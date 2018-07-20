@@ -34,6 +34,7 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.internal.Server;
@@ -730,6 +731,28 @@ public class ServerSettingsWizardPageModelTest {
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE), eq((String) null));
 	}
 
+	@Test
+	public void shouldInitializeWithCancelOCStatus() throws Exception {
+		// given
+		// when
+		ServerSettingsWizardPageModel model = 
+				new TestableServerSettingsWizardPageModel(null, null, null, connection, server);
+		// then
+		assertThat(model.getOCBinaryStatus()).isNotNull();
+		assertThat(model.getOCBinaryStatus().getSeverity()).isEqualTo(IStatus.CANCEL);
+	}	
+	
+	@Test
+	public void shouldUpdateOCStatusWhenLoading() throws Exception {
+		// given
+		TestableServerSettingsWizardPageModel model = 
+				spy(new TestableServerSettingsWizardPageModel(null, null, null, connection, server));
+		// when
+		model.loadResources();
+		// then
+		verify(model).setOCBinaryStatus(any(IStatus.class));
+	}	
+
 	private ServerSettingsWizardPageModel createModel(IService service, IRoute route,
 			org.eclipse.core.resources.IProject deployProject, List<IProject> projects, Connection connection) {
 		return createModel(service, route, deployProject, projects, connection, null);
@@ -771,6 +794,11 @@ public class ServerSettingsWizardPageModelTest {
 		@Override
 		public String getProfileId() {
 			return super.getProfileId();
+		}
+
+		@Override
+		public void setOCBinaryStatus(IStatus ocBinaryStatus) {
+			super.setOCBinaryStatus(ocBinaryStatus);
 		}
 	}
 

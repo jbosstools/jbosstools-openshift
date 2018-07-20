@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -45,27 +46,38 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 
 	public static final String INVALID_POD_STATUS_MESSAGE = "The log is unavailable while the pod is in {0} state.";
 
-	protected <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
-		ISelection selection = UIUtils.getCurrentSelection(event);
-		return UIUtils.getFirstElement(selection, klass);
-	}
-
 	@Override
 	protected void handleEvent(ExecutionEvent event) {
-		IPod pod = getSelectedElement(event, IPod.class);
+		IPod pod = getPod(event);
 		if (pod == null) {
-			pod = getPodFromBuild(event);
-			if (pod == null) {
-				MessageDialog.openError(HandlerUtil.getActiveShell(event), "No pod selected",
-						"Unable to determine the build pod in order to retrieve its log.");
-				return;
-			}
+			MessageDialog.openError(HandlerUtil.getActiveShell(event), "No pod selected",
+					"Unable to determine the build pod in order to retrieve its log.");
+			return;
 		}
 		showLogs(pod, event);
 	}
 
-	protected void showDialog(ExecutionEvent event, String title, String message) {
-		MessageDialog.openError(HandlerUtil.getActiveShell(event), title, message);
+	private IPod getPod(ExecutionEvent event) {
+		IPod pod = getSelectedElement(event, IPod.class);
+		if (pod == null) {
+			pod = getPodFromBuild(event);	
+		}
+		return pod;
+	}
+
+	private IPod getPodFromBuild(ExecutionEvent event) {
+		IBuild build = getSelectedElement(event, IBuild.class);
+		if (build != null) {
+			final String buildName = build.getName();
+			Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(build);
+			List<IPod> pods = connection.getResources(ResourceKind.POD, build.getNamespaceName());
+			for (IPod pod : pods) {
+				if (buildName.equals(pod.getAnnotation(OpenShiftAPIAnnotations.BUILD_NAME))) {
+					return pod;
+				}
+			}
+		}
+		return null;
 	}
 
 	protected void showLogs(IPod pod, ExecutionEvent event) {
@@ -84,14 +96,7 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 		}
 		String containerName = null;
 		if (containers.size() > 1) {
-			List<String> names = containers.stream().map(c -> c.getName()).collect(Collectors.toList());
-			Collections.sort(names);
-			ElementListSelectionDialog dialog = new ElementListSelectionDialog(HandlerUtil.getActiveShell(event),
-					new LabelProvider());
-			dialog.setElements(names.toArray());
-			dialog.setTitle("Pod Containers");
-			dialog.setMessage("Select a pod container");
-			dialog.setMultipleSelection(false);
+			ElementListSelectionDialog dialog = createSelectContainerDialog(containers, HandlerUtil.getActiveShell(event));
 			int result = dialog.open();
 			if (Window.CANCEL == result) {
 				return;
@@ -103,7 +108,24 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 		new PodLogsJob(pod, containerName).schedule();
 	}
 
-	private IConnection getConnectionFromBuild(ExecutionEvent event) {
+	private ElementListSelectionDialog createSelectContainerDialog(Collection<IContainer> containers, Shell shell) {
+		List<String> names = containers.stream().map(IContainer::getName).collect(Collectors.toList());
+		Collections.sort(names);
+		ElementListSelectionDialog dialog = 
+				new ElementListSelectionDialog(shell, new LabelProvider());
+		dialog.setElements(names.toArray());
+		dialog.setTitle("Pod Containers");
+		dialog.setMessage("Select a pod container");
+		dialog.setMultipleSelection(false);
+		return dialog;
+	}
+
+	protected void showDialog(ExecutionEvent event, String title, String message) {
+		MessageDialog.openError(HandlerUtil.getActiveShell(event), title, message);
+	}
+
+	@Override
+	protected IConnection getConnection(ExecutionEvent event) {
 		IBuild build = getSelectedElement(event, IBuild.class);
 		if (build != null) {
 			return ConnectionsRegistryUtil.safeGetConnectionFor(build);
@@ -111,24 +133,8 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 		return null;
 	}
 
-	private IPod getPodFromBuild(ExecutionEvent event) {
-		IBuild build = getSelectedElement(event, IBuild.class);
-		if (build != null) {
-			final String buildName = build.getName();
-			Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(build);
-			List<IPod> pods = connection.getResources(ResourceKind.POD, build.getNamespaceName());
-			for (IPod pod : pods) {
-				if (buildName.equals(pod.getAnnotation(OpenShiftAPIAnnotations.BUILD_NAME))) {
-					return pod;
-				}
-			}
-		}
-		return null;
+	protected <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
+		ISelection selection = UIUtils.getCurrentSelection(event);
+		return UIUtils.getFirstElement(selection, klass);
 	}
-
-	@Override
-	protected IConnection getConnection(ExecutionEvent event) {
-		return getConnectionFromBuild(event);
-	}
-
 }

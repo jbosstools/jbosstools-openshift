@@ -8,11 +8,10 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.core;
+package org.jboss.tools.openshift.internal.core.ocbinary;
 
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 
 import com.openshift.restclient.OpenShiftContext;
 import com.openshift.restclient.capability.IBinaryCapability;
@@ -24,7 +23,7 @@ public abstract class OCBinaryOperation {
 
 	public void run(IConnection connection) {
 		String oldLocation = OpenShiftContext.get().get(IBinaryCapability.OPENSHIFT_BINARY_LOCATION);
-		String location = OCBinary.getInstance().getLocation(connection);
+		String location = OCBinary.getInstance().getPath(connection);
 		OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, location);
 		try {
 			runOCBinary();

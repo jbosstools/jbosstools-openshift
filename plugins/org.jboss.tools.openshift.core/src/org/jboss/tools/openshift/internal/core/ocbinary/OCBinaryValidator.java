@@ -8,23 +8,46 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.core.preferences;
+package org.jboss.tools.openshift.internal.core.ocbinary;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.osgi.framework.Version;
 
-public class OCBinaryVersionValidator {
+public class OCBinaryValidator {
+
+	public static final List<IOCBinaryRequirement> RSYNC_REQUIREMENTS = unmodifiableList(asList(
+			IOCBinaryRequirement.NON_EMPTY,
+			IOCBinaryRequirement.EXECUTABLE,
+			IOCBinaryRequirement.RECOGNIZED_VERSION,
+			IOCBinaryRequirement.MIN_VERSION_RSYNC_PATH_WITH_SPACES,
+			IOCBinaryRequirement.MIN_VERSION_RSYNC,
+			IOCBinaryRequirement.MIN_VERSION_RSYNC_LINUX
+			));
+	
+	public static final List<IOCBinaryRequirement> NON_RSYNC_REQUIREMENTS = unmodifiableList(asList(
+			IOCBinaryRequirement.NON_EMPTY,
+			IOCBinaryRequirement.EXECUTABLE,
+			IOCBinaryRequirement.RECOGNIZED_VERSION
+			));
 
 	/**
 	 * The regular expression use to match line with version of the oc executable.
@@ -47,21 +70,12 @@ public class OCBinaryVersionValidator {
 	 * <li>oc v3.4.0.40</li>
 	 * </ul>
 	 */
-
-	public static enum OCBinaryStatus {
-		OK, OC_INCOMPATIBLE_FOR_RSYNC, OC_PATH_INCOMPATIBLE
-	}
-
 	private static final Pattern OC_VERSION_LINE_PATTERN = Pattern
 			.compile("oc[^v]*v(([0-9]{1,2})(\\.[0-9]{1,2})?(\\.[0-9]{1,2})?)([-\\.]([^+]*))?.*");
 
-	private static final Version OC_MINIMUM_VERSION_FOR_RSYNC = Version.parseVersion("1.1.1");
-
-	private static final Version OC_MINIMUM_VERSION_FOR_OC_WITH_SPACE = Version.parseVersion("3.7.0");
-
 	private String path;
 
-	public OCBinaryVersionValidator(String path) {
+	public OCBinaryValidator(String path) {
 		this.path = path;
 	}
 
@@ -74,14 +88,16 @@ public class OCBinaryVersionValidator {
 	 * @return the OSGi version of the binary
 	 */
 	public Version getVersion(IProgressMonitor monitor) {
+		SubMonitor subMonitor = SubMonitor.convert(monitor, "Checking oc binary version...", 1);
 		Optional<Version> version = Optional.empty();
-		if (path != null) {
+		if (!StringUtils.isEmpty(path)) {
 			try {
-				ProcessBuilder builder = new ProcessBuilder(path, "version");
-				Process process = builder.start();
+				Process process = new ProcessBuilder(path, "version").start();
 				version = parseVersion(process, monitor);
 			} catch (IOException e) {
 				OpenShiftCoreActivator.logError(e.getLocalizedMessage(), e);
+			} finally {
+				subMonitor.done();
 			}
 		}
 		return version.orElse(Version.emptyVersion);
@@ -91,14 +107,16 @@ public class OCBinaryVersionValidator {
 		Optional<Version> version = Optional.empty();
 		String line = null;
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-			while (!monitor.isCanceled() && (!version.isPresent()) && ((line = reader.readLine()) != null)) {
+			while (!monitor.isCanceled() 
+					&& (!version.isPresent()) 
+					&& ((line = reader.readLine()) != null)) {
 				version = parseVersion(line);
 			}
 		}
 		return version;
 	}
 
-	public static Optional<Version> parseVersion(String line) {
+	protected Optional<Version> parseVersion(String line) {
 		if (StringUtils.isBlank(line)) {
 			return Optional.empty();
 		}
@@ -118,47 +136,39 @@ public class OCBinaryVersionValidator {
 					}
 				}
 			} catch (IllegalArgumentException e) {
-				OpenShiftCoreActivator.logError(NLS.bind("Could not parse oc version {0}.", line), e);
+				OpenShiftCoreActivator.logError(NLS.bind("Could not parse oc version in \"{0}\".", line), e);
 			}
 		}
 		return Optional.ofNullable(version);
 	}
 
-	/**
-	 * Checks if the oc binary is compatible for rsync publishing.
-	 * 
-	 * @param monitor
-	 *            the progress monitor
-	 * 
-	 * @return true if the oc binary is compatible
-	 * @see https://issues.jboss.org/browse/JBIDE-21307
-	 * @see https://github.com/openshift/origin/issues/6109
-	 */
-	public boolean isCompatibleForPublishing(IProgressMonitor monitor) {
-		return getStatus(monitor) == OCBinaryStatus.OK;
+	public IStatus getStatus(IProgressMonitor monitor) {
+		return getStatus(getVersion(monitor), true);
 	}
 
-	public OCBinaryStatus getStatus(IProgressMonitor monitor) {
-		OCBinaryStatus status = OCBinaryStatus.OK;
-		Version version = getVersion(monitor);
-		if (!isCompatibleForPublishing(version)) {
-			status = OCBinaryStatus.OC_INCOMPATIBLE_FOR_RSYNC;
-		} else if (!isOcPathValid(version, path)) {
-			status = OCBinaryStatus.OC_PATH_INCOMPATIBLE;
+	public IStatus getStatus(Version version) {
+		return getStatus(version, true);
+	}
+
+	public IStatus getStatus(IProgressMonitor monitor, boolean displayLinks) {
+		return getStatus(getVersion(monitor), displayLinks, RSYNC_REQUIREMENTS);
+	}
+
+	public IStatus getStatus(IProgressMonitor monitor, boolean displayLinks, Collection<IOCBinaryRequirement> requirements) {
+		return getStatus(getVersion(monitor), displayLinks, requirements);
+	}
+
+	public IStatus getStatus(Version version, boolean displayLinks) {
+		return getStatus(version, displayLinks, RSYNC_REQUIREMENTS);
+	}
+
+	public IStatus getStatus(Version version, boolean displayLinks, Collection<IOCBinaryRequirement> requirements) {
+		for (IOCBinaryRequirement requirement : requirements) {
+			if (!requirement.isFulfilled(version, path)) {
+				return StatusFactory.getInstance(requirement.getSeverity(), 
+						OpenShiftCoreActivator.PLUGIN_ID, requirement.getMessage(path, version, displayLinks));
+			}
 		}
-		return status;
-	}
-
-	public static boolean isCompatibleForPublishing(Version version) {
-		return version != null && version.compareTo(OC_MINIMUM_VERSION_FOR_RSYNC) >= 0;
-	}
-
-	public static boolean isOcPathValid(Version version, String path) {
-		boolean result = true;
-		if (!Platform.OS_WIN32.equals(Platform.getOS()) && (version == null
-				|| (path.indexOf(' ') != (-1) && version.compareTo(OC_MINIMUM_VERSION_FOR_OC_WITH_SPACE) < 0))) {
-			result = false;
-		}
-		return result;
-	}
+		return Status.OK_STATUS;
+	}	
 }

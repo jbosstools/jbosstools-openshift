@@ -26,8 +26,8 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.IServerConsoleWriter;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryOperation;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.OpenShiftException;

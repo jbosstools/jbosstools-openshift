@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,12 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.connection;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
@@ -30,12 +28,10 @@ import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -45,7 +41,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -78,9 +73,8 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinaryVersionValidator;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryValidationJob;
 import org.jboss.tools.openshift.internal.ui.validator.URLValidator;
-import org.osgi.framework.Version;
 
 @SuppressWarnings("rawtypes")
 public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvancedConnectionPropertiesEditor {
@@ -91,12 +85,12 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	private ConnectionWizardPageModel pageModel;
 	private IObservableValue selectedConnection;
 	private IValueChangeListener connectionChangedListener;
-	private IObservableValue registryURLObservable;
+	private IObservableValue<String> registryURLObservable;
 	private IObservableValue clusterNamespaceObservable;
 	private IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider;
 	Map<String, Object> extendedProperties = null;
-	private IObservableValue<IStatus> ocLocationValidity = new WritableValue(Status.OK_STATUS, IStatus.class);
-	private IObservableValue<IStatus> ocVersionValidity = new WritableValue(Status.OK_STATUS, IStatus.class);
+	private IObservableValue<IStatus> ocLocationValidity = new WritableValue<>(Status.OK_STATUS, IStatus.class);
+	private IObservableValue<IStatus> ocVersionValidity = new WritableValue<>(Status.OK_STATUS, IStatus.class);
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -266,6 +260,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 						new RequiredControlDecorationUpdater());
 			}
 
+			@Override
 			protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
 				return gridLayoutFactory.numColumns(3);
 			}
@@ -284,31 +279,27 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		} else {
 			location = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
 		}
-		updateOcObservables(location, override);
+		updateOcObservables(location);
 	}
 
-	private void updateOcObservables(String location, boolean override) {
-		IStatus ocLocationStatus = validateOCLocation(location, override);
-		ocLocationValidity.setValue(ocLocationStatus);
-		if (ocLocationStatus.isOK()) {
-			ocVersionValidity.setValue(ValidationStatus.cancel("Verifying oc version..."));
-			OCVersionValidationJob job = new OCVersionValidationJob(location);
-			job.addJobChangeListener(new JobChangeAdapter() {
+	private void updateOcObservables(String location) {
+		ocVersionValidity.setValue(ValidationStatus.cancel("Verifying oc version..."));
+		OCBinaryValidationJob job = new OCBinaryValidationJob(location);
+		job.addJobChangeListener(new JobChangeAdapter() {
 
-				@Override
-				public void done(IJobChangeEvent event) {
-					ocVersionValidity.getRealm().exec(() -> ocVersionValidity.setValue(job.getOCVersionValidity()));
-				}
-			});
-			job.schedule();
-		}
+			@Override
+			public void done(IJobChangeEvent event) {
+				ocVersionValidity.getRealm().exec(() -> ocVersionValidity.setValue(job.getOCVersionValidity()));
+			}
+		});
+		job.schedule();
 	}
 
 	private void discoverRegistryPressed(Shell shell) {
 		IConnection tmp = pageModel.createConnection();
 		IStatus ret = RegistryProviderModel.getDefault().getRegistryURL(tmp);
 
-		String oldVal = (String) registryURLObservable.getValue();
+		String oldVal = registryURLObservable.getValue();
 		String newVal = ret.getMessage();
 		if (ret != null && ret.isOK()) {
 			// If they're equal, do nothing
@@ -318,7 +309,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				String msg = "Are you sure you want to change the registry URL from " + oldVal + " to " + newVal + "?";
 				MessageDialog dialog = new MessageDialog(shell, title, null, msg, MessageDialog.CONFIRM,
 						new String[] { "OK", "Cancel" }, 0);
-				String old = registryURLObservable.getValue().toString().trim();
+				String old = registryURLObservable.getValue().trim();
 				if (old.isEmpty() || dialog.open() == IDialogConstants.OK_ID) {
 					registryURLObservable.setValue(ret.getMessage());
 				}
@@ -340,77 +331,6 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		return s1.equals(s2);
 	}
 
-	private IStatus validateOCLocation(String location, boolean override) {
-		IStatus validity = ValidationStatus.ok();
-		if (StringUtils.isBlank(location)) {
-			if (override)
-				validity = ValidationStatus.error("Please provide a location for the OC binary.");
-			else {
-				validity = ValidationStatus.error(
-						"The workspace setting for the OC binary is not set. Please update the workspace setting or override the location here in the 'Advanced' section.");
-			}
-		} else {
-			File file = new File(location);
-			// Error messages have to be set to field editor, not directly to
-			// the page.
-			if (override) {
-				if (!file.exists()) {
-					validity = ValidationStatus.error((NLS.bind("{0} was not found.", file)));
-				} else if (file.isDirectory()) {
-					validity = ValidationStatus.error((NLS.bind("OC Location must be a file.", file)));
-				} else if (!file.canExecute()) {
-					validity = ValidationStatus.error(NLS.bind("{0} does not have execute permissions.", file));
-				}
-			} else {
-				if (!file.exists()) {
-					validity = ValidationStatus
-							.error((NLS.bind("Workspace setting for OC binary location was not found: {0}", file)));
-				} else if (file.isDirectory()) {
-					validity = ValidationStatus
-							.error((NLS.bind("Workspace setting for OC binary location is not a file: {0}", file)));
-				} else if (!file.canExecute()) {
-					validity = ValidationStatus.error(NLS.bind(
-							"Workspace setting for OC binary location does not have execute permissions: {0}", file));
-				}
-			}
-		}
-		return validity;
-	}
-
-	private class OCVersionValidationJob extends Job {
-
-		private Version version;
-		private String location;
-		private IStatus ocVersionValidity = ValidationStatus.cancel("OC version not verified yet.");
-
-		public OCVersionValidationJob(String location) {
-			super("Checking oc binary...");
-			this.location = location;
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			this.version = new OCBinaryVersionValidator(location).getVersion(monitor);
-			if (Version.emptyVersion.equals(version)) {
-				this.ocVersionValidity = ValidationStatus.error("Could not determine your OpenShift client version");
-			} else if (!OCBinaryVersionValidator.isCompatibleForPublishing(version)) {
-				this.ocVersionValidity = ValidationStatus.error(NLS
-						.bind("OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version));
-			} else {
-				this.ocVersionValidity = ValidationStatus.ok();
-			}
-			if (monitor.isCanceled()) {
-				this.ocVersionValidity = ValidationStatus.cancel("OC version verification was cancelled.");
-			}
-			return Status.OK_STATUS;
-		}
-
-		public IStatus getOCVersionValidity() {
-			return ocVersionValidity;
-		}
-	}
-
-	@SuppressWarnings("unchecked")
 	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
 		registryURLObservable.setValue(model.getRegistryURL());
 	}

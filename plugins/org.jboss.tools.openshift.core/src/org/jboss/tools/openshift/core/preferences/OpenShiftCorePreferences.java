@@ -20,7 +20,7 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.internal.common.core.preferences.StringPreferenceValue;
 import org.jboss.tools.openshift.internal.common.core.preferences.StringsPreferenceValue;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinary;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

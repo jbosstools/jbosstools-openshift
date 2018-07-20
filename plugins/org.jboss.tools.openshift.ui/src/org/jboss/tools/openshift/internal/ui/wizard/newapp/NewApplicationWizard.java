@@ -41,13 +41,16 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
-import org.jboss.tools.openshift.internal.core.util.RSyncValidator;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinary;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryValidator;
+import org.jboss.tools.openshift.internal.core.util.RSyncValidator;
+import org.jboss.tools.openshift.internal.core.util.RSyncValidator.RsyncStatus;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.job.IResourcesModelJob;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
@@ -285,32 +288,23 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 			}
 
 			protected IService getService(Collection<IResource> resources) {
-				IResource service = getResourceOfType(resources, IService.class);
+				IResource service = ResourceUtils.getResourceOfType(IService.class, resources);
 				return service == null ? null : (IService) service;
 			}
 
 			protected IRoute getRoute(Collection<IResource> resources) {
-				IResource route = getResourceOfType(resources, IRoute.class);
+				IResource route = ResourceUtils.getResourceOfType(IRoute.class, resources);
 				return route == null ? null : (IRoute) route;
-			}
-
-			private IResource getResourceOfType(Collection<IResource> resources, Class<? extends IResource> type) {
-				for (IResource resource : resources) {
-					if (type.isInstance(resource)) {
-						return resource;
-					}
-				}
-				return null;
 			}
 
 			protected void createServerAdapter(org.eclipse.core.resources.IProject project, Connection connection,
 					IService service, IRoute route) {
 				try {
 					IServerWorkingCopy server = OpenShiftServerUtils.create(OpenShiftResourceUniqueId.get(service));
+					IStatus ocStatus = new OCBinaryValidator(OCBinary.getInstance().getPath(connection)).getStatus(new NullProgressMonitor());
+					RsyncStatus rsyncStatus = RSyncValidator.get().getStatus();
 					ServerSettingsWizardPageModel serverModel = new ServerSettingsWizardPageModel(service, route,
-							project, connection, server,
-							OCBinary.getInstance().getStatus(connection, new NullProgressMonitor()),
-							RSyncValidator.get().getStatus());
+							project, connection, server, ocStatus, rsyncStatus);
 					serverModel.loadResources();
 					serverModel.updateServer();
 					server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, false);

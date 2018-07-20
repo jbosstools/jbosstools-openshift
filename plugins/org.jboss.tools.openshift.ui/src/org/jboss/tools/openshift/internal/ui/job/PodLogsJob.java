@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -27,7 +27,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils;
-import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryOperation;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.OpenShiftException;
@@ -50,7 +50,7 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 	private final Key key;
 
 	public PodLogsJob(IPod pod, String containerName) {
-		super("FollowPodLogsJob");
+		super("Displaying pod logs...");
 		this.key = new Key(pod, containerName);
 	}
 
