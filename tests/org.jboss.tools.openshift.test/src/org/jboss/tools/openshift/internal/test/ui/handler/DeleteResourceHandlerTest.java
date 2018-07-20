@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.test.internal.ui.handler;
+package org.jboss.tools.openshift.internal.test.ui.handler;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;

@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.test.internal.ui.wizard.newapp;
+package org.jboss.tools.openshift.internal.test.ui.wizard.newapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;

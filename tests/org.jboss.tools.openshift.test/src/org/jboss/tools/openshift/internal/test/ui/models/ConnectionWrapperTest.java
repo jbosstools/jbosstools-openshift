@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.test.internal.ui.models;
+package org.jboss.tools.openshift.internal.test.ui.models;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;

@@ -6,7 +6,7 @@
  * 
  * Contributors: Red Hat, Inc.
  ******************************************************************************/
-package org.jboss.tools.openshift.test.internal.core.job;
+package org.jboss.tools.openshift.internal.test.core.job;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createDeploymentConfig;

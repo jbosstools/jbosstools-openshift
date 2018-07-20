@@ -6,7 +6,7 @@
  * 
  * Contributors: Red Hat, Inc.
  ******************************************************************************/
-package org.jboss.tools.openshift.test.internal.core;
+package org.jboss.tools.openshift.internal.test.core;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isNull;
