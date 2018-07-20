@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -25,10 +25,12 @@ import org.eclipse.osgi.util.NLS;
 //TODO Refactor to merge base into ResourceNameValidator
 public class ProjectNameValidator extends LabelValueValidator {
 
-	public static final String projectNameDescription = "A valid project name must be 63 characters or less but at least 2 characters, excluding \"..\".\n"
-			+ "It may only contain lower-case letters, numbers, and dashes. It may not start or end with a dash.";
+	public static final String PROJECT_NAME_RULE = "It may only contain lowercase letters, numbers, and dashes. It may not start or end with a dash.";
 
-	private Pattern PROJECT_NAME_PATTERN = Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?");
+	public static final String projectNameDescription = "A valid project name must be 63 characters or less but at least 2 characters, excluding \"..\".\n"
+			+ PROJECT_NAME_RULE;
+
+	private static final Pattern PROJECT_NAME_PATTERN = Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?");
 
 	private String message;
 
@@ -58,8 +60,7 @@ public class ProjectNameValidator extends LabelValueValidator {
 		}
 
 		if (!PROJECT_NAME_PATTERN.matcher(param).matches()) {
-			return ValidationStatus.error(
-					"Project name may only contain lower-case letters, numbers, and dashes. It may not start or end with a dash");
+			return ValidationStatus.error(PROJECT_NAME_RULE);
 		}
 		if (unavailableNames != null && unavailableNames.contains(param)) {
 			return ValidationStatus.error("A project with the same name already exists");
