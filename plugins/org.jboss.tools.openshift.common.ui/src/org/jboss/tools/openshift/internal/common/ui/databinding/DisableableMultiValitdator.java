@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.databinding;
 
+import org.eclipse.core.databinding.observable.IObservable;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -30,7 +31,7 @@ public class DisableableMultiValitdator<T> extends MultiValidator {
 	private final IObservableValue<Boolean> enablementObservable;
 	private final IObservableValue<T> valueObservable;
 	private IValidator validator;
-	private final IObservableList<IObservableValue<?>> targets;
+	private final IObservableList<IObservable> targets;
 
 	public DisableableMultiValitdator(IObservableValue<Boolean> enablementObservable,
 			IObservableValue<T> valueObservable, IValidator validator) {
@@ -57,7 +58,7 @@ public class DisableableMultiValitdator<T> extends MultiValidator {
 	}
 
 	@Override
-	public IObservableList<IObservableValue<?>> getTargets() {
+	public IObservableList<IObservable> getTargets() {
 		return targets;
 	}
 }
