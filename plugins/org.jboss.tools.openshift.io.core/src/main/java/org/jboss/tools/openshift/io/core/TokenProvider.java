@@ -15,7 +15,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.jboss.tools.openshift.io.internal.core.OpenShiftIOCoreActivator;
+import org.jboss.tools.openshift.internal.io.core.OpenShiftIOCoreActivator;
 
 /**
  * Interface to be implemented for the tokenProvider extension point. This is

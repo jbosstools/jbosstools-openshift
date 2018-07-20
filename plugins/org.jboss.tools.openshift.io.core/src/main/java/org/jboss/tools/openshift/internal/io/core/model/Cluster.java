@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.io.internal.core.model;
+package org.jboss.tools.openshift.internal.io.core.model;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,12 +16,12 @@ import java.util.List;
 
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.StorageException;
+import org.jboss.tools.openshift.internal.io.core.OpenShiftIOCoreActivator;
+import org.jboss.tools.openshift.internal.io.core.model.AccountModel.Event;
 import org.jboss.tools.openshift.io.core.OSIOCoreConstants;
 import org.jboss.tools.openshift.io.core.OSIOUtils;
 import org.jboss.tools.openshift.io.core.model.ICluster;
 import org.jboss.tools.openshift.io.core.model.IAccount;
-import org.jboss.tools.openshift.io.internal.core.OpenShiftIOCoreActivator;
-import org.jboss.tools.openshift.io.internal.core.model.AccountModel.Event;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 

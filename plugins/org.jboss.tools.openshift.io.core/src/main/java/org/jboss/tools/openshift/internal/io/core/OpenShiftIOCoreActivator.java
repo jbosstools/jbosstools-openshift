@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.io.internal.core;
+package org.jboss.tools.openshift.internal.io.core;
 
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 

@@ -6,7 +6,7 @@
    <extension
          point="org.jboss.tools.openshift.io.core.tokenProvider">
       <tokenProvider
-            class="org.jboss.tools.openshift.io.internal.core.DefaultTokenProvider">
+            class="org.jboss.tools.openshift.internal.io.core.DefaultTokenProvider">
       </tokenProvider>
    </extension>
 </plugin>
