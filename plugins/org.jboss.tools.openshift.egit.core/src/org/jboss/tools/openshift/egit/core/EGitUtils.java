@@ -89,8 +89,8 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.util.StringUtils;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.team.core.RepositoryProvider;
-import org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator;
-import org.jboss.tools.openshift.egit.core.internal.utils.RegexUtils;
+import org.jboss.tools.openshift.internal.egit.core.EGitCoreActivator;
+import org.jboss.tools.openshift.internal.egit.core.utils.RegexUtils;
 
 /**
  * The Class EGitUtils.

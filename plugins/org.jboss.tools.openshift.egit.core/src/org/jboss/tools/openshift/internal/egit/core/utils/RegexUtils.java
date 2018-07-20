@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.egit.core.internal.utils;
+package org.jboss.tools.openshift.internal.egit.core.utils;
 
 /**
  * @author Andre Dietisheim
