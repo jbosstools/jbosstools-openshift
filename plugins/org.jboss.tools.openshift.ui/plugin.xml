@@ -2053,7 +2053,7 @@ $            <command
     <extension
                point="org.eclipse.core.expressions.propertyTesters">
         <propertyTester
-                        class="org.jboss.tools.openshift.ui.internal.propertytester.ServerAdapterPropertyTester"
+                        class="org.jboss.tools.openshift.internal.ui.propertytester.ServerAdapterPropertyTester"
                         id="org.jboss.tools.openshift.ui.serverAdapterPropertyTester"
                         namespace="org.jboss.tools.openshift.ui"
                         properties="isServerAdapterAllowed"

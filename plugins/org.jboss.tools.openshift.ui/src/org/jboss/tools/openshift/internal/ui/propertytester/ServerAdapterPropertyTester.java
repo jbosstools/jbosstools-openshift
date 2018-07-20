@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.ui.internal.propertytester;
+package org.jboss.tools.openshift.internal.ui.propertytester;
 
 import org.eclipse.core.expressions.PropertyTester;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
