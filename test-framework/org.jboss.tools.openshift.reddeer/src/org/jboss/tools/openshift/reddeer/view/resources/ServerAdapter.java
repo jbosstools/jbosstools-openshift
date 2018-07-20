@@ -89,7 +89,7 @@ public class ServerAdapter{
 		new OkButton().click();
 
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.DELETE_ADAPTER));
-		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+		new WaitWhile(new JobIsRunning(), TimePeriod.getCustom(120));
 	}
 
 	/**

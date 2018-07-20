@@ -200,11 +200,7 @@ public class OpenShiftUtils {
 	}
 
 	public static void killJobs() {
-		Job[] currentJobs;
-		currentJobs = Job.getJobManager().find(null);
-		for (Job job : currentJobs) {
-			job.cancel();
-		}
+		Job.getJobManager().cancel(null);
 	}
 	
 	public static void updateMavenProject(String projectName) {

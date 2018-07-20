@@ -17,10 +17,13 @@ import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.preference.page.OpenShift3PreferencePage;
@@ -35,7 +38,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(RedDeerSuite.class)
 @OpenPerspective(JBossPerspective.class)
-@OCBinary(cleanup=true, setOCInPrefs=true)
+@OCBinary(cleanup=false, setOCInPrefs=true)
 public class OCBinaryLocationTest extends AbstractTest {
 	
 	private WorkbenchPreferenceDialog dialog;
@@ -72,7 +75,6 @@ public class OCBinaryLocationTest extends AbstractTest {
 	@Test
 	public void testSetInvalidOCLocation() {
 		page.setOCLocation("invalidPath");
-		
 		try {
 			new WaitWhile(new ControlIsEnabled(new PushButton(OpenShiftLabel.Button.APPLY)), 
 					TimePeriod.LONG);
@@ -83,6 +85,12 @@ public class OCBinaryLocationTest extends AbstractTest {
 	
 	@After
 	public void closeDialog() {
+		try {
+			new DefaultShell("Could Not Accept Changes");
+			new OkButton().click();
+		} catch (CoreLayerException e) {
+			// Just swallow
+		}
 		dialog.cancel();
 	}
 }

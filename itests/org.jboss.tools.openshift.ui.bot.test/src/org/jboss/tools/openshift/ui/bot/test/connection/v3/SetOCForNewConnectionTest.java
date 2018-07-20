@@ -54,7 +54,7 @@ public class SetOCForNewConnectionTest extends AbstractTest {
 	private static final String OC_370_URL_LINUX = "https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit.tar.gz";
 	private static final String OC_370_URL_WINDOWS = "https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-windows.zip";
 	private static final String OC_370_URL_MAC = "https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-mac.zip";
-	private static final String PROPERTY_OC_LOCATION = "OC client path";
+	private static final String PROPERTY_OC_LOCATION = "OC Client";
 	private String pathToOC;
 	Path ocTestDirectory = Paths.get("target", "octest");
 	

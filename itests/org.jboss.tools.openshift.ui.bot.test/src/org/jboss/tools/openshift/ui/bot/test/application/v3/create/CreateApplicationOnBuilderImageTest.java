@@ -35,6 +35,8 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
+import org.eclipse.reddeer.workbench.impl.editor.DefaultEditor;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
@@ -87,7 +89,7 @@ public class CreateApplicationOnBuilderImageTest extends AbstractTest {
 	public void testCreateApplicationBasedOnBuilderImage() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 
-		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer();
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 
 		BuilderImageApplicationWizardHandlingTest.nextToBuildConfigurationWizardPage();
 
@@ -180,6 +182,7 @@ public class CreateApplicationOnBuilderImageTest extends AbstractTest {
 
 	@Test
 	public void validateJBIDE22704FromCentral() {
+		closeCentral();
 		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromCentral();
 		validateJBIDE22704();
 	}
@@ -190,11 +193,21 @@ public class CreateApplicationOnBuilderImageTest extends AbstractTest {
 		explorer.reopen();
 
 		OpenShift3Connection connection = explorer.getOpenShift3Connection(connectionReq.getConnection());
-		connection.getProject().delete();
+		connection.refresh();
+		connection.getProject(DatastoreOS3.PROJECT1_DISPLAYED_NAME).delete();
 
 		ProjectExplorer projectExplorer = new ProjectExplorer();
 		if (projectExplorer.containsProject(projectName)) {
 			projectExplorer.getProject(projectName).delete();
 		}
+		
+		connection.refresh();
+		
+		//Close all shells if test fails (could interfere next tests)
+		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
+	}
+	
+	private static void closeCentral() {
+		new DefaultEditor(OpenShiftLabel.Others.RED_HAT_CENTRAL).close();
 	}
 }

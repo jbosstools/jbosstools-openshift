@@ -20,6 +20,7 @@ import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.jface.handler.TreeViewerHandler;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
@@ -29,7 +30,6 @@ import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.link.DefaultLink;
-import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.toolbar.DefaultToolItem;
@@ -83,11 +83,10 @@ public class OpenShiftExplorerView extends WorkbenchView {
 	 */
 	public void openConnectionShell() {
 		open();
-		// there is either a link or context menu
 		try {
-			new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_CONNECTION).select();
-		} catch (RedDeerException ex) {
 			new DefaultLink(OpenShiftLabel.TextLabels.CREATE_CONNECTION).click();
+		} catch (CoreLayerException s) {
+			new DefaultToolItem(OpenShiftLabel.TextLabels.NEW_CONNECTION_EXPLORER).click();
 		}
 	}
 
@@ -108,12 +107,11 @@ public class OpenShiftExplorerView extends WorkbenchView {
 	 * Connects to OpenShift server. OpenShift connection shell has to be opened at
 	 * the moment of method invocation.
 	 * 
-	 * @param server
-	 *            URL of a server
+	 * @param server           URL of a server
 	 * @param username
 	 * @param password
-	 * @param storePassword
-	 *            whether password should be stored or not in security storage
+	 * @param storePassword    whether password should be stored or not in security
+	 *                         storage
 	 * @param useDefaultServer
 	 */
 	public void connectToOpenShift3Basic(String server, String username, String password, boolean storePassword,
@@ -126,11 +124,10 @@ public class OpenShiftExplorerView extends WorkbenchView {
 	 * Connects to OpenShift server. OpenShift connection shell has to be opened at
 	 * the moment of method invocation.
 	 * 
-	 * @param server
-	 *            URL of a server
+	 * @param server           URL of a server
 	 * @param token
-	 * @param storeToken
-	 *            whether password should be stored or not in security storage
+	 * @param storeToken       whether password should be stored or not in security
+	 *                         storage
 	 * @param useDefaultServer
 	 */
 	public void connectToOpenShift3OAuth(String server, String token, boolean storeToken, boolean useDefaultServer) {
@@ -183,8 +180,7 @@ public class OpenShiftExplorerView extends WorkbenchView {
 	/**
 	 * Finds out whether connection with specified username exists or not.
 	 * 
-	 * @param username
-	 *            user name
+	 * @param username user name
 	 * @return true if connection exists, false otherwise
 	 */
 	public boolean connectionExists(String username) {
@@ -195,10 +191,8 @@ public class OpenShiftExplorerView extends WorkbenchView {
 	 * Finds out whether connection with specified username and server exists or
 	 * not.
 	 * 
-	 * @param username
-	 *            user name
-	 * @param server
-	 *            server
+	 * @param username user name
+	 * @param server   server
 	 * @return true if connection exists, false otherwise
 	 */
 	public boolean connectionExists(String server, String username) {
@@ -224,8 +218,7 @@ public class OpenShiftExplorerView extends WorkbenchView {
 	 * or token are specified in DatastoreOS3 through system properties
 	 * openshift.server, openshift.username, openshift.password and openshift.token.
 	 * 
-	 * @param connection
-	 *            connection to OpenShift
+	 * @param connection connection to OpenShift
 	 * 
 	 * @return OpenShift 3 connection
 	 */
@@ -260,9 +253,10 @@ public class OpenShiftExplorerView extends WorkbenchView {
 			return connectionItem;
 		}
 	}
-	
+
 	/**
 	 * Returns list of OpenShift3Connection instance available in Openshift Explorer
+	 * 
 	 * @return list of OpenShift3Connection
 	 */
 	public List<OpenShift3Connection> getOpenShift3Connections() {
@@ -273,5 +267,5 @@ public class OpenShiftExplorerView extends WorkbenchView {
 		}
 		return itemList;
 	}
-	
+
 }

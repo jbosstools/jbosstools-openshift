@@ -230,8 +230,10 @@ public class OpenShiftLabel {
 	public static class TextLabels {	
 		// Connection related
 		public static final String NEW_CONNECTION = "<New Connection>";
-		public static final String CREATE_CONNECTION = "No connections are available. Create a new connection with the New Connection Wizard...";
+		public static final String NEW_CONNECTION_LINK = "New Connection";
+		public static final String CREATE_CONNECTION = "Create a new connection using the Connection Wizard.";
 		public static final String CONNECTION = "Connection:";
+		public static final String NEW_CONNECTION_EXPLORER = "Connection...";
 		public static final String PASSWORD = "Password:";
 		public static final String SERVER = "Server:";
 		public static final String USERNAME = "Username:";
