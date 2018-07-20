@@ -369,7 +369,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 					ConnectionColumLabelProvider labelProvider = new ConnectionColumLabelProvider();
 
 					@Override
-					public Object convert(Object source) {
+					public String convert(Object source) {
 						return (source instanceof IDockerConnection)
 								? dockerConnectionToString((IDockerConnection) source) : "";
 					}
@@ -393,7 +393,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 					ConnectionColumLabelProvider labelProvider = new ConnectionColumLabelProvider();
 
 					@Override
-					public Object convert(Object source) {
+					public String convert(Object source) {
 						return source == null ? "" : labelProvider.getText(source);
 					}
 				}).in(dbc);
