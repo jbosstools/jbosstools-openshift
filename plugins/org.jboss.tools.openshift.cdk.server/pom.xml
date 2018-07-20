@@ -9,4 +9,5 @@
 	<groupId>org.jboss.tools.openshift.plugins</groupId>
 	<artifactId>org.jboss.tools.openshift.cdk.server</artifactId> 
 	<packaging>eclipse-plugin</packaging>
+<version>3.5.100-SNAPSHOT</version>
 </project>
