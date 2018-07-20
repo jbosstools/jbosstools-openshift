@@ -6,7 +6,7 @@
  *
  * Contributors: Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.client.internal;
+package org.jboss.tools.openshift.internal.client;
 
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;

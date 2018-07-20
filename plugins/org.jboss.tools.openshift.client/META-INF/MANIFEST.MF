@@ -55,4 +55,4 @@ Import-Package: org.apache.commons.logging,
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
 Bundle-ActivationPolicy: lazy
-Bundle-Activator: org.jboss.tools.openshift.client.internal.OpenShiftClientActivator
+Bundle-Activator: org.jboss.tools.openshift.internal.client.OpenShiftClientActivator
