@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.io.internal.ui;
+package org.jboss.tools.openshift.internal.io.ui;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -18,11 +18,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.UIJob;
+import org.jboss.tools.openshift.internal.io.ui.dialog.BrowserBasedLoginDialog;
 import org.jboss.tools.openshift.io.core.LoginProvider;
 import org.jboss.tools.openshift.io.core.LoginResponse;
 import org.jboss.tools.openshift.io.core.model.ICluster;
 import org.jboss.tools.openshift.io.core.model.IAccount;
-import org.jboss.tools.openshift.io.internal.ui.dialog.BrowserBasedLoginDialog;
 
 /**
  * Login provider that will launch a browser to perform the login and extract

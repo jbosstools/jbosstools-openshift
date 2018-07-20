@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.io.internal.ui.processor;
+package org.jboss.tools.openshift.internal.io.ui.processor;
 
 import org.eclipse.swt.browser.Browser;
 import org.jboss.tools.openshift.io.core.LoginResponse;

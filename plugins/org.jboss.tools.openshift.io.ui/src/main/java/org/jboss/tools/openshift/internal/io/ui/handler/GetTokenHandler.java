@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.io.internal.ui.handler;
+package org.jboss.tools.openshift.internal.io.ui.handler;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -18,8 +18,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.openshift.internal.io.ui.OpenShiftIOUIActivator;
 import org.jboss.tools.openshift.io.core.TokenProvider;
-import org.jboss.tools.openshift.io.internal.ui.OpenShiftIOUIActivator;
 
 public class GetTokenHandler extends AbstractHandler {
 

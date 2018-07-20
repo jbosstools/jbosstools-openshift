@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.io.internal.ui.processor;
+package org.jboss.tools.openshift.internal.io.ui.processor;
 
 import java.io.IOException;
 import java.net.URI;
@@ -18,9 +18,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.swt.browser.Browser;
+import org.jboss.tools.openshift.internal.io.ui.OpenShiftIOUIActivator;
 import org.jboss.tools.openshift.io.core.LoginResponse;
 import org.jboss.tools.openshift.io.core.OSIOUtils;
-import org.jboss.tools.openshift.io.internal.ui.OpenShiftIOUIActivator;
 
 public class DefaultRequestProcessor implements RequestProcessor {
 

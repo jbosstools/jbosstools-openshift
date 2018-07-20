@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.io.internal.ui.preferences;
+package org.jboss.tools.openshift.internal.io.ui.preferences;
 
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.internal.layout.ICachingLayout;

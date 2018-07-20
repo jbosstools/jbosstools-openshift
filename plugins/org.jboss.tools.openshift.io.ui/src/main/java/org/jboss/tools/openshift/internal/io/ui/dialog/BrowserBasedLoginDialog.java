@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.io.internal.ui.dialog;
+package org.jboss.tools.openshift.internal.io.ui.dialog;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -23,10 +23,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
+import org.jboss.tools.openshift.internal.io.ui.OpenShiftIOUIActivator;
+import org.jboss.tools.openshift.internal.io.ui.processor.DefaultRequestProcessor;
+import org.jboss.tools.openshift.internal.io.ui.processor.RequestProcessor;
 import org.jboss.tools.openshift.io.core.LoginResponse;
-import org.jboss.tools.openshift.io.internal.ui.OpenShiftIOUIActivator;
-import org.jboss.tools.openshift.io.internal.ui.processor.DefaultRequestProcessor;
-import org.jboss.tools.openshift.io.internal.ui.processor.RequestProcessor;
 
 public class BrowserBasedLoginDialog extends Dialog {
 
