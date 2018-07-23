@@ -93,7 +93,7 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(parent);
+		GridLayoutFactory.fillDefaults().numColumns(4).applyTo(parent);
 		createProjectControls(parent, dbc);
 	}
 
@@ -139,6 +139,12 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.FILL).applyTo(newProjectButton);
 		UIUtils.setDefaultButtonWidth(newProjectButton);
 		newProjectButton.addSelectionListener(onNewProjectClicked());
+		
+		Button newRefreshButton = new Button(parent, SWT.PUSH);
+		newRefreshButton.setText("Refresh...");
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.FILL).applyTo(newRefreshButton);
+		UIUtils.setDefaultButtonWidth(newRefreshButton);
+		newRefreshButton.addSelectionListener(onRefreshButtonClicked());
 	}
 
 	private IValueChangeListener onConnectionChanged() {
@@ -148,6 +154,43 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 			public void handleValueChange(ValueChangeEvent event) {
 				loadResources(getPreviousPage() == null);
 			}
+		};
+	}
+	
+	private SelectionAdapter onRefreshButtonClicked() {
+		return new SelectionAdapter() {
+
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see
+			 * org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events
+			 * .SelectionEvent)
+			 */
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					// run in job to enforce busy cursor which doesnt work otherwise
+					WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
+
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							return Status.OK_STATUS;
+						}
+
+						@Override
+						protected IStatus updateUI(IProgressMonitor monitor) {
+							loadResources(false);
+							return Status.OK_STATUS;
+						}
+
+					}, getContainer());
+				} catch (InvocationTargetException | InterruptedException ex) {
+					// swallow intentionnally
+					Thread.currentThread().interrupt();
+				}
+			}
+
 		};
 	}
 

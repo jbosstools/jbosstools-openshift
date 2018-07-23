@@ -58,14 +58,18 @@ public class SelectProjectComponentBuilder {
 
 	public SelectProjectComponentBuilder() {
 	}
-
+	
 	public void build(Composite container, DataBindingContext dbc) {
+		build(container, dbc, hSpan);
+	}
+
+	public void build(Composite container, DataBindingContext dbc, int horizontalSpan) {
 		Label existingProjectLabel = new Label(container, SWT.NONE);
 		existingProjectLabel.setText("Eclipse Project: ");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(existingProjectLabel);
 
 		final Text existingProjectNameText = new Text(container, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(hSpan, 1).align(SWT.FILL, SWT.CENTER)
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(horizontalSpan, 1).align(SWT.FILL, SWT.CENTER)
 				.grab(true, false).applyTo(existingProjectNameText);
 
 		projectNameTextObservable = WidgetProperties.text(SWT.Modify).observe(existingProjectNameText);
