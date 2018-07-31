@@ -36,7 +36,7 @@ public class OpenShiftEapDeployPathController extends ModuleDeployPathController
 			String ret = super.getOutputNameFromSettings(server, module);
 			if (ret == null && module.equals(findProjectModule(server))) {
 				String suffix = ServerModelUtilities.getDefaultSuffixForModule(module);
-				ret = "ROOT" + suffix;
+				ret = module.getName() + suffix;
 			}
 			return ret;
 		}
