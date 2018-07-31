@@ -10,14 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.test;
 
-import org.jboss.tools.openshift.cdk.server.test.internal.CDK32LaunchControllerTest;
-import org.jboss.tools.openshift.cdk.server.test.internal.CDKDockerUtilityTest;
-import org.jboss.tools.openshift.cdk.server.test.internal.CDKLaunchControllerTest;
-import org.jboss.tools.openshift.cdk.server.test.internal.CDKOpenshiftUtilityTest;
-import org.jboss.tools.openshift.cdk.server.test.internal.CDKRegistryTest;
-import org.jboss.tools.openshift.cdk.server.test.internal.CDKRuntimeDetectorTest;
-import org.jboss.tools.openshift.cdk.server.test.internal.ServiceManagerParsingTest;
-import org.jboss.tools.openshift.cdk.server.test.internal.VagrantPollerTest;
+import org.jboss.tools.openshift.internal.cdk.server.test.CDK32LaunchControllerTest;
+import org.jboss.tools.openshift.internal.cdk.server.test.CDKDockerUtilityTest;
+import org.jboss.tools.openshift.internal.cdk.server.test.CDKLaunchControllerTest;
+import org.jboss.tools.openshift.internal.cdk.server.test.CDKOpenshiftUtilityTest;
+import org.jboss.tools.openshift.internal.cdk.server.test.CDKRegistryTest;
+import org.jboss.tools.openshift.internal.cdk.server.test.CDKRuntimeDetectorTest;
+import org.jboss.tools.openshift.internal.cdk.server.test.ServiceManagerParsingTest;
+import org.jboss.tools.openshift.internal.cdk.server.test.VagrantPollerTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;

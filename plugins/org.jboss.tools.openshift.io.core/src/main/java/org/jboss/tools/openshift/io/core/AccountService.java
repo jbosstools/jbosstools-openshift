@@ -23,13 +23,13 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.core.resources.IResource;
+import org.jboss.tools.openshift.internal.io.core.model.AccountModel;
 import org.jboss.tools.openshift.io.core.exception.OpenshiftIOConfigurationException;
 import org.jboss.tools.openshift.io.core.exception.OpenshiftIOLoginException;
 import org.jboss.tools.openshift.io.core.exception.OpenshiftIORefreshException;
 import org.jboss.tools.openshift.io.core.model.ICluster;
 import org.jboss.tools.openshift.io.core.model.IAccount;
 import org.jboss.tools.openshift.io.core.model.IAccountModel;
-import org.jboss.tools.openshift.io.internal.core.model.AccountModel;
 
 public class AccountService {
 

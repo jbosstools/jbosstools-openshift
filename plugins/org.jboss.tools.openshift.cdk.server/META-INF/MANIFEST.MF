@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.jboss.tools.openshift.cdk.server;singleton:=true
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Version: 3.5.100.qualifier
 Bundle-Localization: plugin
-Bundle-Activator: org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator
+Bundle-Activator: org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator
 Require-Bundle: org.jboss.tools.usage;bundle-version="2.1.0",
  org.jboss.tools.common.core;bundle-version="3.7.0";visibility:=reexport,
  org.jboss.tools.foundation.core;bundle-version="1.2.1",
@@ -47,8 +47,8 @@ Require-Bundle: org.jboss.tools.usage;bundle-version="2.1.0",
  org.eclipse.swt
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: org.jboss.tools.openshift.cdk.server.core.internal;x-friends:="org.jboss.tools.openshift.cdk.server.test",
- org.jboss.tools.openshift.cdk.server.core.internal.adapter;x-friends:="org.jboss.tools.openshift.cdk.server.test",
- org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;x-friends:="org.jboss.tools.openshift.cdk.server.test",
- org.jboss.tools.openshift.cdk.server.core.internal.listeners;x-friends:="org.jboss.tools.openshift.cdk.server.test",
- org.jboss.tools.openshift.cdk.server.core.internal.registry
+Export-Package: org.jboss.tools.openshift.internal.cdk.server.core;x-friends:="org.jboss.tools.openshift.cdk.server.test",
+ org.jboss.tools.openshift.internal.cdk.server.core.adapter;x-friends:="org.jboss.tools.openshift.cdk.server.test",
+ org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers;x-friends:="org.jboss.tools.openshift.cdk.server.test",
+ org.jboss.tools.openshift.internal.cdk.server.core.listeners;x-friends:="org.jboss.tools.openshift.cdk.server.test",
+ org.jboss.tools.openshift.internal.cdk.server.core.registry

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.egit.core;singleton:=true
 Bundle-Version: 3.5.1.qualifier
-Bundle-Activator: org.jboss.tools.openshift.egit.core.internal.EGitCoreActivator
+Bundle-Activator: org.jboss.tools.openshift.internal.egit.core.EGitCoreActivator
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.jgit;bundle-version="3.0.0";visibility:=reexport,
  org.eclipse.egit;bundle-version="3.0.0";visibility:=reexport,
@@ -16,4 +16,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: %Bundle-Vendor
 Export-Package: org.jboss.tools.openshift.egit.core,
- org.jboss.tools.openshift.egit.core.internal
+ org.jboss.tools.openshift.internal.egit.core

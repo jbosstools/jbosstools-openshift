@@ -15,5 +15,5 @@ Require-Bundle: org.jboss.tools.openshift.io.core,
  org.apache.httpcomponents.httpcore;bundle-version="4.3.3",
  org.eclipse.core.runtime,
  org.jboss.tools.foundation.core
-Bundle-Activator: org.jboss.tools.openshift.io.internal.ui.OpenShiftIOUIActivator
+Bundle-Activator: org.jboss.tools.openshift.internal.io.ui.OpenShiftIOUIActivator
 Bundle-ClassPath: .

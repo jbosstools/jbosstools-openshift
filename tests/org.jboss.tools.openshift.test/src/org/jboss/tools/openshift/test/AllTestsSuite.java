@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test;
 
+import org.jboss.tools.openshift.internal.test.common.core.util.KeyValueFilterFactoryTest;
+import org.jboss.tools.openshift.internal.test.core.preferences.OpenShiftCorePreferencesTest;
 import org.jboss.tools.openshift.test.common.core.connection.ConnectionsFactoryTest;
 import org.jboss.tools.openshift.test.common.core.util.StringUtilsTest;
 import org.jboss.tools.openshift.test.common.core.util.URIUtilsTest;
@@ -29,8 +31,6 @@ import org.jboss.tools.openshift.test.core.util.ResourceUtilsIsMatchingTest;
 import org.jboss.tools.openshift.test.core.util.ResourceUtilsTest;
 import org.jboss.tools.openshift.test.handler.PodLogsHandlerTest;
 import org.jboss.tools.openshift.test.handler.ScaleDeploymentHandlerTest;
-import org.jboss.tools.openshift.test.internal.common.core.util.KeyValueFilterFactoryTest;
-import org.jboss.tools.openshift.test.internal.core.preferences.OpenShiftCorePreferencesTest;
 import org.jboss.tools.openshift.test.ui.comparators.CreationTimestampComparatorTest;
 import org.jboss.tools.openshift.test.ui.comparators.ProjectTreeSorterTest;
 import org.jboss.tools.openshift.test.ui.comparators.ProjectViewerComparatorTest;

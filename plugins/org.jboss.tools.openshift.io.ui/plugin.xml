@@ -5,7 +5,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.jboss.tools.openshift.io.internal.ui.handler.GetTokenHandler"
+            class="org.jboss.tools.openshift.internal.io.ui.handler.GetTokenHandler"
             commandId="org.jboss.tools.openshift.osio.ui.command.gettoken">
       </handler>
    </extension>
@@ -48,7 +48,7 @@
          point="org.eclipse.ui.preferencePages">
       <page
             category="org.jboss.tools.common.model.ui.MainPreferencePage"
-            class="org.jboss.tools.openshift.io.internal.ui.preferences.MainPreferencePage"
+            class="org.jboss.tools.openshift.internal.io.ui.preferences.MainPreferencePage"
             id="org.jboss.tools.openshift.io.ui.preferences.MainPreferencePage"
             name="OpenShift.io">
       </page>

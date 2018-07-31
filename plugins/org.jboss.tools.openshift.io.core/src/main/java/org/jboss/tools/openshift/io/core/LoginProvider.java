@@ -14,8 +14,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.openshift.io.core.model.ICluster;
+import org.jboss.tools.openshift.internal.io.core.OpenShiftIOCoreActivator;
 import org.jboss.tools.openshift.io.core.model.IAccount;
-import org.jboss.tools.openshift.io.internal.core.OpenShiftIOCoreActivator;
 
 /**
  * A login provider responsible for performing login to OpenShift.io cluster.
