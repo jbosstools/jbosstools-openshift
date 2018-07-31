@@ -46,7 +46,7 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 		// Make a utility that will simulates finding the web module from the server
 		OpenShiftModuleDeploymentPrefsUtil2 module1Util = getUtilForModule(module1);
 		String outputNameMatched = module1Util.getOutputNameFromSettings2(s1, module1);
-		assertEquals("ROOT.war", outputNameMatched);
+		assertEquals("webProject.war", outputNameMatched);
 
 		// Make an ejb module
 		when(module2.getName()).thenReturn("ejbProject");
