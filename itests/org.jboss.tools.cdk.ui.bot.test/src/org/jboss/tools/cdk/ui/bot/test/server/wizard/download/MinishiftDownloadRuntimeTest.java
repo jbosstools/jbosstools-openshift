@@ -13,11 +13,8 @@ package org.jboss.tools.cdk.ui.bot.test.server.wizard.download;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.junit.internal.runner.ParameterizedRequirementsRunnerFactory;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
-import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
-import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized.UseParametersRunnerFactory;
@@ -31,9 +28,7 @@ import org.junit.runners.Parameterized.UseParametersRunnerFactory;
 @UseParametersRunnerFactory(ParameterizedRequirementsRunnerFactory.class)
 public class MinishiftDownloadRuntimeTest extends DownloadContainerRuntimeAbstractTest {
 
-	private CDKVersion version;
-
-	private static final Logger log = Logger.getLogger(MinishiftDownloadRuntimeTest.class);
+	private CDKVersion version;	
 
 	public MinishiftDownloadRuntimeTest(CDKVersion version) {
 		this.version = version;
@@ -41,8 +36,7 @@ public class MinishiftDownloadRuntimeTest extends DownloadContainerRuntimeAbstra
 
 	@Parameters(name = "{0}")
 	public static Collection<CDKVersion> data() {
-		return Arrays.asList(CDKVersion.MINISHIFT1140, CDKVersion.MINISHIFT1151, CDKVersion.MINISHIFT1161,
-				CDKVersion.MINISHIFT1170);
+		return Arrays.asList(CDKVersion.MINISHIFT1200, CDKVersion.MINISHIFT1210);
 	}
 
 	@Override

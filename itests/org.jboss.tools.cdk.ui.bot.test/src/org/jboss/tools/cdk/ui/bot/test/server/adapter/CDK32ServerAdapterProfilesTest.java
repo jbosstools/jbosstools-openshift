@@ -16,6 +16,7 @@ import org.eclipse.linuxtools.docker.reddeer.ui.DockerExplorerView;
 import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
@@ -88,6 +89,8 @@ public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest
 	public void testCDK32ServerAdapterWithMultipleProfiles() {
 		// fisrt adapter start verification
 		startServerAdapter(() -> { skipRegistrationViaFlag(getCDKServer(), true);}, false);
+		new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
+		new WaitWhile(new JobIsRunning(), TimePeriod.SHORT, false);
 		int conCount = view.getOpenShift3Connections().size();
 		int docCount = getDockerConnectionCreatedByCDK(dockerView, DOCKER_DAEMON_CONNECTION).size();
 		assertEquals("Expected only one OS connection, got " + conCount, 1, conCount);
@@ -96,11 +99,13 @@ public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest
 		startServerAdapter(getSecondCDKServer(), 
 				() -> { skipRegistrationViaFlag(getSecondCDKServer(), true);
 				}, false);
+		new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
+		new WaitWhile(new JobIsRunning(), TimePeriod.SHORT, false);
 		// check counts of connections
 		conCount = view.getOpenShift3Connections().size();
 		docCount = getDockerConnectionCreatedByCDK(dockerView, DOCKER_DAEMON_CONNECTION).size();
-		assertEquals("Expected two OS connections, got " + conCount, 2, conCount);
-		assertEquals("Expectedtwo Docker connections, got " + docCount, 2, docCount);
+		assertEquals("Expected different number of OS connection.", 2, conCount);
+		assertEquals("Expected different number of Docker connections.", 2, docCount);
 		// check functionality of connections
 		for (String docker : getDockerConnectionCreatedByCDK(dockerView, DOCKER_DAEMON_CONNECTION)) {
 			testDockerConnection(docker);
@@ -112,5 +117,7 @@ public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest
 		stopServerAdapter();
 		stopServerAdapter(getSecondCDKServer());
 	}
+	
+	
 
 }
