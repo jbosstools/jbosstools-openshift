@@ -1110,8 +1110,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	    IFile pom = newDeployProject.getFile(IMavenConstants.POM_FILE_NAME);
 	    if (newDeployProject.hasNature(IMavenConstants.NATURE_ID) && pom != null) {                   
             final IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
-            IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(pom, true, null);
-            List<ProfileData> profiles = profileManager.getProfileDatas(facade, null);
+            IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(pom, true, new NullProgressMonitor());
+            List<ProfileData> profiles = profileManager.getProfileDatas(facade, new NullProgressMonitor());
             List<String> activeProfiles = profiles.stream()
                     .filter(p -> ProfileState.Active.equals(p.getActivationState()))
                     .map(p -> p.getId())
