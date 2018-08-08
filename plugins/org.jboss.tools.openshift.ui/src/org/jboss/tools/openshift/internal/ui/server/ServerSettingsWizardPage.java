@@ -1113,8 +1113,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
             IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(pom, true, null);
             List<ProfileData> profiles = profileManager.getProfileDatas(facade, null);
             List<String> activeProfiles = profiles.stream()
-                    .filter(p -> ProfileState.Active.equals(p.getActivationState()))
-                    .map(p -> p.getId())
+                    .filter(p -> ProfileState.Active.equals(p.getActivationState())
+                    		&& !p.isAutoActive())
+                    .map(ProfileData::getId)
                     .collect(Collectors.toList());
             if (profiles.stream().anyMatch(p -> OPENSHIFT_MAVEN_PROFILE.equals(p.getId())) && !activeProfiles.contains(OPENSHIFT_MAVEN_PROFILE)) {
                 activeProfiles.add(OPENSHIFT_MAVEN_PROFILE);
