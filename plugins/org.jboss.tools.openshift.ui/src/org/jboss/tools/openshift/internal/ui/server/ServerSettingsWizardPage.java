@@ -18,9 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.eclipse.core.databinding.Binding;
@@ -38,14 +36,12 @@ import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -70,13 +66,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.internal.IMavenConstants;
-import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.m2e.profiles.core.internal.IProfileManager;
-import org.eclipse.m2e.profiles.core.internal.MavenProfilesCoreActivator;
-import org.eclipse.m2e.profiles.core.internal.ProfileData;
-import org.eclipse.m2e.profiles.core.internal.ProfileState;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -117,6 +106,7 @@ import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.core.util.MavenProfile;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIMessages;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
@@ -1101,27 +1091,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 	public IServer saveServer(IProgressMonitor monitor) throws CoreException {
 		model.updateServer();
-		setOpenshiftMavenProfileActive(model.getDeployProject());
+	    new MavenProfile(OPENSHIFT_MAVEN_PROFILE, model.getDeployProject()).activate(monitor);
 		return model.saveServer(monitor);
-	}
-	
-	@SuppressWarnings("restriction")
-    private void setOpenshiftMavenProfileActive(IProject newDeployProject)  throws CoreException  {
-	    IFile pom = newDeployProject.getFile(IMavenConstants.POM_FILE_NAME);
-	    if (newDeployProject.hasNature(IMavenConstants.NATURE_ID) && pom != null) {                   
-            final IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
-            IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(pom, true, null);
-            List<ProfileData> profiles = profileManager.getProfileDatas(facade, null);
-            List<String> activeProfiles = profiles.stream()
-                    .filter(p -> ProfileState.Active.equals(p.getActivationState())
-                    		&& !p.isAutoActive())
-                    .map(ProfileData::getId)
-                    .collect(Collectors.toList());
-            if (profiles.stream().anyMatch(p -> OPENSHIFT_MAVEN_PROFILE.equals(p.getId())) && !activeProfiles.contains(OPENSHIFT_MAVEN_PROFILE)) {
-                activeProfiles.add(OPENSHIFT_MAVEN_PROFILE);
-                profileManager.updateActiveProfiles(facade, activeProfiles, false, true, new NullProgressMonitor());
-            }
-        }
 	}
 
 	class RouteValidator extends MultiValidator {
