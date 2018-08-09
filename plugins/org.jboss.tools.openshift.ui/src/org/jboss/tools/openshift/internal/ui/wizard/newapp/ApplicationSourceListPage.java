@@ -140,7 +140,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		IObservableValue selectedEclipseProject = createEclipseProjectControls(parent, dbc);
 
 		SashForm listAndDetailsContainer = new SashForm(parent, SWT.VERTICAL);
-		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true)
+		GridDataFactory.fillDefaults().span(4, 1).align(SWT.FILL, SWT.FILL).grab(true, true)
 				.applyTo(listAndDetailsContainer);
 		GridLayoutFactory.fillDefaults().applyTo(listAndDetailsContainer);
 
@@ -210,7 +210,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		SelectProjectComponentBuilder builder = new SelectProjectComponentBuilder();
 		builder.setTextLabel("Use existing workspace project:").setRequired(false)
 				.setEclipseProjectObservable(eclipseProjectObservable).setSelectionListener(onBrowseProjects())
-				.setButtonIndent(0).build(parent, dbc);
+				.setButtonIndent(0).build(parent, dbc, 2);
 
 		Link gitLabel = new Link(parent, SWT.NONE);
 		gitLabel.setText(
