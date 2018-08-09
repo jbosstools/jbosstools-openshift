@@ -57,17 +57,18 @@ public class MavenProfile {
 	 * </ul>
 	 * 
 	 * @param monitor
+	 * @return 
 	 * @throws CoreException
 	 */
-	public void activate(IProgressMonitor monitor) throws CoreException {
-		activate(profileId, project, monitor);
+	public boolean activate(IProgressMonitor monitor) throws CoreException {
+		return activate(profileId, project, monitor);
 	}
 
-	protected void activate(String profileId, IProject project, IProgressMonitor monitor) throws CoreException {
+	protected boolean activate(String profileId, IProject project, IProgressMonitor monitor) throws CoreException {
 		IFile pom = getPom(project);
 	    if (StringUtils.isEmpty(profileId)
 	    		|| pom == null) {
-	    	return;
+	    	return false;
 	    }
 
 		final IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
@@ -75,18 +76,23 @@ public class MavenProfile {
 
 		List<ProfileData> profiles = profileManager.getProfileDatas(facade, monitor);
 		List<String> activeProfiles = getActiveProfiles(profiles);
-		if (canActivate(profileId, profiles, activeProfiles)) {
-			activeProfiles.add(profileId);
-			profileManager.updateActiveProfiles(facade, activeProfiles, false, true, monitor);
+		if (!canActivate(profileId, profiles, activeProfiles)) {
+			return false;
 		}
+		activeProfiles.add(profileId);
+		profileManager.updateActiveProfiles(facade, activeProfiles, false, true, monitor);
+		return true;
 	}
 
 	protected IFile getPom(IProject project) throws CoreException {
+		if (project == null) {
+			return null;
+		}
 		IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
-	    if (!project.hasNature(IMavenConstants.NATURE_ID) 
+	    if (!project.hasNature(IMavenConstants.NATURE_ID)
 	    		|| pom == null
 	    		|| !pom.isAccessible()) {
-	    	return null;
+	    	pom = null;
 	    }
 	    return pom;
 	}
