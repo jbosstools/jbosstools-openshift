@@ -86,7 +86,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 
 	private String gitFolder = "jboss-eap-quickstarts";
 	private String helloworldProject = "jboss-helloworld";
-	private String kitchensinkProject = "jboss-kitchensink";
+	private String kitchensinkProject = "kitchensink";
 
 	private static final String TESTS_PROJECT = "os3projectWithResources";
 	private static final String TESTS_PROJECT_LOCATION = new File("resources/os3projectWithResources")
@@ -279,7 +279,9 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 			//swallow, checkbox is disabled
 		}
 		new FinishButton().click();
-
+		
+		new WaitWhile(new JobIsRunning(), TimePeriod.LONG, false);
+				
 		ProjectExplorer projectExplorer = new ProjectExplorer();
 		projectExplorer.open();
 

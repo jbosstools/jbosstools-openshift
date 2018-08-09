@@ -28,6 +28,7 @@
 		<github.username></github.username>
 		<github.password></github.password>
 		<securestorage.password></securestorage.password>
+		<use.cdk>false</use.cdk>
 		<oc.link.base>https://github.com/openshift/origin/releases/download</oc.link.base>
 		<oc.linux.1.1.64>${oc.link.base}/v1.1.0.1/openshift-origin-client-tools-v1.1.0.1-bf56e23-linux-64bit.tar.gz</oc.linux.1.1.64>
 		<oc.windows.1.1.64>${oc.link.base}/v1.1.0.1/openshift-origin-client-tools-v1.1.0.1-bf56e23-windows.zip</oc.windows.1.1.64>

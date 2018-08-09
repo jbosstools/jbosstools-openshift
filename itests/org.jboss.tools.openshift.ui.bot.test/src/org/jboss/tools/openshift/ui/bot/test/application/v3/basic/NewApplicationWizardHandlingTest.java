@@ -186,7 +186,7 @@ public class NewApplicationWizardHandlingTest extends AbstractTest {
 	public void testFilteringServerTemplates() {
 		DefaultText searchBar = new DefaultText(1);
 		
-		searchBar.setText("eap70-basic-s2i");
+		searchBar.setText("eap71-basic-s2i");
 		assertTrue("There should be precisely one tree item in a tree.",
 				new DefaultTree().getItems().size() == 1);
 		String templateLabel = new DefaultTree().getItems().get(0).getText();
