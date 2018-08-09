@@ -50,7 +50,8 @@ public class MavenProfile {
 	}
 
 	/**
-	 * Activates this maven profile. Does nothing if
+	 * Activates this maven profile. Returns {@code true} if profile was activated,
+	 * {@code false} otherwise. Does nothing if
 	 * <ul>
 	 * 	<li>no profileId was given</li>
 	 * 	<li>given project has no maven nature</li>
@@ -59,15 +60,11 @@ public class MavenProfile {
 	 * </ul>
 	 * 
 	 * @param monitor
-	 * @return 
+	 * @return true if profile was activated, false otherwise
 	 * @throws CoreException
 	 */
 	public boolean activate(IProgressMonitor monitor) throws CoreException {
 		return activate(profileId, project, monitor);
-	}
-	
-	public void deactivate(IProgressMonitor monitor) throws CoreException {
-	    deactivate(profileId, project, monitor);
 	}
 
 	@SuppressWarnings("restriction")
@@ -78,17 +75,35 @@ public class MavenProfile {
 	    	return false;
 	    }
 
-		final IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
 		IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(pom, true, monitor);
+		final IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
 
 		List<ProfileData> profiles = profileManager.getProfileDatas(facade, monitor);
 		List<String> activeProfiles = getActiveProfiles(profiles);
-		if (!canActivate(profileId, profiles, activeProfiles)) {
+		if (!canActivate(profileId, activeProfiles, profiles)) {
 			return false;
 		}
 		activeProfiles.add(profileId);
 		profileManager.updateActiveProfiles(facade, activeProfiles, false, true, monitor);
 		return true;
+	}
+
+	/**
+	 * Deactivates this maven profile. Returns {@code true} if profile was
+	 * deactivated, {@code false} otherwise. Does nothing if
+	 * <ul>
+	 * 	<li>no profileId was given</li>
+	 * 	<li>given project has no maven nature</li>
+	 * 	<li>given project has no accessible pom</li>
+	 * 	<li>profile with the given id does not exist</li>
+	 * </ul>
+	 * 
+	 * @param monitor
+	 * @return true if profile was deactivated, false otherwise
+	 * @throws CoreException
+	 */
+	public boolean deactivate(IProgressMonitor monitor) throws CoreException {
+	    return deactivate(profileId, project, monitor);
 	}
 	
 	@SuppressWarnings("restriction")
@@ -98,12 +113,12 @@ public class MavenProfile {
                 || pom == null) {
             return false;
         }
-        final IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
         IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(pom, true, monitor);
+        final IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
 
         List<ProfileData> profiles = profileManager.getProfileDatas(facade, monitor);
         List<String> activeProfiles = getActiveProfiles(profiles);
-        if (!canDeactivate(profileId, profiles, activeProfiles)) {
+        if (!canDeactivate(profileId, activeProfiles, profiles)) {
             return false;
         }
         
@@ -114,23 +129,26 @@ public class MavenProfile {
 
 	@SuppressWarnings("restriction")
     protected IFile getPom(IProject project) throws CoreException {
+		if (project == null) {
+			return null;
+		}
 		IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
 	    if (!project.hasNature(IMavenConstants.NATURE_ID)
 	    		|| pom == null
 	    		|| !pom.isAccessible()) {
-	    	pom = null;
+	    	return null;
 	    }
 	    return pom;
 	}
 	
 	@SuppressWarnings("restriction")
-    protected boolean canActivate(String profileId, List<ProfileData> profiles, List<String> activeProfiles) {
+    protected boolean canActivate(String profileId, List<String> activeProfiles, List<ProfileData> profiles) {
 		return !activeProfiles.contains(profileId)
 				&& profileExists(profiles);
 	}
 	
 	@SuppressWarnings("restriction")
-    protected boolean canDeactivate(String profileId, List<ProfileData> profiles, List<String> activeProfiles) {
+    protected boolean canDeactivate(String profileId, List<String> activeProfiles, List<ProfileData> profiles) {
         return activeProfiles.contains(profileId)
                 && profileExists(profiles);
     }
