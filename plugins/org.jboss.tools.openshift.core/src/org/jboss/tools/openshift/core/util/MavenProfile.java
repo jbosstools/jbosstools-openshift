@@ -33,6 +33,8 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  * @author Andre Dietisheim
  */
 public class MavenProfile {
+    
+    public static final String OPENSHIFT_MAVEN_PROFILE = "openshift";
 
 	private final String profileId;
 	private final IProject project;
@@ -63,8 +65,13 @@ public class MavenProfile {
 	public boolean activate(IProgressMonitor monitor) throws CoreException {
 		return activate(profileId, project, monitor);
 	}
+	
+	public void deactivate(IProgressMonitor monitor) throws CoreException {
+	    deactivate(profileId, project, monitor);
+	}
 
-	protected boolean activate(String profileId, IProject project, IProgressMonitor monitor) throws CoreException {
+	@SuppressWarnings("restriction")
+    protected boolean activate(String profileId, IProject project, IProgressMonitor monitor) throws CoreException {
 		IFile pom = getPom(project);
 	    if (StringUtils.isEmpty(profileId)
 	    		|| pom == null) {
@@ -83,11 +90,30 @@ public class MavenProfile {
 		profileManager.updateActiveProfiles(facade, activeProfiles, false, true, monitor);
 		return true;
 	}
+	
+	@SuppressWarnings("restriction")
+    protected boolean deactivate(String profileId, IProject project, IProgressMonitor monitor) throws CoreException {
+        IFile pom = getPom(project);
+        if (StringUtils.isEmpty(profileId)
+                || pom == null) {
+            return false;
+        }
+        final IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
+        IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(pom, true, monitor);
 
-	protected IFile getPom(IProject project) throws CoreException {
-		if (project == null) {
-			return null;
-		}
+        List<ProfileData> profiles = profileManager.getProfileDatas(facade, monitor);
+        List<String> activeProfiles = getActiveProfiles(profiles);
+        if (!canDeactivate(profileId, profiles, activeProfiles)) {
+            return false;
+        }
+        
+        activeProfiles.remove(profileId);
+        profileManager.updateActiveProfiles(facade, activeProfiles, false, true, monitor);
+        return true;
+    }
+
+	@SuppressWarnings("restriction")
+    protected IFile getPom(IProject project) throws CoreException {
 		IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
 	    if (!project.hasNature(IMavenConstants.NATURE_ID)
 	    		|| pom == null
@@ -97,17 +123,26 @@ public class MavenProfile {
 	    return pom;
 	}
 	
-	protected boolean canActivate(String profileId, List<ProfileData> profiles, List<String> activeProfiles) {
+	@SuppressWarnings("restriction")
+    protected boolean canActivate(String profileId, List<ProfileData> profiles, List<String> activeProfiles) {
 		return !activeProfiles.contains(profileId)
 				&& profileExists(profiles);
 	}
+	
+	@SuppressWarnings("restriction")
+    protected boolean canDeactivate(String profileId, List<ProfileData> profiles, List<String> activeProfiles) {
+        return activeProfiles.contains(profileId)
+                && profileExists(profiles);
+    }
 
-	protected boolean profileExists(List<ProfileData> profiles) {
+	@SuppressWarnings("restriction")
+    protected boolean profileExists(List<ProfileData> profiles) {
 		return profiles.stream()
 			.anyMatch(p -> profileId.equals(p.getId()));
 	}
 	
-	protected List<String> getActiveProfiles(List<ProfileData> profiles) {
+	@SuppressWarnings("restriction")
+    protected List<String> getActiveProfiles(List<ProfileData> profiles) {
 		return profiles.stream()
                 .filter(p -> ProfileState.Active.equals(p.getActivationState())
                 		&& !p.isAutoActive())

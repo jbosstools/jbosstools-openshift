@@ -106,7 +106,6 @@ import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
-import org.jboss.tools.openshift.core.util.MavenProfile;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIMessages;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
@@ -142,7 +141,6 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implements ICompletable {
     
-    private static final String OPENSHIFT_MAVEN_PROFILE = "openshift";
 	private static final int LINK_DEFAULT_WIDTH = 600;
 	private static final String REFRESH_LINK_TEXT = "refresh";
 	private static final int RESOURCE_PANEL_WIDTH = 800;
@@ -1091,7 +1089,6 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 	public IServer saveServer(IProgressMonitor monitor) throws CoreException {
 		model.updateServer();
-	    new MavenProfile(OPENSHIFT_MAVEN_PROFILE, model.getDeployProject()).activate(monitor);
 		return model.saveServer(monitor);
 	}
 
