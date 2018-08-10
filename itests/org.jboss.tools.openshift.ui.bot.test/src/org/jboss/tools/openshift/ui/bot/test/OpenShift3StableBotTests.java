@@ -21,6 +21,7 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourc
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourcesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.InteligentDeleteResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.LogsTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.OSExplorerResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.PortForwardingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.LabelsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.NewApplicationWizardHandlingTest;
@@ -73,6 +74,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	ResourcesTest.class,
 	ProjectPropertiesTest.class,
 	InteligentDeleteResourceTest.class,
+	OSExplorerResourceTest.class,
 	
 	// Advanced application testing
 	DeployDockerImageTest.class,
