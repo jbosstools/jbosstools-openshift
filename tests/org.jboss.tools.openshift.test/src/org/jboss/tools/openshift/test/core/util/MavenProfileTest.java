@@ -102,6 +102,31 @@ public class MavenProfileTest {
 		assertThat(activated).isFalse();		
 	}
 
+	@Test
+	public void shouldDeactivateIfProfileIsActive() throws CoreException, InterruptedException {
+		// given
+		this.projectProvider = createMavenProject(SPRING_BOOT_PROJECT_NAME);
+		MavenProfile profile = new MavenProfile(OPENSHIFT_MAVEN_PROFILE_ID, projectProvider.getProject());
+		profile.activate(new NullProgressMonitor());
+		// when
+		boolean deactivated = profile.deactivate(new NullProgressMonitor());
+		// then
+		assertThat(deactivated).isTrue();		
+	}
+
+	@Test
+	public void shouldNotDeactivateIfProfileIsNotActive() throws CoreException, InterruptedException {
+		// given
+		this.projectProvider = createMavenProject(SPRING_BOOT_PROJECT_NAME);
+		MavenProfile profile = new MavenProfile(OTHER_MAVEN_PROFILE_ID, projectProvider.getProject());
+		profile.activate(new NullProgressMonitor());
+		profile = new MavenProfile(OPENSHIFT_MAVEN_PROFILE_ID, projectProvider.getProject());
+		// when
+		boolean deactivated = profile.deactivate(new NullProgressMonitor());
+		// then
+		assertThat(deactivated).isFalse();	
+	}
+
 	@SuppressWarnings("restriction")
 	protected TestProjectProvider createMavenProject(String projectName) throws CoreException, InterruptedException {
 		TestProjectProvider projectProvider = new TestProjectProvider(OpenShiftTestActivator.PLUGIN_ID, null, projectName, false);
