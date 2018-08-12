@@ -16,9 +16,11 @@ import java.lang.reflect.Method;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.j2ee.internal.deployables.J2EEDeployableFactory;
 import org.eclipse.jst.jee.internal.deployables.JEEDeployableFactory;
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.internal.UpdateModuleStateJob;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.CachedPublisherProfileBehavior;
@@ -50,10 +52,18 @@ public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 		super.restart(launchMode);
 	}
 	
-	@Override
-    protected void publishStart(IProgressMonitor monitor) throws CoreException {
-	    clearJSTcache();
-	    super.publishStart(monitor);
+	@SuppressWarnings("restriction")
+    @Override
+	public IStatus publish(int kind, IProgressMonitor monitor) {
+	    try {
+    	    IProject project = OpenShiftServerUtils.getDeployProject(getServer());
+    	    if (project.hasNature(IMavenConstants.NATURE_ID)) {
+    	        clearJSTcache(project);
+    	    }
+	    } catch (Exception e) {
+    	    OpenShiftCoreActivator.logError("JST cache wasn't cleared properly", e);
+    	}
+	    return super.publish(kind, monitor);
 	}
 	
 	/*
@@ -62,18 +72,10 @@ public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 	 * https://issues.jboss.org/browse/JBIDE-22138#comment-13617731
 	 */
 	@SuppressWarnings("restriction")
-    private void clearJSTcache() {
-	    try {
-            Method clearCacheMethod = J2EEDeployableFactory.class.getDeclaredMethod("clearCache", IProject.class);
-            clearCacheMethod.setAccessible(true);
-            clearCacheMethod.invoke(JEEDeployableFactory.jeeInstance(), OpenShiftServerUtils.getDeployProject(getServer()));
-        } catch (IllegalAccessException
-                | IllegalArgumentException
-                | InvocationTargetException
-                | NoSuchMethodException
-                | SecurityException e) {
-            OpenShiftCoreActivator.logError("JST cache wasn't cleared properly", e);
-        }
+    private void clearJSTcache(IProject project) throws Exception {
+        Method clearCacheMethod = J2EEDeployableFactory.class.getDeclaredMethod("clearCache", IProject.class);
+        clearCacheMethod.setAccessible(true);
+        clearCacheMethod.invoke(JEEDeployableFactory.jeeInstance(), project);
 	}
 
 	public boolean isRestarting() {
