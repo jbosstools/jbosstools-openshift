@@ -40,7 +40,7 @@ public class CDK3DownloadRuntimeTest extends DownloadContainerRuntimeAbstractTes
   
   @Override
   protected String getServerAdapter() {
-    return SERVER_ADAPTER_32;
+    return SERVER_ADAPTER_3;
   }
   
   @Test

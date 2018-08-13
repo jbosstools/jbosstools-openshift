@@ -13,12 +13,16 @@ package org.jboss.tools.cdk.ui.bot.test.server.wizard.download;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.jface.wizard.WizardDialog;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
-import org.jboss.tools.cdk.ui.bot.test.utils.DownloadCDKRuntimesUtility;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerWizardPage;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
+import org.jboss.tools.cdk.reddeer.utils.DownloadCDKRuntimesUtility;
 import org.junit.Test;
 
 /**
@@ -37,28 +41,45 @@ public class DownloadRuntimesWizardTest extends DownloadContainerRuntimeAbstract
 	
 	@Test
 	public void validCredentialsValidationTest() {
-		chooseWizardPage(CDKLabel.Server.SERVER_TYPE_GROUP, version.serverName());
-		inicializeDownloadRutimeDialog(version);
+		openNewServerWizardDialog(CDKLabel.Server.SERVER_TYPE_GROUP, version.serverName());
+		NewCDK3ServerWizardPage wizardPage = CDKUtils.chooseCDKWizardPage(version, dialog);
+		CDKUtils.initializeDownloadRutimeDialog(wizardPage);
 		DownloadCDKRuntimesUtility util = new DownloadCDKRuntimesUtility(true);
 		util.chooseRuntimeToDownload(version);
 		util.processCredentials(USERNAME, PASSWORD);
 		util.acceptLicense();
 		assertTrue(util.getDownloadWizard().getTitle().contains("Download Runtime"));
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG, false);
-		util.getDownloadWizard().cancel();
+		cancelDialogAndWaitForRefreshingServers(util.getDownloadWizard());
 	}
 	
 	@Test
 	public void invalidCredentialsTest() {
-		chooseWizardPage(CDKLabel.Server.SERVER_TYPE_GROUP, version.serverName());
-		inicializeDownloadRutimeDialog(version);
+		openNewServerWizardDialog(CDKLabel.Server.SERVER_TYPE_GROUP, version.serverName());
+		NewCDK3ServerWizardPage wizardPage = CDKUtils.chooseCDKWizardPage(version, dialog);
+		CDKUtils.initializeDownloadRutimeDialog(wizardPage);
 		DownloadCDKRuntimesUtility util = new DownloadCDKRuntimesUtility(true);
 		util.chooseRuntimeToDownload(version);
 		util.processCredentials("invalidUsername", "invalidPassword");
-		assertTrue(util.getDownloadWizard().getTitle().contains("Credentials"));
-		assertTrue(util.getDownloadWizard().getMessage().contains("Your credentials have failed to validate"));
+		assertTrue("Does not contain Credentials word, but " + util.getDownloadWizard().getTitle(), 
+				util.getDownloadWizard().getTitle().contains("Credentials"));
+		assertTrue("Does not contain expected ... credentials have failed to validate, but " +
+				util.getDownloadWizard().getMessage(),
+				util.getDownloadWizard().getMessage().contains("error occurred while validating your credentials"));
 		assertFalse(util.getDownloadWizard().isNextEnabled());
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG, false);
-		util.getDownloadWizard().cancel();
+		cancelDialogAndWaitForRefreshingServers(util.getDownloadWizard());
+	}
+	
+	private void cancelDialogAndWaitForRefreshingServers(WizardDialog dialog) {
+		try {
+			dialog.cancel();
+		} catch (WaitTimeoutExpiredException exc) {
+			if (exc.getMessage().contains("Refreshing server adapter list")) {
+				new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+			} else {
+				throw exc;
+			}
+		}
 	}
 }

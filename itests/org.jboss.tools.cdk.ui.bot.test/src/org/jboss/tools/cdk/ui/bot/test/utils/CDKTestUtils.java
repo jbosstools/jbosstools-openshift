@@ -15,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -24,8 +23,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.linuxtools.docker.reddeer.ui.DockerExplorerView;
+import org.eclipse.linuxtools.docker.reddeer.ui.resources.DockerConnection;
 import org.eclipse.reddeer.common.condition.WaitCondition;
 import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
@@ -39,12 +41,14 @@ import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.core.matcher.WithMnemonicTextMatcher;
 import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
+import org.eclipse.reddeer.eclipse.ui.console.ConsoleView;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
 import org.eclipse.reddeer.jface.exception.JFaceLayerException;
 import org.eclipse.reddeer.jface.handler.TreeViewerHandler;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.clabel.DefaultCLabel;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
@@ -57,10 +61,12 @@ import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKException;
-import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
-import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
+import org.jboss.tools.cdk.reddeer.ui.preferences.OpenShift3SSLCertificatePreferencePage;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
+import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.preference.page.OpenShift3PreferencePage;
+import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 
 /**
  * Utilities for CDK tests
@@ -70,14 +76,8 @@ import org.jboss.tools.openshift.reddeer.preference.page.OpenShift3PreferencePag
 public class CDKTestUtils {
 
 	private static Logger log = Logger.getLogger(CDKTestUtils.class);
-	
-	public static String getSystemProperty(String systemProperty) {
-		String property = System.getProperty(systemProperty);
-		if (!(property == null || property.equals("") || property.startsWith("${"))) {  
-			return property;
-		}
-		return null;
-	}
+
+	private CDKTestUtils() {}
 	
 	public static void checkParameterNotNull(Map<String, String> dict) {
 		for (String key : dict.keySet()) {
@@ -89,21 +89,112 @@ public class CDKTestUtils {
 		}	
 	}
 	
+	/**
+	 * Tests Openshift 3 connection and try to refresh it
+	 * 
+	 * @param connection
+	 */
+	public static void testOpenshiftConnection(String server, String username) {
+		OpenShift3Connection connection = null;
+		try {
+			connection = findOpenShiftConnection(server, username);
+		} catch (OpenShiftToolsException toolsExc) {
+			fail(toolsExc.getMessage());
+		}
+		testOpenshiftConnection(connection);
+	}
+	
+	/**
+	 * Tests Openshift 3 connection and try to refresh it
+	 * 
+	 * @param connection
+	 */
+	public static void testOpenshiftConnection(OpenShift3Connection connection) {
+		log.info("Performing test of OS 3 connection: " + connection.getTreeItem().getText());
+		// usually, when server adapter is not started, openshift connection after refresh should cause 
+		// problem occurred dialog
+		connection.refresh();
+		try {
+			new WaitUntil(new ShellIsAvailable(CDKLabel.Shell.PROBLEM_DIALOG), TimePeriod.getCustom(30)); 
+			CDKUtils.captureScreenshot("CDKServerAdapterAbstractTest#testOpenshiftConnection"); 
+			new DefaultShell(CDKLabel.Shell.PROBLEM_DIALOG).close(); 
+			fail("Problem dialog occured when refreshing OpenShift connection"); 
+		} catch (WaitTimeoutExpiredException ex) {
+			// no dialog appeared, which is ok
+			log.info("Expected WaitTimeoutExpiredException occured"); 
+		}
+	}
+	
+	/**
+	 * Tests Docker connection
+	 * 
+	 * @param dockerDaemon name of docker connection
+	 */
+	public static void testDockerConnection(String dockerDaemon) {
+		log.info("Performing test of Docker Connection: " + dockerDaemon);
+		DockerExplorerView dockerExplorer = new DockerExplorerView();
+		dockerExplorer.open();
+		DockerConnection connection =  dockerExplorer.getDockerConnectionByName(dockerDaemon);
+		if (connection == null) {
+			fail("Could not find Docker connection " + dockerDaemon); 
+		}
+		connection.select();
+		connection.enableConnection();
+		connection.refresh();
+		new WaitWhile(new JobIsRunning(), TimePeriod.DEFAULT);
+		try {
+			assertTrue("Docker connection does not contain any images", connection.getImagesNames().size() > 0); 
+		} catch (WaitTimeoutExpiredException ex) {
+			ex.printStackTrace();
+			fail("WaitTimeoutExpiredException occurs when expanding" 
+					+ " Docker connection " + dockerDaemon); 
+		} catch (JFaceLayerException jFaceExc) {
+			jFaceExc.printStackTrace();
+			fail(jFaceExc.getMessage());
+		}
+		dockerExplorer.close();
+	}
+	
+	/**
+	 * Finds OpenShift 3 connection based on server username parameters
+	 * 
+	 * @param server server name
+	 * @param username connection username
+	 * @return openshift 3 connection object if found
+	 */
+	public static OpenShift3Connection findOpenShiftConnection(String server, String username) {
+		OpenShiftExplorerView osExplorer = new OpenShiftExplorerView();
+		osExplorer.open();
+		if (osExplorer.connectionExists(server, username)) {
+			return osExplorer.getOpenShift3Connection(server, username);
+		} else {
+			throw new OpenShiftToolsException("Could not find OpenShift connection for " + 
+					server + " and " + username);
+		}
+	}
+	
+	/**
+	 * Verification of successful registration of rhel image during cdk start up
+	 * Checks for reg. expressions in console
+	 */
+	public static void verifyConsoleContainsRegEx(String regex) {
+		ConsoleView view = new ConsoleView();
+		view.open();
+		String consoleText = view.getConsoleText();
+		if (consoleText == null) {
+			fail("Console does not contain any text");
+		}
+		Pattern pattern = Pattern.compile(regex);
+		assertTrue("Console text does not contains regex: \r\n" + regex + 
+				"\r\nConsole text:\r\n" + consoleText, 
+				pattern.matcher(consoleText).find());
+	}
+	
 	public static List<Server> getAllServers() {
 		log.info("Collecting all server adapters"); 
 		ServersView2 view = new ServersView2();
 		view.open();
 		return view.getServers();
-	}
-	
-	public static NewCDKServerWizard openNewServerWizardDialog() {
-		log.info("Adding new Container Development Environment server adapter"); 
-		// call new server dialog from servers view
-		CDKServersView view = new CDKServersView();
-		view.open();
-		NewCDKServerWizard dialog = view.newCDKServer();
-		new WaitWhile(new JobIsRunning(), TimePeriod.MEDIUM, false);
-		return dialog;
 	}
 	
 	/**
@@ -153,6 +244,18 @@ public class CDKTestUtils {
 		}, TimePeriod.MEDIUM);
 	}
 	
+	/**
+	 * Prints out Openshift 3 accepted certificates
+	 */
+	public static void printCertificates() {
+		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();
+		dialog.open();
+		
+		OpenShift3SSLCertificatePreferencePage preferencePage = new OpenShift3SSLCertificatePreferencePage(dialog);
+		dialog.select(preferencePage);
+		preferencePage.printCertificates();
+        dialog.ok();
+	}
 	
 	public static void setOCToPreferences(String ocPath) {
 		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();
@@ -246,39 +349,6 @@ public class CDKTestUtils {
         	exc.printStackTrace();
         } finally {
         	dialog.ok();
-		}
-	}
-	
-	/**
-	 * Deletes given File object using Files.deleteIfExists(Path)
-	 * @param file file or directory to delete
-	 * @throws FileNotFoundException 
-	 */
-	public static void deleteRecursively(File file) throws FileNotFoundException {
-		if (file.exists()) {
-			if (file.isFile()) {
-				log.info("Deleting file " + file.getAbsolutePath());
-				file.delete();
-			} else {
-				if (file.listFiles().length >= 1) {
-					for(File contentFile : file.listFiles()) {
-						deleteRecursively(contentFile);
-					}
-				}
-				log.info("Deleting dir " + file.getAbsolutePath());
-				file.delete();
-			}
-		} else {
-			throw new FileNotFoundException("Given file " + file.getAbsolutePath() + " does not exists");
-		}
-	}
-	
-	public static void deleteFilesIfExist(File file) {
-		log.info("Deleting all content under file path " + file.getAbsolutePath());
-		try {
-			deleteRecursively(file);
-		} catch (FileNotFoundException e) {
-			log.error("Given path does not exists, do nothing");
 		}
 	}
 

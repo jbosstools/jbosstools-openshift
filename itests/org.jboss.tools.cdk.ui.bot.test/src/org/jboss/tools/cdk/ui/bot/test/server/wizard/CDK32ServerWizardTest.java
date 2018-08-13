@@ -10,9 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.ui.bot.test.server.wizard;
 
-import static org.junit.Assert.assertTrue;
 import static org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils.assertDiffMessage;
 import static org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils.assertSameMessage;
+import static org.junit.Assert.assertTrue;
 
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
@@ -23,8 +23,7 @@ import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
-import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
-import org.junit.BeforeClass;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,11 +34,6 @@ import org.junit.runner.RunWith;
  */
 @RunWith(RedDeerSuite.class)
 public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
-	
-	@BeforeClass
-	public static void setUpEnvironment() {
-		checkCDK32Parameters();
-	}
 	
 	@Override
 	protected String getServerAdapter() {
@@ -53,13 +47,13 @@ public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
 	
 	@Test
 	public void testNewCDK32ServerWizard() {
-		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
+		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKUtils.openNewServerWizardDialog();
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
 		
 		page.selectType(CDKLabel.Server.SERVER_TYPE_GROUP, CDKLabel.Server.CDK32_SERVER_NAME);
 		page.setName(getServerAdapter());
 		dialog.next();
-		NewCDK32ServerWizardPage containerPage = new NewCDK32ServerWizardPage();
+		NewCDK32ServerWizardPage containerPage = new NewCDK32ServerWizardPage(dialog);
 		
 		checkWizardPagewidget("Minishift Binary: ", CDKLabel.Server.CDK32_SERVER_NAME);
 
@@ -91,7 +85,7 @@ public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
 		assertSameMessage(dialog, CDKLabel.Messages.NOT_COMPATIBLE);
 		
 		// Positive test of proper minishift binary
-		containerPage.setMinishiftBinary(CDK32_MINISHIFT);
+		containerPage.setMinishiftBinary(MOCK_CDK320);
 		assertDiffMessage(dialog, CDKLabel.Messages.CHECK_MINISHIFT_VERSION);
 		assertSameMessage(dialog, CDKLabel.Messages.SERVER_ADAPTER_REPRESENTING);
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.MEDIUM, false);

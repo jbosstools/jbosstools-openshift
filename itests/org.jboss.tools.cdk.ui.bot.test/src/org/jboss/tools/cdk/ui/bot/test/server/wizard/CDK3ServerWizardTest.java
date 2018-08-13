@@ -10,9 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.ui.bot.test.server.wizard;
 
-import static org.junit.Assert.assertTrue;
 import static org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils.assertDiffMessage;
 import static org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils.assertSameMessage;
+import static org.junit.Assert.assertTrue;
 
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
@@ -23,8 +23,7 @@ import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
-import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
-import org.junit.BeforeClass;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,17 +34,6 @@ import org.junit.runner.RunWith;
  */
 @RunWith(RedDeerSuite.class)
 public class CDK3ServerWizardTest extends CDKServerWizardAbstractTest {
-	
-	private static String MINISHIFT_PATH;
-	
-	@BeforeClass
-	public static void setupCDK3ServerEditorTest() {
-		if (CDK_MINISHIFT == null) {
-			MINISHIFT_PATH = MOCK_CDK311;
-		} else {
-			MINISHIFT_PATH = CDK_MINISHIFT;
-		}
-	}
 	
 	@Override
 	protected String getServerAdapter() {
@@ -59,13 +47,13 @@ public class CDK3ServerWizardTest extends CDKServerWizardAbstractTest {
 	
 	@Test
 	public void testNewCDK3ServerWizard() {
-		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
+		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKUtils.openNewServerWizardDialog();
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
 		
 		page.selectType(CDKLabel.Server.SERVER_TYPE_GROUP, CDKLabel.Server.CDK3_SERVER_NAME);
 		page.setName(getServerAdapter());
 		dialog.next();
-		NewCDK3ServerWizardPage containerPage = new NewCDK3ServerWizardPage();
+		NewCDK3ServerWizardPage containerPage = new NewCDK3ServerWizardPage(dialog);
 		
 		checkWizardPagewidget("Minishift Binary: ", CDKLabel.Server.CDK3_SERVER_NAME);
 
@@ -96,7 +84,7 @@ public class CDK3ServerWizardTest extends CDKServerWizardAbstractTest {
 		assertSameMessage(dialog, CDKLabel.Messages.NOT_COMPATIBLE);
 		
 		// Positive test of proper minishift binary
-		containerPage.setMinishiftBinary(MINISHIFT_PATH);
+		containerPage.setMinishiftBinary(MOCK_CDK311);
 		assertDiffMessage(dialog, CDKLabel.Messages.CHECK_MINISHIFT_VERSION);
 		assertSameMessage(dialog, CDKLabel.Messages.SERVER_ADAPTER_REPRESENTING);
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.MEDIUM, false);

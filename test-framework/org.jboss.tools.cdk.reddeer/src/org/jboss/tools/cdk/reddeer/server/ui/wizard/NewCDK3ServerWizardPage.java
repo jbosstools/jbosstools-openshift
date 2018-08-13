@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
+import org.eclipse.reddeer.core.reference.ReferencedComposite;
 import org.eclipse.reddeer.swt.api.Link;
 import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.link.DefaultLink;
@@ -18,6 +19,10 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 public class NewCDK3ServerWizardPage extends NewServerContainerWizardPage {
+
+	public NewCDK3ServerWizardPage(ReferencedComposite referencedComposite) {
+		super(referencedComposite);
+	}
 
 	public Link getDownloadAndInstallLink() {
 		new DefaultShell(CDKLabel.Shell.NEW_SERVER_WIZARD);

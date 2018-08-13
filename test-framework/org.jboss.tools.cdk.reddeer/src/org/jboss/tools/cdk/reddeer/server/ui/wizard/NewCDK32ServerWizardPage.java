@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
+import org.eclipse.reddeer.core.reference.ReferencedComposite;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
@@ -21,6 +22,10 @@ import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
  */
 public class NewCDK32ServerWizardPage extends NewCDK3ServerWizardPage {
 
+	public NewCDK32ServerWizardPage(ReferencedComposite referencedComposite) {
+		super(referencedComposite);
+	}
+
 	public void setMinishiftProfile(final String profile) {
 		getMinishiftProfile().setText(profile);
 	}
@@ -28,6 +33,15 @@ public class NewCDK32ServerWizardPage extends NewCDK3ServerWizardPage {
 	public LabeledText getMinishiftProfile() {
 		new DefaultShell(CDKLabel.Shell.NEW_SERVER_WIZARD);
 		return new LabeledText(CDKLabel.Labels.MINISHIFT_PROFILE);
+	}
+	
+	public void setMinishiftHome(final String home) {
+		getMinishiftHome().setText(home);
+	}
+	
+	public LabeledText getMinishiftHome() {
+		new DefaultShell(CDKLabel.Shell.NEW_SERVER_WIZARD);
+		return new LabeledText(CDKLabel.Labels.MINISHIFT_HOME);
 	}
 
 }

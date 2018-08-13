@@ -64,12 +64,12 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	@After
 	public void tearDownAbstractServerWizard() {
 		closeOpenShells();
-		CDKUtils.deleteAllCDKServerAdapters();
+		CDKUtils.deleteAllContainerRuntimeServerAdapters();
 		CDKTestUtils.removeAccessRedHatCredentials(CDKLabel.Others.CREDENTIALS_DOMAIN, USERNAME);
 	}
 	
 	protected void assertServerType(final String serverType) {
-		NewCDKServerWizard wizard = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
+		NewCDKServerWizard wizard = (NewCDKServerWizard)CDKUtils.openNewServerWizardDialog();
 		try {
 			TreeItem item = new DefaultTreeItem(new String[] {CDKLabel.Server.SERVER_TYPE_GROUP}).getItem(serverType);
 			item.select();

@@ -12,13 +12,15 @@ Require-Bundle: org.junit,
  org.eclipse.ui.forms,
  org.eclipse.wst.server.core,
  org.eclipse.linuxtools.docker.reddeer,
- org.jboss.tools.runtime.reddeer
+ org.jboss.tools.runtime.reddeer,
+ org.eclipse.reddeer.junit
 Export-Package: org.jboss.tools.cdk.reddeer.core.certificate,
  org.jboss.tools.cdk.reddeer.core.condition,
  org.jboss.tools.cdk.reddeer.core.enums,
-  org.jboss.tools.cdk.reddeer.core.label,
+ org.jboss.tools.cdk.reddeer.core.handlers,
+ org.jboss.tools.cdk.reddeer.core.label,
  org.jboss.tools.cdk.reddeer.core.matcher,
- org.jboss.tools.cdk.reddeer.ui.preferences,
+ org.jboss.tools.cdk.reddeer.core.server,
  org.jboss.tools.cdk.reddeer.requirements,
  org.jboss.tools.cdk.reddeer.server.exception,
  org.jboss.tools.cdk.reddeer.server.ui,
@@ -28,3 +30,4 @@ Export-Package: org.jboss.tools.cdk.reddeer.core.certificate,
  org.jboss.tools.cdk.reddeer.server.ui.wizard.download,
  org.jboss.tools.cdk.reddeer.ui.preferences,
  org.jboss.tools.cdk.reddeer.utils
+Import-Package: org.jboss.tools.openshift.common.core.utils

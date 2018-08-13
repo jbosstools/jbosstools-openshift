@@ -25,20 +25,16 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
 import org.eclipse.reddeer.jface.wizard.WizardDialog;
-import org.eclipse.reddeer.swt.api.Link;
-import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
-import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
-import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewMinishiftServerWizardPage;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
+import org.jboss.tools.cdk.reddeer.utils.DownloadCDKRuntimesUtility;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDKServerWizardAbstractTest;
-import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
-import org.jboss.tools.cdk.ui.bot.test.utils.DownloadCDKRuntimesUtility;
 import org.junit.After;
 import org.junit.Before;
 
@@ -49,7 +45,7 @@ import org.junit.Before;
  */
 public class DownloadContainerRuntimeAbstractTest extends CDKServerWizardAbstractTest {
 
-	private WizardDialog dialog;
+	protected WizardDialog dialog;
 	
 	private static final Logger log = Logger.getLogger(CDK32DownloadRuntimeTest.class);
 	
@@ -60,7 +56,7 @@ public class DownloadContainerRuntimeAbstractTest extends CDKServerWizardAbstrac
 	
 	@Before
 	public void beforeDownloadRuntime() {
-		dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
+		dialog = (NewCDKServerWizard)CDKUtils.openNewServerWizardDialog();
 	}
 	
 	@After
@@ -68,26 +64,14 @@ public class DownloadContainerRuntimeAbstractTest extends CDKServerWizardAbstrac
 		if (dialog.isOpen()) {
 			dialog.cancel();
 		}
-		CDKTestUtils.deleteFilesIfExist(new File(RUNTIMES_DIRECTORY));
-	}
-	
-	public NewCDK3ServerWizardPage chooseCDKWizardPage(CDKVersion version) {
-		switch (version.serverName()) {
-			case CDKLabel.Server.CDK3_SERVER_NAME:
-				return new NewCDK3ServerWizardPage();
-			case CDKLabel.Server.CDK32_SERVER_NAME:
-				return new NewCDK32ServerWizardPage();
-			case CDKLabel.Server.MINISHIFT_SERVER_NAME:
-				return new NewMinishiftServerWizardPage();
-			default:
-				return null;
-		}
+		CDKUtils.deleteFilesIfExist(new File(RUNTIMES_DIRECTORY));
 	}
 	
 	public void downloadAndVerifyContainerRuntime(CDKVersion version, String username, String password, 
 			String installFolder, String downloadFolder, boolean removeArtifacts, boolean useDefaults) {
-		chooseWizardPage(CDKLabel.Server.SERVER_TYPE_GROUP, version.serverName());
-		NewCDK3ServerWizardPage wizardPage = inicializeDownloadRutimeDialog(version);
+		openNewServerWizardDialog(CDKLabel.Server.SERVER_TYPE_GROUP, version.serverName());
+		NewCDK3ServerWizardPage wizardPage = CDKUtils.chooseCDKWizardPage(version, dialog);
+		CDKUtils.initializeDownloadRutimeDialog(wizardPage);
 		DownloadCDKRuntimesUtility util;
 		if (useDefaults) {
 			util = new DownloadCDKRuntimesUtility(true);
@@ -138,23 +122,13 @@ public class DownloadContainerRuntimeAbstractTest extends CDKServerWizardAbstrac
 				true, false);
 	}
 
-	public void chooseWizardPage(String... pathToServer) {
+	public void openNewServerWizardDialog(String... pathToServer) {
 		log.info("Opening server wizard for " + pathToServer);
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
 		
 		page.selectType(pathToServer);
 		page.setName(getServerAdapter());
 		dialog.next();
-	}
-	
-	public NewCDK3ServerWizardPage inicializeDownloadRutimeDialog(CDKVersion version) {
-		log.info("Inicializing " + version.name() + " wizard page");
-		NewCDK3ServerWizardPage wizardPage = chooseCDKWizardPage(version);
-		Link link = wizardPage.getDownloadAndInstallLink();
-		new WaitUntil(new ControlIsEnabled(link), TimePeriod.MEDIUM, false);
-		link.click();
-		new WaitUntil(new ShellIsAvailable(CDKLabel.Shell.DOWNLOAD_RUNTIMES), TimePeriod.MEDIUM);
-		return wizardPage;
 	}
 	
 	public boolean verifyFileInFolder(String folderPath, String fileName) {

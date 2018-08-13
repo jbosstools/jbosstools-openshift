@@ -11,11 +11,12 @@
 package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.core.reference.ReferencedComposite;
+import org.eclipse.reddeer.jface.wizard.WizardPage;
 import org.eclipse.reddeer.swt.api.Button;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
@@ -24,9 +25,11 @@ import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
-public class NewServerContainerWizardPage {
+public class NewServerContainerWizardPage extends WizardPage {
 	
-	private static Logger log = Logger.getLogger(NewServerContainerWizardPage.class);
+	public NewServerContainerWizardPage(ReferencedComposite referencedComposite) {
+		super(referencedComposite);
+	}
 	
 	public String getDomain() {
 		new DefaultShell(CDKLabel.Shell.NEW_SERVER_WIZARD);
@@ -38,7 +41,7 @@ public class NewServerContainerWizardPage {
 	}
 	
 	@SuppressWarnings("unused")
-	private static void disposeSecureStoragePassword() {
+	private void disposeSecureStoragePassword() {
 		try {
 			new WaitUntil(new ShellIsAvailable(CDKLabel.Shell.SECURE_STORAGE_DIALOG), TimePeriod.MEDIUM, true);
 			new DefaultShell(CDKLabel.Shell.SECURE_STORAGE_DIALOG).close();
