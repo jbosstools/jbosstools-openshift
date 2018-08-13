@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.core.server;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.eclipse.core.resources.IProject;
@@ -72,7 +71,7 @@ public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 	 * https://issues.jboss.org/browse/JBIDE-22138#comment-13617731
 	 */
 	@SuppressWarnings("restriction")
-    private void clearJSTcache(IProject project) throws Exception {
+	private void clearJSTcache(IProject project) throws Exception {
         Method clearCacheMethod = J2EEDeployableFactory.class.getDeclaredMethod("clearCache", IProject.class);
         clearCacheMethod.setAccessible(true);
         clearCacheMethod.invoke(JEEDeployableFactory.jeeInstance(), project);
