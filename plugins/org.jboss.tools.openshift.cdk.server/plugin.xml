@@ -321,7 +321,7 @@
     <extension point="org.eclipse.ui.navigator.navigatorContent">
        <actionProvider
           class="org.jboss.tools.openshift.internal.cdk.server.ui.view.CDKActionProvider"
-          id="org.jboss.tools.openshift.cdk.server.ui.internal.view.CDKActionProvider">
+          id="org.jboss.tools.openshift.internal.cdk.server.ui.view.CDKActionProvider">
           <enablement>
              <instanceof value="org.eclipse.wst.server.core.IServer"></instanceof>
           </enablement>
@@ -332,7 +332,7 @@
           viewerId="org.eclipse.wst.server.ui.ServersView">
        <includes>
           <actionExtension
-                pattern="org.jboss.tools.openshift.cdk.server.ui.internal.view.CDKActionProvider"/>
+                pattern="org.jboss.tools.openshift.internal.cdk.server.ui.view.CDKActionProvider"/>
        </includes>
     </viewerActionBinding>
 	</extension>
@@ -354,7 +354,7 @@
    <extension
          point="org.jboss.tools.openshift.core.connection.registryprovider">
       <registryProvider
-            class="org.jboss.tools.openshift.cdk.server.core.internal.registry.CDKRegistryProvider"
+            class="org.jboss.tools.openshift.internal.cdk.server.core.registry.CDKRegistryProvider"
             weight="5">
       </registryProvider>
    </extension>
