@@ -56,7 +56,7 @@
    <extension
          point="org.jboss.tools.openshift.io.core.loginProvider">
       <loginProvider
-            class="org.jboss.tools.openshift.io.internal.ui.DefaultLoginProvider">
+            class="org.jboss.tools.openshift.internal.io.ui.DefaultLoginProvider">
       </loginProvider>
    </extension>
 </plugin>
