@@ -45,16 +45,12 @@ public class CDK3ServerEditorTest extends CDKServerEditorAbstractTest {
 	private static final Logger log = Logger.getLogger(CDK3ServerEditorTest.class);
 	
 	private String hypervisor = MINISHIFT_HYPERVISOR;
-
+	
 	private static String MINISHIFT_PATH;
 	
 	@BeforeClass
 	public static void setupCDK3ServerEditorTest() {
-		if (CDK_MINISHIFT == null) {
-			MINISHIFT_PATH = MOCK_CDK311;
-		} else {
-			MINISHIFT_PATH = CDK_MINISHIFT;
-		}
+		MINISHIFT_PATH = MOCK_CDK311;
 	}
 	
 	@Before
@@ -66,9 +62,9 @@ public class CDK3ServerEditorTest extends CDKServerEditorAbstractTest {
 	protected void setupServerWizardPage(NewMenuWizard dialog) {
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
 		page.selectType(CDKLabel.Server.SERVER_TYPE_GROUP, CDKLabel.Server.CDK3_SERVER_NAME);
-		page.setName(SERVER_ADAPTER_3);
+		page.setName(getServerAdapter());
 		dialog.next();
-		NewCDK3ServerWizardPage containerPage = new NewCDK3ServerWizardPage();
+		NewCDK3ServerWizardPage containerPage = new NewCDK3ServerWizardPage(dialog);
 		containerPage.setCredentials(USERNAME, PASSWORD);
 		if ( StringUtils.isEmptyOrNull(hypervisor) ) {
 			log.info("Hypervisor parameter has no value or is null, default value will be kept: " + containerPage.getHypervisorCombo().getText());

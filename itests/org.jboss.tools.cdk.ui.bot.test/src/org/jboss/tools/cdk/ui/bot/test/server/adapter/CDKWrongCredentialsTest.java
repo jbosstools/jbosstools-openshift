@@ -15,11 +15,17 @@ import static org.junit.Assert.fail;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
+import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.junit.After;
@@ -35,6 +41,14 @@ import org.junit.runner.RunWith;
  *
  */
 @CleanOpenShiftExplorer
+@RemoveCDKServers
+@ContainerRuntimeServer(
+		version = CDKVersion.CDK350,
+		usernameProperty="developers.username",
+		passwordProperty="developers.password",
+		useExistingBinary=true,
+		makeRuntimePersistent=true,
+		createServerAdapter=false)
 @RunWith(RedDeerSuite.class)
 public class CDKWrongCredentialsTest extends CDKServerAdapterAbstractTest {
 
@@ -46,17 +60,33 @@ public class CDKWrongCredentialsTest extends CDKServerAdapterAbstractTest {
 
 	private static final Logger log = Logger.getLogger(CDKWrongCredentialsTest.class);
 	
+	@InjectRequirement
+	private static ContainerRuntimeServerRequirement serverRequirement;
+	
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_32;
+		return serverRequirement.getServerAdapter().getAdapterName();
 	}
 	
 	@BeforeClass
 	public static void setupCDKWrongCredentialsTest() {
-		checkCDK32Parameters();
-		addNewCDK32Server(SERVER_ADAPTER_32, 
-				MINISHIFT_HYPERVISOR, CDK32_MINISHIFT, MINISHIFT_PROFILE_REG,
+		CDKUtils.addNewCDK32Server(
+				serverRequirement.getServerAdapter().getAdapterName(), 
+				MINISHIFT_HYPERVISOR, 
+				serverRequirement.getServerAdapter().getMinishiftBinary().toAbsolutePath().toString(), 
+				MINISHIFT_PROFILE_REG,
 				username, password);
+	}
+	
+	@After
+	public void stopAdapter() {
+		closeAllErrorDialogs();
+		stopServerAdapter(getCDKServer());
+	}
+	
+	@AfterClass
+	public static void tearDownCDKWrongCredentialsTest() {
+		CDKTestUtils.removeAccessRedHatCredentials(CDKLabel.Others.CREDENTIALS_DOMAIN, username);
 	}
 	
 	/**
@@ -66,16 +96,17 @@ public class CDKWrongCredentialsTest extends CDKServerAdapterAbstractTest {
 	@Test
 	public void testPassingWrongCredentials() {
 		try {
-			startServerAdapter(() -> { 
+			serverRequirement.configureCDKServerAdapter(false);
+			startServerAdapter(getCDKServer(), () -> {
 				passCredentialsIntoEnvironment(true);
-				}, true);
+			}, true);
 			fail("Server adapter should not have started successfully");
 		} catch (CDKServerException exc) {
 			log.info("Expected CDKServerException was thrown: " + exc.getCause());
 		} catch (WaitTimeoutExpiredException waitExc) {
 			fail(waitExc.getMessage());
 		}
-		verifyConsoleContainsRegEx("\\bNot a tty supported terminal\\b");
+		CDKTestUtils.verifyConsoleContainsRegEx("\\bNot a tty supported terminal\\b");
 	}
 	
 	/**
@@ -84,27 +115,17 @@ public class CDKWrongCredentialsTest extends CDKServerAdapterAbstractTest {
 	@Test
 	public void testNotPassingCredentials() {
 		try {
-			startServerAdapter(() -> { 
+			serverRequirement.configureCDKServerAdapter(false);
+			startServerAdapter(getCDKServer(), () -> {
 				passCredentialsIntoEnvironment(false);
-				}, true);
+			}, true);
 			fail("Server adapter should not have started successfully");
 		} catch (CDKServerException exc) {
 			log.info("Expected CDKServerException was thrown: " + exc.getMessage());
 		} catch (WaitTimeoutExpiredException waitExc) {
 			fail("WaitTimeoutExpection occured, this was not expected. \r\n" + waitExc.getMessage());
 		}
-		verifyConsoleContainsRegEx("\\bNot a tty supported terminal\\b");		
-	}
-	
-	@After
-	public void stopAdapter() {
-		closeAllErrorDialogs();
-		stopServerAdapter();
-	}
-	
-	@AfterClass
-	public static void tearDownCDKWrongCredentialsTest() {
-		CDKTestUtils.removeAccessRedHatCredentials(CDKLabel.Others.CREDENTIALS_DOMAIN, username);
+		CDKTestUtils.verifyConsoleContainsRegEx("\\bNot a tty supported terminal\\b");		
 	}
 	
 	private void closeAllErrorDialogs() {

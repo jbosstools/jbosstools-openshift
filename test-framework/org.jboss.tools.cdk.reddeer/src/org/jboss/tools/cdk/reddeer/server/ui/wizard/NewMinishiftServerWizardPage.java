@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
-import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.core.reference.ReferencedComposite;
 
 /**
  * New minishift server wizard page class rep.
@@ -19,7 +19,9 @@ import org.eclipse.reddeer.common.logging.Logger;
  */
 public class NewMinishiftServerWizardPage extends NewCDK32ServerWizardPage {
 
-	private static final Logger log = Logger.getLogger(NewMinishiftServerWizardPage.class);
+	public NewMinishiftServerWizardPage(ReferencedComposite referencedComposite) {
+		super(referencedComposite);
+	}
 	
 	@Override
 	public void setCredentials(String username, String password) {

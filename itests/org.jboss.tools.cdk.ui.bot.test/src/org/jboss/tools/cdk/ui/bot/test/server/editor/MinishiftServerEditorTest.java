@@ -18,11 +18,15 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDKPart;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.Minishift17ServerEditor;
@@ -39,26 +43,30 @@ import org.junit.runner.RunWith;
  *
  */
 @RunWith(RedDeerSuite.class)
+@ContainerRuntimeServer(
+		version = CDKVersion.MINISHIFT1210,
+		useExistingBinary=true,
+		makeRuntimePersistent=true,
+		createServerAdapter=false)
 public class MinishiftServerEditorTest extends CDKServerEditorAbstractTest {
 
-	private static String MINISHIFT_PATH;
-	
+	@InjectRequirement
+	private static ContainerRuntimeServerRequirement serverRequirement;
+
 	private String hypervisor = MINISHIFT_HYPERVISOR;
 	
 	private static final Logger log = Logger.getLogger(MinishiftServerEditorTest.class);
 	
+	private static String MINISHIFT_PATH;
+	
 	@BeforeClass
-	public static void setupMinishiftServerEditorTest() {
-		if (MINISHIFT == null) {
-			MINISHIFT_PATH = MOCK_MINISHIFT170;
-		} else {
-			MINISHIFT_PATH = MINISHIFT;
-		}
+	public static void setupCDK3ServerEditorTest() {
+		MINISHIFT_PATH = serverRequirement.getServerAdapter().getMinishiftBinary().toAbsolutePath().toString();;
 	}
 	
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_MINISHIFT;
+		return serverRequirement.getServerAdapter().getAdapterName();
 	}
 	
 	@Before
@@ -82,7 +90,7 @@ public class MinishiftServerEditorTest extends CDKServerEditorAbstractTest {
 		page.selectType(CDKLabel.Server.SERVER_TYPE_GROUP, CDKLabel.Server.MINISHIFT_SERVER_NAME);
 		page.setName(SERVER_ADAPTER_MINISHIFT);
 		dialog.next();
-		NewMinishiftServerWizardPage containerPage = new NewMinishiftServerWizardPage();
+		NewMinishiftServerWizardPage containerPage = new NewMinishiftServerWizardPage(dialog);
 		log.info("Setting hypervisor to: " + hypervisor);
 		containerPage.setHypervisor(hypervisor);
 		log.info("Setting binary to " + MINISHIFT_PATH);

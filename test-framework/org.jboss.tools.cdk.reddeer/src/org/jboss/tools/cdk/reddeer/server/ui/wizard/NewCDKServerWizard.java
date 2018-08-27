@@ -14,9 +14,12 @@ import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.workbench.core.condition.JobIsKilled;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
+import org.jboss.tools.cdk.reddeer.server.exception.CDKException;
 
 /**
  * Class represents New Server Wizard, it is required because
@@ -37,6 +40,11 @@ public class NewCDKServerWizard extends NewMenuWizard {
 	}
 	
 	@Override
+	public void finish() {
+		this.finish(TimePeriod.LONG);
+	}
+	
+	@Override
 	public void finish(TimePeriod timeout) {
 		// workaround 
 		try {
@@ -46,6 +54,11 @@ public class NewCDKServerWizard extends NewMenuWizard {
 			new WaitUntil(new JobIsKilled(CDKLabel.Job.REFRESHING_SERVER_ADAPTER_LIST), TimePeriod.LONG, false);
 		} catch (WaitTimeoutExpiredException exc) {
 			// do nothing because job did not start
+		}
+		try {
+			new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.DEFAULT);
+		} catch (WaitTimeoutExpiredException waitExc) {
+			throw new CDKException("Could not finish New Server Wizard Dialog due to " + this.getMessage(), waitExc);
 		}
 		super.finish(timeout);
 	}

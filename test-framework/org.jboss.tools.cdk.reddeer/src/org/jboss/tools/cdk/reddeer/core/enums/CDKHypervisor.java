@@ -23,7 +23,8 @@ public enum CDKHypervisor {
 	KVM("kvm"),
 	VIRTUALBOX("virtualbox"),
 	XHYVE("xhyve"),
-	HYPERV("hyperv");
+	HYPERV("hyperv"),
+	EMPTY("");
 	
 	String hypervisor;
 	

@@ -37,6 +37,7 @@ import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDKPart;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.MinishiftServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDKServerWizardAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.junit.After;
@@ -82,7 +83,7 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 	}
 
 	public void addCDKServer() {
-		NewCDKServerWizard dialog = CDKTestUtils.openNewServerWizardDialog();
+		NewCDKServerWizard dialog = CDKUtils.openNewServerWizardDialog();
 		
 		try {
 			setupServerWizardPage(dialog);

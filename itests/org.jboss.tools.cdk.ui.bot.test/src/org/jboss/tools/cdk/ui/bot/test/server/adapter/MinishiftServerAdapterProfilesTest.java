@@ -17,10 +17,16 @@ import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
+import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
@@ -35,6 +41,10 @@ import org.junit.runner.RunWith;
  *
  */
 @CleanOpenShiftExplorer
+@ContainerRuntimeServer(
+		version = CDKVersion.MINISHIFT1210,
+		useExistingBinary=true,
+		makeRuntimePersistent=true)
 @RunWith(RedDeerSuite.class)
 public class MinishiftServerAdapterProfilesTest extends CDKServerAdapterAbstractTest {
 
@@ -44,13 +54,21 @@ public class MinishiftServerAdapterProfilesTest extends CDKServerAdapterAbstract
 	
 	private DockerExplorerView dockerView;
 	
-	private static final String DOCKER_DAEMON_CONNECTION = SERVER_ADAPTER_MINISHIFT;
-	
 	private static final Logger log = Logger.getLogger(CDK32ServerAdapterProfilesTest.class);
+	
+	private static String DOCKER_DAEMON_CONNECTION;
+	
+	@InjectRequirement
+	private static ContainerRuntimeServerRequirement serverRequirement;
 	
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_MINISHIFT;
+		return serverRequirement.getServerAdapter().getAdapterName();
+	}
+	
+	@BeforeClass
+	public static void setup() {
+		DOCKER_DAEMON_CONNECTION = serverRequirement.getServerAdapter().getAdapterName();
 	}
 	
 	protected static String getSecondServerAdapter() {
@@ -67,9 +85,9 @@ public class MinishiftServerAdapterProfilesTest extends CDKServerAdapterAbstract
 	
 	@BeforeClass
 	public static void setupServerAdapterWithMultipleProfile() {
-		checkMinishiftParameters();
-		addNewMinishiftServer(SERVER_ADAPTER_MINISHIFT, MINISHIFT_HYPERVISOR, MINISHIFT, MINISHIFT_PROFILE);
-		addNewMinishiftServer(getSecondServerAdapter(), MINISHIFT_HYPERVISOR, MINISHIFT, MINISHIFT_PROFILE2);
+		CDKUtils.addNewMinishiftServer(getSecondServerAdapter(), MINISHIFT_HYPERVISOR, 
+				serverRequirement.getServerAdapter().getMinishiftBinary().toAbsolutePath().toString(), 
+				MINISHIFT_PROFILE2);
 	}
 	
 	@Before
@@ -87,7 +105,7 @@ public class MinishiftServerAdapterProfilesTest extends CDKServerAdapterAbstract
 	@Test
 	public void testMinishiftServerAdapterWithMultipleProfiles() {
 		// fisrt adapter start verification
-		startServerAdapter(() -> {}, false);
+		startServerAdapter(getCDKServer(), () -> {}, false);
 		int conCount = view.getOpenShift3Connections().size();
 		int docCount = getDockerConnectionCreatedByCDK(dockerView, DOCKER_DAEMON_CONNECTION).size();
 		assertEquals("Expected only one OS connection, got " + conCount, 1, conCount);
@@ -102,13 +120,13 @@ public class MinishiftServerAdapterProfilesTest extends CDKServerAdapterAbstract
 		assertEquals("Expectedtwo Docker connections, got " + docCount, 2, docCount);
 		// check functionality of connections
 		for (String docker : getDockerConnectionCreatedByCDK(dockerView, DOCKER_DAEMON_CONNECTION)) {
-			testDockerConnection(docker);
+			CDKTestUtils.testDockerConnection(docker);
 		}
 		for (OpenShift3Connection conn : view.getOpenShift3Connections()) {
-			testOpenshiftConnection(conn);
+			CDKTestUtils.testOpenshiftConnection(conn);
 		}
 		// adapters stoping verification
-		stopServerAdapter();
+		stopServerAdapter(getCDKServer());
 		stopServerAdapter(getSecondCDKServer());
 	}
 

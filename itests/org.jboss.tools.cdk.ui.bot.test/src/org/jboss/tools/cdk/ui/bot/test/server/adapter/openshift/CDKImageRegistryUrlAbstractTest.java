@@ -19,6 +19,7 @@ import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKRuntimeOS;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDKServerAdapterAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.jboss.tools.openshift.reddeer.enums.AuthenticationMethod;
@@ -32,7 +33,6 @@ import org.jboss.tools.openshift.reddeer.wizard.v3.OpenShift3ConnectionWizard;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 
 /**
@@ -53,14 +53,8 @@ public abstract class CDKImageRegistryUrlAbstractTest extends CDKServerAdapterAb
 	public static final String VALIDATION_MESSAGE_OC311 = "OpenShift client oc version 3.11 is required";
 	
 	protected static final String OPENSHIFT_REGISTRY = getMinishiftOpenshiftRegistry();
-
-	@BeforeClass
-	public static void setupCDKImageRegistryUrlAbstract() {
-		log.info("Setting up environment, checking test arguments"); 
-		log.info("Adding new CDK 3.2+ server adapter"); 
-		addNewCDK32Server(SERVER_ADAPTER_32, MINISHIFT_HYPERVISOR,
-				CDK32_MINISHIFT, MINISHIFT_PROFILE); 
-	}
+	
+	protected abstract void startServerAdapter();
 	
 	@AfterClass
 	public static void tearDownCDKImageResgitryUrlAbstract() {
@@ -70,18 +64,16 @@ public abstract class CDKImageRegistryUrlAbstractTest extends CDKServerAdapterAb
 
 	@Before
 	public void setupAdapter() {
-		startServerAdapterIfNotRunning(() -> {
-			skipRegistrationViaFlag(getCDKServer(), true);
-		}, false);
-		wizard = getOpenshiftConnectionWizard(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
+		startServerAdapter();
+		wizard = getOpenshiftConnectionWizard(CDKTestUtils.findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 		assertTrue(wizard.getAuthSection().getMethod().equals(AuthenticationMethod.BASIC));
 		switchOffPasswordSaving(wizard);
 	}
 	
-	public static void setupOCForWorkspace() {
+	public static void setupOCForWorkspace(String pathToSearch) {
 		log.info("Setting up oc for workspace"); 
 		log.info("Find oc on minishift home path"); 
-		String pathToOC = CDKTestUtils.findFileOnPath(DEFAULT_MINISHIFT_HOME, "oc" + CDKRuntimeOS.get().getSuffix()); 
+		String pathToOC = CDKTestUtils.findFileOnPath(pathToSearch, "oc" + CDKRuntimeOS.get().getSuffix()); 
 		log.info("Setting oc into preferences on path " + pathToOC); 
 		CDKTestUtils.setOCToPreferences(pathToOC);
 	}
@@ -129,18 +121,18 @@ public abstract class CDKImageRegistryUrlAbstractTest extends CDKServerAdapterAb
 		try {
 			wizard.discover();
 		} catch (OpenShiftToolsException osExc) {
-			String console = collectConsoleOutput(log, true);
+			String console = CDKUtils.collectConsoleOutput(log, true);
 			fail(console);
 		}
 	}
 	
 	protected void assertStringContains(String original, String toContain) {
-		assertTrue("Failed that \"" + original + "\"\r\ndoes not contain: \"" + toContain + "\"",   
+		assertTrue("\"" + original + "\"\r\nshould contain: \"" + toContain + "\"",   
 				original.contains(toContain));
 	}
 	
 	protected void assertFalseStringContains(String original, String toContain) {
-		assertFalse("Failed that \"" + original + "\"\r\ndoes contain \"" + toContain + "\"",   
+		assertFalse("\"" + original + "\"\r\nshould not contain \"" + toContain + "\"",   
 				original.contains(toContain));
 	}
 	

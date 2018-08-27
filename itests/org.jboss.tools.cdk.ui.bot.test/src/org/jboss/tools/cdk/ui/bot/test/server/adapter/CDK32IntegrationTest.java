@@ -10,8 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.ui.bot.test.server.adapter;
 
-import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
+import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
+import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -24,48 +29,52 @@ import org.junit.runner.RunWith;
  *
  */
 @CleanOpenShiftExplorer
+@RemoveCDKServers
+@ContainerRuntimeServer(
+		version = CDKVersion.CDK350,
+		useExistingBinary=true,
+		makeRuntimePersistent=true,
+		usernameProperty="developers.username",
+		passwordProperty="developers.password")
 @RunWith(RedDeerSuite.class)
 public class CDK32IntegrationTest extends CDKServerAdapterAbstractTest {
 	
-	private static final String DOCKER_DAEMON_CONNECTION = SERVER_ADAPTER_32;
+	private static String DOCKER_DAEMON_CONNECTION;
 	
-	private static final Logger log = Logger.getLogger(CDK32IntegrationTest.class);
+	@InjectRequirement
+	private static ContainerRuntimeServerRequirement serverRequirement;
 	
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_32;
+		return serverRequirement.getServerAdapter().getAdapterName();
 	}
 	
 	@BeforeClass
 	public static void setup() {
-		checkDevelopersParameters();
-		checkCDK32Parameters();
-		addNewCDK32Server(SERVER_ADAPTER_32, MINISHIFT_HYPERVISOR, CDK32_MINISHIFT, MINISHIFT_PROFILE); 
+		DOCKER_DAEMON_CONNECTION = serverRequirement.getServerAdapter().getAdapterName();
 	}
 	
 	@Test
 	public void testCDK32ServerAdapter() {
+		serverRequirement.configureCDKServerAdapter(false);
 		// cdk start verification
-		startServerAdapter(() -> {}, false);
+		startServerAdapter(getCDKServer(), () -> {}, false);
 		// cdk inner rhel image was registered during starting of server adapter
-		verifyConsoleContainsRegEx("\\bRegistering.*subscription-manager\\b"); 
+		CDKTestUtils.verifyConsoleContainsRegEx("\\bRegistering.*subscription-manager\\b"); 
 		// commented out due to https://issues.jboss.org/browse/CDK-270
-		try {
-			verifyConsoleContainsRegEx("\\bRegistration in progress.*OK\\b"); 
-		} catch (AssertionError err) {
-			log.error(err.getLocalizedMessage() + " because of CDK-270");
-		}
+		CDKTestUtils.verifyConsoleContainsRegEx("\\bRegistration in progress.*OK\\b"); 
 		// OS3 and docker connection created verification
-		testOpenshiftConnection(null, OPENSHIFT_USERNAME);
-		testDockerConnection(DOCKER_DAEMON_CONNECTION);
+		CDKTestUtils.testOpenshiftConnection(null, OPENSHIFT_USERNAME);
+		CDKTestUtils.testDockerConnection(DOCKER_DAEMON_CONNECTION);
 		// cdk restart check
-		restartServerAdapter();
+		restartServerAdapter(getCDKServer());
 		// OS and docker connection should be operational after restart
-		testOpenshiftConnection(null, OPENSHIFT_USERNAME);
-		testDockerConnection(DOCKER_DAEMON_CONNECTION);
+		CDKTestUtils.testOpenshiftConnection(null, OPENSHIFT_USERNAME);
+		CDKTestUtils.testDockerConnection(DOCKER_DAEMON_CONNECTION);
 		// cdk stop verification
-		stopServerAdapter();
+		stopServerAdapter(getCDKServer());
 		// verify unregistering of machine
-		verifyConsoleContainsRegEx("\\bUnregistering machine\\b"); 
+		CDKTestUtils.verifyConsoleContainsRegEx("\\bUnregistering machine\\b"); 
 	}
+
 }

@@ -11,6 +11,7 @@
 package org.jboss.tools.cdk.reddeer.core.enums;
 
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKServerAdapterType;
 
 /**
  * Enum holding information for CDK/Minshift container runtimes
@@ -19,36 +20,36 @@ import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
  */
 public enum CDKVersion {
 	
-	CDK2X 	("CDK", "2.x", CDKLabel.Server.CDK_SERVER_NAME, ""),
-	CDK300 	("CDK", "3.0.0", CDKLabel.Server.CDK3_SERVER_NAME, "cdk-3.0-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64" + CDKRuntimeOS.get().getSuffix()),
-	CDK310 	("CDK", "3.1.0", CDKLabel.Server.CDK3_SERVER_NAME, "cdk-3.1.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64" + CDKRuntimeOS.get().getSuffix()),
-	CDK311 	("CDK", "3.1.1", CDKLabel.Server.CDK3_SERVER_NAME, "cdk-3.1.1-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64" + CDKRuntimeOS.get().getSuffix()),
-	CDK320 	("CDK", "3.2.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.2.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64" + CDKRuntimeOS.get().getSuffix()),
-	CDK330 	("CDK", "3.3.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.3.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64" + CDKRuntimeOS.get().getSuffix()),
-	CDK340 	("CDK", "3.4.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.4.0-2-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64" + CDKRuntimeOS.get().getSuffix()),
-	CDK350 	("CDK", "3.5.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.5.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64" + CDKRuntimeOS.get().getSuffix()),
-	MINISHIFT1140 ("Minishift", "1.14.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.14.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
-	MINISHIFT1151 ("Minishift", "1.15.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.15.1-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
-	MINISHIFT1161 ("Minishift", "1.16.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.16.1-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
-	MINISHIFT1170 ("Minishift", "1.17.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.17.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
-	MINISHIFT1180 ("Minishift", "1.18.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.18.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
-	MINISHIFT1190 ("Minishift", "1.19.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.19.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
-	MINISHIFT1200 ("Minishift", "1.20.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.20.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
-	MINISHIFT1210 ("Minishift", "1.21.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.21.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64");
+	CDK2X 	(CDKServerAdapterType.CDK2, "2.x", CDKLabel.Server.CDK_SERVER_NAME, ""),
+	CDK300 	(CDKServerAdapterType.CDK3, "3.0.0", CDKLabel.Server.CDK3_SERVER_NAME, "cdk-3.0-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
+	CDK310 	(CDKServerAdapterType.CDK3, "3.1.0", CDKLabel.Server.CDK3_SERVER_NAME, "cdk-3.1.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
+	CDK311 	(CDKServerAdapterType.CDK3, "3.1.1", CDKLabel.Server.CDK3_SERVER_NAME, "cdk-3.1.1-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
+	CDK320 	(CDKServerAdapterType.CDK32, "3.2.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.2.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
+	CDK330 	(CDKServerAdapterType.CDK32, "3.3.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.3.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
+	CDK340 	(CDKServerAdapterType.CDK32, "3.4.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.4.0-2-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
+	CDK350 	(CDKServerAdapterType.CDK32, "3.5.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.5.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
+	MINISHIFT1140 (CDKServerAdapterType.MINISHIFT17, "1.14.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.14.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
+	MINISHIFT1151 (CDKServerAdapterType.MINISHIFT17, "1.15.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.15.1-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
+	MINISHIFT1161 (CDKServerAdapterType.MINISHIFT17, "1.16.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.16.1-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
+	MINISHIFT1170 (CDKServerAdapterType.MINISHIFT17, "1.17.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.17.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
+	MINISHIFT1180 (CDKServerAdapterType.MINISHIFT17, "1.18.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.18.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
+	MINISHIFT1190 (CDKServerAdapterType.MINISHIFT17, "1.19.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.19.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
+	MINISHIFT1200 (CDKServerAdapterType.MINISHIFT17, "1.20.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.20.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
+	MINISHIFT1210 (CDKServerAdapterType.MINISHIFT17, "1.21.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.21.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch());
 	
-	private final String type;
+	private final CDKServerAdapterType type;
 	private final String version;
 	private final String serverName;
 	private final String downloadName;
 	
-	CDKVersion(String type, String version, String serverName, String downloadName) {
+	CDKVersion(CDKServerAdapterType type, String version, String serverName, String downloadName) {
 		this.type = type;
 		this.version = version;
 		this.serverName = serverName;
 		this.downloadName = downloadName;
 	}
 	
-	public String type() { 
+	public CDKServerAdapterType type() { 
 		return this.type; 
 	}
 	
@@ -65,7 +66,11 @@ public enum CDKVersion {
 	}
 	
 	public String getTypeAndVersion() {
-		return this.type + " v" + this.version;
+		return this.type.serverTypeName() + " v" + this.version;
+	}
+	
+	private static String getArch() {
+		return CDKLabel.Others.FILE_ARCH;
 	}
 	
 }

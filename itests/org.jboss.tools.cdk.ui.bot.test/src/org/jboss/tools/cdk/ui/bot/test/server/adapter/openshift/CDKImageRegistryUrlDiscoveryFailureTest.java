@@ -15,10 +15,16 @@ import static org.junit.Assert.fail;
 
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
+import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
+import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.junit.BeforeClass;
@@ -31,16 +37,35 @@ import org.junit.runner.RunWith;
  *
  */
 @RunWith(RedDeerSuite.class)
+@RemoveCDKServers
+@ContainerRuntimeServer(
+		version = CDKVersion.CDK350,
+		useExistingBinary=true,
+		makeRuntimePersistent=true,
+		usernameProperty="developers.username",
+		passwordProperty="developers.password")
 public class CDKImageRegistryUrlDiscoveryFailureTest extends CDKImageRegistryUrlAbstractTest {
 
+	@InjectRequirement
+	private static ContainerRuntimeServerRequirement serverRequirement;
+	
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_32;
+		return serverRequirement.getServerAdapter().getAdapterName();
 	}
 	
 	@BeforeClass
 	public static void setupCDKImageRegistrUrlDiscovery() {
-		setupOCForWorkspace();
+		serverRequirement.configureCDKServerAdapter(false);
+		setupOCForWorkspace(DEFAULT_MINISHIFT_HOME);
+	}
+	
+	@Override
+	protected void startServerAdapter() {
+		serverRequirement.configureCDKServerAdapter(false);
+		serverRequirement.startServerAdapterIfNotRunning(() -> {
+			skipRegistrationViaFlag(getCDKServer(), true);
+		}, false);
 	}
 	
 	/**
@@ -50,8 +75,8 @@ public class CDKImageRegistryUrlDiscoveryFailureTest extends CDKImageRegistryUrl
 	public void testRegistryUrlNotFoundDialog() {
 		wizard.getImageRegistryUrl().setText(""); 
 		wizard.finish();
-		stopServerAdapter();
-		wizard = getOpenshiftConnectionWizard(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
+		serverRequirement.stopServerAdapter();
+		wizard = getOpenshiftConnectionWizard(CDKTestUtils.findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 		switchOffPasswordSaving(wizard);
 		try {
 			wizard.discover();

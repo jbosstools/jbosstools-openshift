@@ -115,7 +115,8 @@ public class CDKLabel {
 	}
 	
 	public static class Others {
-		public static final String CREDENTIALS_DOMAIN = "access.redhat.com"; 
+		public static final String CREDENTIALS_DOMAIN = "access.redhat.com";
+		public static final String FILE_ARCH = "-amd64";
 	}
 
 }

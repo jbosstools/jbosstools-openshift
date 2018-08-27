@@ -18,10 +18,17 @@ import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
+import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
+import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
@@ -36,6 +43,13 @@ import org.junit.runner.RunWith;
  *
  */
 @CleanOpenShiftExplorer
+@RemoveCDKServers
+@ContainerRuntimeServer(
+		version = CDKVersion.CDK350,
+		usernameProperty="developers.username",
+		passwordProperty="developers.password",
+		useExistingBinary=true,
+		makeRuntimePersistent=true)
 @RunWith(RedDeerSuite.class)
 public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest {
 
@@ -45,13 +59,16 @@ public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest
 	
 	private DockerExplorerView dockerView;
 	
-	private static final String DOCKER_DAEMON_CONNECTION = SERVER_ADAPTER_32;
+	private static String DOCKER_DAEMON_CONNECTION;
 	
 	private static final Logger log = Logger.getLogger(CDK32ServerAdapterProfilesTest.class);
 	
+	@InjectRequirement
+	private static ContainerRuntimeServerRequirement serverRequirement;
+	
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_32;
+		return serverRequirement.getServerAdapter().getAdapterName();
 	}
 	
 	protected static String getSecondServerAdapter() {
@@ -68,9 +85,10 @@ public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest
 	
 	@BeforeClass
 	public static void setupServerAdapterWithMultipleProfile() {
-		checkCDK32Parameters();
-		addNewCDK32Server(SERVER_ADAPTER_32, MINISHIFT_HYPERVISOR, CDK32_MINISHIFT, MINISHIFT_PROFILE);
-		addNewCDK32Server(getSecondServerAdapter(), MINISHIFT_HYPERVISOR, CDK32_MINISHIFT, MINISHIFT_PROFILE2);
+		CDKUtils.addNewCDK32Server(getSecondServerAdapter(), MINISHIFT_HYPERVISOR, 
+				serverRequirement.getServerAdapter().getMinishiftBinary().toAbsolutePath().toString(), 
+				MINISHIFT_PROFILE2, USERNAME, PASSWORD);
+		DOCKER_DAEMON_CONNECTION = serverRequirement.getServerAdapter().getAdapterName();
 	}
 	
 	@Before
@@ -88,7 +106,8 @@ public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest
 	@Test
 	public void testCDK32ServerAdapterWithMultipleProfiles() {
 		// fisrt adapter start verification
-		startServerAdapter(() -> { skipRegistrationViaFlag(getCDKServer(), true);}, false);
+		serverRequirement.configureCDKServerAdapter(false);
+		startServerAdapter(getCDKServer(), () -> { skipRegistrationViaFlag(getCDKServer(), true);}, false);
 		new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
 		new WaitWhile(new JobIsRunning(), TimePeriod.SHORT, false);
 		int conCount = view.getOpenShift3Connections().size();
@@ -108,13 +127,13 @@ public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest
 		assertEquals("Expected different number of Docker connections.", 2, docCount);
 		// check functionality of connections
 		for (String docker : getDockerConnectionCreatedByCDK(dockerView, DOCKER_DAEMON_CONNECTION)) {
-			testDockerConnection(docker);
+			CDKTestUtils.testDockerConnection(docker);
 		}
 		for (OpenShift3Connection conn : view.getOpenShift3Connections()) {
-			testOpenshiftConnection(conn);
+			CDKTestUtils.testOpenshiftConnection(conn);
 		}
 		// adapters stopping verification
-		stopServerAdapter();
+		stopServerAdapter(getCDKServer());
 		stopServerAdapter(getSecondCDKServer());
 	}
 	

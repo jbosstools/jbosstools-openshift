@@ -20,13 +20,17 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK32ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.launch.configuration.CDKLaunchConfigurationDialog;
@@ -46,8 +50,20 @@ import org.junit.runner.RunWith;
  *
  */
 @RunWith(RedDeerSuite.class)
+@ContainerRuntimeServer(
+		version = CDKVersion.CDK350,
+		useExistingBinary=true,
+		makeRuntimePersistent=true,
+		usernameProperty="developers.username",
+		passwordProperty="developers.password",
+		createServerAdapter=false)
 public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
-
+	
+	@InjectRequirement
+	private static ContainerRuntimeServerRequirement serverRequirement;
+	
+	private static String MINISHIFT_PATH;
+	
 	private String hypervisor = MINISHIFT_HYPERVISOR;
 	
 	private CDKLaunchConfigurationDialog launchDialog; 
@@ -58,7 +74,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 	public static void setUpEnvironment() {
 		log.info("Checking given program arguments"); 
 		checkDevelopersParameters();
-		checkCDK32Parameters();
+		MINISHIFT_PATH = serverRequirement.getServerAdapter().getMinishiftBinary().toAbsolutePath().toString();
 	}
 	
 	@Before
@@ -81,7 +97,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 	
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_32;
+		return serverRequirement.getServerAdapter().getAdapterName();
 	}
 
 	@Override
@@ -100,12 +116,12 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 		page.selectType(CDKLabel.Server.SERVER_TYPE_GROUP, CDKLabel.Server.CDK32_SERVER_NAME);
 		page.setName(getServerAdapter());
 		dialog.next();
-		NewCDK32ServerWizardPage containerPage = new NewCDK32ServerWizardPage();
+		NewCDK32ServerWizardPage containerPage = new NewCDK32ServerWizardPage(dialog);
 		containerPage.setCredentials(USERNAME, PASSWORD);
 		log.info("Setting hypervisor to: " + hypervisor);
 		containerPage.setHypervisor(hypervisor);
-		log.info("Setting binary to " + CDK32_MINISHIFT);
-		containerPage.setMinishiftBinary(CDK32_MINISHIFT);
+		log.info("Setting binary to " + MINISHIFT_PATH);
+		containerPage.setMinishiftBinary(MINISHIFT_PATH);
 		// here comes possibility to set profile while creating server adapter
 		log.info("Setting profile to: ");
 		containerPage.setMinishiftProfile("");
@@ -115,7 +131,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 	@Test
 	public void testLaunchConfiguration() {
 		assertEquals(getServerAdapter(), launchDialog.getName());
-		assertEquals(CDK32_MINISHIFT, launchDialog.getLocation());
+		assertEquals(MINISHIFT_PATH, launchDialog.getLocation());
 		assertTrue("Launch config arguments do not contains minishift profile" ,launchDialog.getArguments().getText().contains("--profile minishift"));
 		assertTrue("Launch config arguments do not contains " + hypervisor,launchDialog.getArguments().getText().contains(hypervisor));
 		assertEquals("Launh config env. variable does not have proper MINISHIFT_HOME", DEFAULT_MINISHIFT_HOME, launchDialog.getValueOfEnvVar("MINISHIFT_HOME"));

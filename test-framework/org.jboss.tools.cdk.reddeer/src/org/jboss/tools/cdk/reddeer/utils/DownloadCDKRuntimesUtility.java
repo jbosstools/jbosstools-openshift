@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.cdk.ui.bot.test.utils;
+package org.jboss.tools.cdk.reddeer.utils;
 
 import org.eclipse.reddeer.common.condition.WaitCondition;
 import org.eclipse.reddeer.common.logging.Logger;
@@ -21,6 +21,7 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.jboss.tools.cdk.reddeer.core.condition.ProgressBarIsRunning;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.download.DownloadCDKRuntimesWizard;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.runtime.reddeer.wizard.TaskWizardFirstPage;
 import org.jboss.tools.runtime.reddeer.wizard.TaskWizardLoginPage;
 import org.jboss.tools.runtime.reddeer.wizard.TaskWizardSecondPage;
@@ -102,8 +103,18 @@ public class DownloadCDKRuntimesUtility {
 		log.info("Setting up download and install folder");
 		if (!this.useDefaults) {
 			TaskWizardThirdPage downloadPage = new TaskWizardThirdPage(downloadWizard);
-			downloadPage.setInstallFolder(this.installFolder);
-			downloadPage.setDownloadFolder(this.downloadFolder);
+			if (StringUtils.isEmptyOrNull(installFolder)) {
+				installFolder = new LabeledText(downloadWizard, "Install folder:").getText();
+			}
+			else {
+				downloadPage.setInstallFolder(this.installFolder);
+			}
+			if (StringUtils.isEmptyOrNull(downloadFolder)) {
+				downloadFolder = new LabeledText(downloadWizard, "Download folder:").getText();
+			}
+			else {
+				downloadPage.setDownloadFolder(this.downloadFolder);
+			}
 			downloadPage.setDeleteArchive(this.removeArtifacts);
 		} else {
 			log.info("Using default values");

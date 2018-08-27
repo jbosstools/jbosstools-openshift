@@ -11,8 +11,14 @@
 package org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift;
 
 import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
+import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
 import org.jboss.tools.cdk.reddeer.server.exception.JBIDE25120AssertionError;
+import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.jboss.tools.openshift.reddeer.enums.AuthenticationMethod;
 import org.jboss.tools.openshift.reddeer.wizard.v3.BasicAuthenticationSection;
 import org.jboss.tools.openshift.reddeer.wizard.v3.OpenShift3ConnectionWizard;
@@ -27,18 +33,37 @@ import org.junit.runner.RunWith;
  *
  */
 @RunWith(RedDeerSuite.class)
+@RemoveCDKServers
+@ContainerRuntimeServer(
+		version = CDKVersion.CDK350,
+		useExistingBinary=true,
+		makeRuntimePersistent=true,
+		usernameProperty="developers.username",
+		passwordProperty="developers.password")
 public class CDKImageRegistryUrlDiscoveryTest extends CDKImageRegistryUrlAbstractTest {
 
 	private static final Logger log = Logger.getLogger(CDKImageRegistryUrlDiscoveryTest.class);
 
+	@InjectRequirement
+	private static ContainerRuntimeServerRequirement serverRequirement;
+	
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_32;
+		return serverRequirement.getServerAdapter().getAdapterName();
 	}
 	
 	@BeforeClass
 	public static void setupCDKImageRegistrUrlDiscovery() {
-		setupOCForWorkspace();
+		serverRequirement.configureCDKServerAdapter(false);
+		setupOCForWorkspace(DEFAULT_MINISHIFT_HOME);
+	}
+	
+	@Override
+	protected void startServerAdapter() {
+		serverRequirement.configureCDKServerAdapter(false);
+		startServerAdapterIfNotRunning(getCDKServer(), () -> {
+			skipRegistrationViaFlag(getCDKServer(), true);
+		}, false);
 	}
 	
 	/**
@@ -66,11 +91,11 @@ public class CDKImageRegistryUrlDiscoveryTest extends CDKImageRegistryUrlAbstrac
 		// save empty value
 		wizard.finish();
 		// stop server
-		stopServerAdapter();
+		stopServerAdapter(getCDKServer());
 		// start server adapter -> should bring up the value of registry url in existing
 		// connection
-		startServerAdapter(() -> skipRegistrationViaFlag(getCDKServer(), true), false);
-		wizard = getOpenshiftConnectionWizard(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
+		startServerAdapter(getCDKServer(), () -> skipRegistrationViaFlag(getCDKServer(), true), false);
+		wizard = getOpenshiftConnectionWizard(CDKTestUtils.findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 		switchOffPasswordSaving(wizard);
 		checkImageRegistryUrl(wizard, OPENSHIFT_REGISTRY);
 		wizard.finish();
@@ -100,14 +125,14 @@ public class CDKImageRegistryUrlDiscoveryTest extends CDKImageRegistryUrlAbstrac
 		newWizard.finish();
 		newWizard = null;
 		// stop and start server adapter
-		stopServerAdapter();
-		startServerAdapter(() -> skipRegistrationViaFlag(getCDKServer(), true), false);
+		stopServerAdapter(getCDKServer());
+		startServerAdapter(getCDKServer(), () -> skipRegistrationViaFlag(getCDKServer(), true), false);
 		// check that both connections have filled image registry url
 		try {
-			wizard = getOpenshiftConnectionWizard(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
+			wizard = getOpenshiftConnectionWizard(CDKTestUtils.findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 			checkImageRegistryUrl(wizard, getMinishiftOpenshiftRegistry());
 			wizard.cancel();
-			newWizard = getOpenshiftConnectionWizard(findOpenShiftConnection(null, OPENSHIFT_ADMIN));
+			newWizard = getOpenshiftConnectionWizard(CDKTestUtils.findOpenShiftConnection(null, OPENSHIFT_ADMIN));
 			newWizard.openAdvancedSection();
 			checkImageRegistryUrl(newWizard, getMinishiftOpenshiftRegistry());
 			newWizard.cancel();

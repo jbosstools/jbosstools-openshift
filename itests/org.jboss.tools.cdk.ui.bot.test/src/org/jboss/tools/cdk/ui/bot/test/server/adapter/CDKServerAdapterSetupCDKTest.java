@@ -30,24 +30,28 @@ import org.eclipse.reddeer.eclipse.condition.ConsoleHasNoChange;
 import org.eclipse.reddeer.eclipse.ui.console.ConsoleView;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewEnums.ServerState;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.eclipse.reddeer.swt.api.Button;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.CancelButton;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
+import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK32ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDKPart;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.Minishift17ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.MinishiftServerEditor;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
-import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,10 +62,19 @@ import org.junit.runner.RunWith;
  * @author odockal
  *
  */
-@CleanOpenShiftExplorer
 @RunWith(RedDeerSuite.class)
+@RemoveCDKServers
+@ContainerRuntimeServer(
+		version = CDKVersion.CDK350,
+		useExistingBinary=true,
+		makeRuntimePersistent=true,
+		usernameProperty="developers.username",
+		passwordProperty="developers.password")
 public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 
+	@InjectRequirement
+	private ContainerRuntimeServerRequirement serverRequirement;
+	
 	private static final Logger log = Logger.getLogger(CDKServerAdapterSetupCDKTest.class);
 	
 	protected MinishiftServerEditor editor;
@@ -90,7 +103,7 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 	
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_32;
+		return serverRequirement.getServerAdapter().getAdapterName();
 	}
 	
 	protected String getMinishiftServerAdapter() {
@@ -103,10 +116,7 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 	
 	@BeforeClass
 	public static void setupCDKServerAdapterSetupCDKTest() {
-		checkDevelopersParameters();
-		checkCDK32Parameters();
-		addNewCDK32Server(SERVER_ADAPTER_32, MINISHIFT_HYPERVISOR, CDK32_MINISHIFT, MINISHIFT_PROFILE);
-		addNewMinishiftServer(SERVER_ADAPTER_MINISHIFT, MINISHIFT_HYPERVISOR, MOCK_MINISHIFT170, MINISHIFT_PROFILE);
+		CDKUtils.addNewMinishiftServer(SERVER_ADAPTER_MINISHIFT, MINISHIFT_HYPERVISOR, MOCK_MINISHIFT170, MINISHIFT_PROFILE);
 	}
 	
 	public void setCDKServerAdapterSetupCDK() {
@@ -134,9 +144,9 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 	public void tearDownCDKServerAdapterSetupCDK() {
 		cleanUp();
 		clearConsole();
-		CDKTestUtils.deleteFilesIfExist(NON_EXISTING_DIR);
-		CDKTestUtils.deleteFilesIfExist(EXISTING_DIR);
-		CDKTestUtils.deleteFilesIfExist(MINISHIFT_HOME_DIR);
+		CDKUtils.deleteFilesIfExist(NON_EXISTING_DIR);
+		CDKUtils.deleteFilesIfExist(EXISTING_DIR);
+		CDKUtils.deleteFilesIfExist(MINISHIFT_HOME_DIR);
 	}
 	
 	@Test
@@ -148,7 +158,8 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 		checkConsoleOutput(MINISHIFT_HOME_DIR.getName());
 		clearConsole();
 		((CDKServer) getCDKServer()).setupCDK();
-		confirmOverwritingOfSetupCDK(MINISHIFT_HOME_DIR.getName(), CDKLabel.Shell.WARNING_FOLDER_EXISTS);
+		CDKUtils.confirmOverwritingOfSetupCDK(CDKLabel.Shell.WARNING_FOLDER_EXISTS);
+		checkConsoleOutput(MINISHIFT_HOME_DIR.getName());
 		verifySetupCDKCreatedFiles(MINISHIFT_HOME_DIR);
 	}
 
@@ -160,7 +171,7 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 		ShellIsAvailable wait = new ShellIsAvailable(CDKLabel.Shell.WARNING_FOLDER_EXISTS);
 		new WaitUntil(wait, TimePeriod.MEDIUM, false);
 		if ( wait.getResult() != null) {
-			handleWarningDialog(CDKLabel.Shell.WARNING_FOLDER_EXISTS, CancelButton.class);
+			CDKUtils.handleWarningDialog(CDKLabel.Shell.WARNING_FOLDER_EXISTS, CancelButton.class);
 			fail("Dialog " + CDKLabel.Shell.WARNING_FOLDER_EXISTS + " should have not appeared");
 		}
 		new WaitUntil(new ConsoleHasNoChange(TimePeriod.MEDIUM), TimePeriod.DEFAULT);
@@ -177,7 +188,7 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 		}
 		changeMinishiftHomeTo(EXISTING_DIR.getAbsolutePath());
 		((CDKServer) getCDKServer()).setupCDK();
-		confirmOverwritingOfSetupCDK(EXISTING_DIR.getName(), CDKLabel.Shell.WARNING_FOLDER_EXISTS);
+		CDKUtils.confirmOverwritingOfSetupCDK(CDKLabel.Shell.WARNING_FOLDER_EXISTS);
 		checkConsoleOutput(EXISTING_DIR.getName());
 		verifySetupCDKCreatedFiles(EXISTING_DIR);
 	}
@@ -189,8 +200,8 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 		try {
 			((CDKServer) getCDKServer()).select();
 			new ContextMenuItem("Start").select();
-			handleWarningDialog(CDKLabel.Shell.WARNING_CDK_NOT_INICIALIZED, CancelButton.class);
-			handleWarningDialog(CDKLabel.Shell.PROBLEM_DIALOG, OkButton.class);
+			CDKUtils.handleWarningDialog(CDKLabel.Shell.WARNING_CDK_NOT_INICIALIZED, CancelButton.class);
+			CDKUtils.handleWarningDialog(CDKLabel.Shell.PROBLEM_DIALOG, OkButton.class);
 			new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
 			new WaitWhile(new JobIsRunning(), TimePeriod.MEDIUM, false);
 			assertEquals(ServerState.STOPPED, getCDKServer().getLabel().getState());
@@ -215,7 +226,7 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 			ShellIsAvailable dialog = new ShellIsAvailable(CDKLabel.Shell.PROBLEM_DIALOG);
 			new WaitUntil(dialog, false);
 			if (dialog.getResult() != null) {
-				handleWarningDialog(CDKLabel.Shell.PROBLEM_DIALOG, OkButton.class);
+				CDKUtils.handleWarningDialog(CDKLabel.Shell.PROBLEM_DIALOG, OkButton.class);
 			}
 			new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
 			new WaitWhile(new JobIsRunning(), TimePeriod.MEDIUM, false);
@@ -224,35 +235,11 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 			fail("Could not call Start context menu item over server adapter");
 		}
 	}
-	
-	private void confirmOverwritingOfSetupCDK(String filePath, String shellName) {
-		SystemJobIsRunning runningJob = new SystemJobIsRunning(new JobMatcher("Setup CDK"));
-		log.info("Confirming overwriting of minishift home content at " + filePath);
-		handleWarningDialog(shellName, OkButton.class);
-		new WaitUntil(runningJob, TimePeriod.MEDIUM);
-		new WaitWhile(runningJob, TimePeriod.getCustom(30));
-		new WaitUntil(new ConsoleHasNoChange(TimePeriod.MEDIUM), TimePeriod.DEFAULT);
-		checkConsoleOutput(filePath);
-	}
 
 	private void checkConsoleOutput(String filePath) {
-		verifyConsoleContainsRegEx("\\bSetting up CDK 3 on host\\b");
-		verifyConsoleContainsRegEx("\\b" + filePath + "\\b");
-		verifyConsoleContainsRegEx("\\bCDK 3 setup complete\\b");		
-	}
-	
-	private void handleWarningDialog(String shellName, Class<? extends Button> button) {
-		ShellIsAvailable dialog = new ShellIsAvailable(shellName);
-		new WaitUntil(dialog);
-		Button but;
-		try {
-			but = button.newInstance();
-			but.click();
-			new WaitWhile(dialog, TimePeriod.MEDIUM);
-		} catch (InstantiationException | IllegalAccessException e) {
-			log.error("Could not instantiate button of class " + button.getName());
-			e.printStackTrace();
-		}	
+		CDKTestUtils.verifyConsoleContainsRegEx("\\bSetting up CDK 3 on host\\b");
+		CDKTestUtils.verifyConsoleContainsRegEx("\\b" + filePath + "\\b");
+		CDKTestUtils.verifyConsoleContainsRegEx("\\bCDK 3 setup complete\\b");		
 	}
 	
 	private void clearConsole() {

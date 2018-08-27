@@ -56,6 +56,7 @@ import org.junit.runners.Suite;
 	MinishiftServerEditorTest.class,
 	CDKLaunchConfigurationTest.class,
 	
+	
 	// Setup CDK context menu item tests
 	CDKServerAdapterSetupCDKTest.class,
 		

@@ -18,11 +18,15 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
+import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK32ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CredentialsPart;
@@ -38,15 +42,27 @@ import org.junit.runner.RunWith;
  *
  */
 @RunWith(RedDeerSuite.class)
+@ContainerRuntimeServer(
+		version = CDKVersion.CDK350,
+		useExistingBinary=true,
+		makeRuntimePersistent=true,
+		usernameProperty="developers.username",
+		passwordProperty="developers.password",
+		createServerAdapter=false)
 public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 
 	private String hypervisor = MINISHIFT_HYPERVISOR;
 	
 	private static final Logger log = Logger.getLogger(CDK32ServerEditorTest.class);
 
+	@InjectRequirement
+	private static ContainerRuntimeServerRequirement serverRequirement;
+	
+	private static String MINISHIFT_PATH;
+	
 	@BeforeClass
-	public static void setUpEnvironment() {
-		checkCDK32Parameters();
+	public static void setupCDK32ServerEditorTest() {
+		MINISHIFT_PATH = serverRequirement.getServerAdapter().getMinishiftBinary().toAbsolutePath().toString();;
 	}
 	
 	@Before
@@ -60,12 +76,12 @@ public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 		page.selectType(CDKLabel.Server.SERVER_TYPE_GROUP, CDKLabel.Server.CDK32_SERVER_NAME);
 		page.setName(getServerAdapter());
 		dialog.next();
-		NewCDK32ServerWizardPage containerPage = new NewCDK32ServerWizardPage();
+		NewCDK32ServerWizardPage containerPage = new NewCDK32ServerWizardPage(dialog);
 		containerPage.setCredentials(USERNAME, PASSWORD);
 		log.info("Setting hypervisor to: " + hypervisor);
 		containerPage.setHypervisor(hypervisor);
-		log.info("Setting binary to " + CDK32_MINISHIFT);
-		containerPage.setMinishiftBinary(CDK32_MINISHIFT);
+		log.info("Setting binary to " + MINISHIFT_PATH);
+		containerPage.setMinishiftBinary(MINISHIFT_PATH);
 		// here comes possibility to set profile while creating server adapter
 		log.info("Setting profile to: ");
 		containerPage.setMinishiftProfile(MINISHIFT_PROFILE);
@@ -74,7 +90,7 @@ public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 	
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_32; 
+		return serverRequirement.getServerAdapter().getAdapterName(); 
 	}
 
 	public void setServerEditor() {
@@ -98,7 +114,7 @@ public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 		assertTrue(
 				((CDK32ServerEditor) editor).getHypervisorCombo().getSelection().equalsIgnoreCase(MINISHIFT_HYPERVISOR));
 		assertTrue(editor.getServernameLabel().getText().equals(getServerAdapter()));
-		assertTrue(((CDK32ServerEditor) editor).getMinishiftBinaryLabel().getText().equals(CDK32_MINISHIFT));
+		assertTrue(((CDK32ServerEditor) editor).getMinishiftBinaryLabel().getText().equals(MINISHIFT_PATH));
 		assertTrue(((CDK32ServerEditor) editor).getMinishiftHomeLabel().getText().contains(".minishift"));
 		assertTrue(((CDK32ServerEditor) editor).getMinishiftProfile().getText().equals(MINISHIFT_PROFILE));
 	}
@@ -123,7 +139,7 @@ public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 		checkEditorStateAfterSave(NON_EXISTING_PATH, false);
 		checkEditorStateAfterSave(EXECUTABLE_FILE, false);
 		checkEditorStateAfterSave(MOCK_CDK311, false);
-		checkEditorStateAfterSave(CDK32_MINISHIFT, true);
+		checkEditorStateAfterSave(MINISHIFT_PATH, true);
 	}
 	
 }
