@@ -190,7 +190,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 //		assertTrue("Defined resource button should be enabled",
 //				new PushButton(OpenShiftLabel.Button.DEFINED_RESOURCES).isEnabled());
 
-		completeApplicationCreationAndVerify(helloworldProject, 1);
+		completeApplicationCreationAndVerify(helloworldProject, 2);
 	}
 
 	@Test

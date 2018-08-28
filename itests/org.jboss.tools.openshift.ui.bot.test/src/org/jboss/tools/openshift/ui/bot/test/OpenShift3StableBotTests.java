@@ -20,16 +20,18 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.CreateResou
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.DeleteResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourceLimitsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourcesTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.HandleCustomTemplateTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.ImportApplicationTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.InteligentDeleteResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.LogsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.OSExplorerResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.PortForwardingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.TriggerBuildTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.BuilderImageApplicationWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.LabelsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.NewApplicationWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.TemplateParametersTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.create.CreateApplicationFromTemplateTest;
-import org.jboss.tools.openshift.ui.bot.test.application.v3.create.CreateApplicationOnBuilderImageTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.create.DeploymentTest;
 import org.jboss.tools.openshift.ui.bot.test.common.OCBinaryLocationTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionPropertiesTest;
@@ -90,6 +92,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	NewApplicationWizardHandlingTest.class,
 	TemplateParametersTest.class,
 	LabelsTest.class,
+	BuilderImageApplicationWizardHandlingTest.class,
 	
 	// Creation of a new application
 	CreateApplicationFromTemplateTest.class,
@@ -99,16 +102,17 @@ import org.junit.runners.Suite.SuiteClasses;
 	// Application handling
 	LogsTest.class,
 	PortForwardingTest.class,
+	HandleCustomTemplateTest.class,
 	ImportApplicationWizardTest.class,
 	ImportApplicationWizardGitTest.class,
 	CreateResourcesTest.class,
 	EditResourcesTest.class,
+	ImportApplicationTest.class,
 	
 	// Server adapter
 	ServerAdapterWizardHandlingTest.class,
 	CreateServerAdapterTest.class,
 	PublishChangesTest.class,
-	
 })
 public class OpenShift3StableBotTests extends AbstractBotTests {
 
