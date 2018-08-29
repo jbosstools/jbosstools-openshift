@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.core.server;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.eclipse.core.resources.IProject;
@@ -70,11 +71,25 @@ public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 	 * Cache is not cleaned properly and we get an incorrect name of the module for deployment
 	 * https://issues.jboss.org/browse/JBIDE-22138#comment-13617731
 	 */
-	@SuppressWarnings("restriction")
 	private void clearJSTcache(IProject project) throws Exception {
-        Method clearCacheMethod = J2EEDeployableFactory.class.getDeclaredMethod("clearCache", IProject.class);
+        invokeClearCache(project);
+        invokeCleanAllDelegates();
+	}
+
+	@SuppressWarnings("restriction")
+	private void invokeClearCache(IProject project)
+			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		Method clearCacheMethod = J2EEDeployableFactory.class.getDeclaredMethod("clearCache", IProject.class);
         clearCacheMethod.setAccessible(true);
         clearCacheMethod.invoke(JEEDeployableFactory.jeeInstance(), project);
+	}
+
+	@SuppressWarnings("restriction")
+	private void invokeCleanAllDelegates()
+			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		Method cleanAllDelegatesMethod = J2EEDeployableFactory.class.getDeclaredMethod("cleanAllDelegates");
+        cleanAllDelegatesMethod.setAccessible(true);
+        cleanAllDelegatesMethod.invoke(JEEDeployableFactory.jeeInstance());
 	}
 
 	public boolean isRestarting() {
@@ -99,5 +114,4 @@ public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 			OpenShiftCoreActivator.pluginLog().logError(ce);
 		}
 	}
-
 }
