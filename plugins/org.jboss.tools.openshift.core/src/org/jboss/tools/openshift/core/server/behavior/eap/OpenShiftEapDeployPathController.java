@@ -17,6 +17,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.util.ServerModelUtilities;
 import org.jboss.tools.as.core.internal.modules.ModuleDeploymentPrefsUtil;
 import org.jboss.tools.as.core.server.controllable.subsystems.internal.ModuleDeployPathController;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 
 public class OpenShiftEapDeployPathController extends ModuleDeployPathController implements ISubsystemController {
@@ -46,7 +47,7 @@ public class OpenShiftEapDeployPathController extends ModuleDeployPathController
 				prefix = ((IModule2) module).getProperty(IModule2.PROP_DEPLOY_NAME);
 			}
 			// Otherwise use the module name
-			if (prefix == null) {
+			if (StringUtils.isEmpty(prefix)) {
 			    prefix = module.getName();
 			}
 			return prefix;
