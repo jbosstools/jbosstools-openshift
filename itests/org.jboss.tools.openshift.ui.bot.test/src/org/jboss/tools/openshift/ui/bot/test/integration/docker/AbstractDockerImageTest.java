@@ -23,6 +23,7 @@ import org.eclipse.reddeer.common.matcher.RegexMatcher;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.ui.browser.BrowserEditor;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
@@ -35,6 +36,7 @@ import org.eclipse.reddeer.swt.impl.button.NextButton;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.core.StringContains;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
@@ -85,7 +87,7 @@ public class AbstractDockerImageTest extends AbstractTest {
 	 * Opens a Deploy Image to OpenShift wizard from context menu of a docker image
 	 */
 	protected void openDeployToOpenShiftWizardFromDockerExplorer(String imageName, String imageTag) {
-		dockerExplorer.getDockerConnectionByName(DOCKER_CONNECTION).getImage(imageName, imageTag).select();
+		dockerExplorer.getDockerConnectionByName(DOCKER_CONNECTION).getImage("docker.io/" + imageName, imageTag).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.DEPLOY_TO_OPENSHIFT).select();
 
 		new DefaultShell(OpenShiftLabel.Shell.DEPLOY_IMAGE_TO_OPENSHIFT);
@@ -147,17 +149,26 @@ public class AbstractDockerImageTest extends AbstractTest {
 		connection.createNewProject(projectName);
 		connection.refresh();
 	}
+	
+	protected void proceedThroughDeployImageToOpenShiftWizard() {
+		proceedThroughDeployImageToOpenShiftWizard(null);
+	}
 
 	/**
 	 * Proceeds through the image if the first wizard page has correct details -
 	 * connection, project and image name.
 	 */
-	protected void proceedThroughDeployImageToOpenShiftWizard() {
+	protected void proceedThroughDeployImageToOpenShiftWizard(String imageName) {
 		new WaitUntil(new ControlIsEnabled(new NextButton()), TimePeriod.DEFAULT, false);
 
 		assertTrue("Next button should be enabled if all details are set correctly", new NextButton().isEnabled());
 
-		new NextButton().click();
+		if (imageName == null) {
+			new NextButton().click();
+		} else {
+			new LabeledText("Image Name: ").setText(imageName);
+			new NextButton().click();
+		}
 
 		new WaitUntil(new ControlIsEnabled(new BackButton()), TimePeriod.LONG);
 

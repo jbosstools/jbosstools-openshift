@@ -43,11 +43,11 @@ public class DeployVariousDockerImagesTest extends AbstractDockerImageTest {
 	private static OpenShiftConnectionRequirement openshiftConnectionRequirement;
 
 	private static final String PROJECT_NEXUS = "nexus" + System.currentTimeMillis();
-	private static final String NEXUS_DOCKER_IMAGE = "docker.io/sonatype/nexus";
+	private static final String NEXUS_DOCKER_IMAGE = "sonatype/nexus";
 	private static final String NEXUS_TAG = "2.14.8";
 
 	private static final String PROJECT_SPRING_HELLOWORLD = "springhelloworld" + System.currentTimeMillis();
-	private static final String SPRINGBOOT_DOCKER_IMAGE = "docker.io/saturnism/spring-boot-helloworld-ui";
+	private static final String SPRINGBOOT_DOCKER_IMAGE = "saturnism/spring-boot-helloworld-ui";
 	private static final String SPRINGBOOT_TAG = "latest";
 
 	@BeforeClass
@@ -96,7 +96,7 @@ public class DeployVariousDockerImagesTest extends AbstractDockerImageTest {
 		selectProject(PROJECT_SPRING_HELLOWORLD, openshiftConnectionRequirement);
 		openDeployToOpenShiftWizardFromDockerExplorer(SPRINGBOOT_DOCKER_IMAGE, SPRINGBOOT_TAG);
 
-		proceedThroughDeployImageToOpenShiftWizard();
+		proceedThroughDeployImageToOpenShiftWizard(SPRINGBOOT_DOCKER_IMAGE + ":" + SPRINGBOOT_TAG);
 
 		verifyDeployedDockerImageInBrowser(PROJECT_SPRING_HELLOWORLD, "spring-boot-helloworld-u", "message",
 				openshiftConnectionRequirement);

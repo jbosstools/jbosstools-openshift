@@ -5,10 +5,10 @@ Bundle-SymbolicName: org.jboss.tools.openshift.reddeer
 Bundle-Version: 3.5.2.qualifier
 Bundle-Activator: org.jboss.tools.openshift.reddeer.Activator
 Require-Bundle: 
- org.jboss.tools.openshift.ui;bundle-version="3.3.0",
+ org.jboss.tools.openshift.ui,
  org.jboss.tools.common.core;bundle-version="3.8.1",
  org.jboss.tools.common.reddeer;bundle-version="3.10.0",
- org.jboss.tools.openshift.common.core;bundle-version="3.3.0",
+ org.jboss.tools.openshift.common.core,
  org.apache.commons.lang;bundle-version="2.6.0",
  org.eclipse.reddeer.go;bundle-version="[2.0.0,3.0.0)",
  org.eclipse.ui,
@@ -18,8 +18,8 @@ Require-Bundle:
  org.junit;bundle-version="4.8.2",
  org.apache.commons.compress,
  org.apache.commons.lang;bundle-version="2.6.0",
- org.jboss.tools.openshift.core;bundle-version="3.3.0",
- org.jboss.tools.openshift.client;bundle-version="3.3.0"
+ org.jboss.tools.openshift.core,
+ org.jboss.tools.openshift.client
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: jar

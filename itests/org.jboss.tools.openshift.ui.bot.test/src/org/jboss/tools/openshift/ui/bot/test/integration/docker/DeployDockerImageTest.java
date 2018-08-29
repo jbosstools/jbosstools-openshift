@@ -62,7 +62,7 @@ public class DeployDockerImageTest extends AbstractDockerImageTest {
 	public static String PROJECT1 = "deployimagetesting1" + System.currentTimeMillis();
 	public static String PROJECT2 = "deployimagetesting2" + System.currentTimeMillis();
 
-	private static final String HELLO_OS_DOCKER_IMAGE = "docker.io/openshift/hello-openshift";
+	private static final String HELLO_OS_DOCKER_IMAGE = "openshift/hello-openshift";
 	private static final String TAG = "v1.2.1";
 
 	@BeforeClass
@@ -156,7 +156,7 @@ public class DeployDockerImageTest extends AbstractDockerImageTest {
 		selectProject(PROJECT1, openshiftConnectionRequirement);
 		openDeployToOpenShiftWizardFromDockerExplorer(HELLO_OS_DOCKER_IMAGE, TAG);
 
-		proceedThroughDeployImageToOpenShiftWizard();
+		proceedThroughDeployImageToOpenShiftWizard(HELLO_OS_DOCKER_IMAGE);
 
 		verifyDeployedDockerImageInBrowser(PROJECT1, "hello-openshift", "Hello OpenShift!", openshiftConnectionRequirement);
 	}
@@ -211,8 +211,7 @@ public class DeployDockerImageTest extends AbstractDockerImageTest {
 		assertTrue("Selected docker image should be used in wizard but it is not.",
 				new LabeledText(OpenShiftLabel.TextLabels.IMAGE_NAME).getText().contains(HELLO_OS_DOCKER_IMAGE));
 		assertTrue("Resource should be infered from image name but it is not",
-				new LabeledText(OpenShiftLabel.TextLabels.RESOURCE_NAME).getText()
-						.contains(HELLO_OS_DOCKER_IMAGE.split("/")[2]));
+				HELLO_OS_DOCKER_IMAGE.contains(new LabeledText(OpenShiftLabel.TextLabels.RESOURCE_NAME).getText()));
 	}
 	
 	

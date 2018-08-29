@@ -14,13 +14,16 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
+import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
@@ -46,20 +49,17 @@ import org.junit.runner.RunWith;
 
 /**
  * Test Class for resources being shown correctly in OS Explorer
+ * 
  * @author Pavol Srna
  *
  */
 @RunWith(RedDeerSuite.class)
-@OCBinary
+@OCBinary(setOCInPrefs = true)
 @RequiredBasicConnection
 @CleanConnection
 @RequiredProject
 @RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE)
 public class OSExplorerResourceTest extends AbstractTest {
-	
-	public static String GIT_FOLDER = "jboss-eap-quickstarts";
-	public static String PROJECT_NAME = "jboss-helloworld";
-	public static String BUILD_CONFIG = "eap-app";
 
 	@InjectRequirement
 	private CleanOpenShiftConnectionRequirement cleanReq;
@@ -71,7 +71,7 @@ public class OSExplorerResourceTest extends AbstractTest {
 	private OpenShiftServiceRequirement requiredService;
 	private OpenShift3Connection connection;
 	private OpenShiftProject project;
-	
+
 	@Before
 	public void setUp() {
 		TestUtils.setUpOcBinary();
@@ -81,35 +81,42 @@ public class OSExplorerResourceTest extends AbstractTest {
 		this.connection = explorer.getOpenShift3Connection(requiredConnection.getConnection());
 		this.project = connection.getProject(requiredProject.getProjectName());
 	}
-	
+
 	/**
-	 * Test if deployment config is visible in OS Explorer, when there is no service.
+	 * Test if deployment config is visible in OS Explorer, when there is no
+	 * service.
 	 */
-	@Test(expected=OpenshiftTestInFailureException.class)
-	public void testDeploymentConfigVisibleAfterServiceDeletion(){
+	@Test(expected = OpenshiftTestInFailureException.class)
+	public void testDeploymentConfigVisibleAfterServiceDeletion() {
+		deleteService(OpenShiftResources.EAP_SERVICE);
+		deleteService(OpenShiftResources.EAP_SERVICE_PING);
+		// assert services are deleted
+		List<OpenShiftResource> resources = this.project.getOpenShiftResources(Resource.SERVICE);
+		assertTrue("Service not deleted!", resources.isEmpty());
+		try {
+			this.project.getTreeItem().getItem("eap-app selector: deploymentConfig=eap-app");
+		} catch (CoreLayerException e) {
+			// TODO: do not throw after JBIDE-24217 is fixed
+			throw new OpenshiftTestInFailureException("JBIDE-24217");
+			// TODO: uncomment after JBIDE-24217 is fixed
+			// fail("Deployment config not visible!");
+		}
+	}
+
+	private void deleteService(String serviceName) {
 		this.project.expand();
-		Service service = this.project.getService(OpenShiftResources.EAP_SERVICE);
+		Service service = this.project.getService(serviceName);
 		assertTrue("Service does not exist!", service != null);
 		service.select();
 		new ContextMenuItem("Delete").select();
 		new DefaultShell("Delete OpenShift Resource");
 		new OkButton().click();
-		//assert service is deleted
-		List<OpenShiftResource> resources = this.project.getOpenShiftResources(Resource.SERVICE);
-		assertTrue("Service not deleted!", resources.isEmpty());
-		try{
-			this.project.getTreeItem().getItem("eap-app selector: deploymentConfig=eap-app");
-		}catch (CoreLayerException e) {
-			// TODO: do not throw after JBIDE-24217 is fixed
-			throw new OpenshiftTestInFailureException("JBIDE-24217");
-			// TODO: uncomment after JBIDE-24217 is fixed
-			//fail("Deployment config not visible!");
-		}
-			
+		new WaitWhile(new OpenShiftResourceExists(Resource.SERVICE, serviceName, ResourceState.UNSPECIFIED,
+				project.getName(), requiredConnection.getConnection()));
 	}
-	
+
 	@After
-	public void cleanup(){
+	public void cleanup() {
 		cleanReq.fulfill();
 	}
 }

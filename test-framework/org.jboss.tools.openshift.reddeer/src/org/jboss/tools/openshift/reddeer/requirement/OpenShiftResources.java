@@ -25,6 +25,7 @@ public class OpenShiftResources {
 	 */
 	public static final String EAP_TEMPLATE = "eap71-basic-s2i";
 	public static final String EAP_SERVICE = "eap-app";
+	public static final String EAP_SERVICE_PING = "eap-app-ping";
 	public static final String EAP_APP_REPLICATION_CONTROLLER = "eap-app-1";
 	public static final String EAP_APP_GIT_NAME = "jboss-eap-quickstarts";
 
