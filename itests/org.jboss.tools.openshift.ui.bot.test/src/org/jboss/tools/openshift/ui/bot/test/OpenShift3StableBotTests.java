@@ -17,6 +17,7 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ImportApplic
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.PublishChangesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapterWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.CreateResourcesTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.DeleteResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourceLimitsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourcesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.InteligentDeleteResourceTest;
@@ -29,6 +30,7 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.NewApplication
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.TemplateParametersTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.create.CreateApplicationFromTemplateTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.create.CreateApplicationOnBuilderImageTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.create.DeploymentTest;
 import org.jboss.tools.openshift.ui.bot.test.common.OCBinaryLocationTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionPropertiesTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionWizardHandlingTest;
@@ -74,6 +76,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	DeleteProjectTest.class,
 	ResourcesTest.class,
 	ProjectPropertiesTest.class,
+	DeleteResourceTest.class,
 	InteligentDeleteResourceTest.class,
 	OSExplorerResourceTest.class,
 	TriggerBuildTest.class, 
@@ -91,6 +94,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	// Creation of a new application
 	CreateApplicationFromTemplateTest.class,
 	CreateApplicationOnBuilderImageTest.class, 
+	DeploymentTest.class,
 	
 	// Application handling
 	LogsTest.class,

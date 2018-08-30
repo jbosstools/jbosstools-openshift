@@ -45,6 +45,7 @@ public class AmountOfResourcesExists extends AbstractWaitCondition {
 		if (project.getTreeItem().isDisposed()) {
 			project = explorer.getOpenShift3Connection(connection).getProject();
 		}
+		project.refresh();
 		
 		return project.getOpenShiftResources(resource).size() == amount;
 	}
