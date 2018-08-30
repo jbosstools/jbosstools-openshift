@@ -140,6 +140,7 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Jeff Maury
  */
 public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implements ICompletable {
+    
 	private static final int LINK_DEFAULT_WIDTH = 600;
 	private static final String REFRESH_LINK_TEXT = "refresh";
 	private static final int RESOURCE_PANEL_WIDTH = 800;

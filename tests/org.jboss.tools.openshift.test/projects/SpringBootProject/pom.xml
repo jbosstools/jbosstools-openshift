@@ -51,5 +51,13 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>other</id>
+		</profile>
+		<profile>
+			<id>openshift</id>
+		</profile>
+	</profiles>
 
 </project>
