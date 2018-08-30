@@ -44,11 +44,12 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @ContainerRuntimeServer(
 		version = CDKVersion.CDK350,
-		useExistingBinary=true,
+		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		usernameProperty="developers.username",
 		passwordProperty="developers.password",
-		createServerAdapter=false)
+		createServerAdapter=false,
+		useExistingBinaryInProperty="cdk32.minishift")
 public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 
 	private String hypervisor = MINISHIFT_HYPERVISOR;

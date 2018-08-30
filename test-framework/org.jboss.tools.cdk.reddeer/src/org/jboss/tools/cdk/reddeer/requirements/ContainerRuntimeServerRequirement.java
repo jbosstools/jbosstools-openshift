@@ -126,15 +126,36 @@ public class ContainerRuntimeServerRequirement implements Requirement<ContainerR
 		 */
 		boolean makeRuntimePersistent() default false;
 
+		/**
+		 * Decides if server adapter will be created during fulfill part of requirement.
+		 * @return true by default
+		 */
 		boolean createServerAdapter() default true;
 
-		boolean useExistingBinary() default false;
-
-		// TODO: maybe with setup-cdk? boolean deleteHomeFolder() default true;
-		// TODO: together with setup cdk option boolean forceOverride() default true;
+		/**
+		 * Decides if first try to use already downloaded and saved binary via config.properties file, if such exists.
+		 * @return true by default
+		 */
+		boolean useExistingBinaryFromConfig() default true;
+		
+		/**
+		 * Use user name defined in sys. env. property. Empty by default.
+		 */
 		String usernameProperty() default "";
 
+		/**
+		 * Use password defined in sys. env. property. Empty by default.
+		 */
 		String passwordProperty() default "";
+		
+		/**
+		 * Has priority over {@link #useExistingBinaryFromConfig()} 
+		 * and allows requirement to use binary downloaded outside the running application.
+		 * Cannot be used by persistent config. properties file nor can be deleted in cleanup, 
+		 * this implies that this option overrides {@link #makeRuntimePersistent()}.
+		 * @return empty string by default or string representation of sys. env. property.
+		 */
+		String useExistingBinaryInProperty() default "";
 	}
 
 	// Requirement required methods
@@ -152,9 +173,53 @@ public class ContainerRuntimeServerRequirement implements Requirement<ContainerR
 		}
 		// find out hypervisor to be used
 		adapter.setHypervisor(config.hypervisorProperty());
-		// decide whether to download new container runtime or use already existing
-		// binary
-		if (config.useExistingBinary() && Files.exists(PROPERTIES_FILE)) {
+		// test if user wants to pass already prepared binary via system env. property (allows to test nightly, etc.)
+		if (!isBinaryInProperty()) {
+			downloadContainerRuntime(wizardPage);
+		} else {
+			wizardPage.setMinishiftBinary(CDKUtils.getSystemProperty(config.useExistingBinaryInProperty()));
+		}
+		adapter.setMinishiftBinary(Paths.get(wizardPage.getMinishiftBinaryLabeledText().getText()));
+		adapter.setInstallationFolder(getServerAdapter().getMinishiftBinary().getParent());
+		// setup proper hypervisor
+		wizardPage.setHypervisor(getServerAdapter().getHypervisor());
+		// CDK 3.2+ and Minishift 1.7+ required fields
+		if (wizardPage instanceof NewCDK32ServerWizardPage) {
+			getServerAdapter()
+					.setMinishiftHome(Paths.get(((NewCDK32ServerWizardPage) wizardPage).getMinishiftHome().getText()));
+
+			if (!StringUtils.isEmptyOrNull(config.profile())) {
+				((NewCDK32ServerWizardPage) wizardPage).setMinishiftProfile(config.profile());
+			}
+			adapter.setProfile(((NewCDK32ServerWizardPage) wizardPage).getMinishiftProfile().getText());
+		} else if (wizardPage instanceof NewCDK3ServerWizardPage) {
+			// since CDK 3 does not have Home label in wizard, we have to use default value
+			// or open server editor
+			adapter.setMinishiftHome(MINISHIFT_HOME_DIRECTORY);
+		}
+		if (config.createServerAdapter()) {
+			dialog.finish();
+		} else {
+			dialog.cancel();
+		}
+	}
+	
+	private boolean isBinaryInProperty() {
+		if (!StringUtils.isEmptyOrNull(config.useExistingBinaryInProperty()) && 
+				CDKUtils.getSystemProperty(config.useExistingBinaryInProperty()) != null) {
+			return true;
+		} 
+		return false;
+	}
+
+	/**
+	 * 	Decide whether to download new container runtime or use already existing
+	 *  binary from config file - usually from previous downloading
+	 * @param wizardPage wizard dialog object
+	 */
+	private void downloadContainerRuntime(NewCDK3ServerWizardPage wizardPage) {
+
+		if (config.useExistingBinaryFromConfig() && Files.exists(PROPERTIES_FILE)) {
 			try {
 				Properties properties = CDKUtils.loadProperties(PROPERTIES_FILE);
 				Object binary = properties.get(adapter.getVersion().type().name());
@@ -171,29 +236,6 @@ public class ContainerRuntimeServerRequirement implements Requirement<ContainerR
 			}
 		} else {
 			processContainerDownload(adapter, wizardPage);
-		}
-		getServerAdapter().setMinishiftBinary(Paths.get(wizardPage.getMinishiftBinaryLabeledText().getText()));
-		getServerAdapter().setInstallationFolder(getServerAdapter().getMinishiftBinary().getParent());
-		// setup proper hypervisor
-		wizardPage.setHypervisor(getServerAdapter().getHypervisor());
-		// CDK 3.2+ and Minishift 1.7+ required fields
-		if (wizardPage instanceof NewCDK32ServerWizardPage) {
-			getServerAdapter()
-					.setMinishiftHome(Paths.get(((NewCDK32ServerWizardPage) wizardPage).getMinishiftHome().getText()));
-
-			if (!StringUtils.isEmptyOrNull(config.profile())) {
-				((NewCDK32ServerWizardPage) wizardPage).setMinishiftProfile(config.profile());
-			}
-			getServerAdapter().setProfile(((NewCDK32ServerWizardPage) wizardPage).getMinishiftProfile().getText());
-		} else if (wizardPage instanceof NewCDK3ServerWizardPage) {
-			// since CDK 3 does not have Home label in wizard, we have to use default value
-			// or open server editor
-			getServerAdapter().setMinishiftHome(MINISHIFT_HOME_DIRECTORY);
-		}
-		if (config.createServerAdapter()) {
-			dialog.finish();
-		} else {
-			dialog.cancel();
 		}
 	}
 
@@ -214,16 +256,18 @@ public class ContainerRuntimeServerRequirement implements Requirement<ContainerR
 			CDKUtils.deleteCDKServerAdapter(getServerAdapter().getAdapterName());
 			deleteCertificates();
 		}
-		if (!config.makeRuntimePersistent()) {
-			if (CDKUtils.isCDKServerType(config.version().type().serverType())) {
-				CDKUtils.deleteFilesIfExist(getServerAdapter().getMinishiftBinary());
+		if (!isBinaryInProperty()) {
+			if (!config.makeRuntimePersistent()) {
+				if (CDKUtils.isCDKServerType(config.version().type().serverType())) {
+					CDKUtils.deleteFilesIfExist(getServerAdapter().getMinishiftBinary());
+				} else {
+					CDKUtils.deleteFilesIfExist(getServerAdapter().getInstallationFolder());
+				}
+				removeKeyFromPropertiesFile(getServerAdapter().getVersion().type().name());
+				CDKUtils.deleteFilesIfExist(DOWNLOAD_DIRECTORY);
 			} else {
-				CDKUtils.deleteFilesIfExist(getServerAdapter().getInstallationFolder());
+				writeToContainersPropertiesFile();
 			}
-			removeKeyFromPropertiesFile(getServerAdapter().getVersion().type().name());
-			CDKUtils.deleteFilesIfExist(DOWNLOAD_DIRECTORY);
-		} else {
-			writeToContainersPropertiesFile();
 		}
 	}
 

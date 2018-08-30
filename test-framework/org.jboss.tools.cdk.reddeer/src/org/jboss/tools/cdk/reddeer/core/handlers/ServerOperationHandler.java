@@ -53,7 +53,7 @@ public class ServerOperationHandler {
 		} catch (ServersViewException serversExc) {
 			log.error(serversExc.getMessage(), serversExc);
 		} catch (CDKServerException exc) {
-			String cause = exc.getMessage() + "\r\n" + CDKUtils.collectConsoleOutput(log, true);
+			String cause = exc.getMessage() + "\r\nConsole Output:\r\n" + CDKUtils.collectConsoleOutput(log, true);
 			if (rethrow) {
 				throw new CDKServerException(cause);
 			} else {
