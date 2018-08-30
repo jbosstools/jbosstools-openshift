@@ -39,6 +39,7 @@ import org.jboss.tools.cdk.ui.bot.test.CDKAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.junit.After;
+import org.junit.BeforeClass;
 
 /**
  * Abstract class for CDK Server Wizard tests
@@ -60,6 +61,12 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	private static Logger log = Logger.getLogger(CDKServerWizardAbstractTest.class);
 	
 	protected abstract String getServerAdapter();
+	
+	@BeforeClass
+	public static void emptyRedHatDevelopersCredentials() {
+		CDKTestUtils.removeAccessRedHatCredentials(CDKLabel.Others.CREDENTIALS_DOMAIN, USERNAME);
+	}
+
 	
 	@After
 	public void tearDownAbstractServerWizard() {

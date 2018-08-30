@@ -17,16 +17,18 @@ package org.jboss.tools.cdk.reddeer.core.enums;
  */
 public enum CDKServerAdapterType {
 
-	CDK2 	("org.jboss.tools.openshift.cdk.server.type", "CDK"),
-	CDK3 	("org.jboss.tools.openshift.cdk.server.type.v3", "CDK"),
-	CDK32 	("org.jboss.tools.openshift.cdk.server.type.v32", "CDK"),
-	MINISHIFT17 ("org.jboss.tools.openshift.cdk.server.type.minishift.v17", "Minishift"),
-	NO_CDK  ("", "");
+	CDK2 	("CDK", "org.jboss.tools.openshift.cdk.server.type", "CDK"),
+	CDK3 	("CDK 3.0+", "org.jboss.tools.openshift.cdk.server.type.v3", "CDK"),
+	CDK32 	("CDK 3.2+", "org.jboss.tools.openshift.cdk.server.type.v32", "CDK"),
+	MINISHIFT17 ("Minishift", "org.jboss.tools.openshift.cdk.server.type.minishift.v17", "Minishift"),
+	NO_CDK  ("", "", "");
 	
+	private final String runtimeTypeName;
 	private final String serverType;
 	private final String serverTypeName;
 	
-	CDKServerAdapterType(String type,String name) {
+	CDKServerAdapterType(String runtimeTypeName, String type,String name) {
+		this.runtimeTypeName = runtimeTypeName;
 		this.serverType = type;
 		this.serverTypeName = name;
 	}
@@ -37,5 +39,9 @@ public enum CDKServerAdapterType {
 	
 	public String serverTypeName() {
 		return this.serverTypeName;
+	}
+	
+	public String runtimeTypeName() {
+		return this.runtimeTypeName;
 	}
 }

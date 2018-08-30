@@ -34,7 +34,7 @@ public class DownloadRuntimesWizardTest extends DownloadContainerRuntimeAbstract
 
 	private static final CDKVersion version = CDKVersion.CDK350;
 	
-	private static final String INVALID_CREDENTIALS = "Your credentials have failed to validate";
+	private static final String INVALID_CREDENTIALS = "credentials have failed to validate";
 	
 	@Override
 	protected String getServerAdapter() {
@@ -65,9 +65,10 @@ public class DownloadRuntimesWizardTest extends DownloadContainerRuntimeAbstract
 		util.processCredentials("invalidUsername", "invalidPassword");
 		assertTrue("Does not contain word Credentials, but " + util.getDownloadWizard().getTitle(), 
 				util.getDownloadWizard().getTitle().contains("Credentials"));
-		assertTrue("Does not contain expected " + INVALID_CREDENTIALS + ", but " +
-				util.getDownloadWizard().getMessage(),
-				util.getDownloadWizard().getMessage().contains(INVALID_CREDENTIALS));
+		String message = util.getDownloadWizard().getMessage();
+		assertTrue("Dialog error message does not contain expected '" + INVALID_CREDENTIALS + "', but '" +
+				message + "'",
+				message.contains(INVALID_CREDENTIALS));
 		assertFalse(util.getDownloadWizard().isNextEnabled());
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG, false);
 		cancelDialogAndWaitForRefreshingServers(util.getDownloadWizard());

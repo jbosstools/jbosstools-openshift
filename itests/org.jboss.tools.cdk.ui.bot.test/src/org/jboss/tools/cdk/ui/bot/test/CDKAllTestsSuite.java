@@ -22,6 +22,9 @@ import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK32ServerEditorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK3ServerEditorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.MinishiftServerEditorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.launch.CDKLaunchConfigurationTest;
+import org.jboss.tools.cdk.ui.bot.test.server.runtime.CDK32RuntimeDetectionDevstudioStartUpTest;
+import org.jboss.tools.cdk.ui.bot.test.server.runtime.CDK32RuntimeDetectionTest;
+import org.jboss.tools.cdk.ui.bot.test.server.runtime.CDK3RuntimeDetectionTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK32ServerWizardTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK3ServerWizardTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.MinishiftServerWizardTest;
@@ -37,6 +40,11 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
 	
 	// UI integration tests
+	
+	// Runtime detection test after devstudio startup - must be first
+	CDK32RuntimeDetectionDevstudioStartUpTest.class,
+	CDK3RuntimeDetectionTest.class,
+	CDK32RuntimeDetectionTest.class,
 	
 	// Wizard tests by server adapter type
 	CDK3ServerWizardTest.class,

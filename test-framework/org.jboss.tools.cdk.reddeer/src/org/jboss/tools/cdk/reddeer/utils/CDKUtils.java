@@ -97,8 +97,8 @@ public final class CDKUtils {
 		return "";
 	}
 	
-	public static boolean isContianerRuntimeServer(TreeItem item) {
-		String type = CDKUtils.getServerTypeIdFromItem(item);
+	public static boolean isContainerRuntimeServer(Server server) {
+		String type = CDKUtils.getServerTypeIdFromItem(server.getTreeItem());
 		log.info("Server type id is " + type);
 		return isContainerRuntimeServerType(type);
 	}
@@ -111,10 +111,14 @@ public final class CDKUtils {
 		return Arrays.stream(CDKServerAdapterType.values()).filter(e -> e.serverTypeName() == "CDK").anyMatch(e -> e.serverType().equals(type));
 	}
 	
+	public static boolean isServerOfType(Server server, String type) {
+		return getServerTypeIdFromItem(server.getTreeItem()).equals(type);
+	}
+	
 	public static void deleteAllContainerRuntimeServerAdapters() {
 		for (Server server : getAllServers()) {
 			log.info("Found server with name " + server.getLabel().getName());
-			if (CDKUtils.isContianerRuntimeServer(server.getTreeItem())) {
+			if (CDKUtils.isContainerRuntimeServer(server)) {
 				log.info("Deleting server...");
 				server.delete(true);
 			}
@@ -129,7 +133,7 @@ public final class CDKUtils {
 		Server server = getServer(serverName);
 		if (server != null) {
 			log.info(server.getLabel().getName() + " will be deleted");
-			if (CDKUtils.isContianerRuntimeServer(server.getTreeItem())) {
+			if (CDKUtils.isContainerRuntimeServer(server)) {
 				log.info("Deleting server...");
 				server.delete(true);
 			}
