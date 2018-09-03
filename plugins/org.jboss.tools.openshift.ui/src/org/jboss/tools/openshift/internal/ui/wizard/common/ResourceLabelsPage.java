@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -199,8 +199,8 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<Label>()
 						.windowTitle(RESOURCE_LABEL)
-						.title("Add Label")
-						.description("Add a resource label.")
+						.title("Add a resource label")
+						.description("A valid label must be 63 characters or less and must begin (and end) with an alphanumeric character.")
 						.keyLabel(LABEL_KEY)
 						.keyDescription(LabelKeyValidator.keyDescription)
 						.valueDescription(
