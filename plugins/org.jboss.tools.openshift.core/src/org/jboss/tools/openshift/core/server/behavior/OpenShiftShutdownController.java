@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.core.server.behavior;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -18,13 +17,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IServerShutdownController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.util.MavenProfile;
+import org.jboss.tools.openshift.core.util.MavenCharacter;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.server.debug.DebugLaunchConfigs;
 
@@ -63,34 +62,33 @@ public class OpenShiftShutdownController extends AbstractSubsystemController
 			getBehavior().setServerStarted();
 		}
 	}
-	
-	@SuppressWarnings("restriction")
-    protected void updateProject() throws CoreException {
-	    IProject project = OpenShiftServerUtils.getDeployProject(getServerOrWC());
-	    
-	    IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
-	    if (project.hasNature(IMavenConstants.NATURE_ID) 
-                && pom != null
-                && pom.isAccessible()) {
-	        try {
-                // running the deactivation in the current thread causes 
-                // java.lang.IllegalArgumentException: Attempted to beginRule: P/project_name, does not match outer scope rule
-                // that's why create a workspace job and wait till finishes, because it influences the build
-                // e.g. the resulting war name, so we can't continue launching as it immediately builds/deploys project
-                WorkspaceJob wj = new WorkspaceJob("Disabling \"openshift\" maven profile") {
-                    
-                    @Override
-                    public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-                        new MavenProfile(MavenProfile.OPENSHIFT_MAVEN_PROFILE, project).deactivate(monitor);
-                        return Status.OK_STATUS;
-                    }
-                };
-                wj.schedule();
-                wj.join();
-            } catch (InterruptedException e) {
-                throw new CoreException(Status.CANCEL_STATUS);
-            }
-        }
-	}
 
+	protected void updateProject() throws CoreException {
+	    IProject project = OpenShiftServerUtils.getDeployProject(getServerOrWC());
+		if (!new MavenCharacter(project).hasNature()) {
+			return;
+		}
+
+		try {
+			/*
+			 * running the deactivation in the current thread causes
+			 * java.lang.IllegalArgumentException: Attempted to beginRule: P/project_name,
+			 * does not match outer scope rule that's why create a workspace job and wait
+			 * till finishes, because it influences the build e.g. the resulting war name,
+			 * so we can't continue launching as it immediately builds/deploys project
+			 */
+			WorkspaceJob wj = new WorkspaceJob("Disabling \"openshift\" maven profile") {
+
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+					new MavenProfile(MavenProfile.OPENSHIFT_MAVEN_PROFILE, project).deactivate(monitor);
+					return Status.OK_STATUS;
+				}
+			};
+			wj.schedule();
+			wj.join();
+		} catch (InterruptedException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
+	}
 }

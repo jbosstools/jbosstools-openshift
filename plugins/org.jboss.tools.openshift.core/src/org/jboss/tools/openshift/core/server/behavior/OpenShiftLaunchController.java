@@ -52,6 +52,7 @@ import org.jboss.tools.openshift.core.server.DockerImageLabels;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.util.MavenProfile;
+import org.jboss.tools.openshift.core.util.MavenCharacter;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.portforwarding.PortForwardingUtils;
 import org.jboss.tools.openshift.internal.core.server.debug.DebugContext;
@@ -103,33 +104,34 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 	}
 	
-	@SuppressWarnings("restriction")
     protected void updateProject(IProgressMonitor monitor) throws CoreException {
-        IProject project = OpenShiftServerUtils.getDeployProject(getServerOrWC());
-        
-        IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
-        if (project.hasNature(IMavenConstants.NATURE_ID) 
-                && pom != null
-                && pom.isAccessible()) {
-            try {
-                // running the activation in the current thread causes 
-                // java.lang.IllegalArgumentException: Attempted to beginRule: P/project_name, does not match outer scope rule
-                // that's why create a workspace job and wait till finishes, because it influences the build
-                // e.g. the resulting war name, so we can't continue launching as it immediately builds/deploys project
-                WorkspaceJob wj = new WorkspaceJob("Enabling \"openshift\" maven profile") {
-                    
-                    @Override
-                    public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-                        new MavenProfile(MavenProfile.OPENSHIFT_MAVEN_PROFILE, project).activate(monitor);
-                        return Status.OK_STATUS;
-                    }
-                };
-                wj.schedule();
-                wj.join();
-            } catch (InterruptedException e) {
-                throw new CoreException(Status.CANCEL_STATUS);
-            }
-        }
+		IProject project = OpenShiftServerUtils.getDeployProject(getServerOrWC());
+
+		if (!new MavenCharacter(project).hasNature()) {
+			return;
+		}
+
+		try {
+			/*
+			 * running the activation in the current thread causes
+			 * java.lang.IllegalArgumentException: Attempted to beginRule: P/project_name,
+			 * does not match outer scope rule that's why create a workspace job and wait
+			 * till finishes, because it influences the build e.g. the resulting war name,
+			 * so we can't continue launching as it immediately builds/deploys project
+			 */
+			WorkspaceJob wj = new WorkspaceJob("Enabling \"openshift\" maven profile") {
+
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+					new MavenProfile(MavenProfile.OPENSHIFT_MAVEN_PROFILE, project).activate(monitor);
+					return Status.OK_STATUS;
+				}
+			};
+			wj.schedule();
+			wj.join();
+		} catch (InterruptedException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
     }
 
 	protected void setMode(String mode, DebugContext context, OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
