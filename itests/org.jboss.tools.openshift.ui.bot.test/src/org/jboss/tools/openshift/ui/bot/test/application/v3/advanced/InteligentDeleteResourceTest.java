@@ -38,6 +38,7 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirem
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
@@ -61,11 +62,11 @@ import org.junit.runners.MethodSorters;
 @RequiredBasicConnection
 @CleanConnection
 @RequiredProject
-@RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
+@RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE_RESOURCES_PATH)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class InteligentDeleteResourceTest extends AbstractTest {
 	
-	private static final String POD_NAME = "eap-app";
+	private static final String POD_NAME = OpenShiftResources.EAP_SERVICE;
 
 	@InjectRequirement
 	private static OpenShiftConnectionRequirement connectionReq;
@@ -93,7 +94,7 @@ public class InteligentDeleteResourceTest extends AbstractTest {
 		deleteResourcesWizard.openWizardFromExplorer(projectReq.getProjectName());
 		
 		int sizeBefore = deleteResourcesWizard.getAllResources().size();
-		deleteResourcesWizard.setFilter("eap-app");
+		deleteResourcesWizard.setFilter(OpenShiftResources.EAP_SERVICE);
 		assertNotEquals(sizeBefore, deleteResourcesWizard.getAllResources().size());
 		deleteResourcesWizard.setFilter("");
 		assertEquals(sizeBefore, deleteResourcesWizard.getAllResources().size());
@@ -126,7 +127,8 @@ public class InteligentDeleteResourceTest extends AbstractTest {
 
 	@Test
 	public void testDeleteDService() {
-		deleteResource(ResourceOpenShift.SERVICE);
+		deleteResource(ResourceOpenShift.SERVICE); //eap-app
+		deleteResource(ResourceOpenShift.SERVICE); //eap-app-ping
 		checkDeletedResource(ResourceOpenShift.SERVICE);
 	}
 

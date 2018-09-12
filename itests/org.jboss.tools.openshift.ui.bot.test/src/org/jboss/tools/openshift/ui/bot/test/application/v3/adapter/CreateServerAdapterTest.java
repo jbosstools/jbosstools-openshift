@@ -160,7 +160,7 @@ public class CreateServerAdapterTest extends AbstractTest  {
 	public void testCreateOpenShift3ServerAdapterViaOpenShiftExplorerView() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.getOpenShift3Connection(connectionReq.getConnection()).refresh();
-		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getServicesWithName("eap-app").get(0).select();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getServicesWithName(OpenShiftResources.EAP_SERVICE).get(0).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_ADAPTER_FROM_EXPLORER).select();
 
 		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);
@@ -176,7 +176,7 @@ public class CreateServerAdapterTest extends AbstractTest  {
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG, false);
 
 		assertTrue("OpenShift 3 server adapter was not created.",
-				new ServerAdapterExists(Version.OPENSHIFT3, "eap-app", "Service").test());
+				new ServerAdapterExists(Version.OPENSHIFT3, OpenShiftResources.EAP_SERVICE, "Service").test());
 	}
 
 	private void setAdapterDetailsAndCreateAdapterAndVerifyExistence() {
@@ -205,7 +205,7 @@ public class CreateServerAdapterTest extends AbstractTest  {
 		}
 
 		assertTrue("OpenShift 3 server adapter was not created.",
-				new ServerAdapterExists(Version.OPENSHIFT3, "eap-app", "Service").test());
+				new ServerAdapterExists(Version.OPENSHIFT3, OpenShiftResources.EAP_SERVICE, "Service").test());
 
 	}
 
@@ -222,7 +222,7 @@ public class CreateServerAdapterTest extends AbstractTest  {
 	public void removeAdapterIfExists() {
 		try {
 			OpenShiftUtils.killJobs();
-			new ServerAdapter(Version.OPENSHIFT3, "eap-app", "Service").delete();
+			new ServerAdapter(Version.OPENSHIFT3, OpenShiftResources.EAP_SERVICE, "Service").delete();
 		} catch (OpenShiftToolsException ex) {
 			// do nothing, adapter does not exists
 		} catch (WaitTimeoutExpiredException e) {

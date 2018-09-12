@@ -28,6 +28,8 @@ public class OpenShiftResources {
 	public static final String EAP_SERVICE_PING = "eap-app-ping";
 	public static final String EAP_APP_REPLICATION_CONTROLLER = "eap-app-1";
 	public static final String EAP_APP_GIT_NAME = "jboss-eap-quickstarts";
+	public static final String EAP_TEMPLATE_RESOURCES_PATH = "resources/eap71-basic-s2i-helloworld.json";
+	public static final String EAP_TEMPLATE_RESOURCES_FILENAME = "eap71-basic-s2i-helloworld.json";
 
 	/**	
 	 * the template that creates a basic nodejs service

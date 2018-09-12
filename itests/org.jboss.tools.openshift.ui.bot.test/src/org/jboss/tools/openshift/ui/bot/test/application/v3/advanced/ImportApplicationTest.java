@@ -43,6 +43,7 @@ import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
@@ -60,7 +61,7 @@ import org.junit.runner.RunWith;
 @OCBinary(cleanup=false, setOCInPrefs=true)
 @RequiredBasicConnection
 @RequiredProject
-@RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
+@RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE_RESOURCES_PATH)
 public class ImportApplicationTest extends AbstractTest {
 	
 	public static String PROJECT_NAME = "jboss-helloworld";

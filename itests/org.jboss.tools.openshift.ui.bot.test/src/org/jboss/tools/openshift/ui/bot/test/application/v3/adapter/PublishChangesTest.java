@@ -39,6 +39,7 @@ import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
@@ -64,7 +65,7 @@ import org.junit.runner.RunWith;
 @RequiredBasicConnection
 @CleanConnection
 @RequiredProject
-@RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
+@RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE_RESOURCES_PATH)
 public class PublishChangesTest extends AbstractTest  {
 
 	public static String PUBLISHED_CODE = "package org.jboss.as.quickstarts.helloworld;\n"
@@ -72,7 +73,7 @@ public class PublishChangesTest extends AbstractTest  {
 			+ "String createHelloMessage(String name) { return \"Hello OpenShift \" + name + \"!\"; }"
 			+ "}";
 	
-	private String changedClass= "ROOT.war/WEB-INF/classes/org/jboss/as/quickstarts/helloworld/HelloService.class";
+	private String changedClass= "WEB-INF/classes/org/jboss/as/quickstarts/helloworld/HelloService.class";
 	
 	private static final String GIT_REPO_URL = "https://github.com/jboss-developer/jboss-eap-quickstarts";
 
@@ -113,7 +114,7 @@ public class PublishChangesTest extends AbstractTest  {
 	
 	private void createServerAdapter() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getServicesWithName("eap-app").get(0).createServerAdapter();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getServicesWithName(OpenShiftResources.EAP_SERVICE).get(0).createServerAdapter();
 	}
 	
 	private void changeProjectAndVerifyAutoPublish() {
@@ -139,7 +140,7 @@ public class PublishChangesTest extends AbstractTest  {
 	}
 	
 	private void verifyChangesTookEffect() {
-		new ServerAdapter(Version.OPENSHIFT3, "eap-app", "Service").select();
+		new ServerAdapter(Version.OPENSHIFT3, OpenShiftResources.EAP_SERVICE, "Service").select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.SHOW_IN_WEB_BROWSER).select();
 		
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
@@ -156,7 +157,7 @@ public class PublishChangesTest extends AbstractTest  {
 		try {
 			OpenShiftUtils.killJobs();
 			new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-			new ServerAdapter(Version.OPENSHIFT3, "eap-app", "Service").delete();
+			new ServerAdapter(Version.OPENSHIFT3, OpenShiftResources.EAP_SERVICE, "Service").delete();
 		} catch (OpenShiftToolsException ex) {
 			// do nothing, adapter does not exists
 		}

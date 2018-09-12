@@ -93,7 +93,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	
 	// Creation of a new application
 	CreateApplicationFromTemplateTest.class,
-	CreateApplicationOnBuilderImageTest.class, 
+	//CreateApplicationOnBuilderImageTest.class, 
 	DeploymentTest.class,
 	
 	// Application handling

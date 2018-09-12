@@ -58,6 +58,7 @@ import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionReq
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -85,13 +86,13 @@ import org.junit.runner.RunWith;
 public class CreateApplicationFromTemplateTest extends AbstractTest {
 
 	private String gitFolder = "jboss-eap-quickstarts";
-	private String helloworldProject = "jboss-helloworld";
+	private String helloworldProject = "helloworld";
 	private String kitchensinkProject = "kitchensink";
 
 	private static final String TESTS_PROJECT = "os3projectWithResources";
 	private static final String TESTS_PROJECT_LOCATION = new File("resources/os3projectWithResources")
 			.getAbsolutePath();
-	private static final String URL = "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/eap70-basic-s2i-helloworld.json";
+	private static final String URL = "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/eap71-basic-s2i-helloworld.json";
 
 	private String genericWebhookURL;
 	private String githubWebhookURL;
@@ -148,13 +149,13 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 		new PushButton(OpenShiftLabel.Button.BROWSE_WORKSPACE).click();
 
 		new DefaultShell(OpenShiftLabel.Shell.SELECT_OPENSHIFT_TEMPLATE);
-		new DefaultTreeItem(TESTS_PROJECT, "eap70-basic-s2i-helloworld.json").select();
+		new DefaultTreeItem(TESTS_PROJECT, OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME).select();
 		new OkButton().click();
 
 		new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
 		assertTrue("Template from workspace is not correctly shown in text field containing its path",
 				new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).getText().equals("${workspace_loc:"
-						+ File.separator + TESTS_PROJECT + File.separator + "eap70-basic-s2i-helloworld.json}"));
+						+ File.separator + TESTS_PROJECT + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME +"}"));
 
 		new WaitUntil(new ControlIsEnabled(new CancelButton()));
 
@@ -162,7 +163,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 //		assertTrue("Defined resource button should be enabled",
 //				new PushButton(OpenShiftLabel.Button.DEFINED_RESOURCES).isEnabled());
 
-		completeApplicationCreationAndVerify(helloworldProject, 1);
+		completeApplicationCreationAndVerify(helloworldProject, 2);
 	}
 
 	@Test
@@ -170,13 +171,13 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		new DefaultTabItem(OpenShiftLabel.TextLabels.CUSTOM_TEMPLATE).activate();
 		new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).setText(
-				TESTS_PROJECT_LOCATION + File.separator + "eap70-basic-s2i-helloworld.json");
+				TESTS_PROJECT_LOCATION + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME);
 
 //		TODO: Remove comment once JBIDE-24492 is resolved			
 //		assertTrue("Defined resource button should be enabled",
 //				new PushButton(OpenShiftLabel.Button.DEFINED_RESOURCES).isEnabled());
 
-		completeApplicationCreationAndVerify(helloworldProject, 1);
+		completeApplicationCreationAndVerify(helloworldProject, 2);
 	}
 
 	@Test
