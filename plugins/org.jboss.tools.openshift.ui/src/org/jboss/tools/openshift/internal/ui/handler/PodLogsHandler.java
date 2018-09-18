@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2016 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,18 +18,15 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.job.PodLogsJob;
 
 import com.openshift.restclient.ResourceKind;
@@ -39,7 +36,8 @@ import com.openshift.restclient.model.IPod;
 
 /**
  * @author jeff.cantrill
- * @author Jeff Maury
+ * @contributor Jeff Maury
+ * @contributor Andre Dietisheim
  */
 public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 	private static final String[] STATES = new String[] { "Running", "Succeeded", "Failed", "Completed", "Error" };
@@ -122,19 +120,5 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 
 	protected void showDialog(ExecutionEvent event, String title, String message) {
 		MessageDialog.openError(HandlerUtil.getActiveShell(event), title, message);
-	}
-
-	@Override
-	protected IConnection getConnection(ExecutionEvent event) {
-		IBuild build = getSelectedElement(event, IBuild.class);
-		if (build != null) {
-			return ConnectionsRegistryUtil.safeGetConnectionFor(build);
-		}
-		return null;
-	}
-
-	protected <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
-		ISelection selection = UIUtils.getCurrentSelection(event);
-		return UIUtils.getFirstElement(selection, klass);
 	}
 }

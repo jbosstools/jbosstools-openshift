@@ -24,6 +24,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -38,11 +39,16 @@ import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
+import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.core.ocbinary.OCBinary;
 import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryValidationJob;
 import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+
+import com.openshift.restclient.model.IResource;
 
 /**
  * 
@@ -52,8 +58,6 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 
 	protected abstract void handleEvent(ExecutionEvent event);
-
-	protected abstract IConnection getConnection(ExecutionEvent event);
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -141,4 +145,19 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 			widgetSelected(e);
 		}
 	}
+
+	protected IConnection getConnection(ExecutionEvent event) {
+        Connection connection = null;
+		IResource resource = getSelectedElement(event, IResource.class);
+		if (resource != null) {
+			connection = ConnectionsRegistryUtil.safeGetConnectionFor(resource);
+		}
+		return connection;
+	}
+
+	protected <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
+		ISelection selection = UIUtils.getCurrentSelection(event);
+		return UIUtils.getFirstElement(selection, klass);
+	}
+
 }
