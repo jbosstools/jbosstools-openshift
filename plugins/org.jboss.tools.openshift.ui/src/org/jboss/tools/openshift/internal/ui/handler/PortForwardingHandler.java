@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,10 +17,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.ui.wizard.OkButtonWizardDialog;
-import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.portforwading.PortForwardingWizard;
 import org.jboss.tools.openshift.internal.ui.portforwading.PortForwardingWizardModel;
@@ -29,6 +26,7 @@ import com.openshift.restclient.model.IPod;
 
 /**
  * @author jeff.cantrill
+ * @contributor Andre Dietisheim
  */
 public class PortForwardingHandler extends AbstractOpenShiftCliHandler {
 
@@ -50,16 +48,5 @@ public class PortForwardingHandler extends AbstractOpenShiftCliHandler {
 		dialog.setMinimumPageSize(700, 400);
 		dialog.create();
 		dialog.open();
-	}
-
-	@Override
-	protected IConnection getConnection(ExecutionEvent event) {
-		ISelection selection = UIUtils.getCurrentSelection(event);
-		final IPod pod = UIUtils.getFirstElement(selection, IPod.class);
-		Connection connection = null;
-		if (pod != null) {
-			connection = ConnectionsRegistryUtil.safeGetConnectionFor(pod);
-		}
-		return connection;
 	}
 }
