@@ -45,9 +45,10 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @ContainerRuntimeServer(
 		version = CDKVersion.MINISHIFT1210,
-		useExistingBinary=true,
+		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
-		createServerAdapter=false)
+		createServerAdapter=false,
+		useExistingBinaryInProperty="minishift")
 public class MinishiftServerEditorTest extends CDKServerEditorAbstractTest {
 
 	@InjectRequirement

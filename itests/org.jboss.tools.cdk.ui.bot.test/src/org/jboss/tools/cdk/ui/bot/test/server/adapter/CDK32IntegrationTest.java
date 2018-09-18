@@ -32,10 +32,11 @@ import org.junit.runner.RunWith;
 @RemoveCDKServers
 @ContainerRuntimeServer(
 		version = CDKVersion.CDK350,
-		useExistingBinary=true,
+		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		usernameProperty="developers.username",
-		passwordProperty="developers.password")
+		passwordProperty="developers.password",
+		useExistingBinaryInProperty="cdk32.minishift")
 @RunWith(RedDeerSuite.class)
 public class CDK32IntegrationTest extends CDKServerAdapterAbstractTest {
 	

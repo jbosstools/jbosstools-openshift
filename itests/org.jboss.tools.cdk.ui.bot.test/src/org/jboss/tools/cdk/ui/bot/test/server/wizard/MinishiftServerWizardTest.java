@@ -24,6 +24,7 @@ import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewMinishiftServerWizardPage;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -34,6 +35,17 @@ import org.junit.runner.RunWith;
  */
 @RunWith(RedDeerSuite.class)
 public class MinishiftServerWizardTest extends CDKServerWizardAbstractTest {
+	
+	private static String MINISHIFT_PATH;	
+	
+	@BeforeClass	
+	public static void setupCDK3ServerEditorTest() {	
+		if (MINISHIFT == null) {	
+			MINISHIFT_PATH = MOCK_MINISHIFT170;	
+		} else {	
+			MINISHIFT_PATH = MINISHIFT;	
+		}
+	}
 	
 	@Override
 	protected String getServerAdapter() {
@@ -82,7 +94,7 @@ public class MinishiftServerWizardTest extends CDKServerWizardAbstractTest {
 		assertSameMessage(dialog, CDKLabel.Messages.NOT_COMPATIBLE);
 		
 		// Positive test of proper minishift binary
-		containerPage.setMinishiftBinary(MOCK_MINISHIFT170);
+		containerPage.setMinishiftBinary(MINISHIFT_PATH);
 		assertDiffMessage(dialog, CDKLabel.Messages.CHECK_MINISHIFT_VERSION);
 		assertSameMessage(dialog, CDKLabel.Messages.SERVER_ADAPTER_REPRESENTING);
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.MEDIUM, false);

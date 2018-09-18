@@ -35,10 +35,11 @@ import org.junit.runner.RunWith;
 @RemoveCDKServers
 @ContainerRuntimeServer(
 		version = CDKVersion.CDK350,
-		useExistingBinary=true,
+		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		usernameProperty="developers.username",
-		passwordProperty="developers.password")
+		passwordProperty="developers.password",
+		useExistingBinaryInProperty="cdk32.minishift")
 public class CDKImageRegistryUrlValidatorTest extends CDKImageRegistryUrlAbstractTest {
 
 	public static final String OC_IS_NOT_CONFIGURED = "OpenShift client oc not configured"; 
@@ -60,7 +61,7 @@ public class CDKImageRegistryUrlValidatorTest extends CDKImageRegistryUrlAbstrac
 	@Override
 	protected void startServerAdapter() {
 		serverRequirement.configureCDKServerAdapter(false);
-		serverRequirement.startServerAdapterIfNotRunning(() -> {
+		startServerAdapterIfNotRunning(getCDKServer(), () -> {
 			skipRegistrationViaFlag(getCDKServer(), true);
 		}, false);
 	}

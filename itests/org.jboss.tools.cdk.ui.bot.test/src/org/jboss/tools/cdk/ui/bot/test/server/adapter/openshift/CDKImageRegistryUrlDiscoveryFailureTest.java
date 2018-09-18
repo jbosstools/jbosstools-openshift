@@ -40,10 +40,11 @@ import org.junit.runner.RunWith;
 @RemoveCDKServers
 @ContainerRuntimeServer(
 		version = CDKVersion.CDK350,
-		useExistingBinary=true,
+		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		usernameProperty="developers.username",
-		passwordProperty="developers.password")
+		passwordProperty="developers.password",
+		useExistingBinaryInProperty="cdk32.minishift")
 public class CDKImageRegistryUrlDiscoveryFailureTest extends CDKImageRegistryUrlAbstractTest {
 
 	@InjectRequirement
@@ -63,7 +64,7 @@ public class CDKImageRegistryUrlDiscoveryFailureTest extends CDKImageRegistryUrl
 	@Override
 	protected void startServerAdapter() {
 		serverRequirement.configureCDKServerAdapter(false);
-		serverRequirement.startServerAdapterIfNotRunning(() -> {
+		startServerAdapterIfNotRunning(getCDKServer(), () -> {
 			skipRegistrationViaFlag(getCDKServer(), true);
 		}, false);
 	}
@@ -75,7 +76,7 @@ public class CDKImageRegistryUrlDiscoveryFailureTest extends CDKImageRegistryUrl
 	public void testRegistryUrlNotFoundDialog() {
 		wizard.getImageRegistryUrl().setText(""); 
 		wizard.finish();
-		serverRequirement.stopServerAdapter();
+		stopServerAdapter(getCDKServer());
 		wizard = getOpenshiftConnectionWizard(CDKTestUtils.findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 		switchOffPasswordSaving(wizard);
 		try {

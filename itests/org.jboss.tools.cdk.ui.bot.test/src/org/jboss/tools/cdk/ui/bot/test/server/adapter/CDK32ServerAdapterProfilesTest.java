@@ -48,8 +48,9 @@ import org.junit.runner.RunWith;
 		version = CDKVersion.CDK350,
 		usernameProperty="developers.username",
 		passwordProperty="developers.password",
-		useExistingBinary=true,
-		makeRuntimePersistent=true)
+		useExistingBinaryFromConfig=true,
+		makeRuntimePersistent=true,
+		useExistingBinaryInProperty="cdk32.minishift")
 @RunWith(RedDeerSuite.class)
 public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest {
 
@@ -136,7 +137,4 @@ public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest
 		stopServerAdapter(getCDKServer());
 		stopServerAdapter(getSecondCDKServer());
 	}
-	
-	
-
 }

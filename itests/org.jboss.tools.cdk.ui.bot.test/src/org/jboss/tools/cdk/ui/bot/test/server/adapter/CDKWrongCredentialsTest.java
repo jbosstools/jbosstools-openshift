@@ -46,9 +46,10 @@ import org.junit.runner.RunWith;
 		version = CDKVersion.CDK350,
 		usernameProperty="developers.username",
 		passwordProperty="developers.password",
-		useExistingBinary=true,
+		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
-		createServerAdapter=false)
+		createServerAdapter=false,
+		useExistingBinaryInProperty="cdk32.minishift")
 @RunWith(RedDeerSuite.class)
 public class CDKWrongCredentialsTest extends CDKServerAdapterAbstractTest {
 

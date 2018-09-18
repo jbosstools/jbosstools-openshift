@@ -30,6 +30,7 @@ import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.styledtext.DefaultStyledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.cdk.reddeer.core.condition.MultipleWaitConditionHandler;
@@ -142,10 +143,17 @@ public class CDKServer extends DefaultServer {
 		new WaitWhile(new JobIsRunning(), TimePeriod.DEFAULT, false);
 		DefaultShell shellDialog = new DefaultShell(shell.getSWTWidget());
 		log.info("Shell could have changed after getting another error"); 
-		log.info("Actual shell dialog name is " + shellDialog.getText()); 
+		log.info("Actual shell dialog name is " + shellDialog.getText());
+		String dialogText = "";
+		try {
+			new PushButton("Details >>").click();
+			dialogText = "\r\nDialog error details:\r\n" + new DefaultStyledText(shellDialog).getText();
+		} catch (CoreLayerException exc) {
+			log.error("Error dialog does not have details... ", exc.getCause());
+		}
 		CDKUtils.captureScreenshot("CDEServer#ProblemDialog#" + shellDialog.getText()); 
 		new OkButton(shellDialog).click();
-		throw new CDKServerException(excMessage);
+		throw new CDKServerException(excMessage + dialogText);
 	}
 	
 	private void checkInitialStateChange(ServerState actualState) {

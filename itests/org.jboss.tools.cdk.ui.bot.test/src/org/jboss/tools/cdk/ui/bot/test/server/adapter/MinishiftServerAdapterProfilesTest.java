@@ -43,8 +43,9 @@ import org.junit.runner.RunWith;
 @CleanOpenShiftExplorer
 @ContainerRuntimeServer(
 		version = CDKVersion.MINISHIFT1210,
-		useExistingBinary=true,
-		makeRuntimePersistent=true)
+		useExistingBinaryFromConfig=true,
+		makeRuntimePersistent=true,
+		useExistingBinaryInProperty="minishift")
 @RunWith(RedDeerSuite.class)
 public class MinishiftServerAdapterProfilesTest extends CDKServerAdapterAbstractTest {
 
