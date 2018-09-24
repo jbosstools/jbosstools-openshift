@@ -27,7 +27,7 @@ public enum CDKServerAdapterType {
 	private final String serverType;
 	private final String serverTypeName;
 	
-	CDKServerAdapterType(String runtimeTypeName, String type,String name) {
+	CDKServerAdapterType(String runtimeTypeName, String type, String name) {
 		this.runtimeTypeName = runtimeTypeName;
 		this.serverType = type;
 		this.serverTypeName = name;

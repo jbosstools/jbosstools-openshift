@@ -21,31 +21,32 @@ import org.junit.runners.Parameterized.UseParametersRunnerFactory;
 
 /**
  * Class covers runtime download test for CDK 3.x versions
+ * 
  * @author odockal
  *
  */
 @UseParametersRunnerFactory(ParameterizedRequirementsRunnerFactory.class)
 public class CDK3DownloadRuntimeTest extends DownloadContainerRuntimeAbstractTest {
 
-  private CDKVersion version;
-  
-  public CDK3DownloadRuntimeTest(CDKVersion version) {
-    this.version = version;
-  }
-  
-  @Parameters(name="{0}")
-  public static Collection<CDKVersion> data() {
-    return Arrays.asList(CDKVersion.CDK311);
-  }
-  
-  @Override
-  protected String getServerAdapter() {
-    return SERVER_ADAPTER_3;
-  }
-  
-  @Test
-  public void testDownloadingCDK3XRuntime() {
-    downloadAndVerifyCDKRuntime(version, USERNAME, PASSWORD);
-  }
-	
+	private CDKVersion version;
+
+	public CDK3DownloadRuntimeTest(CDKVersion version) {
+		this.version = version;
+	}
+
+	@Parameters(name = "{0}")
+	public static Collection<CDKVersion> data() {
+		return Arrays.asList(CDKVersion.CDK311);
+	}
+
+	@Override
+	protected String getServerAdapter() {
+		return SERVER_ADAPTER_3;
+	}
+
+	@Test
+	public void testDownloadingCDK3XRuntime() {
+		downloadAndVerifyCDKRuntime(version, USERNAME, PASSWORD);
+	}
+
 }

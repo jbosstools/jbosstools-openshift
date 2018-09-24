@@ -147,17 +147,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	
 	public void startServerAdapter(Server server, Runnable cond, boolean rethrow) {
 		log.info("Starting server adapter");
-		try {
-			ServerOperationHandler.getInstance().handleOperation(() -> server.start(), cond, rethrow);
-		} catch (AssertionError err) {
-			// prevent test to fail when everything seems to be working
-			if (err.getMessage().contains("The VM may not have been registered successfully") &&
-					err.getMessage().contains("The CDK VM is up and running")) {
-				log.info("Expected assertion error due to JBIDE-26333, causes test to fail, though functionality should be ok.");
-			} else {
-				throw err;
-			}
-		}
+		ServerOperationHandler.getInstance().handleOperation(() -> server.start(), cond, rethrow);
 		assertEquals(ServerState.STARTED, server.getLabel().getState());
 		setCertificateAccepted(true);
 	}

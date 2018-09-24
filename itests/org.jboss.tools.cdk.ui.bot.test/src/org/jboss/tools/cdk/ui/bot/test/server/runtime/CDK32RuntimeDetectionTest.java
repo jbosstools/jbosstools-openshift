@@ -15,11 +15,14 @@ import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.core.server.ServerAdapter;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
+import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
 
+@RemoveCDKServers
 @ContainerRuntimeServer(
 		version = CDKVersion.CDK350,
 		usernameProperty="developers.username",
-		passwordProperty="developers.password")
+		passwordProperty="developers.password",
+		createServerAdapter=false)
 public class CDK32RuntimeDetectionTest extends CDKRuntimeDetectionTemplate {
 
 	@InjectRequirement

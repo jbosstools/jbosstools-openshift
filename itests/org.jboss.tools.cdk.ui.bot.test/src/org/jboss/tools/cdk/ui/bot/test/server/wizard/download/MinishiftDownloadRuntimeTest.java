@@ -20,7 +20,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized.UseParametersRunnerFactory;
 
 /**
- * Class covers runtime download test for Minishift 1.14, 1.15.1, 1.16.1, 1.17.0
+ * Class covers runtime download test for Minishift 1.14, 1.15.1, 1.16.1, 1.17.0, etc.
  * 
  * @author odockal
  *
@@ -36,7 +36,7 @@ public class MinishiftDownloadRuntimeTest extends DownloadContainerRuntimeAbstra
 
 	@Parameters(name = "{0}")
 	public static Collection<CDKVersion> data() {
-		return Arrays.asList(CDKVersion.MINISHIFT1210);
+		return Arrays.asList(CDKVersion.MINISHIFT1240);
 	}
 
 	@Override

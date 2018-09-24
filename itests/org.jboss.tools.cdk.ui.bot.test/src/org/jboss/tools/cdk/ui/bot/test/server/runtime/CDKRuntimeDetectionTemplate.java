@@ -30,7 +30,6 @@ import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.core.runtime.Runtime;
 import org.jboss.tools.cdk.reddeer.core.server.ServerAdapter;
-import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
 import org.jboss.tools.cdk.reddeer.server.ui.runtime.RuntimeDetectionPreferencePage;
 import org.jboss.tools.cdk.reddeer.server.ui.runtime.SearchingForRuntimesDialog;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
@@ -45,7 +44,6 @@ import org.junit.runner.RunWith;
  * @author odockal
  *
  */
-@RemoveCDKServers
 @RunWith(RedDeerSuite.class)
 public abstract class CDKRuntimeDetectionTemplate extends CDKAbstractTest {
 
