@@ -107,7 +107,7 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
 		IConnection con = util.findExistingOpenshiftConnection(server, adb);
 		if (con == null) {
-			con = util.createOpenshiftConnection(adb);
+			con = util.createOpenshiftConnection(server, adb);
 		} else {
 			util.updateOpenshiftConnection(adb, con);
 		}

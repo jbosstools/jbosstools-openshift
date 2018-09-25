@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2016 Red Hat, Inc. 
+ * Copyright (c) 2016-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -48,21 +48,21 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 
 		createCDKFile("Basic", null, null);
 		ServiceManagerEnvironment adb = createLoader(s);
-		IConnection con = util.createOpenshiftConnection(adb, null);
+		IConnection con = util.createOpenshiftConnection(s, adb, null);
 		assertNotNull(con);
 		assertEquals(con.getUsername(), "openshift-dev");
 		assertEquals(con.getPassword(), "devel");
 
 		createCDKFile("Basic", "test", null);
 		adb = createLoader(s);
-		con = util.createOpenshiftConnection(adb, null);
+		con = util.createOpenshiftConnection(s, adb, null);
 		assertNotNull(con);
 		assertEquals(con.getUsername(), "test");
 		assertEquals(con.getPassword(), null);
 
 		createCDKFile("Basic", "test", "pass");
 		adb = createLoader(s);
-		con = util.createOpenshiftConnection(adb, null);
+		con = util.createOpenshiftConnection(s, adb, null);
 		assertNotNull(con);
 		assertEquals(con.getUsername(), "test");
 		assertEquals(con.getPassword(), "pass");
@@ -77,7 +77,7 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 		ServiceManagerEnvironment adb = createLoader(s);
 		ConnectionsRegistry registry = (ConnectionsRegistry) mock(ConnectionsRegistry.class);
 
-		IConnection con = util.createOpenshiftConnection(adb, registry);
+		IConnection con = util.createOpenshiftConnection(s, adb, registry);
 		assertNotNull(con);
 		verify(registry).add(con);
 	}
@@ -91,7 +91,7 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 		ServiceManagerEnvironment adb = createLoader(s, "10.1.2.2", "2376", "https://custom.url");
 		ConnectionsRegistry registry = (ConnectionsRegistry) mock(ConnectionsRegistry.class);
 
-		IConnection con = util.createOpenshiftConnection(adb, registry);
+		IConnection con = util.createOpenshiftConnection(s, adb, registry);
 		assertNotNull(con);
 		Object o = ((Connection) con).getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY);
 		assertEquals(o, "https://custom.url");
@@ -106,7 +106,7 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 		ServiceManagerEnvironment adb = createLoader(s, "10.1.2.2", "2376", null);
 		ConnectionsRegistry registry = (ConnectionsRegistry) mock(ConnectionsRegistry.class);
 
-		IConnection con = util.createOpenshiftConnection(adb, registry);
+		IConnection con = util.createOpenshiftConnection(s, adb, registry);
 		assertNotNull(con);
 		Object o = ((Connection) con).getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY);
 		assertEquals("https://hub.openshift.rhel-cdk.10.1.2.2.xip.io", o);
