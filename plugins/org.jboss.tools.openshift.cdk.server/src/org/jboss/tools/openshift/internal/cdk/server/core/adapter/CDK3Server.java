@@ -15,6 +15,7 @@ import java.io.File;
 import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
+import org.jboss.tools.openshift.internal.cdk.server.core.listeners.CDKServerUtility;
 
 public class CDK3Server extends CDKServer {
 
@@ -66,12 +67,7 @@ public class CDK3Server extends CDKServer {
 	}
 
 	public String getMinishiftHome() {
-		String home = System.getProperty("user.home");
-		String defaultMinishiftHome = new File(home, CDKConstants.CDK_RESOURCE_DOTMINISHIFT).getAbsolutePath();
-		String msHome = getServer().getAttribute(CDK3Server.MINISHIFT_HOME, defaultMinishiftHome);
-		if (StringUtils.isEmpty(msHome))
-			msHome = defaultMinishiftHome;
-		return msHome;
+		return CDKServerUtility.getMinishiftHomeOrDefault(getServer());
 	}
 
 	public static boolean matchesCDK3(String version) {
@@ -84,6 +80,9 @@ public class CDK3Server extends CDKServer {
 	 */
 	public boolean isCDKInitialized() {
 		String home = getMinishiftHome();
+		if (StringUtils.isEmpty(home)) {
+			return false;
+		}
 		File homeF = new File(home);
 		if (homeF.exists() && homeF.isDirectory()) {
 			File cdk = new File(homeF, "cdk");

@@ -16,10 +16,18 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK32Server;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK3Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
 
 public class CDKServerUtility {
+	
+	private CDKServerUtility() {
+		// inhibit instantiation
+	}
 
 	public static Properties getDotCDK(IServer server) {
 		String cdkFolder = server.getAttribute(CDKServer.PROP_FOLDER, (String) null);
@@ -59,4 +67,28 @@ public class CDKServerUtility {
 		return null;
 	}
 
+	public static String getMinishiftHomeOrDefault(IServer server) {
+		String minishiftHome = getMinishiftHome(server);
+		if (StringUtils.isEmpty(minishiftHome)) {
+			minishiftHome = getDefaultMinishiftHome();
+		}
+		return minishiftHome;
+	}
+
+	public static String getMinishiftHome(IServer server) {
+		if (server == null) {
+			return null;
+		}
+		return server.getAttribute(CDK3Server.MINISHIFT_HOME, (String) null);
+	}
+
+	public static String getDefaultMinishiftHome() {
+		String msHome = System.getenv(CDK32Server.ENV_MINISHIFT_HOME);
+		if( StringUtils.isEmpty(msHome)
+				|| !new File(msHome).exists()) {
+			msHome = new File(System.getProperty("user.home"), CDKConstants.CDK_RESOURCE_DOTMINISHIFT)
+					.getAbsolutePath();
+		}
+		return msHome;
+	}
 }

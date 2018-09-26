@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.cdk.server.core.listeners;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -32,6 +33,7 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
 import org.jboss.tools.openshift.common.core.connection.IConnectionsFactory;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
@@ -40,7 +42,6 @@ public class CDKOpenshiftUtility {
 
 	private static final String MINISHIFT_HOME_SUBDIR_OC = "oc";
 	private static final String MINISHIFT_HOME_SUBDIR_CACHE = "cache";
-	private static final String ENV_VAR_MINISHIFT_HOME = "minishift.home.location";
 
 	/**
 	 * Return the first connection that matches this server 
@@ -155,10 +156,12 @@ public class CDKOpenshiftUtility {
 
 	private String findOCInMinishiftHome(IServer server) {
 		String ocLocation = null;
-		String minishiftHome = server.getAttribute(ENV_VAR_MINISHIFT_HOME, (String) null);
-		if (minishiftHome == null) {
+		String minishiftHome = CDKServerUtility.getMinishiftHomeOrDefault(server);
+		if (StringUtils.isEmpty(minishiftHome)
+				|| !new File(minishiftHome).exists()) {
 			return null;
 		}
+		
 		Path miniShifthomePath = Paths.get(minishiftHome, MINISHIFT_HOME_SUBDIR_CACHE, MINISHIFT_HOME_SUBDIR_OC);
 		RecursiveExecutableFinder finder = new RecursiveExecutableFinder();
 		try {
