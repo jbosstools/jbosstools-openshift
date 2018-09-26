@@ -24,7 +24,12 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.launching.SocketUtil;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistryAdapter;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryOperation;
 
 import com.openshift.restclient.capability.CapabilityVisitor;
@@ -40,6 +45,7 @@ public class PortForwardingUtils {
 
 	/** Internal registry of {@link IPod}'s port-forwarding. */
 	private static final Map<IPod, IPortForwardable> REGISTRY = new HashMap<>();
+	private static final Map<IPod, IConnectionsRegistryListener> POD_LISTENERS = new HashMap<>();
 
 	private PortForwardingUtils() {
 	}
@@ -151,9 +157,23 @@ public class PortForwardingUtils {
 				return portForwarding;
 			}
 		}, null);
-		if (portForwarding != null) {
-			REGISTRY.put(pod, portForwarding);
-		}
+        if (portForwarding != null) {
+            REGISTRY.put(pod, portForwarding);
+            IConnectionsRegistryListener podListener = new ConnectionsRegistryAdapter() {
+                @Override
+                public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+                    if (newValue == null && oldValue instanceof IPod) {
+                        try {
+                            PortForwardingUtils.stopPortForwarding((IPod)oldValue, null);
+                        } catch (IOException e) {
+                            OpenShiftCoreActivator.logWarning("Error occured while stopping port forwarding for a deleted pod", e);
+                        }
+                    }
+                }
+            };
+            ConnectionsRegistrySingleton.getInstance().addListener(podListener);
+            POD_LISTENERS.put(pod, podListener);
+        }
 		return portForwarding;
 	}
 
@@ -193,6 +213,7 @@ public class PortForwardingUtils {
 			portForwarding.stop();
 		}
 		waitForPortsToGetFree(portForwarding.getPortPairs(), 5, stream);
+		ConnectionsRegistrySingleton.getInstance().removeListener(POD_LISTENERS.remove(pod));
 		return portForwarding;
 	}
 

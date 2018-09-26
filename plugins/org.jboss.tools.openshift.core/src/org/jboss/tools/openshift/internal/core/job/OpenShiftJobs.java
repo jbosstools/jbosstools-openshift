@@ -10,17 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.core.job;
 
-import java.io.IOException;
-
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
-import org.jboss.tools.openshift.internal.core.portforwarding.PortForwardingUtils;
 
-import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
@@ -50,21 +42,6 @@ public class OpenShiftJobs {
 	public static DeleteResourceJob createDeleteResourceJob(final IResource resource) {
 		if (resource instanceof IProject) {
 			return createDeleteProjectJob((IProject) resource);
-		} else if (resource instanceof IPod) {
-		    IJobChangeListener deletePodJobFinishedListener = new JobChangeAdapter() {
-		        
-		        @Override
-		        public void done(IJobChangeEvent event) {
-		            try {
-                        PortForwardingUtils.stopPortForwarding((IPod)resource, null);
-                    } catch (IOException e) {
-                        OpenShiftCoreActivator.logWarning("Error occured while stopping port forwarding for a deleted pod", e);
-                    }
-		        }
-		    };
-		    DeleteResourceJob deletePodJob = new DeleteResourceJob(resource);
-		    deletePodJob.addJobChangeListener(deletePodJobFinishedListener);
-		    return deletePodJob;
 		} else {
 			return new DeleteResourceJob(resource);
 		}
