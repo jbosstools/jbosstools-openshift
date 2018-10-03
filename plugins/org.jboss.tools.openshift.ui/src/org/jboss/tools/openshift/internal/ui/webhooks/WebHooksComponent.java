@@ -154,7 +154,7 @@ public class WebHooksComponent extends Composite {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String url = buildConfig.getBuildSource().getURI();
+				String url = buildConfig.getSourceURI();
 				url = StringUtils.removeEnd(url, ".git");
 				if (isGitHub(url)) {
 					//open https://github.com/<user>/<repo>/settings/hooks
