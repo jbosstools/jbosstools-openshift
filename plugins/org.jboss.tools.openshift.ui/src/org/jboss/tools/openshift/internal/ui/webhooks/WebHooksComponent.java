@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -123,7 +123,7 @@ public class WebHooksComponent extends Composite {
 		uriText.setText(webHook.getWebhookURL());
 		uriText.addMouseListener(onClickUriText(uriText));
 		uriText.setToolTipText("Click to copy to the clipboard");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.FILL).grab(true, false).applyTo(uriText);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(uriText);
 
 		Button copyToClipboard = new Button(parent, SWT.PUSH);
 		copyToClipboard.setImage(OpenShiftImages.COPY_TO_CLIPBOARD_IMG);
@@ -155,16 +155,13 @@ public class WebHooksComponent extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String url = buildConfig.getSourceURI();
-				url = StringUtils.removeEnd(url, ".git");
 				if (isGitHub(url)) {
-					//open https://github.com/<user>/<repo>/settings/hooks
-					if (!url.endsWith("/")) {
-						url = url + "/";
-					}
-					url += "settings/hooks";
+					url = getGithubWebhooksUrl(url);
+				} else {
+					url = StringUtils.removeEnd(url, ".git");
 				}
-				new BrowserUtility().checkedCreateExternalBrowser(url, OpenShiftUIActivator.PLUGIN_ID,
-						OpenShiftUIActivator.getDefault().getLog());
+				new BrowserUtility().checkedCreateExternalBrowser(url, 
+					OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 			}
 		};
 	}
@@ -173,16 +170,7 @@ public class WebHooksComponent extends Composite {
 		uriText.selectAll();
 		String uriToCopy = uriText.getText();
 		copyToClipBoard(uriToCopy);
-
 		notifyCopied(uriText);
-	}
-
-	private void notifyCopied(final Text uriText) {
-		DefaultToolTip copiedNotification = new DefaultToolTip(uriText, ToolTip.NO_RECREATE, true);
-		copiedNotification.setText("Webhook copied to clipboard");
-		copiedNotification.setHideDelay(COPIED_NOTIFICATION_SHOW_DURATION);
-		copiedNotification.show(uriText.getLocation());
-		copiedNotification.deactivate();
 	}
 
 	private static boolean isGitHub(String gitUrl, IWebhookTrigger webHook) {
@@ -199,6 +187,16 @@ public class WebHooksComponent extends Composite {
 		}
 	}
 
+	private String getGithubWebhooksUrl(String url) {
+		// https://github.com/<user>/<repo>/settings/hooks
+		url = StringUtils.removeEnd(url, ".git");
+		if (!url.endsWith("/")) {
+			url = url + "/";
+		}
+		url += "settings/hooks";
+		return url;
+	}
+	
 	private static boolean isGitHub(String gitUrl) {
 		return StringUtils.startsWith(gitUrl, "https://github.com/");
 	}
@@ -211,4 +209,12 @@ public class WebHooksComponent extends Composite {
 		clipboard.dispose();
 	}
 
+	private void notifyCopied(final Text uriText) {
+		DefaultToolTip copiedNotification = new DefaultToolTip(uriText, ToolTip.NO_RECREATE, true);
+		copiedNotification.setText("Webhook copied to clipboard");
+		copiedNotification.setHideDelay(COPIED_NOTIFICATION_SHOW_DURATION);
+		copiedNotification.show(uriText.getLocation());
+		copiedNotification.deactivate();
+	}
+	
 }
