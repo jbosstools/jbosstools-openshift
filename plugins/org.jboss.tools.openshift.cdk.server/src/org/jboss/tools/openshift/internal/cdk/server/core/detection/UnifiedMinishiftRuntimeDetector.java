@@ -147,6 +147,9 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	
 	private File folderWhiteListBin(File folder) {
 		String[] children = folder.list();
+		if( children == null )
+			return null;
+
 		for( int i = 0; i < children.length; i++ ) {
 		     Matcher m = WHITELIST_PATTERN.matcher(children[i]);
 		     if( m.matches()) {
