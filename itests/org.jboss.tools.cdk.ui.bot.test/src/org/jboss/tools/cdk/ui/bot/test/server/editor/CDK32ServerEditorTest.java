@@ -63,7 +63,7 @@ public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 	
 	@BeforeClass
 	public static void setupCDK32ServerEditorTest() {
-		MINISHIFT_PATH = serverRequirement.getServerAdapter().getMinishiftBinary().toAbsolutePath().toString();;
+		MINISHIFT_PATH = serverRequirement.getServerAdapter().getMinishiftBinary().toAbsolutePath().toString();
 	}
 	
 	@Before
