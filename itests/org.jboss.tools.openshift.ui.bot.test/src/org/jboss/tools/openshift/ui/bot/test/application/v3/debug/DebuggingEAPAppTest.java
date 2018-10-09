@@ -69,6 +69,7 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirem
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
@@ -90,7 +91,7 @@ import org.junit.runner.RunWith;
 @RequiredBasicConnection
 @CleanConnection
 @RequiredProject
-@RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
+@RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE_RESOURCES_PATH)
 public class DebuggingEAPAppTest extends AbstractTest {
 
 	private static Logger LOGGER = new Logger(DebuggingEAPAppTest.class);
@@ -125,7 +126,7 @@ public class DebuggingEAPAppTest extends AbstractTest {
 
 		disableShowConsoleWhenOutputChanges();
 		
-		serverAdapter = new ServerAdapter(Version.OPENSHIFT3, "eap-app", "Service");
+		serverAdapter = new ServerAdapter(Version.OPENSHIFT3, OpenShiftResources.EAP_SERVICE, "Service");
 		try {
 			restartServerInDebug(serverAdapter);
 		} catch (WaitTimeoutExpiredException ex) {
@@ -438,7 +439,7 @@ public class DebuggingEAPAppTest extends AbstractTest {
 	private static void createServerAdapter() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).refresh();
-		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getServicesWithName("eap-app").get(0)
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getServicesWithName(OpenShiftResources.EAP_SERVICE).get(0)
 				.createServerAdapter();
 	}
 

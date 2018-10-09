@@ -32,6 +32,7 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRe
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -44,7 +45,7 @@ import org.junit.Test;
 @OCBinary
 @RequiredBasicConnection
 @RequiredProject
-@RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
+@RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE_RESOURCES_PATH)
 public class TriggerBuildTest extends AbstractTest {
 
 	@InjectRequirement

@@ -37,6 +37,7 @@ import org.eclipse.reddeer.swt.impl.text.DefaultText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -98,7 +99,7 @@ public class TemplateParametersTest extends AbstractTest {
 	@Test
 	public void testTemplateParametersDefaultValues() {
 		assertTrue("Value for " + APPLICATION_NAME + " parameter should be eap-app.",
-				new DefaultTable().getItem(APPLICATION_NAME).getText(1).equals("eap-app"));
+				new DefaultTable().getItem(APPLICATION_NAME).getText(1).equals(OpenShiftResources.EAP_SERVICE));
 		assertTrue("Value for " + GENERIC_SECRET + " parameter should be " + SECRET_VALUE,
 				new DefaultTable().getItem(GENERIC_SECRET).getText(1).equals(SECRET_VALUE));
 		assertTrue("Value for " + GITHUB_SECRET + " parameter should be " + SECRET_VALUE,
