@@ -37,10 +37,13 @@ public abstract class AbstractOpenShiftExplorerItem {
 	}
 	
 	public void refresh() {
+		refresh(TimePeriod.LONG);
+	}
+	
+	public void refresh(TimePeriod timePeriod) {
 		select();
-		new ContextMenuItem(OpenShiftLabel.ContextMenu.REFRESH).select();	
-		
-		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.REFRESH).select();			
+		new WaitWhile(new JobIsRunning(), timePeriod);
 	}
 	
 	public void select() {

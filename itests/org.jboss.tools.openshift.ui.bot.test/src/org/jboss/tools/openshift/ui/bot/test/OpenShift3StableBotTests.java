@@ -15,6 +15,7 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.CreateServer
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ImportApplicationWizardGitTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ImportApplicationWizardTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.PublishChangesTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapterFromResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapterWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.CreateResourcesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.DeleteResourceTest;
