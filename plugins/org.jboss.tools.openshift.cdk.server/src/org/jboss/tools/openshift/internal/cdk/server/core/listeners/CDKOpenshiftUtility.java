@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2016 Red Hat, Inc. 
+ * Copyright (c) 2016-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -10,8 +10,17 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.cdk.server.core.listeners;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -24,11 +33,15 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
 import org.jboss.tools.openshift.common.core.connection.IConnectionsFactory;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
 
 public class CDKOpenshiftUtility {
+
+	private static final String MINISHIFT_HOME_SUBDIR_OC = "oc";
+	private static final String MINISHIFT_HOME_SUBDIR_CACHE = "cache";
 
 	/**
 	 * Return the first connection that matches this server 
@@ -55,13 +68,13 @@ public class CDKOpenshiftUtility {
 	 */
 	public IConnection[] findExistingOpenshiftConnections(IServer server, ServiceManagerEnvironment adb) {
 		Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
-		ArrayList<IConnection> ret = new ArrayList<IConnection>();
+		ArrayList<IConnection> ret = new ArrayList<>();
 		for (IConnection c : connections) {
 			if (serverMatchesConnection(server, c, adb)) {
 				ret.add(c);
 			}
 		}
-		return (IConnection[]) ret.toArray(new IConnection[ret.size()]);
+		return ret.toArray(new IConnection[ret.size()]);
 	}
 
 	public boolean serverMatchesConnection(IServer server, IConnection c, ServiceManagerEnvironment adb) {
@@ -92,11 +105,11 @@ public class CDKOpenshiftUtility {
 		return ms;
 	}
 
-	public IConnection createOpenshiftConnection(ServiceManagerEnvironment env) {
-		return createOpenshiftConnection(env, ConnectionsRegistrySingleton.getInstance());
+	public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment env) {
+		return createOpenshiftConnection(server, env, ConnectionsRegistrySingleton.getInstance());
 	}
 
-	public IConnection createOpenshiftConnection(ServiceManagerEnvironment env, ConnectionsRegistry registry) {
+	public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment env, ConnectionsRegistry registry) {
 
 		// Create the connection
 		String soughtHost = env.openshiftHost + ":" + env.openshiftPort;
@@ -121,17 +134,43 @@ public class CDKOpenshiftUtility {
 		}
 		((Connection) con).setRememberPassword(true);
 
-		String ocLoc = env.get(ServiceManagerEnvironmentLoader.OC_LOCATION_KEY);
-		if (ocLoc != null) {
-			((Connection) con).setExtendedProperty(ICommonAttributes.OC_LOCATION_KEY, ocLoc);
-			((Connection) con).setExtendedProperty(ICommonAttributes.OC_OVERRIDE_KEY, true);
-		}
+		setOcLocation(env, con, server);
 
 		updateOpenshiftConnection(env, con, false);
 
 		if (registry != null)
 			registry.add(con);
 		return con;
+	}
+
+	private void setOcLocation(ServiceManagerEnvironment env, IConnection con, IServer server) {
+		String ocLocation = env.get(ServiceManagerEnvironmentLoader.OC_LOCATION_KEY);
+		if (ocLocation == null) {
+			ocLocation = findOCInMinishiftHome(server);
+		}
+		if (ocLocation != null) {
+			((Connection) con).setExtendedProperty(ICommonAttributes.OC_LOCATION_KEY, ocLocation);
+			((Connection) con).setExtendedProperty(ICommonAttributes.OC_OVERRIDE_KEY, true);
+		}
+	}
+
+	private String findOCInMinishiftHome(IServer server) {
+		String ocLocation = null;
+		String minishiftHome = CDKServerUtility.getMinishiftHomeOrDefault(server);
+		if (StringUtils.isEmpty(minishiftHome)
+				|| !new File(minishiftHome).exists()) {
+			return null;
+		}
+		
+		Path miniShifthomePath = Paths.get(minishiftHome, MINISHIFT_HOME_SUBDIR_CACHE, MINISHIFT_HOME_SUBDIR_OC);
+		RecursiveExecutableFinder finder = new RecursiveExecutableFinder();
+		try {
+			Files.walkFileTree(miniShifthomePath, finder);
+			ocLocation = finder.getOCLocation();
+		} catch (IOException e) {
+			// ignore
+		}
+		return ocLocation;
 	}
 
 	public void updateOpenshiftConnection(ServiceManagerEnvironment env, IConnection con) {
@@ -143,6 +182,29 @@ public class CDKOpenshiftUtility {
 		((Connection) con).setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, dockerReg);
 		if (fireUpdate) {
 			ConnectionsRegistrySingleton.getInstance().update(con, con);
+		}
+	}
+
+	private class RecursiveExecutableFinder extends SimpleFileVisitor<Path> {
+
+		private String executable = null;
+
+		@Override
+	    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+	        throws IOException {
+		        Objects.requireNonNull(file);
+		        Objects.requireNonNull(attrs);
+
+		        if (Files.isExecutable(file)) {
+					this.executable = file.toAbsolutePath().toString();
+					return FileVisitResult.TERMINATE;
+		        } else {
+					return FileVisitResult.CONTINUE;
+		        }
+	    }
+
+		public String getOCLocation() {
+			return executable;
 		}
 	}
 

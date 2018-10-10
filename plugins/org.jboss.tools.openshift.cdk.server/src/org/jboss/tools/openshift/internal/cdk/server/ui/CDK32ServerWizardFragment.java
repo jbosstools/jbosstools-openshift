@@ -14,7 +14,6 @@ import java.io.File;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -31,11 +30,12 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
-import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK32Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK3Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.VersionUtil;
 import org.jboss.tools.openshift.internal.cdk.server.core.detection.MinishiftVersionLoader.MinishiftVersions;
+import org.jboss.tools.openshift.internal.cdk.server.core.listeners.CDKServerUtility;
 
 public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 	protected String profileName, minishiftHome;
@@ -75,7 +75,7 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 		homeData.widthHint = 100;
 		Text msHomeText = new Text(main, SWT.SINGLE | SWT.BORDER);
 		msHomeText.setLayoutData(homeData);
-		String defMSHome = getDefaultMinishiftHome();
+		String defMSHome = CDKServerUtility.getDefaultMinishiftHome();
 		msHomeText.setText(defMSHome);
 		Button msHomeBrowse = new Button(main, SWT.PUSH);
 		msHomeBrowse.setText("Browse...");
@@ -101,13 +101,6 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 		msHomeText.addModifyListener(msHomeModListener);
 	}	
 	
-	private String getDefaultMinishiftHome() {
-		String msHome = System.getenv(CDK32Server.ENV_MINISHIFT_HOME);
-		if( msHome == null || msHome.isEmpty() || !(new File(msHome).exists())) {
-			return new Path(System.getProperty("user.home")).append(CDKConstants.CDK_RESOURCE_DOTMINISHIFT).toOSString();
-		}
-		return msHome;
-	}
 	protected void createProfileWidgets(Composite main) {
 		// Point to file / folder to run
 		Label l = new Label(main, SWT.NONE);
@@ -146,6 +139,8 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 			IServerWorkingCopy swc = (IServerWorkingCopy) s;
 			if (profileName != null && !profileName.isEmpty()) {
 				swc.setAttribute(CDK32Server.PROFILE_ID, profileName);
+			}
+			if (!StringUtils.isEmpty(minishiftHome)) {
 				swc.setAttribute(CDK3Server.MINISHIFT_HOME, minishiftHome);
 			}
 		}

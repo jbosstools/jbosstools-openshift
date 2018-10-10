@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2016 Red Hat, Inc. 
+ * Copyright (c) 2016-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -71,7 +72,7 @@ public class CDKRegistryTest extends TestCase {
 		IServer cdkServer = createServer("openshift33");
 
 		ServiceManagerEnvironment adb = createLoader(cdkServer);
-		IConnection con = util.createOpenshiftConnection(adb, ConnectionsRegistrySingleton.getInstance());
+		IConnection con = util.createOpenshiftConnection(cdkServer, adb, ConnectionsRegistrySingleton.getInstance());
 		assertNotNull(con);
 		// Can't test the registry provider model bc it hides the internal details
 		CDKRegistryProvider prov = new CDKRegistryProvider() {
@@ -104,7 +105,7 @@ public class CDKRegistryTest extends TestCase {
 		CredentialService.getCredentialModel()
 				.removeCredentials(CredentialService.getCredentialModel().getDomain("redhat.com"), "user");
 
-		ArrayList<IConnection> cons = new ArrayList(ConnectionsRegistrySingleton.getInstance().getAll());
+		List<IConnection> cons = new ArrayList<>(ConnectionsRegistrySingleton.getInstance().getAll());
 		Iterator<IConnection> con = cons.iterator();
 		while (con.hasNext()) {
 			ConnectionsRegistrySingleton.getInstance().remove(con.next());
@@ -182,12 +183,6 @@ public class CDKRegistryTest extends TestCase {
 				return allTypes[i];
 		}
 		return null;
-	}
-
-	private String getDotCDKFolder() {
-		IPath stateLoc = ((Plugin) CDKCoreActivator.getDefault()).getStateLocation();
-		IPath folder = stateLoc.append("testFolder");
-		return folder.toOSString();
 	}
 
 	private String getDotCDKFile() {
