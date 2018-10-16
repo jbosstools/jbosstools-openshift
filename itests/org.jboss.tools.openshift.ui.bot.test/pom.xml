@@ -88,6 +88,12 @@
 				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift3BotTests</test.class>
 			</properties>
 		</profile>
+		<profile>
+			<id>eap-cd</id>
+			<properties>
+				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift3EAPCDTests</test.class>
+			</properties>
+		</profile>
 	</profiles>
 	<repositories>
 		<!-- needed for org.jboss.tools.central -->
