@@ -17,7 +17,6 @@ import java.io.File;
 import java.util.List;
 
 import org.eclipse.reddeer.common.exception.RedDeerException;
-import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
@@ -34,37 +33,32 @@ import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
-import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
-import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
-import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
 import org.jboss.tools.openshift.reddeer.wizard.v3.NewOpenShift3ApplicationWizard;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(RedDeerSuite.class)
 @OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection
+@CleanConnection
+@RequiredProject
 public class HandleCustomTemplateTest extends AbstractTest {
 
 	@InjectRequirement
 	private static OpenShiftConnectionRequirement connectionReq;
 	
-	@Before
-	public void setUp() {
-		// If project does not exists, e.g. something went south in recreation earlier, create it
-		if (!new OpenShiftProjectExists(DatastoreOS3.PROJECT1_DISPLAYED_NAME, connectionReq.getConnection()).test()) {
-			new OpenShiftExplorerView().getOpenShift3Connection(connectionReq.getConnection()).createNewProject();
-		}
-	}
+	@InjectRequirement
+	private static OpenShiftProjectRequirement projectReq;
 	
 	@Test
 	public void testCreateTemplateFromFileAndUseItInWizard() {
@@ -74,10 +68,10 @@ public class HandleCustomTemplateTest extends AbstractTest {
 	}
 	
 	private void assertTemplateIsUsableInApplicationWizard() {
-		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer();
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(projectReq.getProjectName());
 		
 		try {
-			new DefaultTreeItem("helloworld-sample (instant-app) - " + DatastoreOS3.PROJECT1);
+			new DefaultTreeItem("helloworld-sample (instant-app) - " + projectReq.getProjectName());
 		} catch (RedDeerException ex) {
 			fail("Template is not visible in New OpenShift application wizard although it should be.");
 		}
@@ -92,7 +86,7 @@ public class HandleCustomTemplateTest extends AbstractTest {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
 		
-		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject().select();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_RESOURCE).select();
 		
 		new DefaultShell(OpenShiftLabel.Shell.NEW_RESOURCE);
@@ -110,8 +104,9 @@ public class HandleCustomTemplateTest extends AbstractTest {
 		
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_RESOURCE));
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-		
-		List<OpenShiftResource> templates = explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject().
+	
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).refresh();
+		List<OpenShiftResource> templates = explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).
 				getOpenShiftResources(Resource.TEMPLATE);
 		assertTrue("There should be precisely 1 created template for the project.",
 				templates.size() > 0);
@@ -121,22 +116,4 @@ public class HandleCustomTemplateTest extends AbstractTest {
 				+ "helloworld-sample.", templateName.equals("helloworld-sample"));
 	}
 	
-	@After
-	public void cleanUp() {
-		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		explorer.reopen();
-		
-		OpenShift3Connection connection  = explorer.getOpenShift3Connection(connectionReq.getConnection());
-		connection.getProject().delete();
-		
-		try {
-			new WaitWhile(new OpenShiftProjectExists(connectionReq.getConnection()));
-		} catch (WaitTimeoutExpiredException ex) {
-			connection.refresh();
-		
-			new WaitWhile(new OpenShiftProjectExists(connectionReq.getConnection()), TimePeriod.getCustom(5));
-		}
-		
-		connection.createNewProject();
-	}
 }

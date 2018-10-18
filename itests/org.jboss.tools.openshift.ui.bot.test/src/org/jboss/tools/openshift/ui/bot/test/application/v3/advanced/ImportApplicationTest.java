@@ -35,24 +35,26 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.hamcrest.Matcher;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.ButtonWithTextIsAvailable;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -60,11 +62,12 @@ import org.junit.runner.RunWith;
 @OpenPerspective(value=JBossPerspective.class)
 @OCBinary(cleanup=false, setOCInPrefs=true)
 @RequiredBasicConnection
+@CleanConnection
 @RequiredProject
 @RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE_RESOURCES_PATH)
 public class ImportApplicationTest extends AbstractTest {
 	
-	public static String PROJECT_NAME = "jboss-helloworld";
+	public static String PROJECT_NAME = "helloworld";
 	
 	private static final String GIT_REPO_DIRECTORY = "target/git_repo";
 	
@@ -73,23 +76,7 @@ public class ImportApplicationTest extends AbstractTest {
 	
 	@InjectRequirement
 	private static OpenShiftProjectRequirement projectReq;
-	
-	@Before
-	public void cleanGitFolder() {
-		ProjectExplorer projectExplorer = new ProjectExplorer();
-		projectExplorer.open();
-		
-		if (projectExplorer.containsProject(PROJECT_NAME)) {
-			projectExplorer.getProject(PROJECT_NAME).delete(true);
-		}
-		
-		try {
-			TestUtils.delete(new File(GIT_REPO_DIRECTORY));
-		} catch (IOException e) {
-			throw new RuntimeException("Deletion of git repo was unsuccessfull.", e);
-		}
-	}
-	
+
 	@Test
 	public void testImportOpenShiftApplicationViaOpenShiftExplorer() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
@@ -115,7 +102,7 @@ public class ImportApplicationTest extends AbstractTest {
 		
 		ProjectExplorer projectExplorer = new ProjectExplorer();
 		projectExplorer.open();
-		assertTrue("There should be imported kitchen sink project, but there is not",
+		assertTrue("There should be imported kitchensink project, but there is not",
 				projectExplorer.containsProject(PROJECT_NAME));
 		
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
@@ -160,5 +147,28 @@ public class ImportApplicationTest extends AbstractTest {
 				projectExplorer.containsProject(PROJECT_NAME));
 		
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+	}
+	
+	@After
+	public void cleanUp() {
+		//Close cheatsheet dialog if it is opened
+		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
+		
+		cleanExplorerGitFolder();
+	}
+	
+	private static void cleanExplorerGitFolder() {
+		ProjectExplorer projectExplorer = new ProjectExplorer();
+		projectExplorer.open();
+		
+		if (projectExplorer.containsProject(PROJECT_NAME)) {
+			projectExplorer.getProject(PROJECT_NAME).delete(true);
+		}
+		
+		try {
+			TestUtils.delete(new File(GIT_REPO_DIRECTORY));
+		} catch (IOException e) {
+			throw new RuntimeException("Deletion of git repo was unsuccessfull.", e);
+		}
 	}
 }

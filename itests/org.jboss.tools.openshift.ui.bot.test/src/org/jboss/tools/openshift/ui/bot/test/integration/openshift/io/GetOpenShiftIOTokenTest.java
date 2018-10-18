@@ -52,7 +52,7 @@ public class GetOpenShiftIOTokenTest extends AbstractTest {
 		InternalBrowser internalBrowser = new InternalBrowser(browser);
 		
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-		new WaitUntil(new BrowserContainsText("OpenShift.io Developer Preview"), TimePeriod.LONG);
+		new WaitUntil(new BrowserContainsText("OpenShift.io"), TimePeriod.getCustom(120));
 		
 		internalBrowser.execute(String.format("document.getElementById(\"username\").value=\"%s\"", DatastoreOS3.OPENSHIFT_IO_USERNAME));
 		internalBrowser.execute(String.format("document.getElementById(\"password\").value=\"%s\"", DatastoreOS3.OPENSHIFT_IO_PASSWORD));

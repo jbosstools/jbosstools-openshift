@@ -40,7 +40,7 @@ import org.junit.Test;
 public class ImportApplicationWizardGitTest extends ImportApplicationBase{
 	
 	private File gitFolder = new File(System.getProperty("user.home") + File.separatorChar + "git");
-	private File projectFolder = new File(gitFolder, OpenShiftResources.NODEJS_GIT_NAME);	
+	private File projectFolder = new File(gitFolder, OpenShiftResources.NODEJS_GIT_NAME);
 	
 	@Test
 	public void testNotGitRepo() {

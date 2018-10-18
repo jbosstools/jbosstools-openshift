@@ -63,6 +63,11 @@ public abstract class ImportApplicationBase extends AbstractTest {
 	protected static Service service;
 	protected static OpenShiftProject project;
 	
+	@Before
+	public void cleanUp(){
+		cleanClonnedProjects();
+	}
+	
 	@BeforeClass
 	public static void init(){
 		OpenShiftExplorerView openshiftExplorer = new OpenShiftExplorerView();
@@ -77,12 +82,7 @@ public abstract class ImportApplicationBase extends AbstractTest {
 		assertNotNull("OpenShift service '" + OpenShiftResources.NODEJS_SERVICE 
 					+ "' was not found!", service);
 	}
-	
-	@Before
-	public void cleanUp(){
-		cleanClonnedProjects();
-	}
-	
+
 	@AfterClass
 	public static void cleanClonnedProjects() {
 		ProjectExplorer projectExplorer = new ProjectExplorer();
