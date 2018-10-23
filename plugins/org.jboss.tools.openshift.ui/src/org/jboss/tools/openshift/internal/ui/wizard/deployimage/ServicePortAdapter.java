@@ -33,12 +33,13 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 	private String containerPort;
 	private String protocol;
 	private boolean routePort;
+	private String nodePort;
 
 	public ServicePortAdapter(IPort port) {
-		name = port.getName();
+		this.name = port.getName();
 		this.port = port.getContainerPort();
-		containerPort = String.valueOf(port.getContainerPort());
-		protocol = port.getProtocol();
+		this.containerPort = String.valueOf(port.getContainerPort());
+		this.protocol = port.getProtocol();
 	}
 
 	public ServicePortAdapter(ServicePortAdapter port) {
@@ -51,6 +52,7 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 		this.port = port.getPort();
 		this.containerPort = "0".equals(port.getTargetPort()) ? String.valueOf(this.port) : port.getTargetPort();
 		this.protocol = port.getProtocol();
+		this.nodePort = port.getNodePort();
 	}
 
 	public ServicePortAdapter() {
@@ -116,6 +118,15 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 		firePropertyChange(ROUTE_PORT, this.routePort, this.routePort = routePort);
 	}
 
+	@Override
+	public String getNodePort() {
+		return nodePort;
+	}
+
+	@Override
+	public void setNodePort(String port) {
+		this.nodePort = port;
+	}
 	
 	public void update(ServicePortAdapter port) {
 		setName(port.getName());
@@ -123,6 +134,7 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 		setTargetPort(port.getTargetPort());
 		setProtocol(port.getProtocol());
 		setRoutePort(port.isRoutePort());
+		setNodePort(port.getNodePort());
 	}
 
 	@Override
@@ -134,6 +146,7 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
 		result = prime * result + ((routePort) ? 1231 : 1237);
+		result = prime * result + ((nodePort == null) ? 0 : nodePort.hashCode());
 		return result;
 	}
 
@@ -151,20 +164,33 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 		if (containerPort == null) {
 			if (other.containerPort != null)
 				return false;
-		} else if (!containerPort.equals(other.containerPort))
+		} else if (!containerPort.equals(other.containerPort)) {
 			return false;
+		}
 		if (name == null) {
 			if (other.name != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!name.equals(other.name)) {
 			return false;
+		}
 		if (protocol == null) {
 			if (other.protocol != null)
 				return false;
-		} else if (!protocol.equals(other.protocol))
+		} else if (!protocol.equals(other.protocol)) {
 			return false;
-		else if (routePort != other.routePort)
+		} 
+	
+		if (routePort != other.routePort) {
 			return false;
+		} 
+		
+		if (nodePort == null) {
+			if (other.nodePort != null)
+				return false;
+		} else if (!nodePort.equals(other.nodePort)) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -174,7 +200,6 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 	@Override
 	public String toString() {
 		return "ServicePortAdapter [name=" + name + ", port=" + port + ", containerPort=" + containerPort
-				+ ", protocol=" + protocol + ", routePort=" + routePort + "]";
+				+ ", protocol=" + protocol + ", routePort=" + routePort + ", nodePort=" + nodePort + "]";
 	}
-
 }
