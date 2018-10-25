@@ -20,6 +20,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -30,6 +31,9 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.core.matcher.WithTextMatcher;
+import org.eclipse.reddeer.eclipse.condition.ConsoleHasNoChange;
+import org.eclipse.reddeer.eclipse.debug.ui.views.launch.LaunchView;
+import org.eclipse.reddeer.eclipse.debug.ui.views.variables.VariablesView;
 import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.eclipse.ui.perspectives.DebugPerspective;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
@@ -41,7 +45,9 @@ import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.condition.EditorWithTitleIsActive;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.impl.editor.TextEditor;
@@ -66,6 +72,7 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter;
 import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter.Version;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.condition.SuspendedTreeItemIsReady;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.After;
 import org.junit.Assert;
@@ -107,7 +114,6 @@ public class NodeJSAppDebugTest extends AbstractTest {
 
 	@Before
 	public void setUp() {
-		TestUtils.setUpOcBinary();
 		TestUtils.cleanupGitFolder(OpenShiftResources.NODEJS_GIT_NAME);
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
@@ -116,10 +122,11 @@ public class NodeJSAppDebugTest extends AbstractTest {
 		this.project.expand();
 
 		// import application
-		this.project.getService(OpenShiftResources.NODEJS_SERVICE).select();
+		this.project.getServicesWithName(OpenShiftResources.NODEJS_SERVICE).get(0).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
 		new DefaultShell(OpenShiftLabel.Shell.IMPORT_APPLICATION);
 		new FinishButton().click();
+		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG, false);
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
 
 		// setup server adapter
@@ -127,6 +134,8 @@ public class NodeJSAppDebugTest extends AbstractTest {
 		this.project.getService(OpenShiftResources.NODEJS_SERVICE).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_ADAPTER_FROM_EXPLORER).select();
 		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);
+		new LabeledText("Eclipse Project: ").setText(OpenShiftResources.NODEJS_GIT_NAME);
+		new LabeledText("Source Path: ").setText("${workspace_loc:/nodejs-ex}");
 		new FinishButton().click();
 
 		new WaitWhile(new ShellIsAvailable(""), TimePeriod.LONG);
@@ -135,6 +144,8 @@ public class NodeJSAppDebugTest extends AbstractTest {
 		assertTrue("OpenShift 3 server adapter was not created.",
 				new ServerAdapterExists(Version.OPENSHIFT3, OpenShiftResources.NODEJS_SERVICE, "Service").test());
 
+		new WaitUntil(new ConsoleHasNoChange(), TimePeriod.LONG);
+		
 		// restart in debug
 		this.adapter = new ServerAdapter(Version.OPENSHIFT3, OpenShiftResources.NODEJS_SERVICE, "Service");
 		this.adapter.select();
@@ -184,6 +195,8 @@ public class NodeJSAppDebugTest extends AbstractTest {
 		TextEditor editor = new TextEditor("server.js");
 		setLineBreakpoint(editor, BREAKPOINT_LINE);
 		triggerDebugSession();
+		
+		checkIfDebugViewAndVariableViewAreLoaded();
 
 		// test couple of js variables
 		TreeItem var_db = getVariable(VAR_db);
@@ -338,6 +351,74 @@ public class NodeJSAppDebugTest extends AbstractTest {
 		public String description() {
 			return "tree contains item '" + matcher.toString();
 		}
+	}
+	
+	private void checkIfDebugViewAndVariableViewAreLoaded() {
+		LaunchView debugView = new LaunchView();
+		debugView.open();
+
+		ensureCorrectFrameIsSelected(debugView);
+
+		VariablesView variablesView = new VariablesView();
+		variablesView.open();
+
+		new WaitUntil(new AbstractWaitCondition() {
+
+			@Override
+			public boolean test() {
+				try {
+					TreeItem variable = new DefaultTreeItem(VAR_db);
+					variable.select();
+					return variable.isSelected();
+				} catch (Exception e) {
+					return false;
+				}
+			}
+
+			@Override
+			public String description() {
+				return "Variable is not selected";
+			}
+		}, TimePeriod.LONG);
+	}
+	
+	private void ensureCorrectFrameIsSelected(LaunchView debugView) {
+		List<TreeItem> items;
+		// get frames of suspended thread. If the desired frame is not present,
+		// try reopening Debug view
+		items = getSuspendedThreadTreeItem(debugView).getItems();
+		if (items.size() < 2) {
+			// no stack trace available. Try to close&reopen Debug view (dirty
+			// hack)
+			debugView.close();
+			debugView = new LaunchView();
+			debugView.open();
+			items = getSuspendedThreadTreeItem(debugView).getItems();
+		}
+	}
+	
+	private TreeItem getSuspendedThreadTreeItem(LaunchView debugView) {
+		// get top item
+		debugView.activate();
+		DefaultTree parent = new DefaultTree();
+		TreeItem remoteDebuggerTreeItem = parent.getItems().stream().filter(containsStringPredicate("Remote debugger"))
+				.findFirst().get();
+
+		List<TreeItem> items = remoteDebuggerTreeItem.getItems();
+		TreeItem openJDKTreeItem = items.get(0);
+
+		// this could (and will) change when run with another JDK - need
+		// investigation
+		assertTrue(openJDKTreeItem.getText().contains("OpenJDK"));
+
+		// wait until we can see the suspended thread
+		SuspendedTreeItemIsReady suspendedTreeItemIsReady = new SuspendedTreeItemIsReady(openJDKTreeItem);
+		new WaitUntil(suspendedTreeItemIsReady, TimePeriod.VERY_LONG);
+		return suspendedTreeItemIsReady.getSuspendedTreeItem();
+	}
+	
+	private Predicate<TreeItem> containsStringPredicate(String string) {
+		return treeItem -> treeItem.getText().contains(string);
 	}
 
 }
