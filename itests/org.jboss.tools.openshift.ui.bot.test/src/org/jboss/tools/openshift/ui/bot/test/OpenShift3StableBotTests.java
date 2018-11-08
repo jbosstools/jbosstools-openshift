@@ -113,6 +113,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	// Server adapter
 	ServerAdapterWizardHandlingTest.class,
 	CreateServerAdapterTest.class,
+	ServerAdapterFromResourceTest.class,
 	PublishChangesTest.class,
 })
 public class OpenShift3StableBotTests extends AbstractBotTests {
