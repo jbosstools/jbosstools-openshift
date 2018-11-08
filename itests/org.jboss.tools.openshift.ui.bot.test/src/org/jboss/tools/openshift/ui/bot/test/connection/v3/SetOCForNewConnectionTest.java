@@ -51,9 +51,9 @@ import org.junit.runner.RunWith;
 @CleanOpenShiftExplorer
 public class SetOCForNewConnectionTest extends AbstractTest {
 
-	private static final String OC_370_URL_LINUX = "https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit.tar.gz";
-	private static final String OC_370_URL_WINDOWS = "https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-windows.zip";
-	private static final String OC_370_URL_MAC = "https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-mac.zip";
+	private static final String OC_URL_LINUX = "https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz";
+	private static final String OC_URL_WINDOWS = "https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-windows.zip";
+	private static final String OC_URL_MAC = "https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-mac.zip";
 	private static final String PROPERTY_OC_LOCATION = "OC Client";
 	private String pathToOC;
 	Path ocTestDirectory = Paths.get("target", "octest");
@@ -75,15 +75,15 @@ public class SetOCForNewConnectionTest extends AbstractTest {
 		return pathToOC;
 	}
 
-	private String getOC370Url() {
+	private String getOCUrl() {
 		String url;
 		if (Platform.OS_LINUX.equals(Platform.getOS())) {
-			url = OC_370_URL_LINUX;
+			url = OC_URL_LINUX;
 		} else if (Platform.getOS().startsWith(Platform.OS_WIN32)
 				&& Platform.getOSArch().equals(Platform.ARCH_X86_64)) {
-			url = OC_370_URL_WINDOWS;
+			url = OC_URL_WINDOWS;
 		} else {
-			url = OC_370_URL_MAC;
+			url = OC_URL_MAC;
 		}
 		return url;
 	}
@@ -100,7 +100,7 @@ public class SetOCForNewConnectionTest extends AbstractTest {
 	@Test
 	@RunIf(conditionClass = ConnectionCredentialsExists.class)
 	public void testCreateNewV3BasicConnectionOC370() {
-		String ocClientPath = downloadOCBinary(getOC370Url(), ocTestDirectory.toString());
+		String ocClientPath = downloadOCBinary(getOCUrl(), ocTestDirectory.toString());
 		setBasicConnection(ocClientPath);
 		checkOCLocation(ocClientPath);
 		checkConnectionIsWorking();
@@ -118,7 +118,7 @@ public class SetOCForNewConnectionTest extends AbstractTest {
 	@Test
 	@RunIf(conditionClass = ConnectionCredentialsExists.class)
 	public void testCreateNewV3OAuthConnectionOC370() {
-		String ocClientPath = downloadOCBinary(getOC370Url(), ocTestDirectory.toString());
+		String ocClientPath = downloadOCBinary(getOCUrl(), ocTestDirectory.toString());
 		setOAuthConnection(ocClientPath);
 		checkOCLocation(ocClientPath);
 		checkConnectionIsWorking();

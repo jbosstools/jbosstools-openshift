@@ -58,7 +58,7 @@ import org.junit.runners.MethodSorters;
  */
 @RunWith(RedDeerSuite.class)
 @OpenPerspective(value = JBossPerspective.class)
-@OCBinary
+@OCBinary(setOCInPrefs = true)
 @RequiredBasicConnection
 @CleanConnection
 @RequiredProject

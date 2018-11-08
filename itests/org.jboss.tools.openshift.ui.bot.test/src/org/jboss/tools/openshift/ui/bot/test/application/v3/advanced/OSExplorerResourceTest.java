@@ -105,7 +105,7 @@ public class OSExplorerResourceTest extends AbstractTest {
 
 	private void deleteService(String serviceName) {
 		this.project.expand();
-		Service service = this.project.getService(serviceName);
+		Service service = this.project.getServicesWithName(serviceName).get(0);
 		assertTrue("Service does not exist!", service != null);
 		service.select();
 		new ContextMenuItem("Delete").select();
