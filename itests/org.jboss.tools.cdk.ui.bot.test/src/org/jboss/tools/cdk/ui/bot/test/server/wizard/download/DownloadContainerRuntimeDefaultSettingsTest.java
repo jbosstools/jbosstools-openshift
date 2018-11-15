@@ -14,7 +14,7 @@ import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.junit.Test;
 
 /**
- * Class covers runtime download test for defaults of CDK 3.2+ and Minishift 1.14
+ * Class covers runtime download test for defaults of CDK 3.2+ and Minishift 1.x
  * @author odockal
  *
  */
@@ -26,13 +26,13 @@ public class DownloadContainerRuntimeDefaultSettingsTest extends DownloadContain
 	}
 	
 	@Test
-	public void testDownloadingCDK350RuntimeDefaults() {
-		downloadAndVerifyContainerRuntime(CDKVersion.CDK350, USERNAME, PASSWORD, "", "", true, true);
+	public void testDownloadingCDK360RuntimeDefaults() {
+		downloadAndVerifyContainerRuntime(CDKVersion.CDK360, USERNAME, PASSWORD, "", "", true, true);
 	}
 	
 	@Test
 	public void testDownloadingMinishiftRuntimeDefaults() {
-		downloadAndVerifyContainerRuntime(CDKVersion.MINISHIFT1240, "", "", "", "", true, true);
+		downloadAndVerifyContainerRuntime(CDKVersion.MINISHIFT1261, "", "", "", "", true, true);
 	}
 	
 }

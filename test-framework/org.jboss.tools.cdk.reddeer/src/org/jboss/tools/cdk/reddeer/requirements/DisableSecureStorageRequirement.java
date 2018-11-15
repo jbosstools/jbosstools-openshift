@@ -91,5 +91,10 @@ public class DisableSecureStorageRequirement implements Requirement<DisableSecur
 		return null;
 	}
 
+	@Override
+	public long getPriority() {
+		return 1000;
+	}
+	
 }
 

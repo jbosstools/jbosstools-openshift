@@ -15,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.tools.cdk.reddeer.core.enums.CDKRuntimeOS;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
@@ -34,7 +33,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RemoveCDKServers
 @ContainerRuntimeServer(
-		version = CDKVersion.CDK350,
+		version = CDKVersion.CDK360,
 		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		usernameProperty="developers.username",
@@ -76,11 +75,15 @@ public class CDKImageRegistryUrlValidatorTest extends CDKImageRegistryUrlAbstrac
 	 */
 	@Test
 	public void testSettingOCToWorkspace() {
+		assertStringContains(wizard.getConnectionMessage(), SIGN_TO_OPENSHIFT);
+		wizard.openAdvancedSection();
+		wizard.switchOverrideOC(false);
 		assertStringContains(wizard.getConnectionMessage(), OC_IS_NOT_CONFIGURED);
 		wizard.cancel();
 		setupOCForWorkspace(DEFAULT_MINISHIFT_HOME);
 		wizard = getOpenshiftConnectionWizard(CDKTestUtils.findOpenShiftConnection(null, OPENSHIFT_USERNAME));
-		assertStringContains(wizard.getConnectionMessage(), CDKRuntimeOS.get() == CDKRuntimeOS.LINUX ? OC_3_11_RSYNC_WARNING : SIGN_TO_OPENSHIFT); 
+		// to pass this test, it requires to use cdk-3.7.0+
+		assertStringContains(wizard.getConnectionMessage(), SIGN_TO_OPENSHIFT); 
 		assertTrue(wizard.getOCLocationLabel().getText().endsWith(CDKUtils.IS_WINDOWS ? "oc.exe" : "oc"));  
 	}
 	
@@ -89,11 +92,14 @@ public class CDKImageRegistryUrlValidatorTest extends CDKImageRegistryUrlAbstrac
 	 */
 	@Test
 	public void testImageRegistryUrlValidator() {
+		wizard.openAdvancedSection();
+		wizard.switchOverrideOC(false);
 		wizard.cancel();
 		setupOCForWorkspace(DEFAULT_MINISHIFT_HOME);
 		wizard = getOpenshiftConnectionWizard(CDKTestUtils.findOpenShiftConnection(null, OPENSHIFT_USERNAME));
-		// test default description
-		assertStringContains(wizard.getConnectionMessage(), CDKRuntimeOS.get() == CDKRuntimeOS.LINUX ? OC_3_11_RSYNC_WARNING : SIGN_TO_OPENSHIFT); 
+		// test default description - oc < 3.11 on linux will show warning, other than that, it says "Please sign in to your OpenShift Server"
+		// to pass this test, it requires to use cdk-3.7.0+
+		assertStringContains(wizard.getConnectionMessage(), SIGN_TO_OPENSHIFT);
 		// test wrong image url
 		wizard.getImageRegistryUrl().setText("foo.con"); 
 		assertStringContains(wizard.getConnectionMessage(), VALIDATION_MESSAGE);
