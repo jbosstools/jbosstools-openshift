@@ -33,6 +33,7 @@ import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceOpenShift;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
@@ -58,7 +59,8 @@ import org.junit.runners.MethodSorters;
  */
 @RunWith(RedDeerSuite.class)
 @OpenPerspective(value = JBossPerspective.class)
-@OCBinary(setOCInPrefs = true)
+@OCBinary(cleanup=false, setOCInPrefs = true)
+@CleanOpenShiftExplorer
 @RequiredBasicConnection
 @CleanConnection
 @RequiredProject
