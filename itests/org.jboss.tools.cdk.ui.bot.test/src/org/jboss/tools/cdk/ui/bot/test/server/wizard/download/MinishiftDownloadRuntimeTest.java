@@ -36,7 +36,7 @@ public class MinishiftDownloadRuntimeTest extends DownloadContainerRuntimeAbstra
 
 	@Parameters(name = "{0}")
 	public static Collection<CDKVersion> data() {
-		return Arrays.asList(CDKVersion.MINISHIFT1240);
+		return Arrays.asList(CDKVersion.MINISHIFT1270);
 	}
 
 	@Override

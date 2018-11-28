@@ -35,7 +35,7 @@ public class DownloadLatestContainerRuntimeTest extends DownloadContainerRuntime
   
   @Parameters(name="{0}")
   public static Collection<CDKVersion> data() {
-    return Arrays.asList(CDKVersion.CDK311, CDKVersion.CDK350, CDKVersion.MINISHIFT1240);
+    return Arrays.asList(CDKVersion.CDK311, CDKVersion.CDK360, CDKVersion.MINISHIFT1270);
   }
   
   @Override

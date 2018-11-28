@@ -28,6 +28,7 @@ public enum CDKVersion {
 	CDK330 	(CDKServerAdapterType.CDK32, "3.3.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.3.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
 	CDK340 	(CDKServerAdapterType.CDK32, "3.4.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.4.0-2-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
 	CDK350 	(CDKServerAdapterType.CDK32, "3.5.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.5.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
+	CDK360 	(CDKServerAdapterType.CDK32, "3.6.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.6.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
 	MINISHIFT1140 (CDKServerAdapterType.MINISHIFT17, "1.14.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.14.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
 	MINISHIFT1151 (CDKServerAdapterType.MINISHIFT17, "1.15.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.15.1-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
 	MINISHIFT1161 (CDKServerAdapterType.MINISHIFT17, "1.16.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.16.1-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
@@ -38,7 +39,10 @@ public enum CDKVersion {
 	MINISHIFT1210 (CDKServerAdapterType.MINISHIFT17, "1.21.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.21.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
 	MINISHIFT1220 (CDKServerAdapterType.MINISHIFT17, "1.22.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.22.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
 	MINISHIFT1230 (CDKServerAdapterType.MINISHIFT17, "1.23.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.23.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
-	MINISHIFT1240 (CDKServerAdapterType.MINISHIFT17, "1.24.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.24.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch());
+	MINISHIFT1240 (CDKServerAdapterType.MINISHIFT17, "1.24.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.24.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
+	MINISHIFT1250 (CDKServerAdapterType.MINISHIFT17, "1.25.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.25.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
+	MINISHIFT1261 (CDKServerAdapterType.MINISHIFT17, "1.26.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.26.1-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
+	MINISHIFT1270 (CDKServerAdapterType.MINISHIFT17, "1.27.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.27.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch());
 	
 	private final CDKServerAdapterType type;
 	private final String version;

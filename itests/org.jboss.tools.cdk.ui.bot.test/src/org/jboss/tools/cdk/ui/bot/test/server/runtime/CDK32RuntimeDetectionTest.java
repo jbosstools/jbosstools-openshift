@@ -19,7 +19,7 @@ import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.Remo
 
 @RemoveCDKServers
 @ContainerRuntimeServer(
-		version = CDKVersion.CDK350,
+		version = CDKVersion.CDK360,
 		usernameProperty="developers.username",
 		passwordProperty="developers.password",
 		createServerAdapter=false)

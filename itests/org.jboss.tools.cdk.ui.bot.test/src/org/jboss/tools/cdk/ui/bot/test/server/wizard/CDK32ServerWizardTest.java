@@ -36,9 +36,9 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
 	
-	private static String MINISHIFT_PATH;	
+	private static String MINISHIFT_PATH;
 	
-	@BeforeClass	
+	@BeforeClass
 	public static void setupCDK3ServerEditorTest() {	
 		if (CDK32_MINISHIFT == null) {	
 			MINISHIFT_PATH = MOCK_CDK320;	

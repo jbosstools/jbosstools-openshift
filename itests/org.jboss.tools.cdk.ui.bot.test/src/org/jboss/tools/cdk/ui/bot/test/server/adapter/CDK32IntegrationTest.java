@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 @CleanOpenShiftExplorer
 @RemoveCDKServers
 @ContainerRuntimeServer(
-		version = CDKVersion.CDK350,
+		version = CDKVersion.CDK360,
 		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		usernameProperty="developers.username",

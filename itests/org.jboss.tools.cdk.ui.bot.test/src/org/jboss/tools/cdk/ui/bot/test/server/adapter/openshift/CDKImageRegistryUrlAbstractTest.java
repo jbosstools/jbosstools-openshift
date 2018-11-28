@@ -127,12 +127,12 @@ public abstract class CDKImageRegistryUrlAbstractTest extends CDKServerAdapterAb
 	}
 	
 	protected void assertStringContains(String original, String toContain) {
-		assertTrue("\"" + original + "\"\r\nshould contain: \"" + toContain + "\"",   
+		assertTrue("Dialog's message: \"" + original + "\"\r\nshould be: \"" + toContain + "\"",   
 				original.contains(toContain));
 	}
 	
 	protected void assertFalseStringContains(String original, String toContain) {
-		assertFalse("\"" + original + "\"\r\nshould not contain \"" + toContain + "\"",   
+		assertFalse("Dialog's message: \"" + original + "\"\r\nshould not contain \"" + toContain + "\"",   
 				original.contains(toContain));
 	}
 	
