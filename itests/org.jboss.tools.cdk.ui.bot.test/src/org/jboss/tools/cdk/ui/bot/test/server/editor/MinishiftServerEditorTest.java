@@ -44,7 +44,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(RedDeerSuite.class)
 @ContainerRuntimeServer(
-		version = CDKVersion.MINISHIFT1261,
+		version = CDKVersion.MINISHIFT1280,
 		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		createServerAdapter=false,
