@@ -308,6 +308,11 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 				.validatingBeforeSet(validator).to(BeanProperties
 						.value(IApplicationSourceListPageModel.PROPERTY_LOCAL_APP_SOURCE_FILENAME).observe(model))
 				.in(dbc);
+		
+		DataBindingUtils.addDisposableValueChangeListener((ValueChangeEvent event) -> {
+			loadApplicationSourceAfterPathChange(localTemplateFilename.getValue().toString());
+			asyncRedraw(parent);
+		}, localTemplateFilename, tabContainer);
 
 		// browse button
 		Button btnBrowseFiles = new Button(parent, SWT.NONE);
@@ -327,7 +332,22 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 				btnBrowseFiles, btnBrowseWorkspaceFiles);
 		return localTemplateFilename;
 	}
-
+	
+	private void loadApplicationSourceAfterPathChange(String filename) {
+		if (model.isUseLocalAppSource()) {
+			if (StringUtils.isNotBlank(filename) && (OpenshiftUIConstants.URL_VALIDATOR.isValid(filename) || isFile(filename))) {
+				Job job = loadApplicationSourceJob(filename);
+				try {
+					WizardUtils.runInWizard(job, getContainer(), getDatabindingContext());
+				} catch (InvocationTargetException | InterruptedException e) {
+					OpenShiftUIActivator.getDefault().getLogger().logError(e);
+				}
+			} else {
+				model.resetLocalAppSource();
+			}
+		}
+	}
+	
 	private void asyncRedraw(final Composite c) {
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
@@ -777,13 +797,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		if (model.isUseLocalAppSource()) {
 			String filename = model.getLocalAppSourceFileName();
 			if (StringUtils.isNotBlank(filename)) {
-				Job job = new Job(NLS.bind("Loading application source", filename)) {
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						model.loadAppSource(monitor);
-						return Status.OK_STATUS;
-					}
-				};
+				Job job = loadApplicationSourceJob(filename);
 				try {
 					WizardUtils.runInWizard(job, getContainer(), getDatabindingContext());
 					event.doit = model.getAppSourceStatus().isOK();
@@ -801,5 +815,16 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
 		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this, dbc);
+	}
+	
+	private Job loadApplicationSourceJob(String filename) {
+		Job job = new Job(NLS.bind("Loading application source", filename)) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				model.loadAppSource(monitor);
+				return Status.OK_STATUS;
+			}
+		};
+		return job;
 	}
 }
