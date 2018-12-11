@@ -27,6 +27,7 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.InteligentD
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.LogsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.OSExplorerResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.PortForwardingTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.ScalingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.TriggerBuildTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.BuilderImageApplicationWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.LabelsTest;
@@ -88,6 +89,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	DeployDockerImageTest.class,
 	DeployVariousDockerImagesTest.class,
 	EditResourceLimitsTest.class,
+	ScalingTest.class,
 	
 	// Application wizard handling
 	NewApplicationWizardHandlingTest.class,
