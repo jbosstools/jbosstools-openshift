@@ -1572,7 +1572,7 @@ public class EGitUtils {
 			throws CoreException {
 		BranchOperation branchOp = new BranchOperation(repository, ref);
 		branchOp.execute(monitor);
-		return branchOp.getResult();
+		return branchOp.getResult(repository);
 	}
 
 	public static boolean hasBranch(String ref, IProject project) throws IOException {
