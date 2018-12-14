@@ -18,11 +18,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
+import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +35,6 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -358,6 +359,6 @@ public class UrlUtils {
 		} else if (unencoded.getBytes().length == 0) {
 			return new String();
 		}
-		return DatatypeConverter.printBase64Binary(unencoded.getBytes());
+		return new String(Base64.getEncoder().encode(unencoded.getBytes()), Charset.forName("UTF-8"));
 	}
 }
