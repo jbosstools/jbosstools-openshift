@@ -68,7 +68,7 @@ public class EditResourcesTest extends AbstractTest {
 	private OpenShiftProjectRequirement requiredProject;
 	
 	private static String GIT_FOLDER = "jboss-eap-quickstarts";
-	private String customRepo = "https://github.com/rhopp/jboss-eap-quickstarts";
+	private String customRepo = "https://github.com/some_user/jboss-eap-quickstarts";
 	private String originalRepo = "https://github.com/jboss-developer/jboss-eap-quickstarts";
 	private static String PROJECT_NAME = "jboss-helloworld";
 	private String buildConfig;
@@ -81,8 +81,6 @@ public class EditResourcesTest extends AbstractTest {
 		TestUtils.setUpOcBinary();
 		
 	}
-	
-	
 	
 	@Test
 	public void testCanEditResource() {
