@@ -256,8 +256,9 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		}
 		for (Server server : view.getServers()) {
 			log.info("Checking server " + server.getLabel().getName() +  " state: " + server.getLabel().getState());  
-			if (server.getLabel().getState().equals(ServerState.STARTED)) {
-				log.info("Stopping server"); 
+			if (server.getLabel().getState().equals(ServerState.STARTED) || 
+					server.getLabel().getState().equals(ServerState.STARTING)) {
+				log.info("Stopping server");
 				server.stop();
 				CDKUtils.collectConsoleOutput(log, false);
 			}

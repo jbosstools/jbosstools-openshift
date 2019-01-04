@@ -88,9 +88,9 @@ public class CDKServer extends DefaultServer {
 		ServerState actualState = this.getLabel().getState();
 		MultipleWaitConditionHandler waitConditions = new MultipleWaitConditionHandler(
 				waitConditionMatrix);
-		TimePeriod timeout = TimePeriod.VERY_LONG;
+		TimePeriod timeout = TimePeriod.getCustom(900);
 		if (menuItem == CDKLabel.ServerContextMenu.RESTART) { 
-			timeout = TimePeriod.getCustom(480);
+			timeout = TimePeriod.getCustom(1020);
 		}
 		log.debug("Operate server's state from: + '" + actualState + "' to '" + menuItem + "'");  
 		select();
@@ -106,7 +106,7 @@ public class CDKServer extends DefaultServer {
 		// decide if we wait for SSL acceptance dialog
 		if ((actualState == ServerState.STOPPING || actualState == ServerState.STOPPED) 
 				&& !getCertificatedAccepted()) {
-			new WaitUntil(waitConditions, TimePeriod.getCustom(1800));
+			new WaitUntil(waitConditions, TimePeriod.getCustom(900));
 		}
 		new WaitUntil(new ServerHasState(this, resultState), timeout);
 		waitForProblemDialog(waitConditions, menuItem, TimePeriod.DEFAULT);
