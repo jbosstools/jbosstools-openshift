@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -17,6 +17,7 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ImportApplic
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.PublishChangesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapterFromResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapterWizardHandlingTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.SpringBootTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.CreateResourcesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.DeleteResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourceLimitsTest;
@@ -128,6 +129,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	PublishChangesTest.class,
 	DebuggingEAPAppTest.class,
 	NodeJSAppDebugTest.class,
+	SpringBootTest.class,
 	
 	//OpenShift.io
 	GetOpenShiftIOTokenTest.class

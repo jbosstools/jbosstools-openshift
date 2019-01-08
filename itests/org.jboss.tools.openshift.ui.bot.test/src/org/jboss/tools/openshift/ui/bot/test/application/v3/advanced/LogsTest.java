@@ -15,8 +15,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
-import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
@@ -26,9 +24,6 @@ import org.eclipse.reddeer.eclipse.ui.console.ConsoleView;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
-import org.eclipse.reddeer.swt.impl.button.OkButton;
-import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
-import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.hamcrest.core.StringStartsWith;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
@@ -134,26 +129,4 @@ public class LogsTest extends AbstractTest {
 		}
 	}
 	
-	private void waitForLog(OpenShiftResource pod, String podLogContextMenuItem) {
-		new WaitUntil(
-				new AbstractWaitCondition() {
-
-					@Override
-					public boolean test() {
-						pod.select();
-						new ContextMenuItem(podLogContextMenuItem).select();
-						try {
-							new DefaultShell(OpenShiftLabel.Shell.LOGS_UNAVAILABLE);
-							new OkButton().click();
-							return false;
-						} catch (RedDeerException e) {
-							// catched intentionnally
-							System.err.println(e);
-						}
-						return true;
-					}}
-				, TimePeriod.VERY_LONG);
-	}
-
-
 }

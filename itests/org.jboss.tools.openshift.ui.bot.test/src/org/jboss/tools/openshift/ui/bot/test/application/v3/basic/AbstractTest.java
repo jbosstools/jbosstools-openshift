@@ -10,8 +10,17 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test.application.v3.basic;
 
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
+import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
 import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.AfterClass;
 
@@ -30,6 +39,27 @@ public abstract class AbstractTest {
 		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 		//Kill running jobs if any
 		OpenShiftUtils.killJobs();
+	}
+	
+	protected void waitForLog(OpenShiftResource pod, String podLogContextMenuItem) {
+		new WaitUntil(
+				new AbstractWaitCondition() {
+
+					@Override
+					public boolean test() {
+						pod.select();
+						new ContextMenuItem(podLogContextMenuItem).select();
+						try {
+							new DefaultShell(OpenShiftLabel.Shell.LOGS_UNAVAILABLE);
+							new OkButton().click();
+							return false;
+						} catch (RedDeerException e) {
+							// catched intentionnally
+							System.err.println(e);
+						}
+						return true;
+					}}
+				, TimePeriod.VERY_LONG);
 	}
 	
 
