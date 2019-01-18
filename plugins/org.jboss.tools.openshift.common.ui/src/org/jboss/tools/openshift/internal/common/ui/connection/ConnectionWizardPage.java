@@ -34,12 +34,17 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.window.DefaultToolTip;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -59,6 +64,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
@@ -66,15 +72,19 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimTrailingSlashConverter;
+import org.jboss.tools.openshift.internal.common.ui.utils.OCCommandUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 
+import com.openshift.restclient.authorization.IAuthorizationContext;
+
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
  * @contributor Nick Boldt
+ * @contributor Josef Kopriva
  */
 public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
@@ -211,7 +221,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		ComboViewer serversViewer = new ComboViewer(serversCombo);
 		serversViewer.setContentProvider(new ObservableListContentProvider());
 		serversViewer.setInput(BeanProperties.list(ConnectionWizardPageModel.PROPERTY_ALL_HOSTS).observe(pageModel));
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(serversCombo);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(serversCombo);
 		final IObservableValue serverUrlObservable = WidgetProperties.text().observe(serversCombo);
 		serversCombo.addFocusListener(onServerFocusLost(serverUrlObservable));
 		ValueBindingBuilder.bind(serverUrlObservable).converting(new TrimTrailingSlashConverter())
@@ -248,7 +258,19 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				return (IStatus) observable.getValue();
 			}
 		});
-
+		
+		// Paste from clipboard button
+		Button parseFromClipboard = new Button(parent, SWT.PUSH);
+		parseFromClipboard.setText("Paste Login Command");
+		parseFromClipboard.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				parseLoginCommandFromClipboard(true);
+			}
+		});
+		DefaultToolTip toolTip = new DefaultToolTip ( parseFromClipboard );
+		toolTip.setText ( "Login command can be obtained from Web UI and fills authentication details." );
+				
 		// connection editors
 		Group authenticationDetailsGroup = new Group(parent, SWT.NONE);
 		authenticationDetailsGroup.setText("Authentication");
@@ -270,6 +292,8 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		this.advConnectionEditors = new AdvancedConnectionEditorsStackedView(connectionFactoryObservable, pageModel,
 				advEditorContainer, dbc);
 		advConnectionEditors.createControls();
+		
+		parseLoginCommandFromClipboard(false);
 	}
 
 	private void showHideUserdocLink() {
@@ -313,6 +337,45 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		}
 		new BrowserUtility().checkedCreateExternalBrowser(userdocUrl, OpenShiftCommonUIActivator.PLUGIN_ID,
 				OpenShiftCommonUIActivator.getDefault().getLog());
+	}
+	
+	/**
+	 * Function creates openshift connection and updates pageModel accordingly to pasted oc login command.
+	 * If the login command does not have correct format, then user is informed in error dialog.
+	 * 
+	 */
+	private void parseLoginCommandFromClipboard(boolean clickedOnButton) {
+		Clipboard clipboard = new Clipboard(Display.getDefault());
+		String clipboardText = (String) clipboard.getContents(TextTransfer.getInstance());
+		if (clipboardText == null) {
+			if (clickedOnButton) {
+				MessageDialog.openError(getWizard().getContainer().getShell(), "Error when parsing login command",
+					"Cannot paste clipboard into the login dialog. Only text is accepted.");
+			} //otherwise run when opening from wizard - do not show error dialog
+		} else {
+			if (OCCommandUtils.isValidCommand(clipboardText)) {
+				IConnectionFactory connectionFactory = pageModel.getConnectionFactory();
+				Connection connection = (Connection) connectionFactory.create(OCCommandUtils.getServer(clipboardText));
+				if (IAuthorizationContext.AUTHSCHEME_BASIC.equals(OCCommandUtils.getAuthMethod(clipboardText))) {
+					connection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_BASIC);
+					connection.setUsername(OCCommandUtils.getUsername(clipboardText));
+					String password = OCCommandUtils.getPassword(clipboardText);
+					if (password != null) {
+						connection.setPassword(OCCommandUtils.getPassword(clipboardText));
+					}
+				} else if (IAuthorizationContext.AUTHSCHEME_OAUTH.equals(OCCommandUtils.getAuthMethod(clipboardText))) {
+					connection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_OAUTH);
+					connection.setToken(OCCommandUtils.getToken(clipboardText));
+				}
+				pageModel.setSelectedConnection(connection);
+			} else {
+				if (clickedOnButton) {
+					String message = "Login command pasted from clipboard is not valid:\n" + clipboardText;
+					MessageDialog.openError(getWizard().getContainer().getShell(), "Error when parsing login command",
+							message);
+				}
+			}
+		}
 	}
 
 	@Override
