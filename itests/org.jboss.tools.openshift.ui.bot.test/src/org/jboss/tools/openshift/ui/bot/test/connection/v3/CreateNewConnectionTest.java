@@ -150,8 +150,6 @@ public class CreateNewConnectionTest extends AbstractTest {
 		openShiftExplorerView.open();
 		openShiftExplorerView.openConnectionShell();
 		new DefaultShell(OpenShiftLabel.Shell.NEW_CONNECTION);
-		new LabeledCombo(OpenShiftLabel.TextLabels.SERVER_TYPE)
-				.setSelection(OpenShiftLabel.Others.OPENSHIFT3);
 		new LabeledCombo(OpenShiftLabel.TextLabels.SERVER).setText(DatastoreOS3.SERVER);
 	}
 	

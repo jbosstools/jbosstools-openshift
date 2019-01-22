@@ -109,10 +109,6 @@ public class OpenShift3ConnectionWizard {
 		return getCombo(OpenShiftLabel.TextLabels.CONNECTION);
 	}
 
-	public LabeledCombo getServerType() {
-		return getCombo(OpenShiftLabel.TextLabels.SERVER_TYPE);
-	}
-
 	public LabeledCombo getServer() {
 		return getCombo(OpenShiftLabel.TextLabels.SERVER);
 	}

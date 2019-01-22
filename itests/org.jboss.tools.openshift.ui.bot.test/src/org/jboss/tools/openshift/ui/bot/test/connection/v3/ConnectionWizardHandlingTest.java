@@ -62,10 +62,7 @@ public class ConnectionWizardHandlingTest extends AbstractTest {
 	}
 	
 	@Test
-	public void testSwitchingBasicAndOAuthProtocol() {
-		new LabeledCombo(OpenShiftLabel.TextLabels.SERVER_TYPE).setSelection(
-				OpenShiftLabel.Others.OPENSHIFT3);
-		
+	public void testSwitchingBasicAndOAuthProtocol() {		
 		// Verify that required fields are present after switching protocol type
 		switchToOAuth();
 		switchToBasic();
@@ -74,10 +71,7 @@ public class ConnectionWizardHandlingTest extends AbstractTest {
 	}
 	
 	@Test
-	public void testTokenCachingAfterSwitchingAuthProtocol() {
-		new LabeledCombo(OpenShiftLabel.TextLabels.SERVER_TYPE).setSelection(
-				OpenShiftLabel.Others.OPENSHIFT3);
-		
+	public void testTokenCachingAfterSwitchingAuthProtocol() {	
 		String token = "r4nd0mT0k3n";
 		
 		switchToOAuth();
@@ -91,10 +85,7 @@ public class ConnectionWizardHandlingTest extends AbstractTest {
 	}
 	
 	@Test
-	public void testUserAndPassCachingAfterSwitchingAuthProtocol() {
-		new LabeledCombo(OpenShiftLabel.TextLabels.SERVER_TYPE).setSelection(
-				OpenShiftLabel.Others.OPENSHIFT3);
-		
+	public void testUserAndPassCachingAfterSwitchingAuthProtocol() {	
 		String username = "randomuser";
 		
 		switchToBasic();
@@ -138,9 +129,6 @@ public class ConnectionWizardHandlingTest extends AbstractTest {
 	@Test
 	@Ignore("Link has been changed to Styled text. Test need to be corrected")
 	public void testLinkToRetrieveToken() {
-		new LabeledCombo(OpenShiftLabel.TextLabels.SERVER_TYPE).setSelection(
-				OpenShiftLabel.Others.OPENSHIFT3);
-
 		new LabeledCombo(OpenShiftLabel.TextLabels.PROTOCOL).setSelection(
 				AuthenticationMethod.OAUTH.toString());
 		

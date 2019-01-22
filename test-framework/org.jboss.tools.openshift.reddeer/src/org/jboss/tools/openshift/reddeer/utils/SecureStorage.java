@@ -82,16 +82,16 @@ public class SecureStorage {
 		new DefaultShell(OpenShiftLabel.Shell.EDIT_CONNECTION);
 
 		// Store password if it is not stored
-		if (!(new CheckBox(1).isChecked()) && storePassword) {
-			new CheckBox(1).click();
+		if (!(new CheckBox(0).isChecked()) && storePassword) {
+			new CheckBox(0).click();
 			new FinishButton().click();
 
 			TestUtils.acceptSSLCertificate();
 
 			handleSecureStoragePasswordAndHint(SystemProperties.SECURE_STORAGE_PASSWORD);
 			// Remove password if it is stored
-		} else if (new CheckBox(1).isChecked() && !storePassword) {
-			new CheckBox(1).click();
+		} else if (new CheckBox(0).isChecked() && !storePassword) {
+			new CheckBox(0).click();
 			new FinishButton().click();
 		}
 
