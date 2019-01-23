@@ -56,7 +56,12 @@ public class OCCommandUtils {
 	 * @return server address
 	 */
 	public static String getServer(String ocCommand) {
-		return applyPattern(ocCommand, "(?<=\\s)https[a-zA-Z0-9:/.-]+", 0);
+		String server = applyPattern(ocCommand, "(?<=\\s)https[a-zA-Z0-9:/.-]+", 0);
+		if (server != null) {
+			return server;
+		} else {
+			return applyPattern(ocCommand, "(?<=[\\s=])https[a-zA-Z0-9:/.-]+", 0);
+		}
 	}
 
 	/**
@@ -66,7 +71,7 @@ public class OCCommandUtils {
 	 * @return token
 	 */
 	public static String getToken(String ocCommand) {
-		return applyPattern(ocCommand, "(?<=--token=)[a-zA-Z0-9:]+", 0);
+		return applyPattern(ocCommand, "(?<=--token=)[a-zA-Z0-9:._-]+", 0);
 	}
 
 	/**
@@ -76,7 +81,12 @@ public class OCCommandUtils {
 	 * @return username
 	 */
 	public static String getUsername(String ocCommand) {
-		return applyPattern(ocCommand, "(?<=-u\\s)[a-zA-Z0-9:]+", 0);
+		String username = applyPattern(ocCommand, "(?<=-u[\\s=])[a-zA-Z0-9:]+", 0); 
+		if (username != null) {
+			return username;
+		} else {
+			return applyPattern(ocCommand, "(?<=--username[\\s=])[a-zA-Z0-9:]+", 0);
+		}
 	}
 
 	/**
@@ -86,7 +96,12 @@ public class OCCommandUtils {
 	 * @return password
 	 */
 	public static String getPassword(String ocCommand) {
-		return searchInStringForPattern(ocCommand, "(?<=-p\\s)(.*)(?=\\b)", "-p");
+		String password = searchInStringForPattern(ocCommand, "(?<=-p[\\s=])(.*)(?=\\b)", "-p"); 
+		if (password != null) {
+			return password;
+		} else {
+			return searchInStringForPattern(ocCommand, "(?<=--password[\\s=])(.*)(?=\\b)", "-p");
+		}
 	}
 
 	private static String searchInStringForPattern(String stringToVerify, String pattern, String shouldContain) {

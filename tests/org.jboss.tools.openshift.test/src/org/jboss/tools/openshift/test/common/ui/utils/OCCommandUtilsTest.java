@@ -30,11 +30,22 @@ public class OCCommandUtilsTest {
 				OCCommandUtils.getToken("oc login https://api.engint.openshift.com --token=123456789123456789"));
 		assertEquals("123456789123456789",
 				OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=123456789123456789   "));
+		assertEquals("1234567891234567..89",
+				OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=1234567891234567..89   "));
+		assertEquals("12345678912345678_9",
+				OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=12345678912345678_9   "));
+		assertEquals("1234567891234567.89",
+				OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=1234567891234567.89   "));
+		assertEquals("1234567891234567-89",
+				OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=1234567891234567-89   "));
 	}
 
 	@Test
 	public void testCommandWithPassword() {
 		assertEquals("developerPassword", OCCommandUtils.getPassword("oc login -u developer -p developerPassword"));
+		assertEquals("developerPassword", OCCommandUtils.getPassword("oc login -u developer -p developerPassword"));
+		assertEquals("developerPassword", OCCommandUtils.getPassword("oc login -u developer --password developerPassword"));
+		assertEquals("developerPassword", OCCommandUtils.getPassword("oc login -u developer --password=developerPassword"));
 	}
 
 	@Test
@@ -58,11 +69,22 @@ public class OCCommandUtilsTest {
 	public void testServerAddress() {
 		assertEquals("https://api.engint.openshift.com",
 				OCCommandUtils.getServer("oc login https://api.engint.openshift.com --token=123456789123456789"));
+		assertEquals("https://api.engint.openshift.com",
+				OCCommandUtils.getServer("oc login -s=https://api.engint.openshift.com --token=123456789123456789"));
+		assertEquals("https://api.engint.openshift.com",
+				OCCommandUtils.getServer("oc login -s https://api.engint.openshift.com --token=123456789123456789"));
+		assertEquals("https://api.engint.openshift.com",
+				OCCommandUtils.getServer("oc login --server=https://api.engint.openshift.com --token=123456789123456789"));
+		assertEquals("https://api.engint.openshift.com",
+				OCCommandUtils.getServer("oc login --server https://api.engint.openshift.com --token=123456789123456789"));
 	}
 
 	@Test
 	public void testUsername() {
 		assertEquals("developer", OCCommandUtils.getUsername("oc login -u developer -p developerPassword"));
+		assertEquals("developer", OCCommandUtils.getUsername("oc login -u=developer -p developerPassword"));
+		assertEquals("developer", OCCommandUtils.getUsername("oc login --username developer -p developerPassword"));
+		assertEquals("developer", OCCommandUtils.getUsername("oc login --username=developer -p developerPassword"));
 	}
 	
 	@Test
