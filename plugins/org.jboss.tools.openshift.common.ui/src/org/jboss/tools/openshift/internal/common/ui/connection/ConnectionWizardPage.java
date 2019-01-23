@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
-import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -32,7 +31,6 @@ import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.window.DefaultToolTip;
 import org.eclipse.jface.wizard.IWizard;
@@ -53,7 +51,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.core.jobs.DelegatingProgressMonitor;
@@ -61,7 +58,6 @@ import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
-import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -166,54 +162,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(selectedConnectionBinding, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater());
 
-		// server type
-		Label connectionFactoryLabel = new Label(parent, SWT.NONE);
-		connectionFactoryLabel.setText("Server type:");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT)
-				.applyTo(connectionFactoryLabel);
-		Combo connectionFactoryCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(connectionFactoryCombo);
-		ComboViewer connectionFactoriesViewer = new ComboViewer(connectionFactoryCombo);
-		connectionFactoriesViewer.setContentProvider(ArrayContentProvider.getInstance());
-		connectionFactoriesViewer.setLabelProvider(new ColumnLabelProvider() {
-
-			@Override
-			public String getText(Object element) {
-				if (!(element instanceof IConnectionFactory)) {
-					return element.toString();
-				} else {
-					return ((IConnectionFactory) element).getName();
-				}
-			}
-		});
-		connectionFactoriesViewer.setInput(pageModel.getAllConnectionFactories());
-
-		// Disable the server type when editing a connection
-		if (!pageModel.isAllowConnectionChange() && pageModel.getSelectedConnection() != null) {
-			IConnection c = pageModel.getSelectedConnection();
-			if (!(c instanceof NewConnectionMarker)) {
-				connectionFactoryCombo.setEnabled(false);
-			}
-		}
-
-		final IViewerObservableValue selectedServerType = ViewerProperties.singleSelection()
-				.observe(connectionFactoriesViewer);
-		ValueBindingBuilder.bind(selectedServerType).to(connectionFactoryObservable).in(dbc);
-
 		// server
-		Button useDefaultServerCheckbox = new Button(parent, SWT.CHECK);
-		useDefaultServerCheckbox.setText("Use default server");
-		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.FILL).applyTo(useDefaultServerCheckbox);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(useDefaultServerCheckbox)).to(BeanProperties
-				.value(ConnectionWizardPageModel.PROPERTY_USE_DEFAULT_HOST, IConnection.class).observe(pageModel))
-				.in(dbc);
-
-		IObservableValue hasDefaultHostObservable = BeanProperties
-				.value(ConnectionWizardPageModel.PROPERTY_HAS_DEFAULT_HOST).observe(pageModel);
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(useDefaultServerCheckbox))
-				.notUpdating(hasDefaultHostObservable).in(dbc);
-
 		Label serverLabel = new Label(parent, SWT.NONE);
 		serverLabel.setText("Server:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(serverLabel);
@@ -243,10 +192,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(serverUrlValidator, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater());
 		dbc.addValidationStatusProvider(serverUrlValidator);
-
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(serversCombo)).notUpdatingParticipant()
-				.to(BeanProperties.value(ConnectionWizardPageModel.PROPERTY_USE_DEFAULT_HOST).observe(pageModel))
-				.converting(new InvertingBooleanConverter()).in(dbc);
 
 		// connect error
 		dbc.addValidationStatusProvider(new MultiValidator() {
