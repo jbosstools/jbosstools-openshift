@@ -209,8 +209,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
 		IValidator validator = new RequiredStringValidator("token");
 		this.tokenBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(tokenText))
-				.converting(new TrimmingStringConverter()).validatingAfterConvert(validator).to(tokenObservable)
-				.validatingBeforeSet(validator).in(dbc);
+				.converting(new TrimmingStringConverter()).to(tokenObservable).validatingBeforeSet(validator).in(dbc);
 		ControlDecorationSupport.create(tokenBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 		org.jboss.tools.common.ui.databinding.DataBindingUtils.addDisposableValueChangeListener(changeListener,
 				tokenObservable, tokenText);
