@@ -13,8 +13,12 @@ package org.jboss.tools.openshift.core.server.behavior;
 import static org.jboss.tools.openshift.core.server.OpenShiftServerUtils.toCoreException;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IProject;
@@ -43,6 +47,10 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerProcess;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistryAdapter;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.DockerImageLabels;
@@ -77,6 +85,9 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	private static final int RECHECK_DELAY = 1000;
 	private static final long WAIT_FOR_DEPLOYMENTCONFIG_TIMEOUT = 3 * 60 * 1024;
 	private static final long WAIT_FOR_DOCKERIMAGELABELS_TIMEOUT = 3 * 60 * 1024;
+	private static final long WAIT_FOR_NEW_DEBUG_POD_TIMEOUT = 10_000; // 10 seconds
+
+	protected static final Map<IServer, IConnectionsRegistryListener> POD_LISTENERS = new HashMap<>();
 
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
@@ -121,6 +132,9 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 				DebugContext context = createDebugContext(beh, monitor);
 				toggleDebugging(mode, beh, context, monitor);
 				setOpenShiftMode(mode, context, monitor);
+				if (DebugLaunchConfigs.isDebugMode(mode)) {
+				    createPodListener(beh, context, monitor);
+				}
 			}
 			return Status.OK_STATUS;
 		} catch (CoreException e) {
@@ -255,7 +269,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		Exception e = null;
 		resource = OpenShiftServerUtils.getResource(getServer(), monitor);
 		if (resource == null) {
-			OpenShiftCoreActivator.pluginLog().logError(
+		    OpenShiftCoreActivator.pluginLog().logError(
 					"The OpenShift resource for server " + getServer().getName() + " could not be reached.", e);
 			return IServer.STATE_STOPPED;
 		}
@@ -300,6 +314,42 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		subMonitor.done();
 	}
 
+	protected void createPodListener(OpenShiftServerBehaviour beh, DebugContext context, IProgressMonitor monitor) {
+	    IResource resource = OpenShiftServerUtils.getResource(context.getServer(), monitor);
+	    IConnectionsRegistryListener podListener = new ConnectionsRegistryAdapter() {
+	        private Timer stopDebugTimer;
+            @Override
+            public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+				if (newValue == null && oldValue instanceof IPod && oldValue.equals(context.getPod())) {
+					stopDebugTimer = new Timer(context.getPod().getName());
+					stopDebugTimer.schedule(new TimerTask() {
+
+						@Override
+						public void run() {
+							stopDebugging(context, monitor);
+							setServerState(beh, ILaunchManager.RUN_MODE, monitor);
+						}
+
+					}, WAIT_FOR_NEW_DEBUG_POD_TIMEOUT);
+				} else if (newValue instanceof IPod
+						&& (ResourceUtils.isNewRuntimePodFor(
+								(IPod) newValue, ResourceUtils.getDeploymentConfigFor(resource, (Connection) connection)))) {
+					if (stopDebugTimer != null) {
+						stopDebugTimer.cancel();
+					}
+					try {
+						new OpenShiftDebugMode(context).execute(monitor);
+					} catch (CoreException e) {
+						OpenShiftCoreActivator.logError("Error occured while trying to launch debug on recovered pod",
+								e);
+					}
+				}
+            }
+        };
+        ConnectionsRegistrySingleton.getInstance().addListener(podListener);
+        POD_LISTENERS.put(beh.getServer(), podListener);
+	}
+
 	private void stopDebugging(DebugContext context, IProgressMonitor monitor) {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, NLS.bind("Stopping debugging for server {0}", context.getServer().getName()), 1);
 		IDebugListener listener = new IDebugListener() {
@@ -320,6 +370,9 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		};
 		context.setDebugListener(listener);
 		new OpenShiftDebugMode(context).disableDebugging();
+		if (POD_LISTENERS.containsKey(context.getServer())) {
+		    ConnectionsRegistrySingleton.getInstance().removeListener(POD_LISTENERS.remove(context.getServer()));
+		}
 		subMonitor.done();
 	}
 
@@ -475,28 +528,4 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			}
 		};
 	}
-	
-	class ToggleDebuggingAndSetState extends Job {
-		
-		private String targetMode;
-		private String currentMode;
-		private IProject project;
-		private OpenShiftServerBehaviour behaviour;
-
-		ToggleDebuggingAndSetState(String mode, String currentMode, IProject project, OpenShiftServerBehaviour behaviour) {
-			super(NLS.bind("Setting up debugging for {0}", project.getName()));
-			this.targetMode = mode;
-			this.currentMode = currentMode;
-			this.project = project;
-			this.behaviour = behaviour;
-		}
-
-	@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			IStatus status = toggleDebugging(targetMode, behaviour, monitor);
-			setServerState(status, targetMode, currentMode, behaviour, monitor);
-			return status;
-		}
-	}
-
 }

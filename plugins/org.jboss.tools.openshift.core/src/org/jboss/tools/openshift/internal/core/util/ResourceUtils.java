@@ -54,6 +54,7 @@ import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.IStatus;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 import com.openshift.restclient.model.image.IImageStreamImport;
 import com.openshift.restclient.model.route.IRoute;
@@ -63,6 +64,8 @@ public class ResourceUtils {
 	public static final String DOCKER_IMAGE_KIND = "DockerImage";
 	public static final String IMAGE_STREAM_IMAGE_KIND = "ImageStreamImage";
 	public static final String DEPLOYMENT_CONFIG = "deploymentconfig";
+
+	private static final String POD_STATUS_RUNNING = "Running";
 
 	private ResourceUtils() {
 	}
@@ -412,7 +415,7 @@ public class ResourceUtils {
 	}
 
 	public static Collection<IPod> getBuildPods(Collection<IPod> allPods) {
-		return allPods.stream().filter(pod -> isBuildPod(pod)).collect(Collectors.toList());
+		return allPods.stream().filter(ResourceUtils::isBuildPod).collect(Collectors.toList());
 	}
 
 	/**
@@ -461,8 +464,42 @@ public class ResourceUtils {
 	}
 
 	public static Collection<IPod> getRuntimePods(Collection<IPod> allPods) {
-		return allPods.stream().filter(pod -> isRuntimePod(pod)).collect(Collectors.toList());
+		return allPods.stream().filter(ResourceUtils::isRuntimePod).collect(Collectors.toList());
 	}
+
+	/**
+	 * Returns {@code true} if the given pod is running. Returns
+	 * {@code false} otherwise.
+	 *
+	 * @param pod
+	 * @return true if the given pod is running.
+	 */
+	public static boolean isRunning(IPod pod) {
+	    return pod != null
+	            && POD_STATUS_RUNNING.equals(pod.getStatus());
+	}
+
+	/**
+	 * Returns {@code true} if the given pod fullfills the following criteria:
+	 * <ul>
+	 * <li>is a runtime pod (not a deployer pod)</li>
+	 * <li>is running</li>
+	 * <li>is ready</li>
+	 * <li>is created via the given dc</li>
+	 * </ul>
+	 *
+	 * @param pod the pod to be checked
+	 * @param dc  the deployment config that the given pod originates from
+	 * @return true if the given pod is a runtime pod, that's running, is ready and
+	 *         originates from the given dc
+	 */
+    public static boolean isNewRuntimePodFor(IPod pod, IDeploymentConfig dc) {
+		return pod != null
+		        && isRuntimePod(pod)
+		        && isRunning(pod)
+		        && pod.isReady()
+		        && areRelated(pod, dc);
+    }
 
 	/**
 	 * The image reference for an image change trigger used to correlate a
@@ -925,7 +962,7 @@ public class ResourceUtils {
 	}
 
 	public static boolean isSuccessful(IImageStreamImport imageStreamImport) {
-		return imageStreamImport.getImageStatus().stream().filter(s -> s.isSuccess()).findFirst().isPresent();
+		return imageStreamImport.getImageStatus().stream().anyMatch(IStatus::isSuccess);
 	}
 
 	public static String getDeploymentConfigNameFor(List<IPod> pods) {
@@ -936,7 +973,7 @@ public class ResourceUtils {
 		return pods.stream()
 				.filter(pod -> !StringUtils
 						.isBlank(getSelectorMatchingAny(pod.getLabels(), OpenShiftResourceSelectors.DEPLOYMENT_CONFIG)))
-				.findFirst().map(pod -> getDeploymentConfigNameFor(pod)).orElse(null);
+				.findFirst().map(ResourceUtils::getDeploymentConfigNameFor).orElse(null);
 	}
 
 	public static IProject getProject(IResource resource) {

@@ -6,7 +6,7 @@ Bundle-Version: 3.7.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
-Bundle-ClassPath: lib/openshift-restclient-java-7.1.0.Final.jar,
+Bundle-ClassPath: lib/openshift-restclient-java-7.1.1-SNAPSHOT.jar,
  lib/okhttp-3.11.0.jar,
  lib/okio-1.14.0.jar,
  lib/jboss-dmr-1.3.0.Final.jar,
