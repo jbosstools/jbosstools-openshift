@@ -11,7 +11,7 @@
 	<packaging>eclipse-plugin</packaging>
 	
 	<properties>
-	   <io-jsonwebtoken-jjwt.version>0.8.0</io-jsonwebtoken-jjwt.version>
+	   <io-jsonwebtoken-jjwt.version>0.10.5</io-jsonwebtoken-jjwt.version>
 	</properties>
 	
     <build>
@@ -34,15 +34,37 @@
                     <!-- baseVersion is to avoid SNAPSHOT dependencies being copied with 
                         ever daily changing timestamp -->
                     <useBaseVersion>true</useBaseVersion>
-                    <artifactItems>
+                     <artifactItems>
                         <artifactItem>
                             <groupId>io.jsonwebtoken</groupId>
-                            <artifactId>jjwt</artifactId>
+                            <artifactId>jjwt-impl</artifactId>
                             <version>${io-jsonwebtoken-jjwt.version}</version>
                         </artifactItem>
                         <artifactItem>
                             <groupId>io.jsonwebtoken</groupId>
-                            <artifactId>jjwt</artifactId>
+                            <artifactId>jjwt-impl</artifactId>
+                            <version>${io-jsonwebtoken-jjwt.version}</version>
+                            <classifier>sources</classifier>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>io.jsonwebtoken</groupId>
+                            <artifactId>jjwt-api</artifactId>
+                            <version>${io-jsonwebtoken-jjwt.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>io.jsonwebtoken</groupId>
+                            <artifactId>jjwt-api</artifactId>
+                            <version>${io-jsonwebtoken-jjwt.version}</version>
+                            <classifier>sources</classifier>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>io.jsonwebtoken</groupId>
+                            <artifactId>jjwt-jackson</artifactId>
+                            <version>${io-jsonwebtoken-jjwt.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>io.jsonwebtoken</groupId>
+                            <artifactId>jjwt-jackson</artifactId>
                             <version>${io-jsonwebtoken-jjwt.version}</version>
                             <classifier>sources</classifier>
                         </artifactItem>

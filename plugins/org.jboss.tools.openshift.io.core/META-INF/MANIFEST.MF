@@ -20,4 +20,6 @@ Require-Bundle: org.eclipse.core.resources,
 Export-Package: org.jboss.tools.openshift.io.core,
  org.jboss.tools.openshift.io.core.model
 Bundle-ClassPath: .,
- lib/jjwt-0.8.0.jar
+ lib/jjwt-impl-0.10.5.jar,
+ lib/jjwt-api-0.10.5.jar,
+ lib/jjwt-jackson-0.10.5.jar
