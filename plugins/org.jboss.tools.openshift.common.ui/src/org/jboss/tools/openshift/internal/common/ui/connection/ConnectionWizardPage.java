@@ -231,7 +231,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 		// adv editors
 		Composite advEditorContainer = new Composite(parent, SWT.NONE);
-		GridLayoutFactory.fillDefaults().margins(0, 0).applyTo(authenticationDetailsGroup);
+		GridLayoutFactory.fillDefaults().margins(0, 0).applyTo(advEditorContainer);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(3, 1).grab(true, true)
 				.applyTo(advEditorContainer);
 		this.advConnectionEditors = new AdvancedConnectionEditorsStackedView(connectionFactoryObservable, pageModel,
@@ -312,7 +312,9 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 					connection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_OAUTH);
 					connection.setToken(OCCommandUtils.getToken(clipboardText));
 				}
+				pageModel.setConnectionFactory(connectionFactory);
 				pageModel.setSelectedConnection(connection);
+				pageModel.saveConnection();
 			} else {
 				if (clickedOnButton) {
 					String message = "Login command pasted from clipboard is not valid:\n" + clipboardText;
