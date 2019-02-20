@@ -10,7 +10,7 @@ Require-Bundle:
  org.jboss.tools.common.reddeer;bundle-version="3.10.0",
  org.jboss.tools.openshift.common.core,
  org.apache.commons.lang;bundle-version="2.6.0",
- org.eclipse.reddeer.go;bundle-version="[2.0.0,3.0.0)",
+ org.eclipse.reddeer.go,
  org.eclipse.ui,
  org.eclipse.ui.forms,
  org.eclipse.core.runtime,

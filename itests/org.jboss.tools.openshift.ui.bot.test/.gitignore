@@ -3,3 +3,4 @@ screenshots
 /.project
 /binaries
 /target/
+.classpath
