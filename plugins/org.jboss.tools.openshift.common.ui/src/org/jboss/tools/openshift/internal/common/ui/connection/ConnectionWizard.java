@@ -14,6 +14,9 @@ import org.eclipse.jface.wizard.Wizard;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 
+import org.eclipse.jface.wizard.Wizard;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 /**
  * @author Xavier Coulon
  */
