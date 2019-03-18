@@ -11,18 +11,20 @@
 package org.jboss.tools.openshift.core.server.behavior;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.wst.server.core.IServerAttributes;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IServerShutdownController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
-import org.jboss.tools.openshift.core.util.MavenProfile;
+import org.jboss.tools.openshift.core.server.behavior.ActivateMavenProfileJob.Action;
 import org.jboss.tools.openshift.core.util.MavenCharacter;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.server.debug.DebugLaunchConfigs;
@@ -35,12 +37,7 @@ public class OpenShiftShutdownController extends AbstractSubsystemController
 		return Status.OK_STATUS;
 	}
 
-	protected void log(int status, String message, Exception e) {
-		OpenShiftCoreActivator.getDefault().getLog()
-				.log(new Status(status, OpenShiftCoreActivator.PLUGIN_ID, message, e));
-	}
-
-	public OpenShiftServerBehaviour getBehavior() {
+	protected OpenShiftServerBehaviour getBehavior() {
 		return (OpenShiftServerBehaviour) getServer().loadAdapter(OpenShiftServerBehaviour.class,
 				new NullProgressMonitor());
 	}
@@ -49,46 +46,40 @@ public class OpenShiftShutdownController extends AbstractSubsystemController
 	public void stop(boolean force) {
 		OpenShiftServerBehaviour behavior = getBehavior();
 		behavior.setServerStopping();
+
+		terminateRemoteDebugger(behavior);
+		updateProject(behavior, getServerOrWC());
+
+		behavior.setServerStopped();
+	}
+
+	private void updateProject(OpenShiftServerBehaviour behavior, IServerAttributes server) {
+		IProject project = OpenShiftServerUtils.getDeployProject(getServerOrWC());
+	    try {
+		    if (!new MavenCharacter(project).hasNature()) {
+				behavior.setServerStopped();
+			} else {
+				new ActivateMavenProfileJob(Action.DEACTIVATE, project).schedule();
+			}
+		} catch (CoreException ce) {
+			log(IStatus.ERROR, "Could determine maven nature of project {0} ", ce);
+		}
+	}
+
+	private void terminateRemoteDebugger(OpenShiftServerBehaviour behavior) {
 		try {
-			DebugLaunchConfigs configs = DebugLaunchConfigs.get();
-			if( configs != null ) { 
+			DebugLaunchConfigs configs = DebugLaunchConfigs.get();			
+			if (configs != null) {
 				configs.terminateRemoteDebugger(behavior.getServer());
 			}
-			updateProject();
-			// configs should only be null if workspace is shutting down, so set server to stopped anyway
-			behavior.setServerStopped();
 		} catch (CoreException ce) {
-			log(IStatus.ERROR, "Error shutting down server", ce);
-			getBehavior().setServerStarted();
+			log(IStatus.ERROR, "Could not terminate remote debugger ", ce);
 		}
 	}
 
-	protected void updateProject() throws CoreException {
-	    IProject project = OpenShiftServerUtils.getDeployProject(getServerOrWC());
-		if (!new MavenCharacter(project).hasNature()) {
-			return;
-		}
-
-		try {
-			/*
-			 * running the deactivation in the current thread causes
-			 * java.lang.IllegalArgumentException: Attempted to beginRule: P/project_name,
-			 * does not match outer scope rule that's why create a workspace job and wait
-			 * till finishes, because it influences the build e.g. the resulting war name,
-			 * so we can't continue launching as it immediately builds/deploys project
-			 */
-			WorkspaceJob wj = new WorkspaceJob("Disabling \"openshift\" maven profile") {
-
-				@Override
-				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-					new MavenProfile(MavenProfile.OPENSHIFT_MAVEN_PROFILE, project).deactivate(monitor);
-					return Status.OK_STATUS;
-				}
-			};
-			wj.schedule();
-			wj.join();
-		} catch (InterruptedException e) {
-			throw new CoreException(Status.CANCEL_STATUS);
-		}
+	protected void log(int status, String message, Exception e) {
+		OpenShiftCoreActivator.getDefault().getLog()
+				.log(new Status(status, OpenShiftCoreActivator.PLUGIN_ID, message, e));
 	}
+
 }

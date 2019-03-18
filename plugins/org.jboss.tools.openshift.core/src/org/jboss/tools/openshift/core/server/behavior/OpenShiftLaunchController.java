@@ -17,9 +17,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -35,7 +33,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaHotCodeReplaceListener;
-import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
@@ -51,8 +48,9 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.DockerImageLabels;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
-import org.jboss.tools.openshift.core.util.MavenProfile;
+import org.jboss.tools.openshift.core.server.behavior.ActivateMavenProfileJob.Action;
 import org.jboss.tools.openshift.core.util.MavenCharacter;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.portforwarding.PortForwardingUtils;
 import org.jboss.tools.openshift.internal.core.server.debug.DebugContext;
@@ -64,7 +62,6 @@ import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import com.openshift.restclient.capability.IBinaryCapability;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
 import com.openshift.restclient.model.IPod;
-import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 
 /**
@@ -85,65 +82,59 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
 		OpenShiftServerBehaviour beh = OpenShiftServerUtils.getOpenShiftServerBehaviour(configuration);
-		String currentMode = beh.getServer().getMode();
 		beh.setServerStarting();
-		updateProject(monitor);
 		launchServerProcess(beh, launch, monitor);
+		IProject project = OpenShiftServerUtils.getDeployProject(getServerOrWC());
+		String currentMode = beh.getServer().getMode();
+
+		Job toggleDebuggingAndSetState = new Job(NLS.bind("Setting up debugging for {0}", project.getName())) {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				IStatus status = toggleDebugging(mode, beh, monitor);
+				setServerState(status, mode, currentMode, beh, monitor);
+				return status;
+			}
+		};
+
+		if (!new MavenCharacter(project).hasNature()) {
+			toggleDebuggingAndSetState.schedule();
+		} else {
+			new JobChainBuilder(new ActivateMavenProfileJob(Action.ACTIVATE, project))
+				.runWhenSuccessfullyDone(toggleDebuggingAndSetState)
+				.schedule();
+		}
+	}
+
+	private void setServerState(IStatus status, String mode, String currentMode,
+			OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
+		if (!status.isOK()) {
+			setServerState(beh, currentMode, monitor);
+		} else {
+			setServerState(beh, mode, monitor);
+		}
+	}				
+
+	private IStatus toggleDebugging(String mode, OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
 		try {
 			if (waitForDeploymentConfigReady(beh.getServer(), monitor)) {
 				DebugContext context = createDebugContext(beh, monitor);
-				setMode(mode, context, beh, monitor);
-				updateOpenShift(context, monitor);
+				toggleDebugging(mode, beh, context, monitor);
+				setOpenShiftMode(mode, context, monitor);
 			}
-		} catch (Exception e) {
-			mode = currentMode;
-			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
-					NLS.bind("Could not launch server {0}", beh.getServer().getName()), e));
-		} finally {
-			setServerState(beh, mode, monitor);
+			return Status.OK_STATUS;
+		} catch (CoreException e) {
+			return StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
+					NLS.bind("Could not launch server {0}", beh.getServer().getName()), e);
 		}
 	}
-	
-    protected void updateProject(IProgressMonitor monitor) throws CoreException {
-		IProject project = OpenShiftServerUtils.getDeployProject(getServerOrWC());
 
-		if (!new MavenCharacter(project).hasNature()) {
-			return;
-		}
-
-		try {
-			/*
-			 * running the activation in the current thread causes
-			 * java.lang.IllegalArgumentException: Attempted to beginRule: P/project_name,
-			 * does not match outer scope rule that's why create a workspace job and wait
-			 * till finishes, because it influences the build e.g. the resulting war name,
-			 * so we can't continue launching as it immediately builds/deploys project
-			 */
-			WorkspaceJob wj = new WorkspaceJob("Enabling \"openshift\" maven profile") {
-
-				@Override
-				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-					new MavenProfile(MavenProfile.OPENSHIFT_MAVEN_PROFILE, project).activate(monitor);
-					return Status.OK_STATUS;
-				}
-			};
-			wj.schedule();
-			wj.join();
-		} catch (InterruptedException e) {
-			throw new CoreException(Status.CANCEL_STATUS);
-		}
-    }
-
-	protected void setMode(String mode, DebugContext context, OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
-		toggleDebugging(mode, beh, context, monitor);
+	protected void setOpenShiftMode(String mode, DebugContext context, IProgressMonitor monitor) throws CoreException {
 		if (!DebugLaunchConfigs.isDebugMode(mode)) {
-			// enable devmode if we're not in debug mode. Debug mode has dev mode enabled
+			// enable devmode if we're not in debug targetMode. Debug targetMode has dev targetMode enabled
 			// anyhow
-			enableDevMode(context);
+			new OpenShiftDebugMode(context).enableDevmode();
 		}
-	}
-
-	protected void updateOpenShift(DebugContext context, IProgressMonitor monitor) throws CoreException {
 		new OpenShiftDebugMode(context).execute(monitor);
 	}
 
@@ -171,6 +162,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 
 	protected boolean waitForDeploymentConfigReady(IServer server, IProgressMonitor monitor) throws CoreException {
 		monitor.subTask("Waiting for deployment configs to become available...");
+
 		Connection connection = OpenShiftServerUtils.getConnectionChecked(server);
 		IResource resource = OpenShiftServerUtils.getResourceChecked(server, connection, monitor);
 		long timeout = System.currentTimeMillis() + WAIT_FOR_DEPLOYMENTCONFIG_TIMEOUT;
@@ -214,14 +206,6 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		} else { //run, profile
 			stopDebugging(context, monitor);
 		}
-	}
-
-	/**
-	 * Enables the dev mode environment variable in the given
-	 * {@link IReplicationController}.
-	 */
-	protected void enableDevMode(DebugContext context) {
-		new OpenShiftDebugMode(context).enableDevmode();
 	}
 
 	protected DebugContext createDebugContext(OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
@@ -281,7 +265,8 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	private void setModulesPublishing() {
 		IModule[] modules = getServer().getModules();
 		for (int i = 0; i < modules.length; i++) {
-			((Server) getServer()).setModulePublishState(new IModule[] { modules[i] }, IServer.PUBLISH_STATE_FULL);
+			((Server) getServer()).setModulePublishState(
+					new IModule[] { modules[i] }, IServer.PUBLISH_STATE_FULL);
 		}
 	}
 
@@ -490,4 +475,28 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			}
 		};
 	}
+	
+	class ToggleDebuggingAndSetState extends Job {
+		
+		private String targetMode;
+		private String currentMode;
+		private IProject project;
+		private OpenShiftServerBehaviour behaviour;
+
+		ToggleDebuggingAndSetState(String mode, String currentMode, IProject project, OpenShiftServerBehaviour behaviour) {
+			super(NLS.bind("Setting up debugging for {0}", project.getName()));
+			this.targetMode = mode;
+			this.currentMode = currentMode;
+			this.project = project;
+			this.behaviour = behaviour;
+		}
+
+	@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			IStatus status = toggleDebugging(targetMode, behaviour, monitor);
+			setServerState(status, targetMode, currentMode, behaviour, monitor);
+			return status;
+		}
+	}
+
 }
