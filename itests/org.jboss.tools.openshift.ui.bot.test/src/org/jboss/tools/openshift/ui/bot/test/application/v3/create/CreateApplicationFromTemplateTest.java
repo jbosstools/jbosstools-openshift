@@ -92,7 +92,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	private static final String TESTS_PROJECT = "os3projectWithResources";
 	private static final String TESTS_PROJECT_LOCATION = new File("resources/os3projectWithResources")
 			.getAbsolutePath();
-	private static final String URL = "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/eap71-basic-s2i-helloworld.json";
+	private static final String URL = "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/eap72-basic-s2i-helloworld.json";
 
 	private String genericWebhookURL;
 	private String githubWebhookURL;

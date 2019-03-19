@@ -68,7 +68,7 @@ public class TemplateParametersTest extends AbstractTest {
 			+ "<default-domain-suffix>";
 	public static final String APPLICATION_NAME_VALUE = "The name for the application.";
 	public static final String CONTEXT_DIR_VALUE = "Path within Git project to build; empty for root project directory.";
-	public static final String SOURCE_REPOSITORY_URL_VALUE = "https://github.com/jboss-developer/jboss-eap-quickstarts";
+	public static final String SOURCE_REPOSITORY_URL_VALUE = "https://github.com/jboss-developer/jboss-eap-quickstarts.git";
 	public static final String PERSONAL_GIT_REPO_URI = "https://github.com/some_user/jboss-eap-quickstarts";
 	public static final String SECRET_VALUE = "(generated)";
 	

@@ -31,3 +31,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: jar
 Bundle-Localization: plugin
 Bundle-Vendor: Red Hat
+Automatic-Module-Name: org.jboss.tools.openshift.ui.bot.test

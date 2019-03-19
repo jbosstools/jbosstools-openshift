@@ -32,6 +32,7 @@ import org.eclipse.reddeer.swt.impl.text.DefaultText;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.ResourceIsUpdated;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
@@ -58,6 +59,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection()
+@CleanConnection
 @RequiredProject()
 @RequiredService(service=OpenShiftResources.NODEJS_SERVICE, 
 template=OpenShiftResources.NODEJS_TEMPLATE)

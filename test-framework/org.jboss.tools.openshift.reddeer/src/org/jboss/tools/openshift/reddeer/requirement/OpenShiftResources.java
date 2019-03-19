@@ -23,13 +23,13 @@ public class OpenShiftResources {
 	/**
 	 * the template that creates a basic eap service
 	 */
-	public static final String EAP_TEMPLATE = "eap71-basic-s2i";
+	public static final String EAP_TEMPLATE = "eap72-basic-s2i";
 	public static final String EAP_SERVICE = "eap-app";
 	public static final String EAP_SERVICE_PING = "eap-app-ping";
 	public static final String EAP_APP_REPLICATION_CONTROLLER = "eap-app-1";
 	public static final String EAP_APP_GIT_NAME = "jboss-eap-quickstarts";
-	public static final String EAP_TEMPLATE_RESOURCES_PATH = "resources/eap71-basic-s2i-helloworld.json";
-	public static final String EAP_TEMPLATE_RESOURCES_FILENAME = "eap71-basic-s2i-helloworld.json";
+	public static final String EAP_TEMPLATE_RESOURCES_PATH = "resources/eap72-basic-s2i-helloworld.json";
+	public static final String EAP_TEMPLATE_RESOURCES_FILENAME = "eap72-basic-s2i-helloworld.json";
 	
 	public static final String EAP_CD_TEMPLATE = "resources/eap-cd-basic-s2i-helloworld.json";
 
