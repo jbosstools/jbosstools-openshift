@@ -32,7 +32,7 @@ public class DownloadContainerRuntimeDefaultSettingsTest extends DownloadContain
 	
 	@Test
 	public void testDownloadingMinishiftRuntimeDefaults() {
-		downloadAndVerifyContainerRuntime(CDKVersion.MINISHIFT1280, "", "", "", "", true, true);
+		downloadAndVerifyContainerRuntime(CDKVersion.MINISHIFT1320, "", "", "", "", true, true);
 	}
 	
 }
