@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OpenShift UI Bot Tests
 Bundle-SymbolicName: org.jboss.tools.openshift.ui.bot.test;singleton:=true
-Bundle-Version: 3.6.0.qualifier
+Bundle-Version: 3.7.0.qualifier
 Bundle-Activator: org.jboss.tools.openshift.ui.bot.test.Activator
 Require-Bundle: org.eclipse.ui.ide,
  org.eclipse.ui.editors,
