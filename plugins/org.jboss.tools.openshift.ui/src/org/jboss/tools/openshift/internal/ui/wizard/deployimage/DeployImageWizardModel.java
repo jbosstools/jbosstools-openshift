@@ -101,7 +101,7 @@ public class DeployImageWizardModel extends ResourceLabelsPageModel
 	public void dispose() {
 		super.dispose();
 		DockerConnectionManager.getInstance().removeConnectionManagerListener(this);
-		((EnvironmentVariablesPageModel) envModel).dispose();
+		envModel.dispose();
 		this.connection = null;
 		this.project = null;
 		this.dockerConnection = null;

@@ -23,8 +23,8 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -32,7 +32,6 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
-import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablePage;
 
 /**
@@ -69,7 +68,7 @@ public class DeploymentConfigPage extends EnvironmentVariablePage {
 		Label separator1 = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(separator1);
 
-		createDataVolumeControl(parent, dbc);
+		createDataVolumeControl(parent);
 
 		Label separator2 = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(separator2);
@@ -90,12 +89,15 @@ public class DeploymentConfigPage extends EnvironmentVariablePage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(replicas);
 		ValueBindingBuilder.bind(WidgetProperties.selection().observe(replicas))
 				.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_REPLICAS).observe(model)).in(dbc);
-		parent.addControlListener(new ControlListener() {
+		parent.addControlListener(new ControlAdapter() {
 
 			@Override
 			public void controlResized(ControlEvent e) {
-				if (parent.isDisposed() || envTableContainer == null || envTableContainer.isDisposed()
-						|| volTableContainer == null || volTableContainer.isDisposed()) {
+				if (parent.isDisposed() 
+						|| envTableContainer == null 
+						|| envTableContainer.isDisposed()
+						|| volTableContainer == null 
+						|| volTableContainer.isDisposed()) {
 					return;
 				}
 
@@ -125,15 +127,11 @@ public class DeploymentConfigPage extends EnvironmentVariablePage {
 					parent.layout(true);
 				}
 			}
-
-			@Override
-			public void controlMoved(ControlEvent e) {
-			}
 		});
 	}
 
 	@SuppressWarnings("unchecked")
-	private void createDataVolumeControl(Composite parent, DataBindingContext dbc) {
+	private void createDataVolumeControl(Composite parent) {
 		Composite sectionContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(sectionContainer);
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(sectionContainer);
@@ -162,12 +160,14 @@ public class DeploymentConfigPage extends EnvironmentVariablePage {
 		Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
-		this.dataViewer = new TableViewerBuilder(table, tableContainer).column(new IColumnLabelProvider<String>() {
-			@Override
-			public String getValue(String label) {
-				return label;
-			}
-		}).name("Container Path").align(SWT.LEFT).weight(2).minWidth(100).buildColumn().buildViewer();
+		this.dataViewer = new TableViewerBuilder(table, tableContainer)
+				.column((String label) -> label)
+				.name("Container Path")
+				.align(SWT.LEFT)
+				.weight(2)
+				.minWidth(100)
+				.buildColumn()
+				.buildViewer();
 		dataViewer.setComparator(new ViewerComparator() {
 
 			@Override

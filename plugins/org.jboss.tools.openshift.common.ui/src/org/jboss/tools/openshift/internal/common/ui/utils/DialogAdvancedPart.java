@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -23,16 +23,16 @@ public abstract class DialogAdvancedPart {
 	protected Button advancedButton;
 	protected DialogChildVisibilityAdapter advancedSectionVisibilityAdapter;
 
-	public DialogAdvancedPart() {
+	protected DialogAdvancedPart() {
 	}
 
 	/**
-	 * 
+	 * Creates the controls of 
 	 * @param parent
 	 * @param numColumns the number of columns the advanced button and the advanced
 	 *                   group container should span of the parent layout
 	 */
-	public final void createAdvancedGroup(Composite parent, int numColumns) {
+	public final void create(Composite parent, int numColumns) {
 		// advanced button
 		this.advancedButton = new Button(parent, SWT.NONE);
 		advancedButton.setText(getAdvancedButtonLabel(false));

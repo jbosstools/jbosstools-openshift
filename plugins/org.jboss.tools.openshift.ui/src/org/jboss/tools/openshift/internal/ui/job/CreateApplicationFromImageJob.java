@@ -50,14 +50,10 @@ public class CreateApplicationFromImageJob extends DeployImageJob implements IRe
 
 	@Override
 	public Runnable getSummaryRunnable(final Shell shell) {
-		return new Runnable() {
-
-			@Override
-			public void run() {
+		return () -> {
 				String message = NLS.bind("Results of creating the resources from the {0}/{1} builder image.",
 						buildConfigModel.getBuilderImageNamespace(), buildConfigModel.getBuilderImageName());
 				new ResourceSummaryDialog(shell, getResources(), "Create Application Summary", message).open();
-			}
 		};
 	}
 

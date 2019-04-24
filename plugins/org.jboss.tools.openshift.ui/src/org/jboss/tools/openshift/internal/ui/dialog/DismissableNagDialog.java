@@ -25,7 +25,7 @@ public class DismissableNagDialog extends MessageDialog implements IDialogConsta
 	public static final int YES = 2;
 	private static final String[] LABELS = new String[] { "Always Replace", NO_LABEL, YES_LABEL };
 
-	public AtomicBoolean isOpen = new AtomicBoolean(false);
+	private final AtomicBoolean isOpen = new AtomicBoolean(false);
 
 	public DismissableNagDialog(Shell parentShell, String dialogTitle, String dialogMessage) {
 		super(parentShell, dialogTitle, null, dialogMessage, QUESTION, LABELS, YES);

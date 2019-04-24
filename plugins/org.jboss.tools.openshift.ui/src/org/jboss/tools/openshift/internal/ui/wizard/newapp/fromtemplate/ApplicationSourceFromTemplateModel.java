@@ -87,13 +87,10 @@ public class ApplicationSourceFromTemplateModel extends ResourceLabelsPageModel
 
 		@Override
 		public Runnable getSummaryRunnable(final Shell shell) {
-			return new Runnable() {
-				@Override
-				public void run() {
-					final String message = NLS.bind("Results of creating the resources from the {0} template.",
-							template.getName());
-					new NewApplicationSummaryFromTemplateDialog(shell, job, message).open();
-				}
+			return () -> {
+				final String message = NLS.bind("Results of creating the resources from the {0} template.",
+						template.getName());
+				new NewApplicationSummaryFromTemplateDialog(shell, job, message).open();
 			};
 		}
 
@@ -129,6 +126,8 @@ public class ApplicationSourceFromTemplateModel extends ResourceLabelsPageModel
 		case IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT:
 			handleEclipseProject(evt);
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -136,7 +135,7 @@ public class ApplicationSourceFromTemplateModel extends ResourceLabelsPageModel
 		if (evt.getNewValue() instanceof IApplicationSource
 				&& ResourceKind.TEMPLATE.equals(((IApplicationSource) evt.getNewValue()).getKind())) {
 			IApplicationSource source = (IApplicationSource) evt.getNewValue();
-			ITemplate newTemplate = (ITemplate) source.getSource();
+			ITemplate newTemplate = source.getSource();
 			if (!Objects.equals(newTemplate, this.template)) {
 				this.template = newTemplate;
 				updateTemplateParameters(newTemplate);

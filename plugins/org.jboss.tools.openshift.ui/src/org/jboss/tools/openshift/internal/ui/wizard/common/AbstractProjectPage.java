@@ -23,7 +23,6 @@ import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
-import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -115,15 +114,12 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
 		Binding selectedProjectBinding = ValueBindingBuilder.bind(selectedProjectObservable)
 				.converting(new ObservableTreeItem2ModelConverter(IProject.class))
-				.validatingAfterConvert(new IValidator() {
-
-					@Override
-					public IStatus validate(Object value) {
+				.validatingAfterConvert((Object value) -> {
 						if (value instanceof IProject) {
 							return ValidationStatus.ok();
 						}
 						return ValidationStatus.cancel("Please choose an OpenShift project.");
-					}
+					
 				}).to(BeanProperties.value(IProjectPageModel.PROPERTY_PROJECT).observe(model))
 				.converting(new Model2ObservableTreeItemConverter(null)).in(dbc);
 		ControlDecorationSupport.create(selectedProjectBinding, SWT.LEFT | SWT.TOP, null,
@@ -148,13 +144,8 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 	}
 
 	private IValueChangeListener onConnectionChanged() {
-		return new IValueChangeListener() {
-
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
+		return (ValueChangeEvent event) -> 
 				loadResources(getPreviousPage() == null);
-			}
-		};
 	}
 	
 	private SelectionAdapter onRefreshButtonClicked() {
@@ -255,7 +246,7 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 	 *            true if the wizard need to be closed
 	 * @return the job builder
 	 */
-	protected JobChainBuilder getLoadResourcesJobBuilder(final boolean closeAfter[], final boolean closeOnCancel) {
+	protected JobChainBuilder getLoadResourcesJobBuilder(final boolean[] closeAfter, final boolean closeOnCancel) {
 		JobChainBuilder builder = new JobChainBuilder(new AbstractDelegatingMonitorJob("Loading projects...") {
 
 			@Override
@@ -304,12 +295,9 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 				if (Display.getCurrent() != null) {
 					WizardUtils.close(getWizard());
 				} else {
-					Display.getDefault().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							WizardUtils.close(getWizard());
-						}
-					});
+					Display.getDefault().asyncExec(() -> 
+							WizardUtils.close(getWizard())
+					);
 				}
 			}
 		} catch (InvocationTargetException | InterruptedException e) {

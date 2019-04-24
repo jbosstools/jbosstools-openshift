@@ -124,7 +124,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 				pageModel.getContext(), authSchemeObservable);
 		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, oAuthDetailView);
 		detailViews.put(IAuthorizationContext.AUTHSCHEME_BASIC,
-				new BasicAuthenticationDetailView(pageModel, changeListener, pageModel.getContext()));
+				new BasicAuthenticationDetailView(pageModel, changeListener));
 		rememberTokenObservable = oAuthDetailView.getRememberTokenObservable();
 
 		// auth type
@@ -204,10 +204,6 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		return object instanceof ConnectionFactory;
 	}
 
-	private IConnectionEditorDetailView getDetailView() {
-		return detailViewModel.getSelectedDetailView();
-	}
-
 	@Override
 	protected IConnectionAuthenticationProvider createConnectionAuthenticationProvider(
 			ConnectionWizardPageModel pageModel) {
@@ -217,7 +213,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	private class ConnectionAuthenticationProviderProxy implements IConnectionAuthenticationProvider {
 		@Override
 		public IConnection update(IConnection connection) {
-			return getDetailView().getConnectionAuthenticationProvider().update(connection);
+			return detailViewModel.getSelectedDetailView().getConnectionAuthenticationProvider().update(connection);
 		}
 
 	}

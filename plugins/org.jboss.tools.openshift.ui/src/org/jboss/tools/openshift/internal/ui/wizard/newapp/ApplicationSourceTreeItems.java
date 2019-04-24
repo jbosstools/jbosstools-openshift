@@ -35,7 +35,6 @@ import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IProjectTemplateList;
 import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IProject;
-import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.image.ITagReference;
 import com.openshift.restclient.model.template.ITemplate;
 import com.openshift.restclient.utils.ResourceStatus;
@@ -61,7 +60,7 @@ public class ApplicationSourceTreeItems implements IModelFactory, ICommonAttribu
 			Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
 			Collection appSources = loadTemplates(project, conn);
 			appSources.addAll(loadImageStreams(project, conn));
-			return (List<T>) new ArrayList<>(appSources);
+			return new ArrayList<>(appSources);
 		}
 		return Collections.emptyList();
 	}
@@ -72,7 +71,7 @@ public class ApplicationSourceTreeItems implements IModelFactory, ICommonAttribu
 			if (StringUtils.isNotBlank(conn.getClusterNamespace())) {
 				Collection<IImageStream> commonStreams = conn.getResources(ResourceKind.IMAGE_STREAM,
 						(String) conn.getClusterNamespace());
-				commonStreams.stream().filter(s -> !streams.contains(s)).forEach(s -> streams.add(s));
+				commonStreams.stream().filter(s -> !streams.contains(s)).forEach(streams::add);
 			}
 		} catch (OpenShiftException e) {
 			OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
@@ -120,12 +119,12 @@ public class ApplicationSourceTreeItems implements IModelFactory, ICommonAttribu
 					try {
 						Collection<ITemplate> commonTemplates = capability
 								.getCommonTemplates(conn.getClusterNamespace());
-						commonTemplates.stream().filter(t -> !templates.contains(t)).forEach(t -> templates.add(t));
+						commonTemplates.stream().filter(t -> !templates.contains(t)).forEach(templates::add);
 					} catch (OpenShiftException e) {
 						OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
 					}
 				}
-				return templates.stream().map(t -> new TemplateApplicationSource(t)).collect(Collectors.toList());
+				return templates.stream().map(TemplateApplicationSource::new).collect(Collectors.toList());
 			}
 		}, Collections.emptyList());
 	}

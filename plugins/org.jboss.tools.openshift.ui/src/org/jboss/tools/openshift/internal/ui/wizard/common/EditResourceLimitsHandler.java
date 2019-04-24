@@ -55,14 +55,14 @@ public class EditResourceLimitsHandler extends AbstractHandler {
 				if (dcOrRc == null) {
 					return Status.CANCEL_STATUS;
 				}
-				editResources(HandlerUtil.getActiveShell(event), dcOrRc, dcOrRc.getName());
+				editResources(HandlerUtil.getActiveShell(event), dcOrRc);
 				return Status.OK_STATUS;
 			}
 		}).schedule();
 		return null;
 	}
 
-	protected void editResources(Shell shell, IReplicationController rc, String name) {
+	protected void editResources(Shell shell, IReplicationController rc) {
 		EditResourceLimitsPageModel model = new EditResourceLimitsPageModel(rc);
 		EditResourceLimitsWizard wizard = new EditResourceLimitsWizard(model, "Edit resource limits");
 		new OkCancelButtonWizardDialog(shell, wizard).open();

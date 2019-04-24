@@ -52,7 +52,7 @@ public class EditConnectionHandler extends AbstractHandler {
         TreePath[] expandedTreePaths = getTreeViewer().getExpandedTreePaths();
         return Arrays.stream(expandedTreePaths)
                 .filter(tp -> connectionWrapper.equals(tp.getFirstSegment()))
-                .map(tp -> tp.getSegmentCount())
+                .map(TreePath::getSegmentCount)
                 .reduce(Integer.MIN_VALUE, Integer::max);
 	}
 	

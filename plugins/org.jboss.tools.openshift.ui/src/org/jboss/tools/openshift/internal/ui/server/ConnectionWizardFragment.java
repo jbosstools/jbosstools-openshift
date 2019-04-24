@@ -73,10 +73,7 @@ public class ConnectionWizardFragment extends WizardFragment {
 	}
 
 	private IPageChangingListener onPageChanging(IWizardHandle wizardHandle) {
-		return new IPageChangingListener() {
-
-			@Override
-			public void handlePageChanging(PageChangingEvent event) {
+		return (PageChangingEvent event) -> {
 				if (event.getCurrentPage() == getPage(wizardHandle)) {
 					if (event.getTargetPage() == null
 							|| event.getTargetPage().equals(getPage(wizardHandle).getNextPage())) {
@@ -90,7 +87,6 @@ public class ConnectionWizardFragment extends WizardFragment {
 						OpenShiftServerTaskModelAccessor.set((Connection) connection, getTaskModel());
 					}
 				}
-			}
 		};
 	}
 
@@ -148,14 +144,10 @@ public class ConnectionWizardFragment extends WizardFragment {
 		}
 
 		private IPageChangedListener onPageChanged() {
-			return new IPageChangedListener() {
-
-				@Override
-				public void pageChanged(PageChangedEvent event) {
+			return (PageChangedEvent event) -> {
 					if (event.getSelectedPage() == getPage(wizardHandle)) {
 						updateSize();
 					}
-				}
 			};
 		}
 	}

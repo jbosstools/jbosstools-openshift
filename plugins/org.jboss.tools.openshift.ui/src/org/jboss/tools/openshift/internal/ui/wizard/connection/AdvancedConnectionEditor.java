@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
@@ -88,10 +89,10 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	private IObservableValue<String> registryURLObservable;
 	private IObservableValue clusterNamespaceObservable;
 	private IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider;
-	Map<String, Object> extendedProperties = null;
+	private Map<String, Object> extendedProperties = null;
 	private IObservableValue<IStatus> ocLocationValidity = new WritableValue<>(Status.OK_STATUS, IStatus.class);
 	private IObservableValue<IStatus> ocVersionValidity = new WritableValue<>(Status.OK_STATUS, IStatus.class);
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
@@ -104,168 +105,8 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		Composite composite = setControl(new Composite(parent, SWT.None));
 		GridLayoutFactory.fillDefaults().applyTo(composite);
 
-		DialogAdvancedPart part = new DialogAdvancedPart() {
-
-			@Override
-			protected void createAdvancedContent(Composite advancedComposite) {
-				Label lblRegistry = new Label(advancedComposite, SWT.NONE);
-				lblRegistry.setText("Image Registry URL:");
-				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(lblRegistry);
-
-				Text txtRegistry = new Text(advancedComposite, SWT.BORDER);
-				GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1)
-						.applyTo(txtRegistry);
-
-				Button registryDiscover = new Button(advancedComposite, SWT.PUSH);
-				registryDiscover.setText("Discover...");
-				registryDiscover.addSelectionListener(new SelectionAdapter() {
-
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						discoverRegistryPressed(registryDiscover.getShell());
-					}
-				});
-				GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(registryDiscover);
-				UIUtils.setDefaultButtonWidth(registryDiscover);
-
-				registryURLObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY, txtRegistry);
-				Binding registryURLBinding = ValueBindingBuilder.bind(registryURLObservable)
-						.validatingAfterConvert(new URLValidator(VALIDATOR_URL_TYPE, true))
-						.converting(new TrimTrailingSlashConverter())
-						.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_REGISTRY_URL).observe(model))
-						.in(dbc);
-				ControlDecorationSupport.create(registryURLBinding, SWT.LEFT | SWT.TOP);
-
-				Label lblNamespace = new Label(advancedComposite, SWT.NONE);
-				lblNamespace.setText("Cluster namespace:");
-				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(lblNamespace);
-
-				Text txtClusterNamespace = new Text(advancedComposite, SWT.BORDER);
-				GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
-						.applyTo(txtClusterNamespace);
-
-				clusterNamespaceObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY,
-						txtClusterNamespace);
-				ValueBindingBuilder.bind(clusterNamespaceObservable).converting(new TrimmingStringConverter())
-						.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_CLUSTER_NAMESPACE).observe(model))
-						.in(dbc);
-
-				Link ocWorkspace = new Link(advancedComposite, SWT.PUSH);
-				ocWorkspace.setText("<a>Workspace OC Settings</a>");
-				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(ocWorkspace);
-
-				// Override OC location widgets
-				Button overrideOC = new Button(advancedComposite, SWT.CHECK);
-				overrideOC.setText("Override 'oc' location: ");
-				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(lblRegistry);
-				IObservableValue<Boolean> overrideOCObservable = WidgetProperties.selection().observe(overrideOC);
-				ValueBindingBuilder.bind(overrideOCObservable)
-						.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_OC_OVERRIDE).observe(model))
-						.in(dbc);
-
-				final Text ocText = new Text(advancedComposite, SWT.SINGLE | SWT.BORDER);
-				GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(ocText);
-				IObservableValue<String> ocLocationObservable = WidgetProperties.text(SWT.Modify).observe(ocText);
-				Binding ocLocationBinding = ValueBindingBuilder.bind(ocLocationObservable)
-						.converting(new TrimmingStringConverter()).to(BeanProperties
-								.value(AdvancedConnectionEditorModel.PROP_OC_OVERRIDE_LOCATION).observe(model))
-						.in(dbc);
-
-				overrideOCObservable.addValueChangeListener(new IValueChangeListener<Boolean>() {
-					@Override
-					public void handleValueChange(ValueChangeEvent<? extends Boolean> event) {
-						updateOcObservables();
-					}
-				});
-
-				ocLocationBinding.getValidationStatus().addValueChangeListener(new IValueChangeListener<IStatus>() {
-					@Override
-					public void handleValueChange(ValueChangeEvent<? extends IStatus> event) {
-						updateOcObservables();
-					}
-				});
-				ValueBindingBuilder.bind(overrideOCObservable).to(WidgetProperties.enabled().observe(ocText))
-						.notUpdatingParticipant().in(dbc);
-
-				Button ocBrowse = new Button(advancedComposite, SWT.PUSH);
-				ocBrowse.setText("Browse...");
-				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(ocBrowse);
-				UIUtils.setDefaultButtonWidth(ocBrowse);
-
-				ocWorkspace.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						PreferenceDialog pd = PreferencesUtil.createPreferenceDialogOn(null,
-								IOpenShiftCoreConstants.OPEN_SHIFT_PREFERENCE_PAGE_ID, new String[] {}, null);
-						pd.open();
-						if (!overrideOC.getSelection()) {
-							String ocLoc = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
-							String nullsafe = ocLoc == null ? "" : ocLoc;
-							ocText.setText(nullsafe);
-						}
-						updateOcObservables();
-					}
-				});
-
-				// Validation here is done via a listener rather than dbc validators
-				// because dbc validators will validate in the UI thread, but validation
-				// of this field requires a background job.
-				ocBrowse.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						FileDialog fd = new FileDialog(ocBrowse.getShell());
-						fd.setText(ocText.getText());
-						IPath p = new Path(ocText.getText());
-						if (p.segmentCount() > 1) {
-							fd.setFilterPath(p.removeLastSegments(1).toOSString());
-						}
-						String result = fd.open();
-						if (result != null) {
-							ocLocationObservable.setValue(result);
-						}
-					}
-				});
-
-				ValueBindingBuilder.bind(overrideOCObservable).to(WidgetProperties.enabled().observe(ocBrowse))
-						.notUpdatingParticipant().in(dbc);
-
-				ValidationStatusProvider ocValidator = new MultiValidator() {
-
-					public IObservableList getTargets() {
-						WritableList targets = new WritableList();
-						targets.add(ocLocationObservable);
-						targets.add(ocLocationValidity);
-						targets.add(ocVersionValidity);
-						return targets;
-					}
-
-					@Override
-					protected IStatus validate() {
-						// access all observables that the framework should listen to
-						IStatus ocLocationStatus = ocLocationValidity.getValue();
-						IStatus ocVersionStatus = ocVersionValidity.getValue();
-
-						IStatus status;
-						if (!ocLocationStatus.isOK()) {
-							status = ocLocationStatus;
-						} else {
-							status = ocVersionStatus;
-						}
-						return status;
-					}
-				};
-
-				dbc.addValidationStatusProvider(ocValidator);
-				ControlDecorationSupport.create(ocValidator, SWT.LEFT | SWT.TOP, null,
-						new RequiredControlDecorationUpdater());
-			}
-
-			@Override
-			protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
-				return gridLayoutFactory.numColumns(3);
-			}
-		};
-		part.createAdvancedGroup(composite, 1);
+		DialogAdvancedPart part = new AdvancedConnectionPart(dbc);
+		part.create(composite, 1);
 		this.connectionAdvancedPropertiesProvider = new ConnectionAdvancedPropertiesProvider();
 		updateOcObservables();
 		return composite;
@@ -295,43 +136,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		job.schedule();
 	}
 
-	private void discoverRegistryPressed(Shell shell) {
-		IConnection tmp = pageModel.createConnection();
-		IStatus ret = RegistryProviderModel.getDefault().getRegistryURL(tmp);
-
-		String oldVal = registryURLObservable.getValue();
-		String newVal = ret.getMessage();
-		if (ret != null && ret.isOK()) {
-			// If they're equal, do nothing
-			if (!eq(oldVal, newVal)) {
-				// Verify with user
-				String title = "Overwrite registry URL?";
-				String msg = "Are you sure you want to change the registry URL from " + oldVal + " to " + newVal + "?";
-				MessageDialog dialog = new MessageDialog(shell, title, null, msg, MessageDialog.CONFIRM,
-						new String[] { "OK", "Cancel" }, 0);
-				String old = registryURLObservable.getValue().trim();
-				if (old.isEmpty() || dialog.open() == IDialogConstants.OK_ID) {
-					registryURLObservable.setValue(ret.getMessage());
-				}
-			}
-		} else {
-			String title = "Registry URL not found";
-			String msg = "No registry provider found for the given connection. If your Openshift connection is backed by a CDK or minishift installation, please ensure the CDK is running.";
-			ErrorDialog ed = new ErrorDialog(shell, title, msg, ret,
-					IStatus.ERROR | IStatus.WARNING | IStatus.INFO | IStatus.CANCEL);
-			ed.open();
-		}
-	}
-
-	private boolean eq(String s1, String s2) {
-		if (s1 == null && s2 == null)
-			return true;
-		if (s1 == null)
-			return false;
-		return s1.equals(s2);
-	}
-
-	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
+	protected void onSelectedConnectionChanged() {
 		registryURLObservable.setValue(model.getRegistryURL());
 	}
 
@@ -351,13 +156,9 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	@SuppressWarnings("unchecked")
 	private IValueChangeListener addSelectedConnectionChangedListener(final IObservableValue selectedConnection,
 			final DataBindingContext dbc) {
-		IValueChangeListener listener = new IValueChangeListener() {
-
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
-				onSelectedConnectionChanged(selectedConnection);
+		IValueChangeListener listener = (ValueChangeEvent event) -> {
+				onSelectedConnectionChanged();
 				DataBindingUtils.validateTargetsToModels(dbc);
-			}
 		};
 		selectedConnection.addValueChangeListener(listener);
 		return listener;
@@ -385,7 +186,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		IConnection connection = pageModel.getSelectedConnection();
 		if (connection != null) {
 			if (NewConnectionMarker.getInstance() == connection) {
-				extendedProperties = new HashMap<String, Object>();
+				extendedProperties = new HashMap<>();
 			} else if (connection instanceof Connection) {
 				extendedProperties = ((Connection) connection).getExtendedProperties();
 			}
@@ -483,15 +284,11 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 			Assert.isLegal(conn instanceof Connection);
 
 			final Connection connection = (Connection) conn;
-			Display.getDefault().syncExec(new Runnable() {
-
-				@Override
-				public void run() {
+			Display.getDefault().syncExec(() -> {
 					connection.setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY,
 							registryURLObservable.getValue());
 					connection.setExtendedProperty(ICommonAttributes.CLUSTER_NAMESPACE_KEY,
 							clusterNamespaceObservable.getValue());
-				}
 			});
 			return connection;
 		}
@@ -503,6 +300,197 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		IConnection c = pageModel.getConnection();
 		if (c instanceof Connection && getExtendedProperties() != null) {
 			((Connection) c).setExtendedProperties(getExtendedProperties());
+		}
+	}
+
+	private class AdvancedConnectionPart extends DialogAdvancedPart {
+		
+		private DataBindingContext dbc;
+
+		private AdvancedConnectionPart(DataBindingContext dbc) {
+			this.dbc = dbc;
+		}
+
+		@Override
+		protected void createAdvancedContent(Composite advancedComposite) {
+			Label lblRegistry = new Label(advancedComposite, SWT.NONE);
+			lblRegistry.setText("Image Registry URL:");
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(lblRegistry);
+
+			Text txtRegistry = new Text(advancedComposite, SWT.BORDER);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1)
+					.applyTo(txtRegistry);
+
+			Button registryDiscover = new Button(advancedComposite, SWT.PUSH);
+			registryDiscover.setText("Discover...");
+			registryDiscover.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					discoverRegistryPressed(registryDiscover.getShell());
+				}
+			});
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(registryDiscover);
+			UIUtils.setDefaultButtonWidth(registryDiscover);
+
+			registryURLObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY, txtRegistry);
+			Binding registryURLBinding = ValueBindingBuilder.bind(registryURLObservable)
+					.validatingAfterConvert(new URLValidator(VALIDATOR_URL_TYPE, true))
+					.converting(new TrimTrailingSlashConverter())
+					.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_REGISTRY_URL).observe(model))
+					.in(dbc);
+			ControlDecorationSupport.create(registryURLBinding, SWT.LEFT | SWT.TOP);
+
+			Label lblNamespace = new Label(advancedComposite, SWT.NONE);
+			lblNamespace.setText("Cluster namespace:");
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(lblNamespace);
+
+			Text txtClusterNamespace = new Text(advancedComposite, SWT.BORDER);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
+					.applyTo(txtClusterNamespace);
+
+			clusterNamespaceObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY,
+					txtClusterNamespace);
+			ValueBindingBuilder.bind(clusterNamespaceObservable).converting(new TrimmingStringConverter())
+					.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_CLUSTER_NAMESPACE).observe(model))
+					.in(dbc);
+
+			Link ocWorkspace = new Link(advancedComposite, SWT.PUSH);
+			ocWorkspace.setText("<a>Workspace OC Settings</a>");
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(ocWorkspace);
+
+			// Override OC location widgets
+			Button overrideOC = new Button(advancedComposite, SWT.CHECK);
+			overrideOC.setText("Override 'oc' location: ");
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(lblRegistry);
+			IObservableValue<Boolean> overrideOCObservable = WidgetProperties.selection().observe(overrideOC);
+			ValueBindingBuilder.bind(overrideOCObservable)
+					.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_OC_OVERRIDE).observe(model))
+					.in(dbc);
+
+			final Text ocText = new Text(advancedComposite, SWT.SINGLE | SWT.BORDER);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(ocText);
+			IObservableValue<String> ocLocationObservable = WidgetProperties.text(SWT.Modify).observe(ocText);
+			Binding ocLocationBinding = ValueBindingBuilder.bind(ocLocationObservable)
+					.converting(new TrimmingStringConverter()).to(BeanProperties
+							.value(AdvancedConnectionEditorModel.PROP_OC_OVERRIDE_LOCATION).observe(model))
+					.in(dbc);
+
+			overrideOCObservable.addValueChangeListener(
+					(ValueChangeEvent<? extends Boolean> event) -> updateOcObservables()
+			);
+
+			ocLocationBinding.getValidationStatus().addValueChangeListener(
+					(ValueChangeEvent<? extends IStatus> event) -> updateOcObservables()
+			);
+			ValueBindingBuilder.bind(overrideOCObservable).to(WidgetProperties.enabled().observe(ocText))
+					.notUpdatingParticipant().in(dbc);
+
+			Button ocBrowse = new Button(advancedComposite, SWT.PUSH);
+			ocBrowse.setText("Browse...");
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(ocBrowse);
+			UIUtils.setDefaultButtonWidth(ocBrowse);
+
+			ocWorkspace.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					PreferenceDialog pd = PreferencesUtil.createPreferenceDialogOn(null,
+							IOpenShiftCoreConstants.OPEN_SHIFT_PREFERENCE_PAGE_ID, new String[] {}, null);
+					pd.open();
+					if (!overrideOC.getSelection()) {
+						String ocLoc = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
+						String nullsafe = ocLoc == null ? "" : ocLoc;
+						ocText.setText(nullsafe);
+					}
+					updateOcObservables();
+				}
+			});
+
+			// Validation here is done via a listener rather than dbc validators
+			// because dbc validators will validate in the UI thread, but validation
+			// of this field requires a background job.
+			ocBrowse.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					FileDialog fd = new FileDialog(ocBrowse.getShell());
+					fd.setText(ocText.getText());
+					IPath p = new Path(ocText.getText());
+					if (p.segmentCount() > 1) {
+						fd.setFilterPath(p.removeLastSegments(1).toOSString());
+					}
+					String result = fd.open();
+					if (result != null) {
+						ocLocationObservable.setValue(result);
+					}
+				}
+			});
+
+			ValueBindingBuilder.bind(overrideOCObservable).to(WidgetProperties.enabled().observe(ocBrowse))
+					.notUpdatingParticipant().in(dbc);
+
+			ValidationStatusProvider ocValidator = new MultiValidator() {
+				
+				@Override
+				public IObservableList getTargets() {
+					WritableList targets = new WritableList();
+					targets.add(ocLocationObservable);
+					targets.add(ocLocationValidity);
+					targets.add(ocVersionValidity);
+					return targets;
+				}
+
+				@Override
+				protected IStatus validate() {
+					// access all observables that the framework should listen to
+					IStatus ocLocationStatus = ocLocationValidity.getValue();
+					IStatus ocVersionStatus = ocVersionValidity.getValue();
+
+					IStatus status;
+					if (!ocLocationStatus.isOK()) {
+						status = ocLocationStatus;
+					} else {
+						status = ocVersionStatus;
+					}
+					return status;
+				}
+			};
+
+			dbc.addValidationStatusProvider(ocValidator);
+			ControlDecorationSupport.create(ocValidator, SWT.LEFT | SWT.TOP, null,
+					new RequiredControlDecorationUpdater());
+		}
+
+		private void discoverRegistryPressed(Shell shell) {
+			IConnection tmp = pageModel.createConnection();
+			IStatus ret = RegistryProviderModel.getDefault().getRegistryURL(tmp);
+
+			if (ret != null && ret.isOK()) {
+				String oldVal = registryURLObservable.getValue();
+				String newVal = ret.getMessage();
+				// If they're equal, do nothing
+				if (!StringUtils.equals(oldVal, newVal)) {
+					// Verify with user
+					String title = "Overwrite registry URL?";
+					String msg = "Are you sure you want to change the registry URL from " + oldVal + " to " + newVal + "?";
+					MessageDialog dialog = new MessageDialog(shell, title, null, msg, MessageDialog.CONFIRM,
+							new String[] { "OK", "Cancel" }, 0);
+					String old = registryURLObservable.getValue().trim();
+					if (old.isEmpty() || dialog.open() == IDialogConstants.OK_ID) {
+						registryURLObservable.setValue(ret.getMessage());
+					}
+				}
+			} else {
+				String title = "Registry URL not found";
+				String msg = "No registry provider found for the given connection. If your Openshift connection is backed by a CDK or minishift installation, please ensure the CDK is running.";
+				ErrorDialog ed = new ErrorDialog(shell, title, msg, ret,
+						IStatus.ERROR | IStatus.WARNING | IStatus.INFO | IStatus.CANCEL);
+				ed.open();
+			}
+		}
+
+		@Override
+		protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
+			return gridLayoutFactory.numColumns(3);
 		}
 	}
 }

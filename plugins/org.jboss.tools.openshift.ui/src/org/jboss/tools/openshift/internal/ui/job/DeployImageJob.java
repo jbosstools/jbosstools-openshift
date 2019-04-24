@@ -222,8 +222,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		dc.setReplicas(parameters.getReplicas());
 		dc.setReplicaSelector(SELECTOR_KEY, name);
 
-		Map<String, String> envs = getModifiedEnvVars(parameters.getEnvironmentVariables(),
-				parameters.getImageEnvVars());
+		Map<String, String> envs = getModifiedEnvVars(parameters.getImageEnvVars());
 		dc.addContainer(dc.getName(), imageUri, new HashSet<>(parameters.getPortSpecs()), envs,
 				parameters.getVolumes());
 
@@ -240,8 +239,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		return dc;
 	}
 
-	private Map<String, String> getModifiedEnvVars(Collection<EnvironmentVariable> envVars,
-			Map<String, String> dockerEnvVars) {
+	private Map<String, String> getModifiedEnvVars(Map<String, String> dockerEnvVars) {
 		Map<String, String> envs = new HashMap<>();
 		for (EnvironmentVariable var : parameters.getEnvironmentVariables()) {
 			//will return null if new

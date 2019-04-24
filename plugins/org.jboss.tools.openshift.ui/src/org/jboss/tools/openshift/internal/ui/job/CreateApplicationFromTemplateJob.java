@@ -66,7 +66,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 			template.addObjectLabel(label.getName(), label.getValue());
 		}
 
-		IStatus status = project.accept(new CapabilityVisitor<IProjectTemplateProcessing, IStatus>() {
+		return project.accept(new CapabilityVisitor<IProjectTemplateProcessing, IStatus>() {
 
 			@Override
 			public IStatus visit(IProjectTemplateProcessing capability) {
@@ -91,8 +91,6 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 
 		}, new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 				"Template processing is unsupported for this client and server combination.", null));
-
-		return status;
 	}
 
 	/*
@@ -138,7 +136,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 	private IStatus handleResponse(Collection<IResource> resources) {
 		int severity = IStatus.OK;
 		for (IResource resource : resources) {
-			if (resource.getKind() == ResourceKind.STATUS) {
+			if (ResourceKind.STATUS.equals(resource.getKind())) {
 				severity = IStatus.WARNING;
 				break;
 			}

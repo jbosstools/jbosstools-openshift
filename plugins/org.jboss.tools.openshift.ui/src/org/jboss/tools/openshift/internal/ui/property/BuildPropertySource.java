@@ -22,6 +22,18 @@ import com.openshift.restclient.model.build.ISourceBuildStrategy;
 
 public class BuildPropertySource extends ResourcePropertySource<IBuild> {
 
+	private static final String PUSH_SECRET = "push.secret";
+	private static final String STARTED = "started";
+	private static final String DURATION = "duration";
+	private static final String BUILD_CONFIG = "build.config";
+	private static final String BUILD_STRATEGY = "build.strategy";
+	private static final String BUILDER_IMAGE = "builder.image";
+	private static final String SOURCE_TYPE = "source.type";
+	private static final String SOURCE_REPO = "source.repo";
+	private static final String OUTPUT_IMAGE = "output.image";
+	private static final String SOURCE_CONTEXT_DIR = "source.contextDir";
+	private static final String SOURCE_REF = "source.ref";
+
 	public BuildPropertySource(IBuild resource) {
 		super(resource);
 	}
@@ -29,17 +41,17 @@ public class BuildPropertySource extends ResourcePropertySource<IBuild> {
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		return new IPropertyDescriptor[] { new UneditablePropertyDescriptor("status", "Status"),
-				new UneditablePropertyDescriptor("started", "Started"),
-				new UneditablePropertyDescriptor("duration", "Duration"),
-				new UneditablePropertyDescriptor("build.config", "Build Configuration"),
-				new UneditablePropertyDescriptor("build.strategy", "Build Strategy"),
-				new UneditablePropertyDescriptor("builder.image", "Builder Image"),
-				new UneditablePropertyDescriptor("source.type", "Source Type"),
-				new UneditablePropertyDescriptor("source.repo", "Source Repo"),
-				new UneditablePropertyDescriptor("source.ref", "Source Ref."),
-				new UneditablePropertyDescriptor("source.contextDir", "Source Context Dir."),
-				new UneditablePropertyDescriptor("output.image", "Output Image"),
-				new UneditablePropertyDescriptor("push.secret", "Push Secret") };
+				new UneditablePropertyDescriptor(STARTED, "Started"),
+				new UneditablePropertyDescriptor(DURATION, "Duration"),
+				new UneditablePropertyDescriptor(BUILD_CONFIG, "Build Configuration"),
+				new UneditablePropertyDescriptor(BUILD_STRATEGY, "Build Strategy"),
+				new UneditablePropertyDescriptor(BUILDER_IMAGE, "Builder Image"),
+				new UneditablePropertyDescriptor(SOURCE_TYPE, "Source Type"),
+				new UneditablePropertyDescriptor(SOURCE_REPO, "Source Repo"),
+				new UneditablePropertyDescriptor(SOURCE_REF, "Source Ref."),
+				new UneditablePropertyDescriptor(SOURCE_CONTEXT_DIR, "Source Context Dir."),
+				new UneditablePropertyDescriptor(OUTPUT_IMAGE, "Output Image"),
+				new UneditablePropertyDescriptor(PUSH_SECRET, "Push Secret") };
 	}
 
 	@Override
@@ -49,22 +61,22 @@ public class BuildPropertySource extends ResourcePropertySource<IBuild> {
 			switch ((String) id) {
 			case "status":
 				return build.getStatus();
-			case "started":
+			case STARTED:
 				return DateTimeUtils.formatSince(build.getCreationTimeStamp());
-			case "build.config":
+			case BUILD_CONFIG:
 				return build.getLabels().get(OpenShiftAPIAnnotations.BUILD_CONFIG_NAME);
-			case "build.strategy":
-			case "builder.image":
+			case BUILD_STRATEGY:
+			case BUILDER_IMAGE:
 				return handleBuildStrategy((String) id, build.getBuildStrategy());
-			case "source.type":
-			case "source.repo":
-			case "source.ref":
-			case "source.contextDir":
+			case SOURCE_TYPE:
+			case SOURCE_REPO:
+			case SOURCE_REF:
+			case SOURCE_CONTEXT_DIR:
 				return handleBuildSource((String) id, build.getBuildSource());
-			case "duration":
-			case "output.image":
+			case DURATION:
+			case OUTPUT_IMAGE:
 				return handleBuildStatus((String) id, build.getBuildStatus());
-			case "push.secret":
+			case PUSH_SECRET:
 				return build.getPushSecret();
 			}
 		}
@@ -74,9 +86,9 @@ public class BuildPropertySource extends ResourcePropertySource<IBuild> {
 	private Object handleBuildStatus(String id, IBuildStatus status) {
 		if (status != null) {
 			switch (id) {
-			case "output.image":
+			case OUTPUT_IMAGE:
 				return status.getOutputDockerImage() != null ? status.getOutputDockerImage().getUriWithoutHost() : "";
-			case "duration":
+			case DURATION:
 				return DateTimeUtils.formatDuration(status.getDuration());
 			}
 		}
@@ -87,32 +99,34 @@ public class BuildPropertySource extends ResourcePropertySource<IBuild> {
 		if (strategy == null)
 			return "";
 		switch (id) {
-		case "build.strategy":
+		case BUILD_STRATEGY:
 			return strategy.getType();
-		case "builder.image":
+		case BUILDER_IMAGE:
 			if (strategy instanceof IDockerBuildStrategy) {
 				return ((IDockerBuildStrategy) strategy).getBaseImage();
 			}
 			if (strategy instanceof ISourceBuildStrategy) {
 				return ((ISourceBuildStrategy) strategy).getImage();
 			}
+			return "";
+		default:
+			return "";
 		}
-		return "";
 	}
 
 	private Object handleBuildSource(String id, IBuildSource buildSource) {
 		if (buildSource == null)
 			return "";
-		if ("source.type".equals(id))
+		if (SOURCE_TYPE.equals(id))
 			return buildSource.getType();
 		if (buildSource instanceof IGitBuildSource) {
 			IGitBuildSource source = (IGitBuildSource) buildSource;
 			switch (id) {
-			case "source.repo":
+			case SOURCE_REPO:
 				return source.getURI();
-			case "source.ref":
+			case SOURCE_REF:
 				return source.getRef();
-			case "source.contextDir":
+			case SOURCE_CONTEXT_DIR:
 				return source.getContextDir();
 			}
 		}

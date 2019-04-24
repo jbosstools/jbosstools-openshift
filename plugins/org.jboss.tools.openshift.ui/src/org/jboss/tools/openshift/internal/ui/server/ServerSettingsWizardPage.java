@@ -855,7 +855,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				return gridLayoutFactory.numColumns(1).margins(0, 0);
 			}
 		};
-		advancedPart.createAdvancedGroup(parent, 1);
+		advancedPart.create(parent, 1);
 	}
 
 	private void createDebuggingSettingsControls(Composite parent, ServerSettingsWizardPageModel model,

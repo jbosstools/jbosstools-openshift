@@ -18,9 +18,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertySheet;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistryAdapter;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
@@ -37,28 +37,17 @@ public class ConnectionPropertySource implements IPropertySource {
 
 	private ConnectionListener listener = new ConnectionListener();
 
-	class ConnectionListener implements IConnectionsRegistryListener {
-
-		@Override
-		public void connectionAdded(IConnection connection) {
-		}
-
-		@Override
-		public void connectionRemoved(IConnection connection) {
-		}
+	class ConnectionListener extends ConnectionsRegistryAdapter {
 
 		@Override
 		public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
 			if (connection.equals(ConnectionPropertySource.this.connection)
 					&& IOpenShiftConnection.PROPERTY_EXTENDED_PROPERTIES.equals(property)) {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
+				Display.getDefault().asyncExec(() -> {
 						PropertySheet sh = OpenShiftUIUtils.getPropertySheet();
 						if (sh != null) {
 							OpenShiftUIUtils.refreshPropertySheetPage(sh);
 						}
-					}
 				});
 			}
 		}
@@ -71,7 +60,6 @@ public class ConnectionPropertySource implements IPropertySource {
 
 	@Override
 	public Object getEditableValue() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -141,11 +129,12 @@ public class ConnectionPropertySource implements IPropertySource {
 
 	@Override
 	public void resetPropertyValue(Object id) {
+		// nothing to do
 	}
 
 	@Override
 	public void setPropertyValue(Object id, Object value) {
-
+		// nothing to do
 	}
 
 	public void dispose() {

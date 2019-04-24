@@ -39,11 +39,12 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.EditResourceLimitsPag
 import com.openshift.restclient.model.IContainer;
 
 public class EditResourceLimitsPage extends AbstractOpenShiftWizardPage {
-	public static final String[] MEMORY_SUFFIXES = { "M", "G", "Mi", "Gi", "" };
-	public static final String[] MEMORY_SUFFIXES_LABELS = { "MB (1000 KB)", "GB (1000 MB)", "MiB (1024 KB)",
-			"GiB (1024 MB)", "bytes" };
-	public static final String[] CPU_SUFFIXES = { "m", "k", "M", "G", "" };
-	public static final String[] CPU_SUFFIXES_LABELS = { "millicores", "kcores", "Mcores", "Gcores", "cores" };
+
+	protected static final String[] MEMORY_SUFFIXES = { "M", "G", "Mi", "Gi", "" };
+	protected static final String[] MEMORY_SUFFIXES_LABELS = { 
+			"MB (1000 KB)", "GB (1000 MB)", "MiB (1024 KB)", "GiB (1024 MB)", "bytes" };
+	protected static final String[] CPU_SUFFIXES = { "m", "k", "M", "G", "" };
+	protected static final String[] CPU_SUFFIXES_LABELS = { "millicores", "kcores", "Mcores", "Gcores", "cores" };
 
 	private EditResourceLimitsPageModel model;
 
@@ -118,14 +119,16 @@ public class EditResourceLimitsPage extends AbstractOpenShiftWizardPage {
 
 		IObservableValue<String> valueObservable = WidgetProperties.text(SWT.Modify).observe(text);
 		IObservableValue<String> selectedUnitObservable = ViewerProperties.singleSelection().observe(combo);
-		IObservableValue<IContainer> master = BeanProperties.value(EditResourceLimitsPageModel.SELECTED_CONTAINER)
-				.observe(model);
-		ValueBindingBuilder.bind(valueObservable).validatingAfterGet(new NumericValidator("integer", Integer::parseInt))
-				.converting(new AggregatingConverter(selectedUnitObservable, true))
-				.to(PojoProperties.value(property).observeDetail(master))
-				.converting(new KeywordConverter(suffixes, true)).in(dbc);
-		ValueBindingBuilder.bind(selectedUnitObservable).converting(new AggregatingConverter(valueObservable, false))
-				.to(PojoProperties.value(property).observeDetail(master))
-				.converting(new KeywordConverter(suffixes, false)).in(dbc);
+		IObservableValue<IContainer> master = 
+				BeanProperties.value(EditResourceLimitsPageModel.SELECTED_CONTAINER).observe(model);
+		ValueBindingBuilder.bind(valueObservable)
+			.validatingAfterGet(new NumericValidator("integer", Integer::parseInt))
+			.converting(new AggregatingConverter(selectedUnitObservable, true))
+			.to(PojoProperties.value(property).observeDetail(master))
+			.converting(new KeywordConverter(suffixes, true)).in(dbc);
+		ValueBindingBuilder.bind(selectedUnitObservable)
+			.converting(new AggregatingConverter(valueObservable, false))
+			.to(PojoProperties.value(property).observeDetail(master))
+			.converting(new KeywordConverter(suffixes, false)).in(dbc);
 	}
 }

@@ -20,20 +20,17 @@ public class ConnectionsRegistryAdapter implements IConnectionsRegistryListener 
 
 	@Override
 	public void connectionAdded(IConnection connection) {
-		// TODO Auto-generated method stub
-
+		// empty default implementation
 	}
 
 	@Override
 	public void connectionRemoved(IConnection connection) {
-		// TODO Auto-generated method stub
-
+		// empty default implementation
 	}
 
 	@Override
 	public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-		// TODO Auto-generated method stub
-
+		// empty default implementation
 	}
 
 }

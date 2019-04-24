@@ -37,12 +37,24 @@ import com.openshift.restclient.model.IResource;
 
 public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel>
 		implements IConnectionWrapper {
-	public static final String[] RESOURCE_KINDS = { ResourceKind.BUILD, ResourceKind.BUILD_CONFIG,
-			ResourceKind.DEPLOYMENT_CONFIG, ResourceKind.EVENT, ResourceKind.IMAGE_STREAM,
-			ResourceKind.IMAGE_STREAM_TAG, ResourceKind.POD, ResourceKind.ROUTE, ResourceKind.REPLICATION_CONTROLLER,
-			ResourceKind.SERVICE, ResourceKind.TEMPLATE, ResourceKind.PVC, ResourceKind.PROJECT };
 
-	private AtomicReference<LoadingState> state = new AtomicReference<LoadingState>(LoadingState.INIT);
+	protected static final String[] RESOURCE_KINDS = { 
+			ResourceKind.BUILD,
+			ResourceKind.BUILD_CONFIG,
+			ResourceKind.DEPLOYMENT_CONFIG,
+			ResourceKind.EVENT,
+			ResourceKind.IMAGE_STREAM,
+			ResourceKind.IMAGE_STREAM_TAG,
+			ResourceKind.POD,
+			ResourceKind.ROUTE,
+			ResourceKind.REPLICATION_CONTROLLER,
+			ResourceKind.SERVICE,
+			ResourceKind.TEMPLATE,
+			ResourceKind.PVC,
+			ResourceKind.PROJECT 
+			};
+
+	private AtomicReference<LoadingState> state = new AtomicReference<>(LoadingState.INIT);
 	private Map<String, ProjectWrapper> projects = new HashMap<>();
 	private ResourceCache resourceCache = new ResourceCache();
 
@@ -52,7 +64,7 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 
 	public Collection<IResourceWrapper<?, ?>> getResources() {
 		synchronized (projects) {
-			return new ArrayList<IResourceWrapper<?, ?>>(projects.values());
+			return new ArrayList<>(projects.values());
 		}
 	}
 
@@ -82,9 +94,9 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 
 	void initWith(List<IProject> resources) {
 		synchronized (projects) {
-			resources.forEach(project -> {
-				projects.put(project.getName(), new ProjectWrapper(this, project));
-			});
+			resources.forEach(project -> 
+				projects.put(project.getName(), new ProjectWrapper(this, project))
+			);
 		}
 		state.set(LoadingState.LOADED);
 	}
