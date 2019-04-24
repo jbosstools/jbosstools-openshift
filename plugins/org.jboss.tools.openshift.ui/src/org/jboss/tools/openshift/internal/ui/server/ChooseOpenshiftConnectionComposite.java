@@ -48,6 +48,7 @@ import org.jboss.tools.openshift.internal.core.ocbinary.OCBinary;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.authorization.IAuthorizationContext;
 
 public class ChooseOpenshiftConnectionComposite extends Composite {
 	private IConnectionChangedListener connectionChangeListener;
@@ -59,7 +60,6 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 	private Label imageRegistryValLbl;
 	private Label clusterNamespaceValLbl;
 	private Label ocLocationValLbl;
-	private Label userLbl;
 
 	private List<IConnection> connections;
 	private IConnection selectedConnection;
@@ -97,11 +97,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 				int ret = WizardUtils.openWizardDialog(connectionWizard, addConBtn.getShell());
 				if (ret == Window.OK) {
 					refreshConnections();
-					IConnection c = connectionWizard.getConnection();
-					int ind = connections.indexOf(c);
-					if (ind != -1) {
-						connectionCombo.select(ind);
-					}
+					setConnectionInConnectionWizardCombo(connectionWizard.getConnection());
 				}
 			}
 		});
@@ -114,11 +110,8 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 				WizardUtils.openWizardDialog(connectionWizard, editConBtn.getShell());
 				refreshConnections();
 				IConnection c = connectionWizard.getConnection();
-				int ind = connections.indexOf(c);
-				if (ind != -1) {
-					connectionCombo.select(ind);
-					setSelectedConnection(c);
-				}
+				setConnectionInConnectionWizardCombo(c);
+				setSelectedConnection(c);
 			}
 		});
 
@@ -137,7 +130,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 		protocolValLbl = new Label(authGroup, SWT.NONE);
 		GridDataFactory.fillDefaults().span(5, 1).applyTo(protocolValLbl);
 
-		userLbl = new Label(authGroup, SWT.NONE);
+		Label userLbl = new Label(authGroup, SWT.NONE);
 		userLbl.setText("Username: ");
 		usernameValLbl = new Label(authGroup, SWT.NONE);
 		GridDataFactory.fillDefaults().span(5, 1).applyTo(usernameValLbl);
@@ -177,8 +170,9 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 			}
 		});
 		if (connectionCombo.getItemCount() > 0) {
-			connectionCombo.select(0);
-			setSelectedConnection(connections.get(0));
+			IConnection recentConnection = ConnectionsRegistrySingleton.getInstance().getRecentConnection();
+			setConnectionInConnectionWizardCombo(recentConnection);
+			setSelectedConnection(recentConnection);
 		}
 		int selIndex = connectionCombo.getSelectionIndex();
 		editConBtn.setEnabled(selIndex != -1);
@@ -206,15 +200,12 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 		Collection<IConnection> allCons = ConnectionsRegistrySingleton.getInstance().getAll();
 		connections = allCons.stream().filter(connection -> connection instanceof IOpenShiftConnection)
 				.collect(Collectors.toList());
-		List<String> connectionNames = new ArrayList<String>();
-		allCons.forEach((con) -> connectionNames.add(createLabel(con)));
+		List<String> connectionNames = new ArrayList<>();
+		allCons.forEach(con -> connectionNames.add(createLabel(con)));
 		connectionCombo.setItems((String[]) connectionNames.toArray(new String[connectionNames.size()]));
 
 		if (selectedName != null && connectionNames.contains(selectedName)) {
-			int ind = connectionNames.indexOf(selectedName);
-			if (ind != -1) {
-				connectionCombo.select(ind);
-			}
+			 setConnectionInConnectionWizardCombo(connectionNames.indexOf(selectedName));
 		}
 	}
 
@@ -225,7 +216,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 			if (con instanceof IOpenShiftConnection) {
 				String authScheme = ((Connection) con).getAuthScheme();
 				protocolValLbl.setText(authScheme);
-				if ("Basic".equals(authScheme)) {
+				if (IAuthorizationContext.AUTHSCHEME_BASIC.equals(authScheme)) {
 					usernameValLbl.setText(con.getUsername());
 				} else {
 					usernameValLbl.setText("Not applicable");
@@ -286,7 +277,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 				}
 			}
 
-			private String runConnectionOrError() throws IOException, OpenShiftException {
+			private String runConnectionOrError() throws IOException {
 				String blockedMsg = null;
 				if (selectedConnection != null && selectedConnection.canConnect()) {
 					boolean connected = selectedConnection.connect();
@@ -301,6 +292,16 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 				return blockedMsg;
 			}
 		};
+	}
+	
+	private void setConnectionInConnectionWizardCombo(IConnection connection) {
+		setConnectionInConnectionWizardCombo(connections.indexOf(connection));
+	}
+	
+	private void setConnectionInConnectionWizardCombo(int ind) {
+		if (ind != -1) {
+			connectionCombo.select(ind);
+		}
 	}
 
 	public static interface IConnectionChangedListener {
