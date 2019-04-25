@@ -42,8 +42,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
-import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.DataBindingUtils;
@@ -67,7 +67,7 @@ import com.openshift.restclient.model.IBuildConfig;
  */
 public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 
-	public IBuildConfigPageModel model;
+	protected IBuildConfigPageModel model;
 
 	public BuildConfigWizardPage(IWizard wizard, IBuildConfigPageModel model) {
 		super("Select Build Config", "Choose the build config that will be used to import a project to Eclipse", "",
@@ -87,11 +87,12 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 
 		// build configs tree
 		TreeViewer buildConfigsViewer = createBuildConfigsViewer(
-				new Tree(buildConfigsGroup, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL), model, dbc);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(SWT.DEFAULT, 200).span(1, 2)
-				.applyTo(buildConfigsViewer.getControl());
-		final IObservableValue selectedItem = BeanProperties.value(IBuildConfigPageModel.PROPERTY_SELECTED_ITEM)
-				.observe(model);
+				new Tree(buildConfigsGroup, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL), model);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, true).hint(SWT.DEFAULT, 200).span(1, 2)
+			.applyTo(buildConfigsViewer.getControl());
+		final IObservableValue selectedItem = 
+				BeanProperties.value(IBuildConfigPageModel.PROPERTY_SELECTED_ITEM).observe(model);
 		Binding selectedBuildConfigBinding = ValueBindingBuilder
 				.bind(ViewerProperties.singleSelection().observe(buildConfigsViewer))
 				.converting(new ObservableTreeItem2ModelConverter()).to(selectedItem)
@@ -107,8 +108,8 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 				}
 			}
 		});
-		IObservableValue connectionObservable = BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONNECTION)
-				.observe(model);
+		IObservableValue connectionObservable = 
+				BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONNECTION).observe(model);
 		DataBindingUtils.addDisposableValueChangeListener(onConnectionChanged(buildConfigsViewer, model),
 				connectionObservable, buildConfigsViewer.getTree());
 
@@ -141,10 +142,7 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 		ValueBindingBuilder.bind(selectedItem).to(selectedService).notUpdatingParticipant().in(dbc);
 		new BuildConfigDetailViews(selectedService, detailsContainer, dbc).createControls();
 		expandable.setClient(detailsContainer);
-		expandable.addExpansionListener(new IExpansionListener() {
-			@Override
-			public void expansionStateChanging(ExpansionEvent e) {
-			}
+		expandable.addExpansionListener(new ExpansionAdapter() {
 
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
@@ -156,7 +154,7 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 		loadBuildConfigs(model);
 	}
 
-	private TreeViewer createBuildConfigsViewer(Tree tree, IBuildConfigPageModel model, DataBindingContext dbc) {
+	private TreeViewer createBuildConfigsViewer(Tree tree, IBuildConfigPageModel model) {
 		TreeViewer buildConfigsViewer = new TreeViewer(tree);
 		IListProperty childrenProperty = new MultiListProperty(
 				new IListProperty[] { BeanProperties.list(IBuildConfigPageModel.PROPERTY_BUILDCONFIGS),
@@ -184,13 +182,9 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	private IValueChangeListener onConnectionChanged(final TreeViewer viewer, final IBuildConfigPageModel model) {
-		return new IValueChangeListener() {
-
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
+		return (ValueChangeEvent event) -> {
 				loadBuildConfigs(model);
 				viewer.expandAll();
-			}
 		};
 	}
 

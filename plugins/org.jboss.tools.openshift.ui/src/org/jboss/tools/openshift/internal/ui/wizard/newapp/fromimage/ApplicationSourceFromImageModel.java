@@ -96,6 +96,8 @@ public class ApplicationSourceFromImageModel extends DeployImageWizardModel
 		case IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT:
 			handleEclipseProject(evt);
 			break;
+		default:
+			break;
 		}
 	}
 

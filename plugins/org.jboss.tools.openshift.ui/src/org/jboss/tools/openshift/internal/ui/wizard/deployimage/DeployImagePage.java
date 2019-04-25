@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -93,17 +93,13 @@ import com.openshift.restclient.model.IProject;
  */
 public class DeployImagePage extends AbstractOpenShiftWizardPage {
 
+	protected static final String DEPLOY_IMAGE_PAGE_NAME = "Deployment Config Settings Page";
+
 	private static final String MISSING_DOCKER_CONNECTION_MSG = "You must select a Docker connection.";
-
-	static String DEPLOY_IMAGE_PAGE_NAME = "Deployment Config Settings Page";
-
 	private static final String PAGE_DESCRIPTION = "This page allows you to choose an image and the name to be used for the deployed resources.";
-
 	private static final int NUM_COLUMS = 4;
-
 	private final IDeployImagePageModel model;
-
-	ContentProposalAdapter imageNameProposalAdapter;
+	private ContentProposalAdapter imageNameProposalAdapter;
 
 	protected DeployImagePage(IWizard wizard, IDeployImagePageModel model) {
 		super("Deploy an Image", PAGE_DESCRIPTION, DEPLOY_IMAGE_PAGE_NAME, wizard);
@@ -492,7 +488,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 						selection.y = selection.x;
 						imageNameText.setSelection(selection);
 					}
-				}, getImageNameContentProposalProvider(imageNameText), null, null);
+				}, getImageNameContentProposalProvider(), null, null);
 
 		// List local Docker images
 		Button btnDockerBrowse = new Button(parent, SWT.NONE);
@@ -625,20 +621,13 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	/**
 	 * Creates an {@link IContentProposalProvider} to propose
 	 * {@link IDockerImage} names based on the current text.
-	 * 
-	 * @param items
-	 * @return
 	 */
-	private IContentProposalProvider getImageNameContentProposalProvider(final Text imageNameText) {
-		return new IContentProposalProvider() {
-
-			@Override
-			public IContentProposal[] getProposals(final String input, final int position) {
-				return model.getImageNames().stream().filter(name -> name.contains(input))
+	private IContentProposalProvider getImageNameContentProposalProvider() {
+		return (final String input, final int position) -> 
+				model.getImageNames().stream()
+						.filter(name -> name.contains(input))
 						.map(n -> new ContentProposal(n, n, null, position))
 						.toArray(size -> new IContentProposal[size]);
-			}
-		};
 	}
 
 	private SelectionAdapter onNewProjectClicked() {

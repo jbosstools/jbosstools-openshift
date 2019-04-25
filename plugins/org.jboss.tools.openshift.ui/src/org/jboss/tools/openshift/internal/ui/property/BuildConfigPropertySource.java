@@ -76,28 +76,27 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 	}
 
 	private void addBuildSourceProperties(List<IPropertyDescriptor> all, IBuildConfig bc) {
-		if (bc == null || bc.getBuildSource() == null) {
+		if (bc == null 
+				|| bc.getBuildSource() == null) {
 			return;
 		}
 
-		switch (bc.getBuildSource().getType()) {
-		case BuildSourceType.GIT:
+		if (BuildSourceType.GIT == bc.getBuildSource().getType()) {
 			all.addAll(getGitBuildSource());
-			break;
-		default:
 		}
 	}
 
 	private List<IPropertyDescriptor> getBuildTriggerPropertyDescriptors() {
 		return Arrays.asList(
-				new IPropertyDescriptor[] { new ExtTextPropertyDescriptor(Ids.TRIGGERS_WEB, "Webhooks", TRIGGERS),
-						new ExtTextPropertyDescriptor(Ids.TRIGGERS_IMAGE_CHANGE, "Image Change", TRIGGERS) });
+				new ExtTextPropertyDescriptor(Ids.TRIGGERS_WEB, "Webhooks", TRIGGERS),
+				new ExtTextPropertyDescriptor(Ids.TRIGGERS_IMAGE_CHANGE, "Image Change", TRIGGERS));
 	}
 
 	private List<IPropertyDescriptor> getGitBuildSource() {
-		return Arrays.asList(new IPropertyDescriptor[] { new ExtTextPropertyDescriptor(Ids.SOURCE_TYPE, "Type", SOURCE),
+		return Arrays.asList(
+				new ExtTextPropertyDescriptor(Ids.SOURCE_TYPE, "Type", SOURCE),
 				new ExtTextPropertyDescriptor(Ids.SOURCE_GIT_REF, "Ref", SOURCE),
-				new ExtTextPropertyDescriptor(Ids.SOURCE_URI, "URI", SOURCE), });
+				new ExtTextPropertyDescriptor(Ids.SOURCE_URI, "URI", SOURCE));
 	}
 
 	@Override
@@ -153,35 +152,35 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 	}
 
 	private List<IPropertyDescriptor> getDockerPropertyDescriptors() {
-		return Arrays.asList(new IPropertyDescriptor[] { new ExtTextPropertyDescriptor(Ids.Type, "Type", STRATEGY),
+		return Arrays.asList(new ExtTextPropertyDescriptor(Ids.Type, "Type", STRATEGY),
 				new ExtTextPropertyDescriptor(Ids.DOCKER_CONTEXT_DIR, "Context Dir", STRATEGY),
-				new ExtTextPropertyDescriptor(Ids.DOCKER_IMAGE, IMAGE, STRATEGY), });
+				new ExtTextPropertyDescriptor(Ids.DOCKER_IMAGE, IMAGE, STRATEGY));
 	}
 
 	private List<IPropertyDescriptor> getCustomPropertyDescriptors() {
-		return Arrays
-				.asList(new IPropertyDescriptor[] { new ExtTextPropertyDescriptor(Ids.Type, "Type", STRATEGY),
-						new ExtTextPropertyDescriptor(Ids.CUSTOM_EXPOSE_DOCKER_SOCKET, "Expose Docker Socket",
-								STRATEGY),
-						new ExtTextPropertyDescriptor(Ids.CUSTOM_IMAGE, IMAGE, STRATEGY),
-						new ExtTextPropertyDescriptor(Ids.CUSTOM_ENV, ENVIRONMENT_VARIABLES, STRATEGY), });
+		return Arrays.asList(
+				new ExtTextPropertyDescriptor(Ids.Type, "Type", STRATEGY),
+				new ExtTextPropertyDescriptor(Ids.CUSTOM_EXPOSE_DOCKER_SOCKET, "Expose Docker Socket", STRATEGY),
+				new ExtTextPropertyDescriptor(Ids.CUSTOM_IMAGE, IMAGE, STRATEGY),
+				new ExtTextPropertyDescriptor(Ids.CUSTOM_ENV, ENVIRONMENT_VARIABLES, STRATEGY));
 	}
 
 	private List<IPropertyDescriptor> getSTIPropertyDescriptors() {
-		return Arrays.asList(new IPropertyDescriptor[] { new ExtTextPropertyDescriptor(Ids.Type, "Type", STRATEGY),
+		return Arrays.asList(
+				new ExtTextPropertyDescriptor(Ids.Type, "Type", STRATEGY),
 				new ExtTextPropertyDescriptor(Ids.STI_SCRIPT_LOCATION, "Script Location", STRATEGY),
 				new ExtTextPropertyDescriptor(Ids.STI_IMAGE, IMAGE, STRATEGY),
-				new ExtTextPropertyDescriptor(Ids.STI_ENV, ENVIRONMENT_VARIABLES, STRATEGY), });
+				new ExtTextPropertyDescriptor(Ids.STI_ENV, ENVIRONMENT_VARIABLES, STRATEGY));
 	}
 
 	private List<IPropertyDescriptor> getJenkinsPipelinePropertyDescriptors() {
-		return Arrays.asList(new IPropertyDescriptor[] { new ExtTextPropertyDescriptor(Ids.Type, "Type", STRATEGY),
+		return Arrays.asList(new ExtTextPropertyDescriptor(Ids.Type, "Type", STRATEGY),
 				new ExtTextPropertyDescriptor(Ids.JENKINS_FILE, "Jenkins File", STRATEGY),
 				new ExtTextPropertyDescriptor(Ids.JENKINS_FILEPATH, "Jenkins File Path", STRATEGY),
-				new ExtTextPropertyDescriptor(Ids.JENKINS_ENV, ENVIRONMENT_VARIABLES, STRATEGY), });
+				new ExtTextPropertyDescriptor(Ids.JENKINS_ENV, ENVIRONMENT_VARIABLES, STRATEGY));
 	}
 
-	public static enum Ids {
+	public enum Ids {
 		Type, CUSTOM_EXPOSE_DOCKER_SOCKET, CUSTOM_IMAGE, CUSTOM_ENV, DOCKER_CONTEXT_DIR, DOCKER_IMAGE, OUTPUT_REPO_NAME, STI_SCRIPT_LOCATION, STI_IMAGE, STI_ENV, JENKINS_FILE, JENKINS_FILEPATH, JENKINS_ENV, SOURCE_TYPE, SOURCE_GIT_REF, SOURCE_URI, TRIGGERS_WEB, TRIGGERS_IMAGE_CHANGE
 	}
 }

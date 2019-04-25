@@ -32,7 +32,6 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
-import org.jboss.tools.openshift.internal.ui.server.ChooseOpenshiftConnectionComposite.IConnectionChangedListener;
 
 public class ChooseOpenshiftConnectionFragment extends WizardFragment {
 	private IWizardHandle handle;
@@ -68,13 +67,7 @@ public class ChooseOpenshiftConnectionFragment extends WizardFragment {
 		initWizardHandle();
 
 		chooseConnectionComposite = new ChooseOpenshiftConnectionComposite(parent);
-		chooseConnectionComposite.setConnectionChangeListener(new IConnectionChangedListener() {
-
-			@Override
-			public void connectionChanged(IConnection newVal) {
-				selectedConnectionChanged(newVal);
-			}
-		});
+		chooseConnectionComposite.setConnectionChangeListener(this::selectedConnectionChanged);
 		getContainer(getPage(handle)).addPageChangingListener(onPageChanging(handle));
 		selectedConnectionChanged(chooseConnectionComposite.getConnection());
 		return chooseConnectionComposite;
@@ -106,9 +99,7 @@ public class ChooseOpenshiftConnectionFragment extends WizardFragment {
 	}
 
 	private IPageChangingListener onPageChanging(IWizardHandle wizardHandle) {
-		return new IPageChangingListener() {
-			@Override
-			public void handlePageChanging(PageChangingEvent event) {
+		return (PageChangingEvent event) -> {
 				if (event.getCurrentPage() == getPage(wizardHandle)) {
 					if (event.getTargetPage() == null
 							|| event.getTargetPage().equals(getPage(wizardHandle).getNextPage())) {
@@ -127,7 +118,6 @@ public class ChooseOpenshiftConnectionFragment extends WizardFragment {
 						OpenShiftServerTaskModelAccessor.set((Connection) selectedConnection, getTaskModel());
 					}
 				}
-			}
 		};
 	}
 

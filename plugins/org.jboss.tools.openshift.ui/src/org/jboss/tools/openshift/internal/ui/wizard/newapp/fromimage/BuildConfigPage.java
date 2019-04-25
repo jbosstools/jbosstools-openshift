@@ -14,9 +14,7 @@ import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -154,15 +152,11 @@ public class BuildConfigPage extends EnvironmentVariablePage {
 
 		Binding gitUrlBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observeDelayed(500, gitUrlText))
-				.validatingAfterConvert(new IValidator() {
-
-					@Override
-					public IStatus validate(Object value) {
+				.validatingAfterConvert((Object value) -> {
 						if (UrlUtils.isValid((String) value)) {
 							return Status.OK_STATUS;
 						}
 						return ValidationStatus.error("A valid URL to a Git repository is required");
-					}
 				}).to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_GIT_REPOSITORY_URL).observe(model)).in(dbc);
 		ControlDecorationSupport.create(gitUrlBinding, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater(true));

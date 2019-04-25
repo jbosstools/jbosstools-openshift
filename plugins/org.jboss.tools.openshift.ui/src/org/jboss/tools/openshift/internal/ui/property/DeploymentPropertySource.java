@@ -50,14 +50,6 @@ public class DeploymentPropertySource implements IPropertySource {
 		};
 	}
 
-	//	private Collection<IPropertyDescriptor> getPodStatusDescriptors(){
-	//		Set<IPropertyDescriptor> status = new HashSet<>();
-	//		for (IPod pod : deployment.getPods()) {
-	//			status.add(new ExtTextPropertyDescriptor("pod", pod.getStatus(), "Pods"));
-	//		}
-	//		return status;
-	//	}
-
 	@Override
 	public Object getPropertyValue(Object id) {
 		switch ((String) id) {
@@ -65,7 +57,7 @@ public class DeploymentPropertySource implements IPropertySource {
 			return deployment.getWrapped().getName();
 		case "service.port":
 			List<IServicePort> ports = deployment.getWrapped().getPorts();
-			if (ports.size() > 0) {
+			if (!ports.isEmpty()) {
 				IServicePort port = ports.get(0);
 				return NLS.bind("{0}/{1}->{2}",
 						new Object[] { port.getPort(), port.getProtocol(), port.getTargetPort() });
@@ -73,9 +65,7 @@ public class DeploymentPropertySource implements IPropertySource {
 			break;
 		case "service.route":
 		case "deployment.name":
-			//			return NLS.bind("", deployment.get)
 		case "deployment.date":
-
 		case "pods":
 			return deployment.getResourcesOfKind(ResourceKind.POD).size();
 		}
@@ -89,10 +79,12 @@ public class DeploymentPropertySource implements IPropertySource {
 
 	@Override
 	public void resetPropertyValue(Object id) {
+		// nothing to be done
 	}
 
 	@Override
 	public void setPropertyValue(Object id, Object value) {
+		// nothing to be done
 	}
 
 }

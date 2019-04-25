@@ -43,7 +43,7 @@ public class ApplicationSourceDetailViews extends AbstractStackedDetailViews {
 
 	private final IDetailView templateView = new ApplicationSourceDetailView();
 
-	public ApplicationSourceDetailViews(IObservableValue detailViewModel, IObservableValue disabled, Composite parent,
+	public ApplicationSourceDetailViews(IObservableValue detailViewModel, Composite parent,
 			DataBindingContext dbc) {
 		super(detailViewModel, null, parent, dbc);
 	}

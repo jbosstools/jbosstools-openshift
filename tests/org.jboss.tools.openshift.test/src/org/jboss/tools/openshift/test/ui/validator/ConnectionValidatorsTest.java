@@ -117,7 +117,7 @@ public class ConnectionValidatorsTest {
 		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		Composite composite = new Composite(shell, SWT.NONE);
 		try {
-			BasicAuthenticationDetailView view = new BasicAuthenticationDetailView(pageModel, l, null);
+			BasicAuthenticationDetailView view = new BasicAuthenticationDetailView(pageModel, l);
 			DataBindingContext dbc = new DataBindingContext();
 			view.createControls(shell, null, dbc);
 			view.onVisible(null, dbc);

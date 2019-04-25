@@ -28,6 +28,10 @@ import com.openshift.restclient.authorization.IAuthorizationContext;
  */
 public class ConnectionValidatorFactory {
 
+	private ConnectionValidatorFactory() {
+		// inhibit instantiation
+	}
+
 	/**
 	 * Returns new validator that checks that there is no connection other than the selected one
 	 * with host and username provided by the observable values.

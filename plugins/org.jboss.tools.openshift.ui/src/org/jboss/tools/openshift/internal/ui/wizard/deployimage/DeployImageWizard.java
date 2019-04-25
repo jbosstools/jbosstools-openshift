@@ -24,7 +24,6 @@ import org.eclipse.linuxtools.docker.core.IRegistryAccount;
 import org.eclipse.linuxtools.docker.core.IRepositoryTag;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -102,7 +101,7 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 	@Override
 	public boolean performFinish() {
 		// checks if we need to push the image, first
-		final Job job = getJobChain(getModel(), PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+		final Job job = getJobChain(getModel());
 		job.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
@@ -122,7 +121,7 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 	 * @param shell the current shell
 	 * @return
 	 */
-	private Job getJobChain(final IDeployImageParameters model, final Shell shell) {
+	private Job getJobChain(final IDeployImageParameters model) {
 		final DeployImageJob deployJob = getDeployImageJob(getModel(), getShell());
 		final boolean pushImageToRegistry = model.isPushImageToRegistry();
 		if (pushImageToRegistry) {
@@ -140,14 +139,11 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 			@Override
 			public void done(IJobChangeEvent event) {
 				IStatus status = event.getResult();
-				if ((JobUtils.isOk(status) || JobUtils.isWarning(status)) && !deployJob.getResources().isEmpty()) {
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							new ResourceSummaryDialog(shell, deployJob.getResources(), TITLE,
-									deployJob.getSummaryMessage()).open();
-						}
-					});
+				if ((JobUtils.isOk(status) 
+						|| JobUtils.isWarning(status)) && !deployJob.getResources().isEmpty()) {
+					Display.getDefault().syncExec(() -> 
+							new ResourceSummaryDialog(
+									shell, deployJob.getResources(), TITLE, deployJob.getSummaryMessage()).open());
 					OpenShiftUIUtils.showOpenShiftExplorer();
 				}
 			}
@@ -210,12 +206,6 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 	 */
 	public static boolean isFailed(IStatus status) {
 		return JobUtils.isOk(status) || JobUtils.isWarning(status);
-	}
-
-	@Override
-	public void dispose() {
-		super.dispose();
-		//getModel().dispose();
 	}
 
 }

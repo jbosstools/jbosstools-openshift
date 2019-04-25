@@ -21,7 +21,6 @@ import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.property.list.IListProperty;
 import org.eclipse.core.databinding.property.list.MultiListProperty;
@@ -74,7 +73,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
@@ -146,14 +144,10 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 
 		TabFolder tabContainer = new TabFolder(listAndDetailsContainer, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(tabContainer);
-		tabContainer.addListener(SWT.Selection, new Listener() {
-
-			@Override
-			public void handleEvent(Event event) {
+		tabContainer.addListener(SWT.Selection, (Event event) -> 
 				// JBIDE-21072: force re-layout of the parent upon tab switching
-				parent.layout(true, true);
-			}
-		});
+				parent.layout(true, true)
+		);
 
 		IObservableValue useLocalTemplateObservable = BeanProperties
 				.value(IApplicationSourceListPageModel.PROPERTY_USE_LOCAL_APP_SOURCE).observe(model);
@@ -174,9 +168,9 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		TabFolderTraverseListener tabFolderTraverseListener = new TabFolderTraverseListener(tabContainer);
 
 		IObservableValue serverTemplate = createServerTemplateControls(tabContainer, tabFolderTraverseListener,
-				useLocalTemplateObservable, dbc);
+				dbc);
 		IObservableValue localTemplateFilename = createLocalTemplateControls(tabContainer, tabFolderTraverseListener,
-				useLocalTemplateObservable, dbc);
+				dbc);
 		dbc.addValidationStatusProvider(new MultiValidator() {
 			@Override
 			protected IStatus validate() {
@@ -218,14 +212,10 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		gitLabel.addSelectionListener(onClickEGitLink());
 		GridDataFactory.fillDefaults().span(3, 1).applyTo(gitLabel);
 
-		DataBindingUtils.addDisposableValueChangeListener(new IValueChangeListener() {
-
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
+		DataBindingUtils.addDisposableValueChangeListener((ValueChangeEvent event) -> {
 				org.eclipse.core.resources.IProject p = (org.eclipse.core.resources.IProject) event.getObservableValue()
 						.getValue();
 				toggleEgitLink(gitLabel, p);
-			}
 		}, eclipseProjectObservable, gitLabel);
 		toggleEgitLink(gitLabel, model.getEclipseProject());
 		return builder.getProjectNameTextObservable();
@@ -235,14 +225,11 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Display.getCurrent().asyncExec(new Runnable() {
-					@Override
-					public void run() {
+				Display.getCurrent().asyncExec(() -> {
 						org.eclipse.core.resources.IProject p = model.getEclipseProject();
 						model.setEclipseProject(null);
 						EGitUIUtils.openGitSharingWizard(Display.getCurrent().getActiveShell(), p);
 						model.setEclipseProject(p);//force re-validation
-					}
 				});
 			}
 		};
@@ -264,7 +251,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 										model.getEclipseProject().getName()),
 						getShell());
 				if (model.getEclipseProject() != null) {
-					dialog.setInitialSelections(new Object[] { model.getEclipseProject() });
+					dialog.setInitialSelections(model.getEclipseProject());
 				}
 				if (dialog.open() == Dialog.OK) {
 					Object selectedProject = dialog.getFirstResult();
@@ -275,8 +262,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 	}
 
 	private IObservableValue createLocalTemplateControls(TabFolder tabContainer,
-			TabFolderTraverseListener tabFolderTraverseListener, IObservableValue useLocalTemplate,
-			DataBindingContext dbc) {
+			TabFolderTraverseListener tabFolderTraverseListener, DataBindingContext dbc) {
 
 		TabItem localTemplatesTab = new TabItem(tabContainer, SWT.NONE);
 		localTemplatesTab.setText("Custom template");
@@ -349,12 +335,9 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 	}
 	
 	private void asyncRedraw(final Composite c) {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
+		Display.getDefault().asyncExec(() -> {
 				c.redraw();
 				c.update();
-			}
 		});
 	}
 
@@ -381,7 +364,6 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		}
 		try {
 			model.setLocalAppSourceFileName(file);
-			return;
 		} catch (NotATemplateException ex) {
 			MessageDialog.openWarning(getShell(), "Template Error",
 					NLS.bind(
@@ -407,8 +389,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 	}
 
 	private IObservableValue createServerTemplateControls(TabFolder tabFolder,
-			TabFolderTraverseListener tabFolderTraverseListener, IObservableValue uploadTemplate,
-			DataBindingContext dbc) {
+			TabFolderTraverseListener tabFolderTraverseListener, DataBindingContext dbc) {
 		TabItem serverTemplatesTab = new TabItem(tabFolder, SWT.NONE);
 		serverTemplatesTab.setText("Server application source");
 
@@ -423,14 +404,11 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 
 		IObservableValue eclipseProjectObservable = BeanProperties
 				.value(IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
-		DataBindingUtils.addDisposableValueChangeListener(new IValueChangeListener() {
-
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
-				filterTemplates(txtTemplateFilter,
-						(org.eclipse.core.resources.IProject) event.getObservableValue().getValue());
-			}
-		}, eclipseProjectObservable, txtTemplateFilter);
+		DataBindingUtils.addDisposableValueChangeListener(
+				(ValueChangeEvent event) ->
+					filterTemplates(
+							txtTemplateFilter, (org.eclipse.core.resources.IProject) event.getObservableValue().getValue())
+				, eclipseProjectObservable, txtTemplateFilter);
 
 		filterTemplates(txtTemplateFilter, model.getEclipseProject());
 
@@ -469,7 +447,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(detailsContainer);
 
 		new ApplicationSourceDetailViews(
-				BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE).observe(model), null,
+				BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE).observe(model),
 				detailsContainer, dbc).createControls();
 
 		// detail resources button
@@ -493,14 +471,11 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 	}
 
 	private IDoubleClickListener onServerTemplateDoubleClicked() {
-		return new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
+		return (DoubleClickEvent event) -> {
 				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
 				if (hasApplicationSource(selection.getFirstElement()) && canFlipToNextPage()) {
 					getContainer().showPage(getNextPage());
 				}
-			}
 		};
 	}
 
@@ -568,7 +543,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ITemplate template = (ITemplate) model.getSelectedAppSource().getSource();
+				ITemplate template = model.getSelectedAppSource().getSource();
 				new ResourceSummaryDialog(getShell(), template.getObjects(), "Template Details",
 						NLS.bind("The following resources will be created by using template\n\"{0}\":",
 								template.getName()),
@@ -579,12 +554,9 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 	}
 
 	private ModifyListener onFilterTextTyped(final TreeViewer viewer) {
-		return new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
+		return (ModifyEvent e) -> {
 				viewer.refresh();
 				viewer.expandAll();
-			}
 		};
 	}
 
@@ -818,13 +790,12 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 	}
 	
 	private Job loadApplicationSourceJob(String filename) {
-		Job job = new Job(NLS.bind("Loading application source", filename)) {
+		return new Job(NLS.bind("Loading application source", filename)) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				model.loadAppSource(monitor);
 				return Status.OK_STATUS;
 			}
 		};
-		return job;
 	}
 }

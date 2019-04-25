@@ -22,7 +22,8 @@ abstract class AbstractResourceWrapper<R extends IResource, P extends AbstractOp
 	}
 
 	@SuppressWarnings("unchecked")
-	void updateWith(IResource r) {
+	@Override
+	synchronized void updateWith(IResource r) {
 		if (ResourceUtils.isOlder(getWrapped(), r)) {
 			super.updateWith((R) r);
 		}

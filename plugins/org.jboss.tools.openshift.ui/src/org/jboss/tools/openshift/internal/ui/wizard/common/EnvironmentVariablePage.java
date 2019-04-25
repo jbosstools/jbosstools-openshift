@@ -257,7 +257,8 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 		private void handleEvent() {
 			EnvironmentVariable var = UIUtils.getFirstElement(envViewer.getSelection(), EnvironmentVariable.class);
 			Set<String> usedKeys = model.getEnvironmentVariables().stream()
-					.filter(v -> !model.isEnvironmentVariableDeleted(v)).map(v -> v.getKey())
+					.filter(v -> !model.isEnvironmentVariableDeleted(v))
+					.map(EnvironmentVariable::getKey)
 					.collect(Collectors.toSet());
 			usedKeys.remove(var.getKey());
 			EnvironmentVariable copy = new EnvironmentVariable(var.getKey(),
@@ -283,7 +284,8 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Set<String> usedKeys = model.getEnvironmentVariables().stream()
-						.filter(v -> !model.isEnvironmentVariableDeleted(v)).map(v -> v.getKey())
+						.filter(v -> !model.isEnvironmentVariableDeleted(v))
+						.map(EnvironmentVariable::getKey)
 						.collect(Collectors.toSet());
 				IKeyValueWizardModel<KeyValueItem> dialogModel = new KeyValueWizardModelBuilder<KeyValueItem>()
 						.windowTitle(ENVIRONMENT_VARIABLE_LABEL).title("Add " + ENVIRONMENT_VARIABLE_LABEL)

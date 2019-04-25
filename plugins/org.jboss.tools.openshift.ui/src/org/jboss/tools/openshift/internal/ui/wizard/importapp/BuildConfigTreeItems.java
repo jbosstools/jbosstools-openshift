@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2019 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.importapp;
 
 import java.util.Collections;
@@ -12,6 +22,10 @@ import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 
 public class BuildConfigTreeItems {
+
+	private BuildConfigTreeItems() {
+		// inhibit instantiation
+	}
 
 	public static class ConnectionTreeItem extends ObservableTreeItem {
 
@@ -68,7 +82,7 @@ public class BuildConfigTreeItems {
 
 	}
 
-	public static class Model2ObservableTreeItemConverter extends Converter {
+	public static class Model2ObservableTreeItemConverter extends Converter<Object, Object> {
 
 		Model2ObservableTreeItemConverter() {
 			super(Object.class, ObservableTreeItem.class);

@@ -48,15 +48,14 @@ import com.openshift.restclient.authorization.IAuthorizationContext;
  */
 public class BasicAuthenticationDetailView extends BaseDetailsView implements IConnectionEditorDetailView {
 
-	private ConnectionWizardPageModel pageModel;
-	IObservableValue<?> urlObservable;
+	private IObservableValue<?> urlObservable;
 	private Text usernameText;
-	private IObservableValue usernameObservable;
+	private IObservableValue<String> usernameObservable;
 	private Binding usernameBinding;
 	private Text passwordText;
-	private IObservableValue passwordObservable;
+	private IObservableValue<String> passwordObservable;
 	private Binding passwordBinding;
-	private IObservableValue rememberPasswordObservable;
+	private IObservableValue<Boolean> rememberPasswordObservable;
 	private IValueChangeListener changeListener;
 	private IConnectionAuthenticationProvider connectionAuthProvider;
 	private Button rememberPasswordCheckbox;
@@ -64,10 +63,8 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 
 	private MultiValidator connectionValidator;
 
-	public BasicAuthenticationDetailView(ConnectionWizardPageModel pageModel, IValueChangeListener changeListener,
-			Object context) {
+	public BasicAuthenticationDetailView(ConnectionWizardPageModel pageModel, IValueChangeListener changeListener) {
 		this.changeListener = changeListener;
-		this.pageModel = pageModel;
 		urlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel);
 		usernameObservable = new WritableValue(null, String.class);
 		connectionValidator = ConnectionValidatorFactory.createBasicAuthenticationValidator(pageModel,
@@ -100,9 +97,9 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
 		this.passwordText = new Text(composite, SWT.BORDER | SWT.PASSWORD);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
-		this.passwordObservable = new WritableValue(null, String.class);
+		this.passwordObservable = new WritableValue<>(null, String.class);
 
-		this.rememberPasswordObservable = new WritableValue(Boolean.FALSE, Boolean.class);
+		this.rememberPasswordObservable = new WritableValue<>(Boolean.FALSE, Boolean.class);
 		this.rememberPasswordCheckbox = new Button(composite, SWT.CHECK);
 		rememberPasswordCheckbox.setText("&Save password (could trigger secure storage login)");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false)
@@ -194,16 +191,12 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 
 			final Connection connection = (Connection) conn;
 			// might be called from job, switch to display thread to access observables
-			Display.getDefault().syncExec(new Runnable() {
-
-				@Override
-				public void run() {
+			Display.getDefault().syncExec(() -> {
 					connection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_BASIC);
 					connection.setUsername((String) usernameObservable.getValue());
 					connection.setPassword((String) passwordObservable.getValue());
 					connection.setRememberPassword(
 							BooleanUtils.toBoolean((Boolean) rememberPasswordObservable.getValue()));
-				}
 			});
 
 			return connection;

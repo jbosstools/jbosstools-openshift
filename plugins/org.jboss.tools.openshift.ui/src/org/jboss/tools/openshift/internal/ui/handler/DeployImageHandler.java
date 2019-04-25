@@ -102,13 +102,10 @@ public class DeployImageHandler extends AbstractHandler {
 			job.addJobChangeListener(new JobChangeAdapter() {
 				@Override
 				public void done(IJobChangeEvent event) {
-					shell.getDisplay().asyncExec(new Runnable() {
-						@Override
-						public void run() {
+					shell.getDisplay().asyncExec(() -> {
 							DeployImageWizard wizard = new DeployImageWizard(dockerConnection, image, connection,
 									project, authorized[0]);
 							WizardUtils.openWizardDialog(500, 500, wizard, shell);
-						}
 					});
 				}
 			});
