@@ -45,6 +45,7 @@ import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.v3.OpenShift3NativeProjectUtils;
@@ -186,7 +187,7 @@ public class NewApplicationWizardHandlingTest extends AbstractTest {
 	public void testFilteringServerTemplates() {
 		DefaultText searchBar = new DefaultText(1);
 		
-		searchBar.setText("eap71-basic-s2i");
+		searchBar.setText(OpenShiftResources.EAP_TEMPLATE);
 		assertTrue("There should be precisely one tree item in a tree.",
 				new DefaultTree().getItems().size() == 1);
 		String templateLabel = new DefaultTree().getItems().get(0).getText();

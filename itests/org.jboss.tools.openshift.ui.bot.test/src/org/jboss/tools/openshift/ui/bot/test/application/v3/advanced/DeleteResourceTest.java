@@ -86,7 +86,7 @@ public class DeleteResourceTest extends AbstractTest {
 		try {
 			OpenShiftResourceExists openShiftResourceExists = new OpenShiftResourceExists(Resource.POD, podName,
 					ResourceState.UNSPECIFIED, projectReq.getProjectName(), connectionReq.getConnection());
-			new WaitWhile(openShiftResourceExists, TimePeriod.getCustom(15));
+			new WaitWhile(openShiftResourceExists, TimePeriod.getCustom(30));
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("Application pod should be deleted at this point, but it it still present.");
 		}

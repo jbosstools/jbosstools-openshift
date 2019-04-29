@@ -57,6 +57,11 @@
 								<id>org.jboss.tools.maven.feature.feature.group</id>
 								<versionRange>0.0.0</versionRange>
 							</requirement>
+							<requirement>
+								<type>p2-installable-unit</type>
+								<id>com.basistech.m2e.code.quality.checkstyle.feature.feature.group</id>
+								<versionRange>1.1.3</versionRange>
+							</requirement>
 						</extraRequirements>
 					</dependency-resolution>
 					<skip>${skipITests}</skip>
@@ -100,7 +105,13 @@
 		<repository>
 			<id>jbosstools</id>
 			<layout>p2</layout>
-			<url>https://devstudio.redhat.com/11/stable/updates/</url>
+			<url>https://devstudio.redhat.com/12/stable/updates/</url>
+		</repository>
+		<repository>
+		<!-- needed for com.basistech.m2e.code.quality.checkstyle -->
+			<id>m2e-code-quality-plugins</id>
+			<layout>p2</layout>
+			<url>http://m2e-code-quality.github.io/m2e-code-quality/site/latest/</url>
 		</repository>
 	</repositories>
 </project>

@@ -59,6 +59,7 @@ import org.jboss.tools.openshift.reddeer.view.resources.Service;
 import org.jboss.tools.openshift.reddeer.wizard.importapp.ImportApplicationWizard;
 import org.jboss.tools.openshift.reddeer.wizard.server.ServerSettingsWizard;
 
+@SuppressWarnings("restriction")
 public class OpenShiftUtils {
 	
 	public static OpenShiftResource getOpenShiftPod(String projectName, String podName, Connection connection) {
@@ -156,7 +157,6 @@ public class OpenShiftUtils {
 		}
 	}
 	
-	@SuppressWarnings("restriction")
 	public static void importProjectUsingSmartImport(String gitRepoDirectory, String projectName) {
 		SmartImportJob job = new SmartImportJob(new File(gitRepoDirectory + File.separator + projectName),
 				Collections.emptySet(), true, true);
@@ -178,12 +178,16 @@ public class OpenShiftUtils {
 	}
 	
 	public static void cloneGitRepository(String gitRepoDirectory, String gitRepoURL, boolean cleanupFolderBefore) {
+		cloneGitRepository(gitRepoDirectory, gitRepoURL, "master", false);
+	}
+	
+	public static void cloneGitRepository(String gitRepoDirectory, String gitRepoURL, String branch, boolean cleanupFolderBefore) {
 		if (cleanupFolderBefore) {
 			TestUtils.cleanupGitFolder(new File(gitRepoDirectory));
 		}
 		try {
 			FileUtils.deleteDirectory(new File(gitRepoDirectory));
-			Git.cloneRepository().setURI(gitRepoURL).setDirectory(new File(gitRepoDirectory)).call();
+			Git.cloneRepository().setURI(gitRepoURL).setDirectory(new File(gitRepoDirectory)).setBranch(branch).call();
 		} catch (GitAPIException|IOException e) {
 			throw new RuntimeException("Unable to clone git repository from " + gitRepoURL, e);
 		}

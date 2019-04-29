@@ -5,21 +5,21 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss",
-            "version": "1.4.16",
-            "openshift.io/display-name": "JBoss EAP 7.1 (no https)",
+            "version": "1.0.0",
+            "openshift.io/display-name": "JBoss EAP 7.2",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
-            "description": "An example EAP 7 application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
-            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat Enterprise Application Server 7.1 based application, including a build configuration, application deployment configuration and insecure communication using http.",
+            "description": "An example Red Hat JBoss EAP 7 application. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap72/README.adoc",
+            "template.openshift.io/long-description": "This template defines resources needed to develop a Red Hat JBoss Enterprise Application Platform 7.2 based application, including a build configuration, application deployment configuration and secure communication using edge TLS.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-enterprise-application-platform/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
-        "name": "eap71-basic-s2i"
+        "name": "eap72-basic-s2i"
     },
     "labels": {
-        "template": "eap71-basic-s2i",
-        "xpaas": "1.4.16"
+        "template": "eap72-basic-s2i",
+        "xpaas": "1.0.0"
     },
-    "message": "A new EAP 7 based application has been created in your project.",
+    "message": "A new EAP based application has been created in your project.",
     "parameters": [
         {
             "displayName": "Application Name",
@@ -29,24 +29,17 @@
             "required": true
         },
         {
-            "displayName": "Custom http Route Hostname",
-            "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>-<project>.<default-domain-suffix>",
-            "name": "HOSTNAME_HTTP",
-            "value": "",
-            "required": false
-        },
-        {
             "displayName": "Git Repository URL",
             "description": "Git source URI for application",
             "name": "SOURCE_REPOSITORY_URL",
-            "value": "https://github.com/jboss-developer/jboss-eap-quickstarts",
+            "value": "https://github.com/jboss-developer/jboss-eap-quickstarts.git",
             "required": true
         },
         {
             "displayName": "Git Reference",
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
-            "value": "7.1.0.GA",
+            "value": "openshift",
             "required": false
         },
         {
@@ -71,8 +64,8 @@
             "required": false
         },
         {
-            "displayName": "A-MQ cluster password",
-            "description": "A-MQ cluster admin password",
+            "displayName": "AMQ cluster password",
+            "description": "AMQ cluster admin password",
             "name": "MQ_CLUSTER_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
             "generate": "expression",
@@ -172,6 +165,7 @@
             "kind": "Service",
             "apiVersion": "v1",
             "spec": {
+                "publishNotReadyAddresses": true,
                 "clusterIP": "None",
                 "ports": [
                     {
@@ -204,15 +198,13 @@
                     "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
-                    "description": "Route for application's http service."
+                    "description": "Route for application's https service."
                 }
             },
             "spec": {
-                "host": "${HOSTNAME_HTTP}",
-                "path": "/helloworld",
                 "to": {
                     "name": "${APPLICATION_NAME}"
-                }
+               }
             }
         },
         {
@@ -261,10 +253,11 @@
                             }
                         ],
                         "forcePull": true,
+                        "incremental": true,
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap71-openshift:1.3"
+                            "name": "jboss-eap72-openshift:1.0"
                         }
                     }
                 },
@@ -391,7 +384,7 @@
                                 "env": [
                                     {
                                         "name": "JGROUPS_PING_PROTOCOL",
-                                        "value": "openshift.DNS_PING"
+                                        "value": "dns.DNS_PING"
                                     },
                                     {
                                         "name": "OPENSHIFT_DNS_PING_SERVICE_NAME",
