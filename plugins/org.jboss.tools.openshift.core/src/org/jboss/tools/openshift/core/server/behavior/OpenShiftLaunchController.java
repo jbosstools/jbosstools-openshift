@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016-2017 Red Hat Inc..
+ * Copyright (c) 2016-2019 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,7 +85,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	private static final int RECHECK_DELAY = 1000;
 	private static final long WAIT_FOR_DEPLOYMENTCONFIG_TIMEOUT = 3 * 60 * 1024;
 	private static final long WAIT_FOR_DOCKERIMAGELABELS_TIMEOUT = 3 * 60 * 1024;
-	private static final long WAIT_FOR_NEW_DEBUG_POD_TIMEOUT = 10_000; // 10 seconds
+	private static final long WAIT_FOR_NEW_DEBUG_POD_TIMEOUT = 60_000; // 60 seconds
 
 	protected static final Map<IServer, IConnectionsRegistryListener> POD_LISTENERS = new HashMap<>();
 
@@ -321,16 +321,18 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
             @Override
             public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
 				if (newValue == null && oldValue instanceof IPod && oldValue.equals(context.getPod())) {
-					stopDebugTimer = new Timer(context.getPod().getName());
-					stopDebugTimer.schedule(new TimerTask() {
+					if (stopDebugTimer == null) {
+						stopDebugTimer = new Timer(context.getPod().getName());
+						stopDebugTimer.schedule(new TimerTask() {
 
-						@Override
-						public void run() {
-							stopDebugging(context, monitor);
-							setServerState(beh, ILaunchManager.RUN_MODE, monitor);
-						}
+							@Override
+							public void run() {
+								stopDebugging(context, monitor);
+								setServerState(beh, ILaunchManager.RUN_MODE, monitor);
+							}
 
-					}, WAIT_FOR_NEW_DEBUG_POD_TIMEOUT);
+						}, WAIT_FOR_NEW_DEBUG_POD_TIMEOUT);
+					}
 				} else if (newValue instanceof IPod
 						&& (ResourceUtils.isNewRuntimePodFor(
 								(IPod) newValue, ResourceUtils.getDeploymentConfigFor(resource, (Connection) connection)))) {
