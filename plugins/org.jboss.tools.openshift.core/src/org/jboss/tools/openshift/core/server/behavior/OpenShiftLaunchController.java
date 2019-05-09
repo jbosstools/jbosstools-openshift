@@ -69,6 +69,7 @@ import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.capability.IBinaryCapability;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
+import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
 
@@ -81,10 +82,72 @@ import com.openshift.restclient.model.IResource;
 public class OpenShiftLaunchController extends AbstractSubsystemController
 		implements ISubsystemController, ILaunchServerController {
 
+	private final class NewPodListener extends ConnectionsRegistryAdapter {
+
+		private final OpenShiftServerBehaviour beh;
+		private final DebugContext context;
+		private final IProgressMonitor monitor;
+		private Timer stopDebugTimer;
+
+		private NewPodListener(OpenShiftServerBehaviour beh, DebugContext context, IProgressMonitor monitor) {
+			this.context = context;
+			this.beh = beh;
+			this.monitor = monitor;
+		}
+
+		@Override
+		public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+			if (newValue == null 
+					&& oldValue instanceof IPod
+					&& oldValue.equals(context.getPod())) {
+				onTimeoutStopDebugging(beh, context, monitor);
+			} else if (newValue instanceof IPod) {
+				IPod newPod = (IPod) newValue;
+			    IResource resource = OpenShiftServerUtils.getResource(context.getServer(), monitor);
+			    IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(resource, (Connection) connection);
+			    if (ResourceUtils.isNewRuntimePodFor(newPod, dc)) {
+					toggleNewPodDebugging(context, monitor);
+				}
+			}
+		}
+
+		private void toggleNewPodDebugging(DebugContext context, IProgressMonitor monitor) {
+			try {
+				if (stopDebugTimer != null) {
+					stopDebugTimer.cancel();
+					stopDebugTimer = null;
+				}
+				new OpenShiftDebugMode(context).execute(monitor);
+			} catch (CoreException e) {
+				OpenShiftCoreActivator.logError(
+						"Error occured while trying to launch debug on recovered pod", e);
+			}
+		}
+
+		private void onTimeoutStopDebugging(OpenShiftServerBehaviour beh, DebugContext context,
+				IProgressMonitor monitor) {
+			if (stopDebugTimer == null) {
+				stopDebugTimer = new Timer(context.getPod().getName());
+				stopDebugTimer.schedule(new TimerTask() {
+
+					@Override
+					public void run() {
+						stopDebugging(context, monitor);
+						setServerState(beh, ILaunchManager.RUN_MODE, monitor);
+						if (POD_LISTENERS.containsKey(context.getServer())) {
+						    ConnectionsRegistrySingleton.getInstance().removeListener(POD_LISTENERS.remove(context.getServer()));
+						}
+					}
+
+				}, WAIT_FOR_NEW_DEBUG_POD_TIMEOUT);
+			}
+		}
+	}
+
 	private static final int PUBLISH_DELAY = 3000;
 	private static final int RECHECK_DELAY = 1000;
-	private static final long WAIT_FOR_DEPLOYMENTCONFIG_TIMEOUT = 3 * 60 * 1024;
-	private static final long WAIT_FOR_DOCKERIMAGELABELS_TIMEOUT = 3 * 60 * 1024;
+	private static final long WAIT_FOR_DEPLOYMENTCONFIG_TIMEOUT = 3 * 60 * 1000;
+	private static final long WAIT_FOR_DOCKERIMAGELABELS_TIMEOUT = 3 * 60 * 1000;
 	private static final long WAIT_FOR_NEW_DEBUG_POD_TIMEOUT = 60_000; // 60 seconds
 
 	protected static final Map<IServer, IConnectionsRegistryListener> POD_LISTENERS = new HashMap<>();
@@ -315,39 +378,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	}
 
 	protected void createPodListener(OpenShiftServerBehaviour beh, DebugContext context, IProgressMonitor monitor) {
-	    IResource resource = OpenShiftServerUtils.getResource(context.getServer(), monitor);
-	    IConnectionsRegistryListener podListener = new ConnectionsRegistryAdapter() {
-	        private Timer stopDebugTimer;
-            @Override
-            public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-				if (newValue == null && oldValue instanceof IPod && oldValue.equals(context.getPod())) {
-					if (stopDebugTimer == null) {
-						stopDebugTimer = new Timer(context.getPod().getName());
-						stopDebugTimer.schedule(new TimerTask() {
-
-							@Override
-							public void run() {
-								stopDebugging(context, monitor);
-								setServerState(beh, ILaunchManager.RUN_MODE, monitor);
-							}
-
-						}, WAIT_FOR_NEW_DEBUG_POD_TIMEOUT);
-					}
-				} else if (newValue instanceof IPod
-						&& (ResourceUtils.isNewRuntimePodFor(
-								(IPod) newValue, ResourceUtils.getDeploymentConfigFor(resource, (Connection) connection)))) {
-					if (stopDebugTimer != null) {
-						stopDebugTimer.cancel();
-					}
-					try {
-						new OpenShiftDebugMode(context).execute(monitor);
-					} catch (CoreException e) {
-						OpenShiftCoreActivator.logError("Error occured while trying to launch debug on recovered pod",
-								e);
-					}
-				}
-            }
-        };
+	    IConnectionsRegistryListener podListener = new NewPodListener(beh, context, monitor);
         ConnectionsRegistrySingleton.getInstance().addListener(podListener);
         POD_LISTENERS.put(beh.getServer(), podListener);
 	}
@@ -372,9 +403,6 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		};
 		context.setDebugListener(listener);
 		new OpenShiftDebugMode(context).disableDebugging();
-		if (POD_LISTENERS.containsKey(context.getServer())) {
-		    ConnectionsRegistrySingleton.getInstance().removeListener(POD_LISTENERS.remove(context.getServer()));
-		}
 		subMonitor.done();
 	}
 
