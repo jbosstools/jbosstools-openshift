@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jboss.tools</groupId>
+		<artifactId>openshift</artifactId>
+		<version>3.9.0-SNAPSHOT</version>
+	</parent>
+	<groupId>org.jboss.tools.openshift</groupId>
+	<artifactId>jacoco-report</artifactId>
+	<packaging>pom</packaging>
+	
+	<properties>
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                    	<id>aggregate-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report-aggregate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencies>
+        <!-- plugins -->
+        <dependency>
+            <groupId>org.jboss.tools.openshift.plugins</groupId>
+            <artifactId>org.jboss.tools.openshift.egit.core</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.openshift.plugins</groupId>
+            <artifactId>org.jboss.tools.openshift.egit.ui</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.openshift.plugins</groupId>
+            <artifactId>org.jboss.tools.openshift.client</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.openshift.plugins</groupId>
+            <artifactId>org.jboss.tools.openshift.common.core</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.openshift.plugins</groupId>
+            <artifactId>org.jboss.tools.openshift.common.ui</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.openshift.plugins</groupId>
+            <artifactId>org.jboss.tools.openshift.core</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.openshift.plugins</groupId>
+            <artifactId>org.jboss.tools.openshift.ui</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.openshift.plugins</groupId>
+            <artifactId>org.jboss.tools.openshift.cdk.server</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.openshift.plugins</groupId>
+            <artifactId>org.jboss.tools.openshift.js</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+        </dependency>
+        <!-- tests -->
+        <dependency>
+            <groupId>org.jboss.tools.openshift.tests</groupId>
+            <artifactId>org.jboss.tools.openshift.egit.test</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.openshift.tests</groupId>
+            <artifactId>org.jboss.tools.openshift.test</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.openshift.tests</groupId>
+            <artifactId>org.jboss.tools.openshift.cdk.server.test</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- integration tests -->
+        <dependency>
+            <groupId>org.jboss.tools.openshift.tests</groupId>
+            <artifactId>org.jboss.tools.openshift.ui.bot.test</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.cdk.tests</groupId>
+            <artifactId>org.jboss.tools.cdk.ui.bot.test</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+	
+</project>

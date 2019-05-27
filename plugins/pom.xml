@@ -9,13 +9,7 @@
 	<groupId>org.jboss.tools.openshift</groupId>
 	<artifactId>plugins</artifactId>
 	<name>openshift.plugins</name>
-	<packaging>pom</packaging>
-	
-	<properties>
-		<sonar.sources>src</sonar.sources>
-		<sonar.tests></sonar.tests>
-	</properties>
-	
+	<packaging>pom</packaging>	
 	<modules>
 		<module>org.jboss.tools.openshift.egit.core</module>
 		<module>org.jboss.tools.openshift.egit.ui</module>

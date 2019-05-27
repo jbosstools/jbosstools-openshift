@@ -13,7 +13,6 @@
 	<packaging>pom</packaging>
 	<properties>
 		<tycho.scmUrl>scm:git:https://github.com/jbosstools/jbosstools-openshift.git</tycho.scmUrl>
-		<sonar.test.inclusions>**/*Test.*,**/test/**/*</sonar.test.inclusions>
 	</properties>
 	<modules>
 		<module>plugins</module>
@@ -22,6 +21,7 @@
 		<module>test-framework</module>
 		<module>features</module>
 		<module>site</module>
+		<module>jacoco-report</module>
 	</modules>
 
 	<repositories>
@@ -83,25 +83,16 @@
 				<!-- sonar properties -->
 				<sonar.code.codeCoveragePlugin>jacoco</sonar.code.codeCoveragePlugin>
 				<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-				<!-- points to the target folder of the global parent project -->
-				<sonar.jacoco.reportPath>../../target/jacoco.exec</sonar.jacoco.reportPath>
-				<sonar.jacoco.itReportPath>../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-				<sonar.jacoco.reportPaths>${sonar.jacoco.reportPath},${sonar.jacoco.itReportPath}</sonar.jacoco.reportPaths>
+				<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+				<sonar.organization>jbosstools</sonar.organization>
 			</properties>
 			<build>
 				<plugins>
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.7.9</version>
 						<configuration>
 							<append>true</append>
-							<includes>
-								<include>org/jboss/tools/openshift/**/*</include>
-							</includes>
-							<excludes>
-								<exclude>**/reddeer/**/*</exclude>
-							</excludes>
 						</configuration>
 						<executions>
 							<execution>
@@ -109,22 +100,7 @@
 								<goals>
 									<goal>prepare-agent</goal>
 								</goals>
-								<configuration>
-									<destFile>${sonar.jacoco.reportPath}</destFile>
-								</configuration>
 							</execution>
-							<!-- <execution>
-								<id>agent-for-it</id>
-								<goals>
-									<goal>prepare-agent-integration</goal>
-								</goals>
-								<configuration>
-								<includes>
-									<include>**/reddeer/**/*</include>
-								</includes>
-									<destFile>${sonar.jacoco.itReportPath}</destFile>
-								</configuration>
-							</execution> -->
 							<execution>
 								<id>jacoco-site</id>
 								<phase>verify</phase>
