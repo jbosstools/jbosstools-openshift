@@ -32,6 +32,7 @@ public abstract class CDKAbstractTest {
 	public static final String FOLDER = CDKUtils.IS_LINUX ? "linux" : (CDKUtils.IS_WINDOWS ? "win" : "mac");
 	public static final String separator = System.getProperty("file.separator");
 	public static final String MINISHIFT_CONFIG_MINIMAL = " --disk-size 5GB --memory 2GB --cpus 1";
+	public static final String MINISHIFT_CONFIG_OPTIMAL = " --memory 4GB --cpus 2";
 	public static final String SKIP_REGISTRATION = "--skip-registration";
 	public static final String RUNTIMES_DIRECTORY = System.getProperty("user.dir") + separator + "runtimes";
 
