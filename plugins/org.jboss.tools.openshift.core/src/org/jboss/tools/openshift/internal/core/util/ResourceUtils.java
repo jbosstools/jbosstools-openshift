@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -45,6 +46,7 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.capability.resources.ITags;
+import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
@@ -55,7 +57,9 @@ import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.IStatus;
+import com.openshift.restclient.model.deploy.DeploymentTriggerType;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
+import com.openshift.restclient.model.deploy.IDeploymentTrigger;
 import com.openshift.restclient.model.image.IImageStreamImport;
 import com.openshift.restclient.model.route.IRoute;
 
@@ -266,8 +270,8 @@ public class ResourceUtils {
 		if (!target.keySet().containsAll(source.keySet())) {
 			return false;
 		}
-		for (String key : source.keySet()) {
-			if (!Objects.deepEquals(target.get(key), source.get(key))) {
+		for (Entry<String, String> entry : source.entrySet()) {
+			if (!Objects.deepEquals(target.get(entry.getKey()), entry.getValue())) {
 				return false;
 			}
 		}
@@ -536,7 +540,7 @@ public class ResourceUtils {
 		if (buildConfigs == null) {
 			return null;
 		}
-		return buildConfigs.stream().map(bc -> imageRef(bc)).collect(Collectors.toList());
+		return buildConfigs.stream().map(ResourceUtils::imageRef).collect(Collectors.toList());
 	}
 
 	/**
@@ -594,11 +598,57 @@ public class ResourceUtils {
 	 * @return
 	 */
 	public static IResource getImageStreamTagForDigest(String digest, Collection<? extends IResource> imageStreamTags) {
-		return imageStreamTags.stream().filter(istag -> {
-			String imageName = ModelNode.fromJSONString(istag.toJson()).get("image").get("metadata").get("name")
-					.asString();
-			return digest.equals(imageName);
-		}).findFirst().orElse(null);
+		return imageStreamTags.stream()
+				.filter(istag -> {
+					String imageName = ModelNode.fromJSONString(
+							istag.toJson()).get("image").get("metadata").get("name")
+							.asString();
+					return digest.equals(imageName);
+				})
+				.findFirst()
+				.orElse(null);
+	}
+
+	/**
+	 * Returns the {@link DockerImageURI} for a given IDeploymentConfig.
+	 * Alternatively tries to get it from IDeploymentImageChangeTrigger or then
+	 * container images.
+	 * 
+	 * @param dc
+	 * @return
+	 */
+	public static DockerImageURI getDockerImageUri(IDeploymentConfig dc) {
+		DockerImageURI image = getImageChangeTriggerImage(dc);
+		if (image != null) {
+			return image;
+		} else {
+			return getContainerImage(dc);
+		}
+	}
+
+	private static DockerImageURI getImageChangeTriggerImage(IDeploymentConfig dc) {
+		IDeploymentImageChangeTrigger trigger = getImageChangeTrigger(dc.getTriggers());
+		if (trigger == null) {
+			return null;
+		}
+		return trigger.getFrom();
+	}
+
+	private static IDeploymentImageChangeTrigger getImageChangeTrigger(Collection<IDeploymentTrigger> triggers) {
+		return triggers.stream()
+			.filter(trigger -> DeploymentTriggerType.IMAGE_CHANGE.equals(trigger.getType()))
+			.findAny()
+			.map(trigger -> (IDeploymentImageChangeTrigger) trigger)
+			.orElse(null);
+	}
+
+	private static DockerImageURI getContainerImage(IDeploymentConfig dc) {
+		Collection<String> images = dc.getImages();
+		if (images.isEmpty()) {
+			return null;
+		}
+		// TODO: handle if there are 2+ images
+		return new DockerImageURI(images.iterator().next());
 	}
 
 	/**
@@ -950,7 +1000,7 @@ public class ResourceUtils {
 
 		return workspaceProjects.stream()
 				// only git shared projects
-				.filter(project -> EGitUtils.isSharedWithGit(project)).filter(project -> {
+				.filter(EGitUtils::isSharedWithGit).filter(project -> {
 					try {
 						if (buildConfig != null && !StringUtils.isEmpty(buildConfig.getSourceURI())) {
 							return EGitUtils.getAllRemoteURIs(project).contains(new URIish(buildConfig.getSourceURI()));
@@ -1112,7 +1162,7 @@ public class ResourceUtils {
 			return null;
 		}
 		Optional<String> matchingSelector = selectors.keySet().stream()
-				.filter(selector -> Stream.of(keys).anyMatch(key -> selector.equalsIgnoreCase(key))).findFirst();
+				.filter(selector -> Stream.of(keys).anyMatch(selector::equalsIgnoreCase)).findFirst();
 		if (!matchingSelector.isPresent()) {
 			return null;
 		}
@@ -1230,4 +1280,5 @@ public class ResourceUtils {
 		}
 		return strippedUri;
 	}
+
 }

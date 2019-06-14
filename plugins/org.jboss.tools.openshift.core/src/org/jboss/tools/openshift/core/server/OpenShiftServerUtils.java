@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2017 Red Hat Inc..
+ * Copyright (c) 2015-2019 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -565,8 +565,9 @@ public class OpenShiftServerUtils {
 	 * @param resource the resource to derive the pod and docker image from
 	 * @param server the server to derive the openshift connection from
 	 * @return
+	 * @throws CoreException 
 	 */
-	public static String loadPodPath(IResource resource, IServer server, IProgressMonitor monitor) {
+	public static String loadPodPath(IResource resource, IServer server, IProgressMonitor monitor) throws CoreException {
 		DockerImageLabels metaData = DockerImageLabels.getInstance(resource, getBehaviour(server));
 		return metaData.getPodPath(monitor);
 	}

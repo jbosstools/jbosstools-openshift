@@ -53,10 +53,9 @@ public class PodDeploymentPathMetadata {
 
 	private String getPodPath(String imageMetaData) {
 		String podPath = null;
-		if ((podPath = matchFirstGroup(imageMetaData, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
-			if ((podPath = matchFirstGroup(imageMetaData, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
-				podPath = matchFirstGroup(imageMetaData, PATTERN_WOKRING_DIR);
-			}
+		if ((podPath = matchFirstGroup(imageMetaData, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null
+				&& (podPath = matchFirstGroup(imageMetaData, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
+			podPath = matchFirstGroup(imageMetaData, PATTERN_WOKRING_DIR);
 		}
 
 		return podPath;

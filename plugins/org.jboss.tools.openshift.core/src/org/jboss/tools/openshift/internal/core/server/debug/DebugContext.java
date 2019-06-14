@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.wst.server.core.IServer;
 
 import com.openshift.restclient.model.IPod;
@@ -65,14 +64,14 @@ public class DebugContext {
 	 * @return
 	 */
 	public DebugContext(IServer server, String devmodeKey, String debugPortKey, String debugPort) {
-		Assert.isNotNull(server, "Could not find server to set dev mode / debugging on.");
-		Assert.isNotNull(devmodeKey, "Could not find key to enable dev mode with.");
-		Assert.isNotNull(debugPortKey, "Could not find key to enable debugging with.");
-		Assert.isNotNull(debugPort, "Could not find debugging port.");
+		assertNotNull(server, "Could not find server to set dev mode / debugging on.");
+		assertNotNull(devmodeKey, "Could not find key to enable dev mode with.");
+		assertNotNull(debugPortKey, "Could not find key to enable debugging with.");
+		assertNotNull(debugPort, "Could not find debugging port.");
 
 		this.server = server;
 		this.devmodeKey = devmodeKey;
-		this.debugPortKey = debugPortKey;
+		this.debugPortKey = debugPortKey;	
 		this.debugPort = getDebugPort(debugPort);
 	}
 
@@ -146,6 +145,12 @@ public class DebugContext {
 			return Integer.parseInt(debugPort);
 		} catch (NumberFormatException e) {
 			return NO_DEBUG_PORT;
+		}
+	}
+	
+	void assertNotNull(Object object, String message) {
+		if (object == null) {
+			throw new IllegalArgumentException(message);
 		}
 	}
 }

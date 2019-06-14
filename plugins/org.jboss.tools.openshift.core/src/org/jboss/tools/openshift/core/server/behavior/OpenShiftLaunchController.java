@@ -251,7 +251,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		return true;
 	}
 
-	protected boolean waitForDockerImageLabelsReady(DockerImageLabels metadata, IProgressMonitor monitor) {
+	protected boolean waitForDockerImageLabelsReady(DockerImageLabels metadata, IProgressMonitor monitor) throws CoreException {
 		monitor.subTask("Waiting for docker image to become available...");
 		long timeout = System.currentTimeMillis() + WAIT_FOR_DOCKERIMAGELABELS_TIMEOUT;
 		while (!metadata.load(monitor)) {
@@ -285,7 +285,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 	}
 
-	protected DebugContext createDebugContext(OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
+	protected DebugContext createDebugContext(OpenShiftServerBehaviour beh, IProgressMonitor monitor) throws CoreException {
 		monitor.subTask("Initialising debugging...");
 
 		DockerImageLabels imageLabels = getDockerImageLabels(beh, monitor);
@@ -299,7 +299,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		return new DebugContext(beh.getServer(), devmodeKey, debugPortKey, debugPort);
 	}
 
-	private DockerImageLabels getDockerImageLabels(OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
+	private DockerImageLabels getDockerImageLabels(OpenShiftServerBehaviour beh, IProgressMonitor monitor) throws CoreException {
 		IResource resource = OpenShiftServerUtils.getResource(beh.getServer(), monitor);
 		DockerImageLabels metadata = DockerImageLabels.getInstance(resource, beh);
 		waitForDockerImageLabelsReady(metadata, monitor);

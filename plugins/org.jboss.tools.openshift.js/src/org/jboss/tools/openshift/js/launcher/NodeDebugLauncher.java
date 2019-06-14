@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat Inc..
+ * Copyright (c) 2016-2019 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,7 +95,7 @@ public final class NodeDebugLauncher {
 		}
 	}
 
-	private static String getPodPath(IServer server, IProgressMonitor monitor) {
+	private static String getPodPath(IServer server, IProgressMonitor monitor) throws CoreException {
 		IResource resource = OpenShiftServerUtils.getResource(server, monitor);
 		return OpenShiftServerUtils.loadPodPath(resource, server, monitor);
 	}
