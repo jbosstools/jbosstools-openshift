@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016-2017 Red Hat Inc..
+ * Copyright (c) 2016-2019 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -122,7 +122,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		}
 	}
 
-	protected void loadPodPathIfEmpty(final IResource resource, IProgressMonitor monitor) {
+	protected void loadPodPathIfEmpty(final IResource resource, IProgressMonitor monitor) throws CoreException {
 		// If the pod path is not set on the project yet, we can do that now
 		// to make future fetches faster
 		String podPath = OpenShiftServerUtils.getPodPath(getServer());

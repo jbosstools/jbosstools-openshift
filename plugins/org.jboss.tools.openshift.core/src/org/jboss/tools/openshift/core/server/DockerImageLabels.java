@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat Inc.. All rights reserved. This program and the
+ * Copyright (c) 2017-2019 Red Hat Inc.. All rights reserved. This program and the
  * accompanying materials are made available under the terms of the Eclipse
  * Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
@@ -8,16 +8,17 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.core.server;
 
-import java.util.Collection;
 import java.util.Objects;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.OpenShiftException;
@@ -25,9 +26,6 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.deploy.DeploymentTriggerType;
-import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
-import com.openshift.restclient.model.deploy.IDeploymentTrigger;
 
 public class DockerImageLabels {
 
@@ -68,14 +66,14 @@ public class DockerImageLabels {
 		this.connection = connection;
 	}
 
-	public String getDevmodeKey(IProgressMonitor monitor) {
+	public String getDevmodeKey(IProgressMonitor monitor) throws CoreException {
 		if (!loadIfRequired(monitor)) {
 			return null;
 		}
 		return devmodeMetadata.getEnablementKey();
 	}
 
-	public String getDevmodePortKey(IProgressMonitor monitor) {
+	public String getDevmodePortKey(IProgressMonitor monitor) throws CoreException {
 		if (!loadIfRequired(monitor)) {
 			return null;
 		}
@@ -83,21 +81,21 @@ public class DockerImageLabels {
 		return devmodeMetadata.getPortKey();
 	}
 
-	public String getDevmodePortValue(IProgressMonitor monitor) {
+	public String getDevmodePortValue(IProgressMonitor monitor) throws CoreException {
 		if (!loadIfRequired(monitor)) {
 			return null;
 		}
 		return devmodeMetadata.getPortValue();
 	}
 
-	public String getPodPath(IProgressMonitor monitor) {
+	public String getPodPath(IProgressMonitor monitor) throws CoreException {
 		if (!loadIfRequired(monitor)) {
 			return null;
 		}
 		return this.podPathMetadata.get();
 	}
 
-	public boolean load(IProgressMonitor monitor) {
+	public boolean load(IProgressMonitor monitor) throws CoreException {
 		return loadIfRequired(monitor);
 	}
 
@@ -105,7 +103,7 @@ public class DockerImageLabels {
 		return metadata != null;
 	}
 
-	protected boolean loadIfRequired(IProgressMonitor monitor) {
+	protected boolean loadIfRequired(IProgressMonitor monitor) throws CoreException {
 		if (isLoaded()) {
 			return true;
 		}
@@ -131,35 +129,27 @@ public class DockerImageLabels {
 	 * @param reosurce
 	 *            the openshift resource to load the image metadata for
 	 * @return
+	 * @throws CoreException 
 	 */
-	protected String load(IResource resource, IProgressMonitor monitor) {
+	protected String load(IResource resource, IProgressMonitor monitor) throws CoreException {
 		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(resource, connection);
 		if (dc == null) {
-			return null;
+			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
+					resource == null ? "Could not determine the deployment config." 
+					: NLS.bind("Could not determine the deployment config for resource {0} in project {1}.", 
+							resource.getName(), resource.getNamespaceName()))) ;  
 		}
 
-		IDeploymentImageChangeTrigger trigger = getImageChangeTrigger(dc.getTriggers());
-		if (trigger == null) {
-			return null;
+		DockerImageURI uri = ResourceUtils.getDockerImageUri(dc);
+		if (uri == null) {
+			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
+					NLS.bind("Could not determine the docker image specified in deployment config {0} in project {1}.",
+							dc.getName(), dc.getNamespaceName())));
 		}
-		DockerImageURI uri = trigger.getFrom();
 		return getImageStreamTag(uri, resource.getNamespaceName(), monitor);
 	}
 
-	private IDeploymentImageChangeTrigger getImageChangeTrigger(Collection<IDeploymentTrigger> triggers) {
-		if (CollectionUtils.isEmpty(triggers)) {
-			return null;
-		}
-
-		for (IDeploymentTrigger trigger : triggers) {
-			if (DeploymentTriggerType.IMAGE_CHANGE.equals(trigger.getType())) {
-				return (IDeploymentImageChangeTrigger) trigger;
-			}
-		}
-		return null;
-	}
-
-	private String getImageStreamTag(DockerImageURI uri, String namespace, IProgressMonitor monitor) {
+	protected String getImageStreamTag(DockerImageURI uri, String namespace, IProgressMonitor monitor) {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, NLS.bind("Loading imagestream tag {0}", uri.getName()), 1);
 		try {
 			IResource imageStreamTag = connection.getResource(ResourceKind.IMAGE_STREAM_TAG, namespace,
