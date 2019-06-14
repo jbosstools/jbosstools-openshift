@@ -80,9 +80,9 @@ public class HumanReadableX509CertificateTest {
 		String issuedBy = certificate.getIssuedBy();
 		// then
 		assertThat(getValue(LABEL_PRINCIPAL_COUNTRY, issuedBy)).isEqualTo("US");
-		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATION, issuedBy)).isEqualTo("Symantec Corporation");
-		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATIONAL_UNIT, issuedBy)).isEqualTo("Symantec Trust Network");
-		assertThat(getValue(LABEL_PRINCIPAL_COMMON_NAME, issuedBy)).isEqualTo("Symantec Class 3 EV SSL CA - G3");
+		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATION, issuedBy)).isEqualTo("DigiCert Inc");
+		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATIONAL_UNIT, issuedBy)).isEqualTo("www.digicert.com");
+		assertThat(getValue(LABEL_PRINCIPAL_COMMON_NAME, issuedBy)).isEqualTo("DigiCert SHA2 Extended Validation Server CA");
 	}
 
 	@Test
@@ -91,15 +91,15 @@ public class HumanReadableX509CertificateTest {
 		// when
 		String fingerprint = certificate.getFingerprint();
 		// then
-		assertThat(fingerprint).isEqualTo("917871FF8DC3E10638AEE136547F4E85C1404D2D");
+		assertThat(fingerprint).isEqualTo("9C9E80E9E2D6E6BE8A851A95408C86B781A3604C");
 	}
 
 	@Test
 	public void shouldReportValidity() throws CertificateException, ParseException {
 		// given
 		SimpleDateFormat dateParser = new SimpleDateFormat(DATE_FORMAT, Locale.US);
-		Calendar expectedIssuedOn = getCalendar(dateParser.parse("Tue, 6 Jun 2017 01:00:00 CET"));
-		Calendar expectedExpiresOn = getCalendar(dateParser.parse("Fri, 7 Jun 2019 00:59:59 CET"));
+		Calendar expectedIssuedOn = getCalendar(dateParser.parse("Wed, 21 Mar 2018 01:00:00 CET"));
+		Calendar expectedExpiresOn = getCalendar(dateParser.parse("Fri, 20 Mar 2020 13:00:00 CET"));
 		// when
 		String validity = certificate.getValidity();
 		// then
