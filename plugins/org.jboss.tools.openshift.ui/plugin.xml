@@ -1469,6 +1469,42 @@ $            <command
                                  connection="org.jboss.tools.openshift.core.connection.Connection">
         </importApplicationWizard>
     </extension>
+    <extension
+          point="org.jboss.tools.openshift.core.sslCertificateCallbackUI">
+       <sslCertificateCallbackUI
+             class="org.jboss.tools.openshift.internal.ui.wizard.connection.SSLCertificateCallback">
+       </sslCertificateCallbackUI>
+    </extension>
+    <extension
+          point="org.jboss.tools.openshift.core.routeChooser">
+       <routeChooser
+             class="org.jboss.tools.openshift.internal.ui.route.RouteChooser">
+       </routeChooser>
+    </extension>
+    <extension
+          point="org.jboss.tools.openshift.ui.connectionEditor.advanced">
+       <connectionEditorAdvanced
+             class="org.jboss.tools.openshift.internal.ui.wizard.connection.AdvancedConnectionEditor">
+       </connectionEditorAdvanced>
+    </extension>
+    <extension
+          point="org.jboss.tools.jmx.ui.providerUI">
+       <providerUI
+             editable="false"
+             icon="icons/openshift-logo-white-icon.png"
+             id="org.jboss.tools.openshift.core.server.OpenshiftJMXConnection"
+             name="Openshift JMX">
+          <connectionLabelProvider
+                class="org.jboss.tools.openshift.internal.ui.server.OpenshiftJMXLabelProvider">
+          </connectionLabelProvider>
+       </providerUI>
+    </extension>
+    <extension
+          point="org.jboss.tools.openshift.core.dialogProvider">
+       <dialogProvider
+             class="org.jboss.tools.openshift.internal.ui.dialog.DialogProvider">
+       </dialogProvider>
+    </extension>
 
 	<!-- Edit Connection -->
 	<extension
@@ -1730,19 +1766,19 @@ $            <command
                                      id="org.jboss.tools.openshift.internal.ui.server.OpenShiftLaunchConfigurationTabGroup"
                                      type="org.jboss.tools.openshift.internal.core.behaviour.launchType"/>
     </extension>
+    <extension
+          point="org.eclipse.core.expressions.propertyTesters">
+       <propertyTester
+             class="org.jboss.tools.openshift.internal.ui.propertytester.ServerAdapterPropertyTester"
+             id="org.jboss.tools.openshift.ui.serverAdapterPropertyTester"
+             namespace="org.jboss.tools.openshift.ui"
+             properties="isServerAdapterAllowed"
+             type="com.openshift.restclient.model.IResource">
+       </propertyTester>
+    </extension>
 
     <!-- Core UI Integration: ssl certificate callback -->
-    <extension
-               point="org.jboss.tools.openshift.core.sslCertificateCallbackUI">
-        <sslCertificateCallbackUI
-                                  class="org.jboss.tools.openshift.internal.ui.wizard.connection.SSLCertificateCallback" />
-    </extension>
     <!-- Core UI Integration: route chooser -->
-    <extension
-               point="org.jboss.tools.openshift.core.routeChooser">
-        <routeChooser
-                      class="org.jboss.tools.openshift.internal.ui.route.RouteChooser" />
-    </extension>
 
     <extension point="org.eclipse.ui.editors.documentProviders"> 
         <provider 
@@ -2031,34 +2067,6 @@ $            <command
                                       icon="icons/openshift-logo-white-icon.png"
                                       configTypeID="org.jboss.tools.openshift.internal.core.behaviour.launchType"
                                       id="org.jboss.tools.openshift.internal.core.behaviour.launchIcon"/>
-    </extension>
-    <extension
-               point="org.jboss.tools.openshift.ui.connectionEditor.advanced">
-        <connectionEditorAdvanced
-                                  class="org.jboss.tools.openshift.internal.ui.wizard.connection.AdvancedConnectionEditor">
-        </connectionEditorAdvanced>
-    </extension>
-    <extension
-               point="org.jboss.tools.jmx.ui.providerUI">
-        <providerUI
-                    editable="false"
-                    icon="icons/openshift-logo-white-icon.png"
-                    id="org.jboss.tools.openshift.core.server.OpenshiftJMXConnection"
-                    name="Openshift JMX">
-            <connectionLabelProvider
-                                     class="org.jboss.tools.openshift.internal.ui.server.OpenshiftJMXLabelProvider">
-            </connectionLabelProvider>
-        </providerUI>
-    </extension>
-    <extension
-               point="org.eclipse.core.expressions.propertyTesters">
-        <propertyTester
-                        class="org.jboss.tools.openshift.internal.ui.propertytester.ServerAdapterPropertyTester"
-                        id="org.jboss.tools.openshift.ui.serverAdapterPropertyTester"
-                        namespace="org.jboss.tools.openshift.ui"
-                        properties="isServerAdapterAllowed"
-                        type="com.openshift.restclient.model.IResource">
-        </propertyTester>
     </extension>
 
 </plugin>

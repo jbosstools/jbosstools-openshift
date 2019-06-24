@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.behavior.OpenShiftLaunchController;
+import org.jboss.tools.openshift.internal.core.Dialogs;
 import org.jboss.tools.openshift.internal.core.server.debug.DebugContext;
 import org.jboss.tools.openshift.internal.core.server.debug.IDebugListener;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode;
@@ -23,12 +24,19 @@ import org.jboss.tools.openshift.js.launcher.NodeDebugLauncher;
 
 public class OpenShiftNodejsLaunchController extends OpenShiftLaunchController implements ISubsystemController {
 
+	private static final String WARN_NEWER_THAN_NODEJS7_UNSUPPORTED = "org.jboss.tools.openshift.js.dontwarnNodeJs7";
+
 	public OpenShiftNodejsLaunchController() {
 		super();
 	}
 
 	@Override
 	protected void startDebugging(OpenShiftServerBehaviour beh, DebugContext context, IProgressMonitor monitor) {
+		// https://issues.jboss.org/browse/JBIDE-26408
+		Dialogs.INSTANCE.warn("Node.js 8+ unsupported	", 
+				"Debugging is only supported up to Node.js 7. If your Node.js is newer, debugging will not work.\n"
+				+ "If using an OpenShift template to create the application, set 'NODEJS_PROPERTY' to '7'", 
+				WARN_NEWER_THAN_NODEJS7_UNSUPPORTED);
 		IDebugListener listener = new IDebugListener() {
 
 			@Override

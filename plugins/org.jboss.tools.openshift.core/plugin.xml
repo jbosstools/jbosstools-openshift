@@ -118,6 +118,7 @@
 		id="org.jboss.tools.openshift.core.connection.registryprovider"
 		name="registryprovider"
 		schema="schema/org.jboss.tools.openshift.core.connection.registryprovider.exsd"/>
+    <extension-point id="org.jboss.tools.openshift.core.dialogProvider" name="dialogProvider" schema="schema/org.jboss.tools.openshift.core.dialogProvider.exsd"/>
 
 	<extension
  		point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
