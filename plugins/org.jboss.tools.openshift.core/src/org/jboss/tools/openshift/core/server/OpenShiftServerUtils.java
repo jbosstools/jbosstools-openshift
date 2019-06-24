@@ -231,7 +231,6 @@ public class OpenShiftServerUtils {
 		server.setAttribute(IDeployableServer.DEPLOY_DIRECTORY_TYPE, IDeployableServer.DEPLOY_CUSTOM);
 		server.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
 		server.setAttribute(Server.PROP_AUTO_PUBLISH_TIME, DEFAULT_AUTO_PUBLISH_DELAY);
-
 	}
 
 	public static void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String podPath,

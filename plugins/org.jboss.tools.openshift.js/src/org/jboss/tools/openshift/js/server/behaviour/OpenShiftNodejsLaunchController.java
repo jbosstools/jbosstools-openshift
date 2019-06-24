@@ -35,7 +35,7 @@ public class OpenShiftNodejsLaunchController extends OpenShiftLaunchController i
 		// https://issues.jboss.org/browse/JBIDE-26408
 		Dialogs.INSTANCE.warn("Node.js 8+ unsupported	", 
 				"Debugging is only supported up to Node.js 7. If your Node.js is newer, debugging will not work.\n"
-				+ "If using an OpenShift template to create the application, set 'NODEJS_PROPERTY' to '6'", 
+				+ "If using an OpenShift template to create the application, set 'NODEJS_PROPERTY' to '7'", 
 				WARN_NEWER_THAN_NODEJS7_UNSUPPORTED);
 		IDebugListener listener = new IDebugListener() {
 
