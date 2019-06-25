@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -50,6 +50,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.internal.restclient.ResourceFactory;
+import com.openshift.restclient.IApiTypeMapper;
+import com.openshift.restclient.IApiTypeMapper.IVersionedApiResource;
+import com.openshift.restclient.IApiTypeMapper.IVersionedType;
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ResourceKind;
@@ -89,6 +92,69 @@ public class DeployImageJobTest {
 	@Mock
 	private IProgressMonitor monitor;
 	private Connection connection;
+	@Mock
+	private IApiTypeMapper mapper;
+
+	private void mockResource(IApiTypeMapper mapper, String kind) {
+		when(mapper.getType(anyString(), eq(kind))).thenReturn(new IVersionedType() {
+
+			@Override
+			public String getVersion() {
+				return "v1";
+			}
+
+			@Override
+			public String getPrefix() {
+				return null;
+			}
+
+			@Override
+			public String getKind() {
+				return kind;
+			}
+
+			@Override
+			public String getApiGroupName() {
+				return null;
+			}
+		});
+		when(mapper.getEndpointFor(anyString(), eq(kind))).thenReturn(new IVersionedApiResource() {
+			@Override
+			public boolean isSupported(String capability) {
+				return true;
+			}
+
+			@Override
+			public boolean isNamespaced() {
+				return true;
+			}
+
+			@Override
+			public String getVersion() {
+				return "v1";
+			}
+
+			@Override
+			public String getPrefix() {
+				return null;
+			}
+
+			@Override
+			public String getName() { // TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public String getKind() {
+				return kind;
+			}
+
+			@Override
+			public String getApiGroupName() {
+				return "v1";
+			}
+		});
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -99,7 +165,11 @@ public class DeployImageJobTest {
 		when(client.getOpenShiftAPIVersion()).thenReturn("v1");
 		factory = new ResourceFactory(client);
 		job = spy(new TestDeployImageJob(parameters));
+		when(client.adapt(IApiTypeMapper.class)).thenReturn(mapper);
+		mockResource(mapper, ResourceKind.DEPLOYMENT_CONFIG);
+		mockResource(mapper, ResourceKind.IMAGE_STREAM);
 	}
+
 
 	@Test
 	public void shouldUpdateImageTagIfItDifferesFromExisting() {
