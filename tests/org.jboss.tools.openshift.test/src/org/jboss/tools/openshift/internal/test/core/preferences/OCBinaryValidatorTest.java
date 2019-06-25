@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2016 Red Hat, Inc. 
+ * Copyright (c) 2016-2019 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -56,6 +56,16 @@ public class OCBinaryValidatorTest {
 	}
 
 	@Test
+	public void shouldReportVersionIsPresentOCP4() {
+		assertFalse(validator.parseVersion(null).isPresent());
+		assertFalse(validator.parseVersion("Client Version: vqualifier").isPresent());
+		assertTrue(validator.parseVersion("Client Version: v1-foo").isPresent());
+		assertTrue(validator.parseVersion("Client Version: v1.0-foo").isPresent());
+		assertTrue(validator.parseVersion("Client Version: v1.0-foo+fdf5432").isPresent());
+		assertTrue(validator.parseVersion("Client Version: v1.2.0-foo+fdf5432").isPresent());
+	}
+
+	@Test
 	public void shouldParseOCGithubVersion() {
 		assertSameVersion("1.2.3.foo", "oc v1.2.3-foo");
 		assertSameVersion("1.2.3", "oc v1.2.3");
@@ -65,8 +75,22 @@ public class OCBinaryValidatorTest {
 	}
 
 	@Test
+	public void shouldParseOCGithubVersionOCP4() {
+		assertSameVersion("1.2.3.foo", "Client Version: v1.2.3-foo");
+		assertSameVersion("1.2.3", "Client Version: v1.2.3");
+		assertSameVersion("1.2.0.foo", "Client Version: v1.2-foo");
+		assertSameVersion("1.0.0", "Client Version: v1");
+		assertSameVersion("1.4.0.rc1", "Client Version: v1.4.0-rc1+b4e0954");
+	}
+
+	@Test
 	public void testParseOCEnterpriseVersion() {
 		assertSameVersion("3.4.1.2", "oc v3.4.1.2");
+	}
+
+	@Test
+	public void testParseOCEnterpriseVersionOCP4() {
+		assertSameVersion("3.4.1.2", "Client Version: v3.4.1.2");
 	}
 
 	@Test

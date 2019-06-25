@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2016-2018 Red Hat, Inc. 
+ * Copyright (c) 2016-2019 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -71,7 +71,7 @@ public class OCBinaryValidator {
 	 * </ul>
 	 */
 	private static final Pattern OC_VERSION_LINE_PATTERN = Pattern
-			.compile("oc[^v]*v(([0-9]{1,2})(\\.[0-9]{1,2})?(\\.[0-9]{1,2})?)([-\\.]([^+]*))?.*");
+			.compile("(oc|Client\\sVersion:)[^v]*v(([0-9]{1,2})(\\.[0-9]{1,2})?(\\.[0-9]{1,2})?)([-\\.]([^+]*))?.*");
 
 	private String path;
 
@@ -94,6 +94,10 @@ public class OCBinaryValidator {
 			try {
 				Process process = new ProcessBuilder(path, "version").start();
 				version = parseVersion(process, monitor);
+				if (!version.isPresent()) {
+					process = new ProcessBuilder(path, "version", "--short").start();
+					version = parseVersion(process, monitor);
+				}
 			} catch (IOException e) {
 				OpenShiftCoreActivator.logError(e.getLocalizedMessage(), e);
 			} finally {
@@ -124,15 +128,15 @@ public class OCBinaryValidator {
 		Version version = null;
 		if (matcher.matches()) {
 			try {
-				version = Version.parseVersion(matcher.group(1));
+				version = Version.parseVersion(matcher.group(2));
 				if ((matcher.groupCount() > 1) && version.getQualifier().isEmpty()) {
 					// Since we are using the OSGi Version class to assist,
 					// and an OSGi qualifier must fit (alpha|numeric|-|_)+ format,
 					// remove all invalid characters in group6? alpha.1.dumb -> alpha1dumb
-					String group6 = matcher.group(6);
-					if (group6 != null) {
-						group6 = group6.replaceAll("[^a-zA-Z0-9_-]", "_");
-						version = new Version(version.getMajor(), version.getMinor(), version.getMicro(), group6);
+					String group7 = matcher.group(7);
+					if (group7 != null) {
+						group7 = group7.replaceAll("[^a-zA-Z0-9_-]", "_");
+						version = new Version(version.getMajor(), version.getMinor(), version.getMicro(), group7);
 					}
 				}
 			} catch (IllegalArgumentException e) {
