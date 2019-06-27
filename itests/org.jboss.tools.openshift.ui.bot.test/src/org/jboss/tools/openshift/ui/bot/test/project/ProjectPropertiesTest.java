@@ -43,8 +43,8 @@ import org.junit.runner.RunWith;
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(project=DatastoreOS3.TEST_PROJECT, 
-		service = OpenShiftResources.NODEJS_SERVICE, 
-		template = OpenShiftResources.NODEJS_TEMPLATE)
+		service = OpenShiftResources.EAP_SERVICE, 
+		template = OpenShiftResources.EAP_TEMPLATE)
 @RunWith(RedDeerSuite.class)
 public class ProjectPropertiesTest extends AbstractTest {
 

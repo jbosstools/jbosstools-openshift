@@ -58,8 +58,8 @@ import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionReq
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
@@ -74,7 +74,6 @@ import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -89,11 +88,8 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	private String helloworldProject = "helloworld";
 	private String kitchensinkProject = "kitchensink";
 
-	private static final String TESTS_PROJECT = "os3projectWithResources";
-	private static final String TESTS_PROJECT_LOCATION = new File("resources/os3projectWithResources")
-			.getAbsolutePath();
-	private static final String URL = "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/eap72-basic-s2i-helloworld.json";
-
+	protected static final String TESTS_PROJECT = "osProjectWithResources";
+	
 	private String genericWebhookURL;
 	private String githubWebhookURL;
 
@@ -105,11 +101,27 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	
 	@InjectRequirement
 	private CleanOpenShiftConnectionRequirement cleanReq;
-
-	@BeforeClass
-	public static void importTestsProject() {
+	
+	protected void importTestsProject() {
+		importTestsProject(new File("resources" + File.separator + TESTS_PROJECT).getAbsolutePath());
+	}
+	
+	protected String getTemplateURL() {
+		return "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/eap72-basic-s2i-helloworld.json";
+	}
+	
+	protected String getFilesystemTemplatePath() {
+		return new File("resources" + File.separator + TESTS_PROJECT).getAbsolutePath() + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME;
+	}
+	
+	protected String getWorkspaceTemplatePath() {
+		return "${workspace_loc:"
+				+ File.separator + TESTS_PROJECT + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME +"}";
+	}
+	
+	protected void importTestsProject(String pathToProject) {
 		new ExternalProjectImportWizardDialog().open();
-		new DefaultCombo().setText(TESTS_PROJECT_LOCATION);
+		new DefaultCombo().setText(pathToProject);
 		new PushButton("Refresh").click();
 
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.LONG);
@@ -122,6 +134,9 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 
 	@Before
 	public void setUp() {
+		if (!new ProjectExists(TESTS_PROJECT).test()) {
+			importTestsProject();
+		}
 		DatastoreOS3.generateProjectName();
 		OpenShift3NativeProjectUtils.getOrCreateProject(DatastoreOS3.PROJECT1,
 			DatastoreOS3.PROJECT1_DISPLAYED_NAME, StringUtils.EMPTY, connectionReq.getConnection());
@@ -154,8 +169,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 
 		new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
 		assertTrue("Template from workspace is not correctly shown in text field containing its path",
-				new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).getText().equals("${workspace_loc:"
-						+ File.separator + TESTS_PROJECT + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME +"}"));
+				new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).getText().equals(getWorkspaceTemplatePath()));
 
 		new WaitUntil(new ControlIsEnabled(new CancelButton()));
 
@@ -170,8 +184,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	public void createApplicationFromLocalFileSystemTemplate() {
 		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		new DefaultTabItem(OpenShiftLabel.TextLabels.CUSTOM_TEMPLATE).activate();
-		new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).setText(
-				TESTS_PROJECT_LOCATION + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME);
+		new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).setText(getFilesystemTemplatePath());
 
 //		TODO: Remove comment once JBIDE-24492 is resolved			
 //		assertTrue("Defined resource button should be enabled",
@@ -184,7 +197,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	public void createApplicationFromTemplateProvidedByURL() {
 		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		new DefaultTabItem(OpenShiftLabel.TextLabels.CUSTOM_TEMPLATE).activate();
-		new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).setText(URL);
+		new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).setText(getTemplateURL());
 		
 // 		TODO: Remove comment once JBIDE-24492 is resolved	
 //		assertTrue("Defined resource button should be enabled",
@@ -281,14 +294,13 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 		}
 		new FinishButton().click();
 		
-		new WaitWhile(new JobIsRunning(), TimePeriod.LONG, false);
+		new WaitWhile(new JobIsRunning(), TimePeriod.getCustom(90), false);
 				
-		ProjectExplorer projectExplorer = new ProjectExplorer();
-		projectExplorer.open();
-
 		OpenShiftUtils.handleCheatSheetCreateServerAdapter();
 		
-		new WaitUntil(new ProjectExists(projectName, new ProjectExplorer()), TimePeriod.LONG, false);
+		ProjectExplorer projectExplorer = new ProjectExplorer();
+		projectExplorer.open();
+		new WaitUntil(new ProjectExists(projectName, projectExplorer), TimePeriod.LONG, false);
 		assertTrue("Project Explorer should contain imported project " + projectName,
 				projectExplorer.containsProject(projectName));
 	}

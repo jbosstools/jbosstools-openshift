@@ -98,7 +98,7 @@ public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {
 		new NextButton().click();
 		TestUtils.acceptSSLCertificate();		
 		
-		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.CREATE_OS_PROJECT), TimePeriod.LONG);
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.CREATE_OS_PROJECT), TimePeriod.VERY_LONG);
 
 		new DefaultShell(OpenShiftLabel.Shell.CREATE_OS_PROJECT);
 		new LabeledText(OpenShiftLabel.TextLabels.PROJECT_NAME).setText(projectName);
@@ -162,7 +162,7 @@ public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_OS3_APPLICATION).select();
 		
 		try {
-			new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.CREATE_OS_PROJECT), TimePeriod.LONG);
+			new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.CREATE_OS_PROJECT), TimePeriod.VERY_LONG);
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("Shell to create a new OpenShift application was supposed to be opened. But it's not.");
 		}
@@ -197,7 +197,7 @@ public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_OS3_APPLICATION).select();;
 		
 		try {
-			new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.CREATE_OS_PROJECT), TimePeriod.LONG);
+			new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.CREATE_OS_PROJECT), TimePeriod.VERY_LONG);
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("Shell to create a new OpenShift application was supposed to be opened. But it's not.");
 		}

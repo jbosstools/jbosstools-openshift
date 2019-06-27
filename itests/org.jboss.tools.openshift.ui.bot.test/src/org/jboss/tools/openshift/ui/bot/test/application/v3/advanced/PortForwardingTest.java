@@ -154,7 +154,7 @@ public class PortForwardingTest extends AbstractTest {
 	private void openPortForwardingDialog() {
 		OpenShift3Connection openShift3Connection = new OpenShiftExplorerView().getOpenShift3Connection(connectionReq.getConnection());
 		ApplicationPodIsRunning applicationPodIsRunning = new ApplicationPodIsRunning(openShift3Connection.getProject(projectReq.getProjectName()));
-		new WaitUntil(applicationPodIsRunning, TimePeriod.LONG);
+		new WaitUntil(applicationPodIsRunning, TimePeriod.getCustom(90));
 		
 		openShift3Connection.getProject(projectReq.getProjectName()).
 			getOpenShiftResource(Resource.POD, 

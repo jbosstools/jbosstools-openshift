@@ -91,8 +91,7 @@ public class HandleCustomTemplateTest extends AbstractTest {
 		
 		new DefaultShell(OpenShiftLabel.Shell.NEW_RESOURCE);
 		new LabeledText(OpenShiftLabel.TextLabels.RESOURCE_LOCATION).setText(
-				System.getProperty("user.dir") + File.separator + "resources" + 
-						File.separator + "hello-world-template.json");
+				getTemplatePath());
 		new FinishButton().click();
 		 
 		new DefaultShell(OpenShiftLabel.Shell.CREATE_RESOURCE_SUMMARY);
@@ -114,6 +113,11 @@ public class HandleCustomTemplateTest extends AbstractTest {
 		String templateName = templates.get(0).getName();
 		assertTrue("Template name '" + templateName + "' does not match required name "
 				+ "helloworld-sample.", templateName.equals("helloworld-sample"));
+	}
+	
+	protected String getTemplatePath() {
+		return System.getProperty("user.dir") + File.separator + "resources" + 
+				File.separator + "hello-world-template.json";
 	}
 	
 }
