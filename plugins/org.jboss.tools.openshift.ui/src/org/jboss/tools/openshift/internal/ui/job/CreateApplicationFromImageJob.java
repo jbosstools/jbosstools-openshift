@@ -14,11 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.dmr.ModelNode;
+import org.jboss.tools.common.log.StatusFactory;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.IDeployImageParameters;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage.IBuildConfigPageModel;
@@ -51,9 +54,10 @@ public class CreateApplicationFromImageJob extends DeployImageJob implements IRe
 	@Override
 	public Runnable getSummaryRunnable(final Shell shell) {
 		return () -> {
-				String message = NLS.bind("Results of creating the resources from the {0}/{1} builder image.",
-						buildConfigModel.getBuilderImageNamespace(), buildConfigModel.getBuilderImageName());
-				new ResourceSummaryDialog(shell, getResources(), "Create Application Summary", message).open();
+				IStatus status = StatusFactory.getInstance(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, 
+						NLS.bind("Results of creating the resources from the {0}/{1} builder image.",
+								buildConfigModel.getBuilderImageNamespace(), buildConfigModel.getBuilderImageName()));
+				new ResourceSummaryDialog(shell, getResources(), "Create Application Summary", status).open();
 		};
 	}
 

@@ -29,6 +29,7 @@ import com.openshift.restclient.model.IService;
  */
 public class ResourceDetailViews extends AbstractStackedDetailViews {
 
+	private final IDetailView resourceView = new ResourceDetailView();
 	private final IDetailView projectView = new ProjectDetailView();
 	private final IDetailView serviceView = new ServiceDetailView();
 	private final IDetailView replicationControllerView = new ReplicationControllerDetailView();
@@ -39,6 +40,7 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
 
 	@Override
 	protected void createViewControls(Composite parent, Object context, DataBindingContext dbc) {
+		resourceView.createControls(parent, context, dbc);
 		projectView.createControls(parent, context, dbc);
 		serviceView.createControls(parent, context, dbc);
 		replicationControllerView.createControls(parent, context, dbc);
@@ -47,10 +49,10 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
 
 	@Override
 	protected IDetailView[] getDetailViews() {
-		return new IDetailView[] { projectView, serviceView, replicationControllerView, emptyView };
+		return new IDetailView[] { projectView, serviceView, replicationControllerView, resourceView, emptyView };
 	}
 
-	private abstract class ResourceDetailView extends EmptyView {
+	private class ResourceDetailView extends EmptyView {
 
 		private StyledText kindText;
 		private StyledText nameText;

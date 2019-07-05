@@ -13,16 +13,15 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -42,10 +41,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.jboss.tools.common.log.StatusFactory;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.ICellToolTipProvider;
-import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryContentProvider;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryLabelProvider;
@@ -72,24 +72,28 @@ public class NewApplicationSummaryFromTemplateDialog extends ResourceSummaryDial
 
 	public NewApplicationSummaryFromTemplateDialog(Shell parentShell, CreateApplicationFromTemplateJob job,
 			String message) {
-		super(parentShell, job.getResources(), "Create Application Summary", message,
+		super(parentShell, job.getResources(), "Create Application Summary", 
+				StatusFactory.getInstance(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID,
+						message),
 				new ResourceSummaryLabelProvider(), new ResourceSummaryContentProvider());
 		this.job = job;
 	}
 
 	@Override
 	protected void createAreaAfterResourceSummary(Composite parent) {
+		createWebhooksComposite(parent);
+		createParametersComposite(parent);
+	}
 
-		Composite area = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(area);
-		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(area);
-
+	private void createWebhooksComposite(Composite parent) {
 		final Collection<IBuildConfig> buildConfigs = findBuildConfigsWithWebHooks();
 		if (!buildConfigs.isEmpty()) {
-			Link webHooksLink = new Link(area, SWT.NONE);
+			Link webHooksLink = new Link(parent, SWT.NONE);
 			webHooksLink
-					.setText("Click <a>here</a> to display the webhooks available to automatically trigger builds.");
-			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(webHooksLink);
+					.setText("Click <a>here</a> for webhooks available to automatically trigger builds.");
+			GridDataFactory.fillDefaults()
+				.indent(0, 10).align(SWT.FILL, SWT.TOP).grab(true, false)
+				.applyTo(webHooksLink);
 			webHooksLink.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -98,23 +102,36 @@ public class NewApplicationSummaryFromTemplateDialog extends ResourceSummaryDial
 				}
 			});
 		}
+	}
 
+	private void createParametersComposite(Composite parent) {
 		if (job.getParameters().isEmpty()) {
 			return;
 		}
 
-		Label lblParams = new Label(area, SWT.WRAP);
+		Label separator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
+		GridDataFactory.fillDefaults()
+			.indent(0, 10).align(SWT.FILL, SWT.TOP).grab(true, false)
+			.applyTo(separator);
+		Label lblParams = new Label(parent, SWT.WRAP);
 		lblParams.setText(
-				"Please make note of the following parameters which may include values required to administer your resources:");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).hint(100, SWT.DEFAULT).grab(true, false)
-				.applyTo(lblParams);
+				"Note the following parameters reuired to administer your resources:");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.TOP).grab(true, false)
+			.applyTo(lblParams);
 
 		Composite container = new Composite(parent, SWT.NONE);
-		GridDataFactory.swtDefaults().align(SWT.FILL, SWT.TOP).grab(true, true).applyTo(container);
-		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).equalWidth(false).applyTo(container);
+		GridDataFactory.swtDefaults()
+			.align(SWT.FILL, SWT.TOP).grab(true, true)
+			.applyTo(container);
+		GridLayoutFactory.fillDefaults()
+			.numColumns(2).margins(10, 0).equalWidth(false)
+			.applyTo(container);
 
 		Composite parameters = new Composite(container, SWT.NONE);
-		GridDataFactory.fillDefaults().hint(100, 200).grab(true, true).applyTo(parameters);
+		GridDataFactory.fillDefaults()
+			.hint(100, 200).grab(true, true)
+			.applyTo(parameters);
 
 		TableViewer viewer = createTable(parameters);
 		viewer.setInput(job.getParameters());
@@ -123,7 +140,9 @@ public class NewApplicationSummaryFromTemplateDialog extends ResourceSummaryDial
 		copyToClipboard.setImage(OpenShiftImages.COPY_TO_CLIPBOARD_IMG);
 		copyToClipboard.setToolTipText("Copy parameters to clipboard");
 		copyToClipboard.addSelectionListener(onClickCopyButton(lblParams));
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(false, false).applyTo(copyToClipboard);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.TOP).grab(false, false)
+			.applyTo(copyToClipboard);
 	}
 
 	private SelectionAdapter onClickCopyButton(final Control control) {
@@ -131,13 +150,8 @@ public class NewApplicationSummaryFromTemplateDialog extends ResourceSummaryDial
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				List<IParameter> params = new ArrayList<>(job.getParameters());
-				Collections.sort(params, new Comparator<IParameter>() {
-
-					@Override
-					public int compare(IParameter p1, IParameter p2) {
-						return p1.getName().compareTo(p2.getName());
-					}
-				});
+				Collections.sort(params, 
+						(IParameter p1, IParameter p2) -> p1.getName().compareTo(p2.getName()));
 				String text = getAsString(params);
 				copyToClipBoard(control, text, "Parameters copied to clipboard");
 			}
@@ -206,21 +220,13 @@ public class NewApplicationSummaryFromTemplateDialog extends ResourceSummaryDial
 			}
 		};
 		TableViewer viewer = new TableViewerBuilder(table, tableContainer).contentProvider(new ArrayContentProvider())
-				.column(new IColumnLabelProvider<IParameter>() {
-
-					@Override
-					public String getValue(IParameter variable) {
-						return variable.getName();
-					}
-				}).cellToolTipProvider(cellToolTipProvider).name("Name").align(SWT.LEFT).weight(2).minWidth(100)
-				.buildColumn().column(new IColumnLabelProvider<IParameter>() {
-
-					@Override
-					public String getValue(IParameter parameter) {
-						return TemplateParameterViewerUtils.getValueLabel(parameter);
-					}
-				}).cellToolTipProvider(cellToolTipProvider).name("Value").align(SWT.LEFT).weight(2).minWidth(100)
-				.buildColumn().buildViewer();
+				.column(IParameter::getName)
+					.cellToolTipProvider(cellToolTipProvider).name("Name").align(SWT.LEFT).weight(2).minWidth(100)
+				.buildColumn()
+				.column(TemplateParameterViewerUtils::getValueLabel)
+					.cellToolTipProvider(cellToolTipProvider).name("Value").align(SWT.LEFT).weight(2).minWidth(100)
+				.buildColumn()
+			.buildViewer();
 		viewer.setComparator(new ParameterNameViewerComparator());
 
 		viewer.addDoubleClickListener(onDoubleClick(table));
@@ -228,17 +234,14 @@ public class NewApplicationSummaryFromTemplateDialog extends ResourceSummaryDial
 	}
 
 	private IDoubleClickListener onDoubleClick(final Control control) {
-		return new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-				IParameter param = (IParameter) selection.getFirstElement();
-				if (param != null) {
-					String text = param.getValue();
-					if (StringUtils.isNotBlank(text)) {
-						String notification = param.getName() + " value copied to clipboard";
-						copyToClipBoard(control, text, notification);
-					}
+		return event -> {
+			IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+			IParameter param = (IParameter) selection.getFirstElement();
+			if (param != null) {
+				String text = param.getValue();
+				if (StringUtils.isNotBlank(text)) {
+					String notification = param.getName() + " value copied to clipboard";
+					copyToClipBoard(control, text, notification);
 				}
 			}
 		};

@@ -766,8 +766,11 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		});
 
 		IObservableValue<IResource> selectedResource = new WritableValue<>();
-		ValueBindingBuilder.bind(selectedResourceTreeItem).converting(new ObservableTreeItem2ModelConverter())
-				.to(selectedResource).notUpdatingParticipant().in(dbc);
+		ValueBindingBuilder
+			.bind(selectedResourceTreeItem)
+				.converting(new ObservableTreeItem2ModelConverter())
+			.to(selectedResource)
+				.notUpdatingParticipant().in(dbc);
 		new ResourceDetailViews(selectedResource, detailsContainer, dbc).createControls();
 	}
 
