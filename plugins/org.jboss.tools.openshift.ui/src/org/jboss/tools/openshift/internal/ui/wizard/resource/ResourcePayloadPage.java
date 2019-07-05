@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.validation.IValidator;
@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -63,7 +63,7 @@ import com.openshift.restclient.OpenShiftException;
  *
  */
 public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPageModel> {
-	class ResourceContentValidator implements IValidator {
+	class ResourceContentValidator implements IValidator<String> {
 
 		private final WritableValue<IStatus> source;
 
@@ -72,14 +72,13 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
 		}
 
 		@Override
-		public IStatus validate(Object value) {
-			String svalue = (String) value;
-			if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(svalue) && isFile(svalue)) {
+		public IStatus validate(String value) {
+			if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(value) && isFile(value)) {
 				Job job = new Job("Checking OpenShift resource content") {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						IStatus status;
-						try (InputStream s = new FileInputStream(VariablesHelper.replaceVariables(svalue))) {
+						try (InputStream s = new FileInputStream(VariablesHelper.replaceVariables(value))) {
 							status = CreateResourceJob.loadResource(ResourcePayloadPage.this.model.getProject(), s,
 									null);
 						} catch (IOException e) {
@@ -110,22 +109,29 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
 	private void createPayloadSourceControls(Composite parent, DataBindingContext dbc) {
 		Group sourceGroup = new Group(parent, SWT.NONE);
 		sourceGroup.setText("Source");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(3, 1)
-				.hint(SWT.DEFAULT, SWT.DEFAULT).applyTo(sourceGroup);
-		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 6).spacing(6, 6).applyTo(sourceGroup);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, true).span(4, 1)
+			.applyTo(sourceGroup);
+		GridLayoutFactory.fillDefaults()
+			.numColumns(3).margins(10, 6).spacing(6, 6)
+			.applyTo(sourceGroup);
 
 		createLocalSourceControls(dbc, sourceGroup);
 	}
 
 	private void createLocalSourceControls(DataBindingContext dbc, Group sourceGroup) {
 		Label label = new Label(sourceGroup, SWT.NONE);
-		GridDataFactory.fillDefaults().span(3, 1).applyTo(label);
-		label.setText("Enter a file path (workspace or local) or a full URL.");
+		GridDataFactory.fillDefaults()
+			.span(3, 1)
+			.applyTo(label);
+		label.setText("Enter a file path (workspace or local) or a full URL:");
 		// local template file name
 		Text sourceText = new Text(sourceGroup, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(sourceText);
-		final IObservableValue source = WidgetProperties.text(SWT.Modify).observe(sourceText);
-		final WritableValue<IStatus> sourceStatus = new WritableValue<IStatus>(Status.OK_STATUS, IStatus.class);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).span(3, 1).grab(true, false)
+			.applyTo(sourceText);
+		final IObservableValue<String> source = WidgetProperties.text(SWT.Modify).observe(sourceText);
+		final WritableValue<IStatus> sourceStatus = new WritableValue<>(Status.OK_STATUS, IStatus.class);
 		final ResourceContentValidator contentValidator = new ResourceContentValidator(sourceStatus);
 		ValueBindingBuilder.bind(source).validatingBeforeSet(contentValidator)
 				.to(BeanProperties.value(IResourcePayloadPageModel.PROPERTY_SOURCE).observe(model))
@@ -134,7 +140,7 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
 
 			@Override
 			protected IStatus validate() {
-				String sourceValue = (String) source.getValue();
+				String sourceValue = source.getValue();
 				if (StringUtils.isEmpty(sourceValue)) {
 					return ValidationStatus.cancel("You need to provide a file path or an URL");
 				}
@@ -153,9 +159,14 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
 		ControlDecorationSupport.create(validator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
 		// browse button
+		GridDataFactory.fillDefaults()
+			.grab(true, false)
+			.applyTo(new Label(sourceGroup, SWT.NONE)); // filler
 		Button btnBrowseFiles = new Button(sourceGroup, SWT.NONE);
 		btnBrowseFiles.setText("Browse File System...");
-		GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).span(2, 1).grab(true, false).applyTo(btnBrowseFiles);
+		GridDataFactory.fillDefaults()
+			.align(SWT.END, SWT.CENTER)
+			.applyTo(btnBrowseFiles);
 
 		btnBrowseFiles.addSelectionListener(onFileSystemBrowseClicked());
 
