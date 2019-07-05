@@ -95,7 +95,8 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
 							@Override
 							public void run() {
 								new ResourceSummaryDialog(getShell(), createJob.getResource(),
-										"Create Resource Summary", "Results of creating the resource(s)").open();
+										"Create Resource Summary", "Results of creating the resource(s)")
+								.open();
 							}
 						});
 						OpenShiftUIUtils.showOpenShiftExplorer();

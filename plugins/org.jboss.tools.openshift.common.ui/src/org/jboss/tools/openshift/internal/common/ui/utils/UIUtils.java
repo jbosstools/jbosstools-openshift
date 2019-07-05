@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011-2018 Red Hat, Inc.
+ * Copyright (c) 2011-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -36,6 +36,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusAdapter;
@@ -77,6 +79,9 @@ import org.jboss.tools.foundation.ui.widget.WidgetVisitorUtility;
  * @author André Dietisheim
  */
 public class UIUtils {
+
+	private UIUtils() {
+	}
 
 	public static final String PACKAGE_EXPLORER_ID = "org.eclipse.jdt.ui.PackageExplorer";
 	public static final String PROJECT_EXPLORER_ID = "org.eclipse.ui.navigator.ProjectExplorer";
@@ -559,4 +564,26 @@ public class UIUtils {
 		evt.display = button.getDisplay();
 		button.notifyListeners(SWT.Selection, evt);
 	}
+
+	/**
+	 * Adjusts the withHint of the given composite when a resize happens (adds a
+	 * control listener that is called upon resize). This only works with a
+	 * composite that is in a GridLayout and thus has a GridData with a widthHint.
+	 * 
+	 * @param composite
+	 */
+	public static void adjustWidthHintOnResize(Composite composite) {
+		composite.addControlListener(new ControlAdapter() {
+
+			@Override
+			public void controlResized(ControlEvent e) {
+				Object layoutData = composite.getLayoutData();
+				if (!composite.isDisposed()
+						&& layoutData instanceof GridData) {
+					((GridData) layoutData).widthHint = composite.getParent().getSize().x;
+				}
+			}
+		});
+	}
+
 }

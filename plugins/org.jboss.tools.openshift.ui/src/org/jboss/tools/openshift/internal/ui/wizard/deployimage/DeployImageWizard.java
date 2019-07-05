@@ -143,7 +143,7 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 						|| JobUtils.isWarning(status)) && !deployJob.getResources().isEmpty()) {
 					Display.getDefault().syncExec(() -> 
 							new ResourceSummaryDialog(
-									shell, deployJob.getResources(), TITLE, deployJob.getSummaryMessage()).open());
+									shell, deployJob.getResources(), TITLE, deployJob.getStatus()).open());
 					OpenShiftUIUtils.showOpenShiftExplorer();
 				}
 			}

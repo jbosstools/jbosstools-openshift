@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -66,12 +67,14 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 
 	public static final String SELECTOR_KEY = "deploymentconfig";
 	private static final String JBOSSTOOLS_OPENSHIFT = "jbosstools-openshift";
-	private static final String MSG_NO_IMAGESTREAM = "{0} Note: Could not find an image stream\nfor {1} and/or the image is not available to the cluster.\nMake sure that a Docker image with that tag is available on the node for the\ndeployment to succeed.";
+	private static final String MSG_NO_IMAGESTREAM = "Could not access image stream for {0}.\n"
+			+ "Docker image backing the stream is most likely not available in OpenShift. "
+			+ "Possibly push the image to the Docker registry in OpenShift.";
 
 	private IDeployImageParameters parameters;
 	private Collection<IResource> created = Collections.emptyList();
-	private String summaryMessage;
-
+	private IStatus status;
+	
 	public DeployImageJob(IDeployImageParameters parameters) {
 		this("Deploy Image Job", parameters);
 	}
@@ -79,15 +82,16 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 	protected DeployImageJob(String title, IDeployImageParameters parameters) {
 		super(title);
 		this.parameters = parameters;
-		this.summaryMessage = NLS.bind("Results of deploying image \"{0}\".", parameters.getResourceName());
+		this.status = StatusFactory.getInstance(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, 
+				NLS.bind("Results of deploying image \"{0}\".", parameters.getResourceName()));
 	}
 
 	protected IDeployImageParameters getParameters() {
 		return this.parameters;
 	}
 
-	public String getSummaryMessage() {
-		return this.summaryMessage;
+	public IStatus getStatus() {
+		return status;
 	}
 
 	@Override
@@ -125,9 +129,13 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		try {
 			IDeploymentConfig dc = connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, project, name);
 			IDeploymentImageChangeTrigger trigger = (IDeploymentImageChangeTrigger) dc.getTriggers().stream()
-					.filter(t -> DeploymentTriggerType.IMAGE_CHANGE.equals(t.getType())).findFirst().orElse(null);
-			if (trigger == null || !ResourceKind.IMAGE_STREAM_TAG.equals(trigger.getKind())
-					|| StringUtils.isBlank(trigger.getNamespace()) || connection.getResource(ResourceKind.IMAGE_STREAM,
+					.filter(t -> DeploymentTriggerType.IMAGE_CHANGE.equals(t.getType()))
+					.findFirst()
+					.orElse(null);
+			if (trigger == null 
+					|| !ResourceKind.IMAGE_STREAM_TAG.equals(trigger.getKind())
+					|| StringUtils.isBlank(trigger.getNamespace()) 
+					|| connection.getResource(ResourceKind.IMAGE_STREAM,
 							trigger.getNamespace(), trigger.getFrom().getName()) == null) {
 				return false;
 			}
@@ -267,7 +275,8 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 			}
 		}
 		if (is == null) {
-			summaryMessage = NLS.bind(MSG_NO_IMAGESTREAM, summaryMessage, parameters.getImageName());
+			status = StatusFactory.getInstance(IStatus.WARNING, OpenShiftUIActivator.PLUGIN_ID, 
+					NLS.bind(MSG_NO_IMAGESTREAM, parameters.getImageName()));
 		}
 		return is;
 	}
