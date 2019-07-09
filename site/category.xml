@@ -11,8 +11,6 @@
 	<feature id="org.jboss.tools.openshift.egit.integration.test.feature"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.feature"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.integration.tests.feature"><category name="site" /></feature>
-	<feature id="org.jboss.tools.openshift.io.feature"><category name="site" /></feature>
-	<feature id="org.jboss.tools.openshift.io.test.feature"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.js.feature"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.test.feature"><category name="site" /></feature>
 
@@ -23,8 +21,6 @@
 	<feature id="org.jboss.tools.openshift.egit.integration.test.feature.source"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.feature.source"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.integration.tests.feature.source"><category name="site" /></feature>
-	<feature id="org.jboss.tools.openshift.io.feature.source"><category name="site" /></feature>
-	<feature id="org.jboss.tools.openshift.io.test.feature.source"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.js.feature.source"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.test.feature.source"><category name="site" /></feature>
 
