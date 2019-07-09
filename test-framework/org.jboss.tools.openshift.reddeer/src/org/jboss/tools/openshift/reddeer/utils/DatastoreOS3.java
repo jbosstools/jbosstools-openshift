@@ -70,9 +70,6 @@ public class DatastoreOS3 {
 	public static final String GIT_USERNAME = System.getProperty("github.username", "openshift-tools-testing-account");
 	public static final String GIT_PASSWORD = System.getProperty("github.password");
 	
-	//OpenShift IO credentials
-	public static String OPENSHIFT_IO_USERNAME = System.getProperty(KEY_OPENSHIFT_IO_USERNAME);
-	public static String OPENSHIFT_IO_PASSWORD = System.getProperty(KEY_OPENSHIFT_IO_PASSWORD);
 	
 	public static String PROJECT1 = "project-name01-" + System.currentTimeMillis();
 	public static String PROJECT1_DISPLAYED_NAME = "displayedName-" + System.currentTimeMillis();

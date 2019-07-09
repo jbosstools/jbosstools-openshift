@@ -28,8 +28,6 @@ public class SystemProperties {
 	public static final String KEY_USERNAME = "openshift.username";
 	public static final String KEY_PASSWORD = "openshift.password";
 	private static final String KEY_SECURE_STORAGE_PASSWORD = "securestorage.password";
-	public static final String KEY_OPENSHIFT_IO_USERNAME = "openshift.io.username";
-	public static final String KEY_OPENSHIFT_IO_PASSWORD = "openshift.io.password";
 	
 	private static final Logger log = Logger.getLogger(SystemProperties.class);
 
