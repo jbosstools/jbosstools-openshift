@@ -22,8 +22,6 @@ Require-Bundle: org.eclipse.ui.ide,
  org.jboss.tools.openshift.common.ui,
  org.jboss.tools.openshift.core,
  org.jboss.tools.openshift.ui,
- org.jboss.tools.openshift.io.core,
- org.jboss.tools.openshift.io.ui,
  org.eclipse.linuxtools.docker.reddeer,
  org.eclipse.reddeer.common
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

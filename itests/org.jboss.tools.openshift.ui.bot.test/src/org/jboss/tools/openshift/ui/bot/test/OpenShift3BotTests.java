@@ -51,7 +51,6 @@ import org.jboss.tools.openshift.ui.bot.test.connection.v3.SetOCForNewConnection
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.StoreConnectionTest;
 import org.jboss.tools.openshift.ui.bot.test.integration.docker.DeployDockerImageTest;
 import org.jboss.tools.openshift.ui.bot.test.integration.docker.DeployVariousDockerImagesTest;
-import org.jboss.tools.openshift.ui.bot.test.integration.openshift.io.GetOpenShiftIOTokenTest;
 import org.jboss.tools.openshift.ui.bot.test.project.CreateNewProjectTest;
 import org.jboss.tools.openshift.ui.bot.test.project.DeleteProjectTest;
 import org.jboss.tools.openshift.ui.bot.test.project.LinkToCreateNewProjectTest;
@@ -129,10 +128,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	PublishChangesTest.class,
 	DebuggingEAPAppTest.class,
 	NodeJSAppDebugTest.class,
-	SpringBootTest.class,
-	
-	//OpenShift.io
-	GetOpenShiftIOTokenTest.class
+	SpringBootTest.class
 })
 public class OpenShift3BotTests extends AbstractBotTests{
 	
