@@ -1736,7 +1736,9 @@ $            <command
                id="org.jboss.tools.openshift.server.icon"/>
     </extension>
 
-    <!-- OpenShift 3 server editor -->
+    <!-- OpenShift 3 Server Editor -->
+
+	<!-- editor section -->
     <extension
                point="org.eclipse.wst.server.ui.editorPageSections">
         <section
@@ -1747,6 +1749,27 @@ $            <command
                  typeIds="org.jboss.tools.openshift.server.type">
         </section>
     </extension>
+
+	<!-- deployment page -->
+	<extension point="org.eclipse.wst.server.ui.editorPages">
+		<page
+			class="org.jboss.tools.openshift.internal.ui.server.OpenShiftDeploymentPage"
+			id="org.jboss.ide.eclipse.as.ui.editor.deploymentPage"
+			name="Deployment"
+			typeIds="org.jboss.tools.openshift.server.type" />
+	</extension>
+
+	<extension point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
+		<subsystem
+			system="deploymentPage"
+			id="deploymentPage.standard"
+			name="Deployment Page"
+			class="org.jboss.ide.eclipse.as.ui.editor.internal.StandardDeploymentPageController" />
+		<subsystemMapping
+			id="deploymentPage.standard"
+			mappedId="deploymentPage.standard"
+			serverTypes="org.jboss.tools.openshift.server.type" />
+	</extension>
 
     <!-- OpenShift 3 server wizard -->
     <extension
