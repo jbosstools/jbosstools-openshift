@@ -24,13 +24,17 @@ public class OpenShiftDeploymentPage extends DeploymentPage implements IServerWo
 		this.preferences = DeploymentPreferencesLoader.loadPreferencesFromServer(getServer());
 
 		new ModuleDeploymentOptionsComposite(parent, this, getFormToolkit(parent.getDisplay()), getPreferences()) {
+
 			@Override
 			protected boolean showTemporaryColumn() {
 				return false;
 			}
+
+			@Override
+			protected String getDefaultDeploymentTypeFilter() {
+				return DEPLOYED;
+			}
 		};
 	}
-
-
 	
 }
