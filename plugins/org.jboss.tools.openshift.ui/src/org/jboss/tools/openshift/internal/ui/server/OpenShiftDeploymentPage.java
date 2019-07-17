@@ -10,7 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.server;
 
+import java.util.Arrays;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.ide.eclipse.as.core.server.IServerWorkingCopyProvider;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentPage;
 import org.jboss.ide.eclipse.as.ui.editor.ModuleDeploymentOptionsComposite;
@@ -35,6 +41,25 @@ public class OpenShiftDeploymentPage extends DeploymentPage implements IServerWo
 				return DEPLOYED;
 			}
 		};
+	}
+
+	@Override
+	public void doSave(IProgressMonitor monitor) {
+		super.doSave(monitor);
+
+		/**
+		 * https://issues.jboss.org/browse/JBIDE-26744: triggering a full re-deploy so
+		 * that change in deployment name results in new artifacts to rsync to the pod.
+		 * Without it, nothing new shows up in the temp directory and rsync ends up
+		 * syncing nothing.
+		 */ 
+		Server server = (Server) getServer().getOriginal();
+		setPublishState(IServer.PUBLISH_STATE_FULL, server.getModules(), server);
+	}
+	
+	private void setPublishState(int state, IModule[] modules, Server server) {
+		Arrays.stream(modules).forEach(module -> 
+			server.setModulePublishState(new IModule[] { module }, state));
 	}
 	
 }
