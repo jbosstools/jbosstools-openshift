@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Red Hat, Inc.
+ * Copyright (c) 2014-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -132,7 +132,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 
 			Button rememberCheckbox = new Button(container, SWT.CHECK);
 			rememberCheckbox
-					.setText("Remember decision (it can be changed in preferences 'OpenShift 3/SSL certificates')");
+					.setText("Remember decision (it can be changed in preferences 'OpenShift/SSL certificates')");
 			rememberCheckbox.setSelection(rememberDecision);
 			rememberCheckbox.addSelectionListener(onRememberCertificate(certificate));
 			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(rememberCheckbox);

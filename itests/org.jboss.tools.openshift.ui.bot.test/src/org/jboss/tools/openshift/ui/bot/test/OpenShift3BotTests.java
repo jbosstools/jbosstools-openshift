@@ -61,7 +61,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * <b>OpenShift 3 All Tests suite</b>
+ * <b>OpenShift All Tests suite</b>
  * 
  * @author mlabuda@redhat.com
  * @contributor jkopriva@redhat.com

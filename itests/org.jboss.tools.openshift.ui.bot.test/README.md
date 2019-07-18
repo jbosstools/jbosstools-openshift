@@ -1,12 +1,12 @@
 # OpenShift tooling integrations tests
-This plugin contains OpenShift 3 tooling integrations tests. For execution of a specific tests see guidelines below.
+This plugin contains OpenShift tooling integrations tests. For execution of a specific tests see guidelines below.
 
-## OpenShift 3 integration tests
-Running OpenShift 3 integrations tests requires OpenShift 3 local cluster in CDK (https://developers.redhat.com/products/cdk/overview/). Online instances, like https://www.openshift.com, can be used too, but they are not tested. 
+## OpenShift integration tests
+Running OpenShift integrations tests requires OpenShift local cluster in CDK (https://developers.redhat.com/products/cdk/overview/). Online instances, like https://www.openshift.com, can be used too, but they are not tested. 
 Note: tested with CDK 3.2.0.alpha.
 
 #### Running OS tests from IDE
-There are three suites for OpenShift 3 tests (full suite (OpenShift3BotTests), smoke suite (OpenShift3SmokeBotTests)) and stable suite (OpenShift3StableTests). To run OpenShift tests from IDE, perform following steps:
+There are three suites for OpenShift tests (full suite (OpenShift3BotTests), smoke suite (OpenShift3SmokeBotTests)) and stable suite (OpenShift3StableTests). To run OpenShift tests from IDE, perform following steps:
 1. Install RedDeer to your IDE from update site: http://download.eclipse.org/reddeer/releases/latest (RedDeer is on DevStudio TP, RedDeer project repo URL: https://github.com/eclipse/reddeer)
 2. Select desired suite (e.g. OpenShift3BotTests, OpenShift3SmokeBotTests, OpenShift3StableBotTests) and in its context menu select _Run As_ - _Run Configurations..._
 3. In Run Configurations shell double click on RedDeer Test and a new RedDeer test run configuration for your suite is created

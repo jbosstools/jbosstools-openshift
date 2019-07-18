@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -35,7 +35,7 @@ public class ConnectionFactory implements IConnectionFactory {
 
 	@Override
 	public String getName() {
-		return "OpenShift 3";
+		return "OpenShift";
 	}
 
 	@Override
@@ -87,6 +87,6 @@ public class ConnectionFactory implements IConnectionFactory {
 
 	@Override
 	public String getUserDocText() {
-		return "Want to try OpenShift 3 online? You can sign up for an account <a>here</a>";
+		return "Want to try OpenShift online? You can sign up for an account <a>here</a>";
 	}
 }

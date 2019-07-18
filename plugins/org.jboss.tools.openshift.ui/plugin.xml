@@ -19,7 +19,7 @@
                           contentProvider="org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerContentProvider"
                           id="org.jboss.tools.openshift.ui.explorer.navigatorContent"
                           labelProvider="org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider"
-                          name="OpenShift 3 Explorer Content">
+                          name="OpenShift Explorer Content">
             <possibleChildren>
                 <or>
                     <instanceof
@@ -1727,7 +1727,7 @@ $            <command
         </page>
     </extension>
 
-    <!-- OpenShift 3 server adapter icon -->
+    <!-- OpenShift server adapter icon -->
     <extension
                point="org.eclipse.wst.server.ui.serverImages">
         <image
@@ -1736,7 +1736,7 @@ $            <command
                id="org.jboss.tools.openshift.server.icon"/>
     </extension>
 
-    <!-- OpenShift 3 Server Editor -->
+    <!-- OpenShift Server Editor -->
 
 	<!-- editor section -->
     <extension
@@ -1771,7 +1771,7 @@ $            <command
 			serverTypes="org.jboss.tools.openshift.server.type" />
 	</extension>
 
-    <!-- OpenShift 3 server wizard -->
+    <!-- OpenShift server wizard -->
     <extension
                point="org.eclipse.wst.server.ui.wizardFragments">
         <fragment
@@ -1785,7 +1785,7 @@ $            <command
                point="org.eclipse.debug.ui.launchConfigurationTabGroups">
         <launchConfigurationTabGroup
                                      class="org.jboss.tools.openshift.internal.ui.server.OpenShiftLaunchConfigurationTabGroup"
-                                     description="Launch Tabs for OpenShift 3 Server"
+                                     description="Launch Tabs for OpenShift Server"
                                      id="org.jboss.tools.openshift.internal.ui.server.OpenShiftLaunchConfigurationTabGroup"
                                      type="org.jboss.tools.openshift.internal.core.behaviour.launchType"/>
     </extension>

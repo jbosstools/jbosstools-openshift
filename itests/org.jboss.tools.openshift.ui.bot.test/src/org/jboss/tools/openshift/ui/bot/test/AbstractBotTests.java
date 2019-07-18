@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat, Inc.
+ * Copyright (c) 2017-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -25,7 +25,7 @@ import org.junit.AfterClass;
 import org.junit.runner.RunWith;
 
 /**
- * <b>OpenShift 3 Abstract class for Tests suites</b>
+ * <b>OpenShift Abstract class for Tests suites</b>
  * 
  * @author jkopriva@redhat.com
  */

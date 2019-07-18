@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2017 Red Hat, Inc.
+ * Copyright (c) 2007-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -165,7 +165,7 @@ public class CreateServerAdapterTest extends AbstractTest  {
 
 		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);
 
-		assertTrue("Service should be preselected for new OpenShift 3 server adapter",
+		assertTrue("Service should be preselected for new OpenShift server adapter",
 				new DefaultTreeItem(projectReq.getProjectName(), "eap-app deploymentConfig=eap-app").isSelected());
 		assertTrue("Eclipse project should be preselected automatically for new server adapter",
 				new LabeledText("Eclipse Project: ").getText().equals(PROJECT_NAME));
@@ -175,7 +175,7 @@ public class CreateServerAdapterTest extends AbstractTest  {
 		new WaitWhile(new ShellIsAvailable(""));
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG, false);
 
-		assertTrue("OpenShift 3 server adapter was not created.",
+		assertTrue("OpenShift server adapter was not created.",
 				new ServerAdapterExists(Version.OPENSHIFT3, OpenShiftResources.EAP_SERVICE, "Service").test());
 	}
 
@@ -204,7 +204,7 @@ public class CreateServerAdapterTest extends AbstractTest  {
 			new WaitUntil(new JobIsKilled(JOB_NAME), TimePeriod.VERY_LONG);
 		}
 
-		assertTrue("OpenShift 3 server adapter was not created.",
+		assertTrue("OpenShift server adapter was not created.",
 				new ServerAdapterExists(Version.OPENSHIFT3, OpenShiftResources.EAP_SERVICE, "Service").test());
 
 	}

@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2018 Red Hat, Inc. 
+ * Copyright (c) 2018-2019 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -498,8 +498,8 @@ public class ContainerRuntimeServerRequirement implements Requirement<ContainerR
 	}
 
 	/**
-	 * Deletes all Openshift 3 SSL certificates that were accepted from Preferences
-	 * -> JBossTools -> OpenShift 3 -> SSL Certificates
+	 * Deletes all Openshift SSL certificates that were accepted from Preferences
+	 * -> JBossTools -> OpenShift -> SSL Certificates
 	 */
 	private void deleteCertificates() {
 		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();

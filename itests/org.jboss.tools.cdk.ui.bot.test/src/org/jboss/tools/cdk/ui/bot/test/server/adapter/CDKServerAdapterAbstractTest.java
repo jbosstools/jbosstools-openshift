@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2017 Red Hat, Inc. 
+ * Copyright (c) 2017-2019 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -280,8 +280,8 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	}
 	
 	/**
-	 * Deletes all Openshift 3 SSL certificates that were accepted from
-	 * Preferences -> JBossTools -> OpenShift 3 -> SSL Certificates
+	 * Deletes all OpenShift SSL certificates that were accepted from
+	 * Preferences -> JBossTools -> OpenShift -> SSL Certificates
 	 */
 	private static void deleteCertificates() {
 		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();

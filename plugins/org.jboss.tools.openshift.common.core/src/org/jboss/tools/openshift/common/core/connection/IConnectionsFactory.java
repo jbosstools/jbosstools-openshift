@@ -21,7 +21,7 @@ public interface IConnectionsFactory {
 	/** connection factory for OpenShift 2 */
 	public static final String CONNECTIONFACTORY_EXPRESS_ID = "org.jboss.tools.openshift.express.core.ConnectionFactory";
 
-	/** connection factory for OpenShift 3 */
+	/** connection factory for OpenShift */
 	public static final String CONNECTIONFACTORY_OPENSHIFT_ID = "org.jboss.tools.openshift.core.ConnectionFactory";
 
 	/**

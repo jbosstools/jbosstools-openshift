@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2016-2017 Red Hat, Inc. 
+ * Copyright (c) 2016-2019 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -31,7 +31,7 @@ public class OpenShift3SSLCertificatePreferencePage extends PreferencePage {
 	private static Logger log = Logger.getLogger(OpenShift3SSLCertificatePreferencePage.class);
 	
 	public OpenShift3SSLCertificatePreferencePage(ReferencedComposite composite) {
-		super(composite, "JBoss Tools", "OpenShift 3", "SSL certificates");
+		super(composite, "JBoss Tools", "OpenShift", "SSL certificates");
 	}
 	
 	public void printCertificates() {

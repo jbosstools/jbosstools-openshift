@@ -117,7 +117,7 @@ public class OpenShiftServerUtils {
 	}
 
 	/**
-	 * Returns the first openshift 3 server in the current workspace
+	 * Returns the first OpenShift server in the current workspace
 	 * that matches the given OpenShift resource (service,
 	 * deployment config, replication controller) name.
 	 * 
@@ -128,7 +128,7 @@ public class OpenShiftServerUtils {
 	}
 
 	/**
-	 * Returns the first openshift 3 server within the given list of servers
+	 * Returns the first OpenShift server within the given list of servers
 	 * that matches the given OpenShift resource (service,
 	 * deployment config, replication controller) name.
 	 * 
@@ -160,7 +160,7 @@ public class OpenShiftServerUtils {
 		String baseName = new StringBuilder(resource.getName())
 				.append(" (")
 				.append(resource.getKind())
-				.append(") at OpenShift 3 (")
+				.append(") at OpenShift (")
 				.append(UrlUtils.cutPort(UrlUtils.cutScheme(connection.getHost())))
 				.append(")").toString();
 		return ServerUtils.getServerName(baseName);
@@ -611,7 +611,7 @@ public class OpenShiftServerUtils {
 				OCBinary.getInstance() != null
 						&& !StringUtils.isBlank(OCBinary.getInstance().getPath(getConnection(server))),
 				"Binary for oc-tools could not be found."
-						+ " Please open the OpenShift 3 Preference Page and set the location of the oc binary.");
+						+ " Please open the OpenShift Preference Page and set the location of the oc binary.");
 
 		return new RSync(resource, podPath, server);
 	}

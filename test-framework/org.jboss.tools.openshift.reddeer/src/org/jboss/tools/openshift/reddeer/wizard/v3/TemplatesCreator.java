@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2017 Red Hat, Inc.
+ * Copyright (c) 2007-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -40,7 +40,7 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.wizard.page.ResourceLabelsWizardPage;
 
 /**
- * Creator allows to create a new OpenShift 3 application in simplified way. It's required to provide mostly
+ * Creator allows to create a new OpenShift application in simplified way. It's required to provide mostly
  * only server, username and project together with template name or location on a file system.
  * 
  * @author mlabuda@redhat.com
@@ -50,10 +50,10 @@ public class TemplatesCreator {
 	private NewOpenShift3ApplicationWizard wizard;
 	
 	/**
-	 * Initiates a new template creator to create a new OpenShift 3 application based on template.
+	 * Initiates a new template creator to create a new OpenShift application based on template.
 	 * Wizard is opened from OpenShift explorer view.
 	 * 
-	 * @param server OpenShift 3 server
+	 * @param server OpenShift server
 	 * @param username user name
 	 * @param project project
 	 */
@@ -62,11 +62,11 @@ public class TemplatesCreator {
 	}
 
 	/**
-	 * Initiates a new template creator to create a new OpenShift 3 application based on template.
+	 * Initiates a new template creator to create a new OpenShift application based on template.
 	 * Wizard is opened from OpenShift explorer if openFromShellMenu is false. Otherwise wizard is 
 	 * opened via shell menu.
 	 * 
-	 * @param server OpenShift 3 server
+	 * @param server OpenShift server
 	 * @param username user name
 	 * @param project project
 	 * @param openFromShellMenu open wizard from shell menu, if false, opens it from OpenShift explorer
@@ -86,7 +86,7 @@ public class TemplatesCreator {
 	}
 
 	/**
-	 * Creates new OpenShift 3 application from a local template.
+	 * Creates new OpenShift application from a local template.
 	 * 
 	 * @param templatePath path on local file system to a template
 	 */
@@ -95,7 +95,7 @@ public class TemplatesCreator {
 	}
 
 	/**
-	 * Creates new OpenShift 3 application from a local template with specific labels.
+	 * Creates new OpenShift application from a local template with specific labels.
 	 * 
 	 * @param templatePath path on local file system to a template
 	 * @param labels OpenShift labels
@@ -105,7 +105,7 @@ public class TemplatesCreator {
 	}
 	
 	/**
-	 * Creates new OpenShift 3 application from a local template with specific parameters.
+	 * Creates new OpenShift application from a local template with specific parameters.
 	 * 
 	 * @param templatePath path on local file system to a template
 	 * @param parameters template parameters
@@ -115,7 +115,7 @@ public class TemplatesCreator {
 	}
 	
 	/**
-	 * Creates new OpenShift 3 application from a local template with specific labels and template parameters.
+	 * Creates new OpenShift application from a local template with specific labels and template parameters.
 	 * 
 	 * @param templatePath path on local file system to a template
 	 * @param labels OpenShift labels
@@ -127,7 +127,7 @@ public class TemplatesCreator {
 	}
 	
 	/**
-	 * Creates new OpenShift 3 application from a server template with matching name.
+	 * Creates new OpenShift application from a server template with matching name.
 	 * 
 	 * @param templateName name of a server template
 	 */
@@ -136,7 +136,7 @@ public class TemplatesCreator {
 	}
 	
 	/**
-	 * Creates new OpenShift 3 application from a server template with matching name.
+	 * Creates new OpenShift application from a server template with matching name.
 	 * 
 	 * @param templateName name of a server template
 	 */
@@ -145,7 +145,7 @@ public class TemplatesCreator {
 	}
 
 	/**
-	 * Creates new OpenShift 3 application from a server template with matching name and specific template parameters.
+	 * Creates new OpenShift application from a server template with matching name and specific template parameters.
 	 * 
 	 * @param templateName name of a server template
 	 * @param parameters template parameters
@@ -155,7 +155,7 @@ public class TemplatesCreator {
 	}
 	
 	/**
-	 * Creates new OpenShift 3 application from a server template with matching name and specific template parameters.
+	 * Creates new OpenShift application from a server template with matching name and specific template parameters.
 	 * 
 	 * @param templateName name of a server template
 	 * @param label list of OpenShift labels
@@ -165,7 +165,7 @@ public class TemplatesCreator {
 	}
 	
 	/**
-	 * Creates new OpenShift 3 application from a server template with matching name and specific labels
+	 * Creates new OpenShift application from a server template with matching name and specific labels
 	 * and template parameters.
 	 * @param <T>
 	 * 

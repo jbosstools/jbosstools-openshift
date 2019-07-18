@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2017 Red Hat, Inc.
+ * Copyright (c) 2007-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -23,8 +23,8 @@ import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.wizard.AbstractOpenShiftApplicationWizard;
 
 /**
- * To create a new OpenShift 3 application there are several steps:
- * - open new OpenShift 3 application wizard
+ * To create a new OpenShift application there are several steps:
+ * - open new OpenShift application wizard
  * - select template either from local file system or server
  * - proceed through wizard and set up missing remaining parameters if there are any
  * 
@@ -42,7 +42,7 @@ public class NewOpenShift3ApplicationWizard extends AbstractOpenShiftApplication
 	}
 
 	/**
-	 * Opens a new OpenShift 3 application wizard from OpenShift Explorer view with the given project pre-selected.
+	 * Opens a new OpenShift application wizard from OpenShift Explorer view with the given project pre-selected.
 	 * If the project is null, a generated project is used.
 	 */
 	public void openWizardFromExplorer(String project) {
