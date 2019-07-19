@@ -20,12 +20,10 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.model.IURLProvider;
-import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.jboss.ide.eclipse.as.core.server.internal.DeployableServer;
 import org.jboss.ide.eclipse.as.core.server.internal.IExtendedPropertiesProvider;
 import org.jboss.ide.eclipse.as.core.server.internal.JBossServer;
 import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;
-import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.util.ServerModelUtilities;
 import org.jboss.tools.as.core.server.controllable.systems.IDeploymentOptionsController;
@@ -102,7 +100,7 @@ public class OpenShiftServer extends DeployableServer
 	@Override
 	public String getDeployFolder() {
 		try {
-			IDeploymentOptionsController deployOpts = (IDeploymentOptionsController)getControllableBehavior().getController(IDeploymentOptionsController.SYSTEM_ID);
+			IDeploymentOptionsController deployOpts = getDeploymentOptionsController();
 			return deployOpts.getDeploymentsRootFolder(true);
 		} catch(CoreException ce) {
 			OpenShiftCoreActivator.logError(ce.getMessage(), ce);
@@ -113,22 +111,16 @@ public class OpenShiftServer extends DeployableServer
 	@Override
 	public String getTempDeployFolder() {
 		try {
-			IDeploymentOptionsController deployOpts = (IDeploymentOptionsController)getControllableBehavior().getController(IDeploymentOptionsController.SYSTEM_ID);
+			IDeploymentOptionsController deployOpts = getDeploymentOptionsController();
 			return deployOpts.getDeploymentsTemporaryFolder(true);
 		} catch(CoreException ce) {
 			OpenShiftCoreActivator.logError(ce.getMessage(), ce);
 			return super.getTempDeployFolder();
 		}
 	}
-	
-	
-	private IControllableServerBehavior getControllableBehavior() {
-		if( getServer() != null ) {
-			ServerBehaviourDelegate del = (ServerBehaviourDelegate)getServer().loadAdapter(ServerBehaviourDelegate.class, null);
-			if( del instanceof ControllableServerBehavior)
-				return (IControllableServerBehavior)del;
-		}
-		return null;
+
+	private IDeploymentOptionsController getDeploymentOptionsController() throws CoreException {
+		return (IDeploymentOptionsController) OpenShiftServerUtils.getAdapter(IControllableServerBehavior.class, getServer())
+				.getController(IDeploymentOptionsController.SYSTEM_ID);
 	}
-	
 }

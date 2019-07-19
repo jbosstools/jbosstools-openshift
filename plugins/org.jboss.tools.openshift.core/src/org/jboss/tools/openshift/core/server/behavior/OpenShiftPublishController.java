@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.core.server.behavior;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IProject;
@@ -34,6 +35,8 @@ import org.jboss.tools.as.core.server.controllable.subsystems.StandardFileSystem
 import org.jboss.tools.common.util.FileUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.core.server.OutputNamesCacheFactory;
+import org.jboss.tools.openshift.core.server.OutputNamesCacheFactory.OutputNamesCache;
 import org.jboss.tools.openshift.core.server.RSync;
 import org.jboss.tools.openshift.core.server.behavior.eap.OpenshiftEapProfileDetector;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -52,6 +55,10 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		if (!modulesIncludesMagicProject(server, deployProject)) {
 			publishRootModule(monitor, deployProject, localDirectory);
 		}
+		
+		final File localFolder = getDeploymentsRootFolder();
+		syncPodsToDirectory(localFolder, monitor);
+		deleteOldDeployments(getServer());
 	}
 
 	private void publishRootModule(final IProgressMonitor monitor, final IProject deployProject, final File localDirectory)
@@ -122,6 +129,14 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		}
 	}
 
+	protected void syncPodsToDirectory(final File localFolder, IProgressMonitor monitor) throws CoreException {
+		RSync rsync = createRsync(getServer(), monitor);
+		MultiStatus status = rsync.syncPodsToDirectory(localFolder, ServerConsoleModel.getDefault().getConsoleWriter());
+		if (!status.isOK()) {
+			throw new CoreException(status);
+		}
+	}
+
 	protected void loadPodPathIfEmpty(final IResource resource, IProgressMonitor monitor) throws CoreException {
 		// If the pod path is not set on the project yet, we can do that now
 		// to make future fetches faster
@@ -186,4 +201,30 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		String profile = ServerProfileModel.getProfile(getServer());
 		return OpenshiftEapProfileDetector.PROFILE.equals(profile);
 	}
+
+	public void deleteOldDeployments(final IServer server) throws CoreException {
+		File deploymentsRootFolder = getDeploymentsRootFolder();
+		Arrays.stream(server.getModules())
+			.forEach(module -> deleteOldDeployment(module, deploymentsRootFolder, server));
+	}
+
+	private void deleteOldDeployment(final IModule module, final File deploymentsRootFolder, IServer server) {
+		OutputNamesCache outputNamesCache = OutputNamesCacheFactory.INSTANCE.get(server);
+		if (outputNamesCache.isModified(module)) {
+			deleteOldDeployment(module, outputNamesCache, deploymentsRootFolder);
+			outputNamesCache.reset(module);
+		}
+	}
+
+	private void deleteOldDeployment(final IModule module, final OutputNamesCache moduleOutputNames, File deploymentsRootFolder) {
+		String outputName = moduleOutputNames.getOldOutputName(module);
+		if (outputName == null) {
+			return;
+		}
+		File outputNamePath = new File(deploymentsRootFolder, outputName);
+		if (outputNamePath.exists()) {
+			FileUtils.remove(outputNamePath);
+		}
+	}
+	
 }
