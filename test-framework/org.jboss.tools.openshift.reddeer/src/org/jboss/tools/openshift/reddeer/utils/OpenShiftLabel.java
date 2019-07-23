@@ -292,7 +292,7 @@ public class OpenShiftLabel {
 		public static final String VALUE = "Value:";
 		public static final String REMOTE_REQUEST_TIMEOUT = "Remote requests timeout (in seconds):";
 		public static final String FIND_FREE_PORTS = "Find free local ports for remote ports";
-		public static final String RESOURCE_LOCATION = "Enter a file path (workspace or local) or a full URL.";
+		public static final String RESOURCE_LOCATION = "Enter a file path (workspace or local) or a full URL:";
 		public static final String BUILDER_RESOURCE_NAME = "Name: ";
 		
 		// Git related

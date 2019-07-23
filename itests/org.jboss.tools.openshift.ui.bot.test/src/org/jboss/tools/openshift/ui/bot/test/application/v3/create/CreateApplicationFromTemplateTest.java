@@ -251,7 +251,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 		assertFalse(TemplateParametersTest.GITHUB_SECRET.split(" ")[0] + " should be generated and non-empty.",
 				new DefaultTable().getItem(TemplateParametersTest.GITHUB_SECRET.split(" ")[0]).getText(1).isEmpty());
 
-		new DefaultLink("Click here to display the webhooks available to automatically trigger builds.").click();
+		new DefaultLink("Click here for webhooks available to automatically trigger builds.").click();
 
 		new DefaultShell(OpenShiftLabel.Shell.WEBHOOK_TRIGGERS);
 		genericWebhookURL = new DefaultText(0).getText();
