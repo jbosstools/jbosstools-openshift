@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2017 Red Hat, Inc.
+ * Copyright (c) 2007-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -88,7 +88,7 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
 		
 		/**
 		 * If set to true, given oc will be set into 
-		 * Preferences -> JBoss Tools -> OpenShift 3 -> oc executable location field
+		 * Preferences -> JBoss Tools -> OpenShift -> oc executable location field
 		 * @return true or false
 		 */
 		boolean setOCInPrefs() default false;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016-2017 Red Hat, Inc.
+ * Copyright (c) 2016-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -101,7 +101,7 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 				connection = createConnection(server, username, password, token);
 				ConnectionsRegistrySingleton.getInstance().add(connection);
 			}
-			LOGGER.debug(NLS.bind("Connecting to OpenShift 3 server at {0}", url));
+			LOGGER.debug(NLS.bind("Connecting to OpenShift server at {0}", url));
 			connection.connect();
 			this.connection = connection;
 		} catch (UnsupportedEncodingException | MalformedURLException e) {

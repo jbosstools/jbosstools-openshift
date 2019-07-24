@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2017 Red Hat, Inc.
+ * Copyright (c) 2007-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -141,7 +141,7 @@ public class NodeJSAppDebugTest extends AbstractTest {
 		new WaitWhile(new ShellIsAvailable(""), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
 
-		assertTrue("OpenShift 3 server adapter was not created.",
+		assertTrue("OpenShift server adapter was not created.",
 				new ServerAdapterExists(Version.OPENSHIFT3, OpenShiftResources.NODEJS_SERVICE, "Service").test());
 
 		new WaitUntil(new ConsoleHasNoChange(), TimePeriod.LONG);

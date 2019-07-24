@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2017 Red Hat, Inc.
+ * Copyright (c) 2007-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -92,7 +92,7 @@ public class ServerAdapterWizardHandlingTest extends AbstractTest  {
 	public void testPreselectedConnectionForNewOpenShift3ServerAdapter() {
 		openNewServerAdapterWizard();
 
-		assertTrue("There should be preselected an existing OpenShift 3 connection in new server adapter wizard.",
+		assertTrue("There should be preselected an existing OpenShift connection in new server adapter wizard.",
 				new LabeledCombo(OpenShiftLabel.TextLabels.CONNECTION).getSelection().contains(connectionReq.getConnection().getUsername()));
 	}
 
@@ -157,7 +157,7 @@ public class ServerAdapterWizardHandlingTest extends AbstractTest  {
 		assertFalse("Finish button should be disabled on new server "
 				+ "adapter wizard page where selection of a connection is done, "
 				+ "because there are still missing details to successfully create a new"
-				+ "OpenShift 3 server adapter.", buttonIsEnabled(new FinishButton()));
+				+ "OpenShift server adapter.", buttonIsEnabled(new FinishButton()));
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2017 Red Hat, Inc. 
+ * Copyright (c) 2017-2019 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -90,7 +90,7 @@ public class CDKTestUtils {
 	}
 	
 	/**
-	 * Tests Openshift 3 connection and try to refresh it
+	 * Tests OpenShift connection and try to refresh it
 	 * 
 	 * @param connection
 	 */
@@ -105,7 +105,7 @@ public class CDKTestUtils {
 	}
 	
 	/**
-	 * Tests Openshift 3 connection and try to refresh it
+	 * Tests OpenShift connection and try to refresh it
 	 * 
 	 * @param connection
 	 */
@@ -156,11 +156,11 @@ public class CDKTestUtils {
 	}
 	
 	/**
-	 * Finds OpenShift 3 connection based on server username parameters
+	 * Finds OpenShift connection based on server username parameters
 	 * 
 	 * @param server server name
 	 * @param username connection username
-	 * @return openshift 3 connection object if found
+	 * @return OpenShift connection object if found
 	 */
 	public static OpenShift3Connection findOpenShiftConnection(String server, String username) {
 		OpenShiftExplorerView osExplorer = new OpenShiftExplorerView();
@@ -245,7 +245,7 @@ public class CDKTestUtils {
 	}
 	
 	/**
-	 * Prints out Openshift 3 accepted certificates
+	 * Prints out OpenShift accepted certificates
 	 */
 	public static void printCertificates() {
 		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();

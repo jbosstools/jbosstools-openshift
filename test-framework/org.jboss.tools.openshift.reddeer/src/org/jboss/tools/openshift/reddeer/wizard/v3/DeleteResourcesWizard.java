@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2018 Red Hat, Inc.
+ * Copyright (c) 2007-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -49,7 +49,7 @@ public class DeleteResourcesWizard {
 	}
 
 	/**
-	 * Opens a new OpenShift 3 Delete Resources... wizard from OpenShift Explorer view with the given project pre-selected.
+	 * Opens a new OpenShift Delete Resources... wizard from OpenShift Explorer view with the given project pre-selected.
 	 * If the project is null, a generated project is used.
 	 * 
 	 * @param project project name for deleting resources 

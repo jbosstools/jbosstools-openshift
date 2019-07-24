@@ -199,7 +199,7 @@ public class ServerAdapterFromResourceTest extends AbstractTest  {
 		} else {
 			resourceType = type.toString().replaceFirst(".$","").replaceAll(" ", "");
 		}		
-		assertTrue("Resource should be preselected for new OpenShift 3 server adapter",
+		assertTrue("Resource should be preselected for new OpenShift server adapter",
 				new DefaultTreeItem(project.getName(), selectors).isSelected());
 		
 		try {
@@ -212,7 +212,7 @@ public class ServerAdapterFromResourceTest extends AbstractTest  {
 		new WaitWhile(new ShellIsAvailable(""));
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG, false);
 		
-		assertTrue("OpenShift 3 server adapter was not created.", 
+		assertTrue("OpenShift server adapter was not created.", 
 				new ServerAdapterExists(Version.OPENSHIFT3, name, resourceType).test());	
 		adapter = new ServerAdapter(Version.OPENSHIFT3, name, resourceType);
 	}

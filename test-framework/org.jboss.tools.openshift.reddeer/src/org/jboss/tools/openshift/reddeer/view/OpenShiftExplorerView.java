@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2017 Red Hat, Inc.
+ * Copyright (c) 2007-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -209,28 +209,28 @@ public class OpenShiftExplorerView extends WorkbenchView {
 
 		connection = getOpenShift3Connection(server, username);
 
-		assertNotNull("Unable to get openshift 3 connection.", connection);
+		assertNotNull("Unable to get OpenShift connection.", connection);
 		return connection;
 	}
 
 	/**
-	 * Gets default OpenShift 3 connection. OpenShift server and username/password
+	 * Gets default OpenShift connection. OpenShift server and username/password
 	 * or token are specified in DatastoreOS3 through system properties
 	 * openshift.server, openshift.username, openshift.password and openshift.token.
 	 * 
 	 * @param connection connection to OpenShift
 	 * 
-	 * @return OpenShift 3 connection
+	 * @return OpenShift connection
 	 */
 	public OpenShift3Connection getOpenShift3Connection(Connection connection) {
 		return new OpenShift3Connection(getConnectionItem(connection.getHost(), connection.getUsername()));
 	}
 
 	/**
-	 * Returns the OpenShift 3 connection, which has the given server and user name.
+	 * Returns the OpenShift connection, which has the given server and user name.
 	 * Throws {@link OpenShiftToolsException} if it doesn't exist.
 	 * 
-	 * @return OpenShift 3 connection
+	 * @return OpenShift connection
 	 */
 	public OpenShift3Connection getOpenShift3Connection(String server, String username) {
 		return new OpenShift3Connection(getConnectionItem(server, username));

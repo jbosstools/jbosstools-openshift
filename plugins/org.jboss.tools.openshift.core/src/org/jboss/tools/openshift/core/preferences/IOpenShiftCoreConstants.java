@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,12 +18,12 @@ public interface IOpenShiftCoreConstants {
 	static final String OPENSHIFT_CLI_LOC = "openshift.cli.location";
 
 	/**
-	 * URL of the web page for Openshift 3 download instructions.
+	 * URL of the web page for OpenShift download instructions.
 	 */
 	public static final String DOWNLOAD_INSTRUCTIONS_URL = "https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github";
 
 	/**
-	 * Identifier of the Openshift 3 preference page.
+	 * Identifier of the OpenShift preference page.
 	 */
 	public static final String OPEN_SHIFT_PREFERENCE_PAGE_ID = "org.jboss.tools.openshift.ui.preferences.OpenShiftPreferencePage";
 

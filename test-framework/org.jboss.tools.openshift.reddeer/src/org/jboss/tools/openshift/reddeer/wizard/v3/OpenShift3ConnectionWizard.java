@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2017 Red Hat, Inc. 
+ * Copyright (c) 2017-2019 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -36,7 +36,7 @@ import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 /**
- * Represents OpenShift 3 connection wizard (Edit or New)
+ * Represents OpenShift connection wizard (Edit or New)
  * 
  * @author odockal
  *

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2018 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2019 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -43,7 +43,7 @@ import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.route.IRoute;
 
 /**
- * Contributes OpenShift 3 specific content to the OpenShift explorer view
+ * Contributes OpenShift specific content to the OpenShift explorer view
  * 
  * @author jeff.cantrill
  * @author Jeff Maury

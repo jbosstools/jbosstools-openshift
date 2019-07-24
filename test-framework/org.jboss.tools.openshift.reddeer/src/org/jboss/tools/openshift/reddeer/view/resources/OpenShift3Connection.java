@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2017 Red Hat, Inc.
+ * Copyright (c) 2007-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -34,7 +34,7 @@ public class OpenShift3Connection extends AbstractOpenShiftConnection {
 	}
 
 	/**
-	 * Gets an OpenShift 3 project with specified project name.
+	 * Gets an OpenShift project with specified project name.
 	 *  
 	 * @param projectName name of a project, if displayed name is provided,
 	 *  	its displayed name, otherwise its project name
@@ -56,7 +56,7 @@ public class OpenShift3Connection extends AbstractOpenShiftConnection {
 	}
 
 	/**
-	 * Gets first project of a OpenShift 3 connection.
+	 * Gets first project of a OpenShift connection.
 	 *
 	 * @return OpenShift project
 	 */

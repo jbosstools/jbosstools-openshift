@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2018 Red Hat Inc..
+ * Copyright (c) 2015-2019 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -185,8 +185,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	protected ServerSettingsWizardPage(final IWizard wizard, final IServerWorkingCopy server,
 			final Connection connection, final IResource resource, final IRoute route, final IProject deployProject) {
 		super("Server Settings",
-				"Create an OpenShift 3 Server Adapter by selecting the project, resource and folders used for file synchronization.",
-				"Create an OpenShift 3 Server Adapter", wizard);
+				"Create an OpenShift Server Adapter by selecting the project, resource and folders used for file synchronization.",
+				"Create an OpenShift Server Adapter", wizard);
 		this.model = new ServerSettingsWizardPageModel(resource, route, deployProject, connection, server,
 				Status.OK_STATUS,
 				RSyncValidator.get().getStatus());

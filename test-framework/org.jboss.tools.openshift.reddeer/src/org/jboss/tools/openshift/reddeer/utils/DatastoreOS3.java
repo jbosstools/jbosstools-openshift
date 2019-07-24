@@ -21,7 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.openshift.reddeer.enums.AuthenticationMethod;
 
 /**
- * Storage for settings that are used in the OpenShift 3 integration tests.
+ * Storage for settings that are used in the OpenShift integration tests.
  * 
  * @author mlabuda@redhat.com
  * @author adietish@redhat.com

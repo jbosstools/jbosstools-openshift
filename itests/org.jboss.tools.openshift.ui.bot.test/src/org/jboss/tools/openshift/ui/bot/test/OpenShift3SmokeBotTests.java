@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat, Inc.
+ * Copyright (c) 2017-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -52,7 +52,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * <b>OpenShift 3 Smoke Tests suite</b>
+ * <b>OpenShift Smoke Tests suite</b>
  * 
  * @author mlabuda@redhat.com
  * @contributor jkopriva@redhat.com

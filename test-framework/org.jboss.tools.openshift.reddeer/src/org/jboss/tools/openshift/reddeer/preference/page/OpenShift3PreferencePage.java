@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2017 Red Hat, Inc.
+ * Copyright (c) 2007-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -16,7 +16,7 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 /**
- * OpenShift 3 preference page has a place to set up path to OpenShift command line tools
+ * OpenShift preference page has a place to set up path to OpenShift command line tools
  * binary. This 'oc' binary is crucial for many features in OpenShift tools such as
  * port forwarding, build logs, pod logs etc.
  * 
@@ -26,7 +26,7 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 public class OpenShift3PreferencePage extends PreferencePage {
 	
 	public OpenShift3PreferencePage(ReferencedComposite composite) {
-		super(composite, new String[]{"JBoss Tools", "OpenShift 3"});
+		super(composite, new String[]{"JBoss Tools", "OpenShift"});
 	}
 	
 	/**
