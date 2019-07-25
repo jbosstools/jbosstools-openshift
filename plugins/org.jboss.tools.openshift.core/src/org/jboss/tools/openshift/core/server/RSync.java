@@ -34,6 +34,7 @@ import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.IBinaryCapability;
+import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
 import com.openshift.restclient.capability.resources.IRSyncable;
 import com.openshift.restclient.capability.resources.IRSyncable.LocalPeer;
 import com.openshift.restclient.capability.resources.IRSyncable.Peer;
@@ -100,24 +101,34 @@ public class RSync {
 
 	private void syncPodToDirectory(IPod pod, File localFolder, String podPath, final IServerConsoleWriter consoleWriter) {
 		localFolder.mkdirs();
-		sync(new PodPeer(podPath, pod), new LocalPeer(sanitizePath(localFolder.getAbsolutePath())), pod, consoleWriter);
+		sync(new PodPeer(podPath, pod),
+				new LocalPeer(sanitizePath(localFolder.getAbsolutePath())),
+				pod,
+				consoleWriter,
+				IRSyncable.exclude(".git", ".npm"),
+				IRSyncable.NO_PERMS,
+				IBinaryCapability.SKIP_TLS_VERIFY);
 	}
 
 	private void syncDirectoryToPod(final IPod pod, final File localFolder, String podPath, final IServerConsoleWriter consoleWriter) {
-		sync(new LocalPeer(sanitizePath(localFolder.getAbsolutePath())), new PodPeer(podPath, pod), pod, consoleWriter);
+		sync(new LocalPeer(sanitizePath(localFolder.getAbsolutePath())),
+				new PodPeer(podPath, pod),
+				pod,
+				consoleWriter,
+				IRSyncable.exclude(".git", ".npm"),
+				IRSyncable.NO_PERMS,
+				IRSyncable.DELETE,
+				IBinaryCapability.SKIP_TLS_VERIFY);
 	}
 
-	private void sync(final Peer source, final Peer destination, final IPod pod, final IServerConsoleWriter consoleWriter) {
+	private void sync(final Peer source, final Peer destination, final IPod pod, final IServerConsoleWriter consoleWriter, OpenShiftBinaryOption... options) {
 		if (!POD_STATUS_RUNNING.equals(pod.getStatus())) {
 			return;
 		}
 		pod.accept(new CapabilityVisitor<IRSyncable, IRSyncable>() {
 			@Override
 			public IRSyncable visit(IRSyncable rsyncable) {
-				final InputStream syncStream = rsyncable.sync(source, destination, 
-							IRSyncable.exclude(".git", ".npm"),
-							IRSyncable.NO_PERMS,
-							IBinaryCapability.SKIP_TLS_VERIFY);
+				final InputStream syncStream = rsyncable.sync(source, destination, options);
 				asyncWriteLogs(syncStream, consoleWriter);
 				try {
 					rsyncable.await();

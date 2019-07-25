@@ -589,6 +589,18 @@ public class OpenShiftServerUtils {
 		return getOpenShiftServerBehaviour(ServerUtil.getServer(configuration));
 	}
 
+	public static OpenShiftServer getServerDelegate(IServer server) {
+		return getAdapter(OpenShiftServer.class, server);
+	}
+
+	public static <T> T getAdapter(Class<T> clazz, IServer server) {
+		T delegate = server.getAdapter(clazz);
+		if( delegate == null ) {
+			delegate = (T) server.loadAdapter(clazz, new NullProgressMonitor());
+		}
+		return delegate;
+	}
+	
 	/**
 	 * Creates an {@link RSync}
 	 * 

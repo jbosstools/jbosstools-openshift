@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerType;
@@ -51,20 +52,39 @@ public class OpenShiftServerTestUtils {
 		return createOpenshift3Server(name, profile, null, null);
 	}
 
+	public static IServer createOpenshift3Server(String name, String profile, IFile file)
+			throws CoreException, UnsupportedEncodingException, MalformedURLException {
+		return createOpenshift3Server(name, profile, null, null, file);
+	}
+
 	public static IServer createOpenshift3Server(String name, String profile, IService service,
 			IOpenShiftConnection connection) throws CoreException, UnsupportedEncodingException, MalformedURLException {
-		IServerWorkingCopy workingCopy = createOpenshift3ServerWorkingCopy(name, profile, service, connection);
-		return workingCopy.save(false, null);
+		 return createOpenshift3Server(name, profile, service, connection, null);
+	}
+
+	public static IServer createOpenshift3Server(String name, String profile, IService service,
+			IOpenShiftConnection connection, IFile file) throws CoreException, UnsupportedEncodingException, MalformedURLException {
+		IServerWorkingCopy workingCopy = createOpenshift3ServerWorkingCopy(name, profile, service, connection, file);
+		return workingCopy.save(true, null);
 	}
 	
-	public static IServerWorkingCopy createOpenshift3ServerWorkingCopy(String name) throws CoreException {
+	public static IServerWorkingCopy createOpenshift3ServerWorkingCopy(String name, IFile file) throws CoreException {
 		IServerType type = OpenShiftServerUtils.getServerType();
-		return type.createServer(name, null, null);
+		return type.createServer(name, file, null);
+	}
+
+	public static IServerWorkingCopy createOpenshift3ServerWorkingCopy(String name) throws CoreException {
+		return createOpenshift3ServerWorkingCopy(name, null);
 	}
 
 	public static IServerWorkingCopy createOpenshift3ServerWorkingCopy(String name, String profile, IService service,
 			IOpenShiftConnection connection) throws CoreException, UnsupportedEncodingException, MalformedURLException {
-		IServerWorkingCopy wc = createOpenshift3ServerWorkingCopy(name);
+		return createOpenshift3ServerWorkingCopy(name, profile, service, connection, null);
+	}
+
+	public static IServerWorkingCopy createOpenshift3ServerWorkingCopy(String name, String profile, IService service,
+			IOpenShiftConnection connection, IFile file) throws CoreException, UnsupportedEncodingException, MalformedURLException {
+		IServerWorkingCopy wc = createOpenshift3ServerWorkingCopy(name, file);
 		String serviceId = service == null ? null : OpenShiftResourceUniqueId.get(service);
 		String connectionUrl = connection == null ? null : ConnectionURL.forConnection(connection).getUrl();
 		OpenShiftServerUtils.updateServer(name, "http://www.example.com", "dummy", connectionUrl, "dummy", serviceId,
