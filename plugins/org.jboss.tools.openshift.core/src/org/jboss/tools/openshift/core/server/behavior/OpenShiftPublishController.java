@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.core.server.behavior;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -27,12 +26,12 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
-import org.jboss.ide.eclipse.as.core.server.internal.v7.DeploymentMarkerUtils;
 import org.jboss.ide.eclipse.as.wtp.core.console.ServerConsoleModel;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IPublishController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.as.core.server.controllable.subsystems.StandardFileSystemPublishController;
 import org.jboss.tools.common.util.FileUtils;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.OutputNamesCacheFactory;
@@ -55,10 +54,9 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		if (!modulesIncludesMagicProject(server, deployProject)) {
 			publishRootModule(monitor, deployProject, localDirectory);
 		}
-		
-		final File localFolder = getDeploymentsRootFolder();
-		syncPodsToDirectory(localFolder, monitor);
-		deleteOldDeployments(getServer());
+
+		syncPodsToDirectory(monitor);
+		deleteOldDeployments(getServer(), monitor);
 	}
 
 	private void publishRootModule(final IProgressMonitor monitor, final IProject deployProject, final File localDirectory)
@@ -114,11 +112,14 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	public void publishFinish(IProgressMonitor monitor) throws CoreException {
 		super.publishFinish(monitor);
 
-		final File localFolder = getDeploymentsRootFolder();
-		syncDirectoryToPods(localFolder, monitor);
+		syncDirectoryToPods(monitor);
 
 		final IResource resource = OpenShiftServerUtils.getResource(getServer(), monitor);
 		loadPodPathIfEmpty(resource, monitor);
+	}
+
+	protected void syncDirectoryToPods(IProgressMonitor monitor) throws CoreException {
+		syncDirectoryToPods(getDeploymentsRootFolder(), monitor);
 	}
 
 	protected void syncDirectoryToPods(final File localFolder, IProgressMonitor monitor) throws CoreException {
@@ -127,6 +128,10 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		if (!status.isOK()) {
 			throw new CoreException(status);
 		}
+	}
+
+	protected void syncPodsToDirectory(IProgressMonitor monitor) throws CoreException {
+		syncPodsToDirectory(getDeploymentsRootFolder(), monitor);
 	}
 
 	protected void syncPodsToDirectory(final File localFolder, IProgressMonitor monitor) throws CoreException {
@@ -167,13 +172,6 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		}.schedule();
 	}
 
-	protected void deleteDoDeployMarkers(final File localFolder) {
-		// Remove all *.dodeploy files from this folder.
-		Stream.of(localFolder.listFiles())
-			.filter(file -> file.getName().endsWith(DeploymentMarkerUtils.DO_DEPLOY))
-			.forEach(File::delete);
-	}
-
 	@Override
 	protected void launchUpdateModuleStateJob() throws CoreException {
 		// No-op for now, until other problems are fixed
@@ -202,29 +200,48 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		return OpenshiftEapProfileDetector.PROFILE.equals(profile);
 	}
 
-	public void deleteOldDeployments(final IServer server) throws CoreException {
+	protected void deleteOldDeployments(final IServer server, IProgressMonitor monitor) throws CoreException {
 		File deploymentsRootFolder = getDeploymentsRootFolder();
-		Arrays.stream(server.getModules())
-			.forEach(module -> deleteOldDeployment(module, deploymentsRootFolder, server));
+		MultiStatus multiStatus = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0, "Could not delete old deployment(s)", null);
+		Arrays.stream(server.getModules()).forEach(module -> {
+			try {
+				deleteOldDeployment(module, deploymentsRootFolder, server, monitor);
+			} catch (CoreException e) {
+				multiStatus.add(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
+						NLS.bind("Could not delete old deployment for module {0}", module.getName())));
+			}
+		});
+		if (!multiStatus.isOK()) {
+			throw new CoreException(multiStatus);
+		}
 	}
 
-	private void deleteOldDeployment(final IModule module, final File deploymentsRootFolder, IServer server) {
+	private void deleteOldDeployment(final IModule module, final File deploymentsRootFolder, IServer server,
+			IProgressMonitor monitor) throws CoreException {
 		OutputNamesCache outputNamesCache = OutputNamesCacheFactory.INSTANCE.get(server);
 		if (outputNamesCache.isModified(module)) {
-			deleteOldDeployment(module, outputNamesCache, deploymentsRootFolder);
+			File moduleOutputFile = getModuleOutputFile(module, outputNamesCache, deploymentsRootFolder);
+			deleteDeploymentFile(moduleOutputFile, monitor);
 			outputNamesCache.reset(module);
 		}
 	}
 
-	private void deleteOldDeployment(final IModule module, final OutputNamesCache moduleOutputNames, File deploymentsRootFolder) {
+	protected File deleteDeploymentFile(File deployment, IProgressMonitor monitor) throws CoreException {
+		if (deployment == null 
+				|| !deployment.exists()) {
+			return null;
+		}
+		FileUtils.remove(deployment);
+		return deployment;
+	}
+
+	private File getModuleOutputFile(final IModule module, final OutputNamesCache moduleOutputNames,
+			File deploymentsRootFolder) {
 		String outputName = moduleOutputNames.getOldOutputName(module);
 		if (outputName == null) {
-			return;
+			return null;
 		}
-		File outputNamePath = new File(deploymentsRootFolder, outputName);
-		if (outputNamePath.exists()) {
-			FileUtils.remove(outputNamePath);
-		}
+		return new File(deploymentsRootFolder, outputName);
 	}
 	
 }

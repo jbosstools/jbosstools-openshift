@@ -10,13 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.server;
 
-import java.util.Arrays;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.internal.Server;
@@ -24,6 +21,7 @@ import org.jboss.ide.eclipse.as.core.server.IServerWorkingCopyProvider;
 import org.jboss.ide.eclipse.as.ui.editor.DeploymentPage;
 import org.jboss.ide.eclipse.as.ui.editor.ModuleDeploymentOptionsComposite;
 import org.jboss.tools.as.core.internal.modules.DeploymentPreferencesLoader;
+import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.OutputNamesCacheFactory;
 import org.jboss.tools.openshift.core.server.OutputNamesCacheFactory.OutputNamesCache;
 
@@ -73,11 +71,6 @@ public class OpenShiftDeploymentPage extends DeploymentPage implements IServerWo
 		 * Without it, nothing new shows up in the temp directory and rsync ends up
 		 * syncing nothing.
 		 */
-		setPublishState(IServer.PUBLISH_STATE_FULL, server.getModules(), (Server) server);
-	}
-
-	private void setPublishState(int state, IModule[] modules, Server server) {
-		Arrays.stream(modules).forEach(module -> 
-			server.setModulePublishState(new IModule[] { module }, state));
+		OpenShiftServerUtils.setModulePublishState(IServer.PUBLISH_STATE_FULL, server.getModules(), (Server) server);
 	}
 }
