@@ -753,4 +753,10 @@ public class OpenShiftServerUtils {
 		return collection;
 	}
 
+	public static void setModulePublishState(int state, IModule[] modules, Server server) {
+		Arrays.stream(modules).forEach(module -> 
+			server.setModulePublishState(new IModule[] { module }, state));
+	}
+
+
 }

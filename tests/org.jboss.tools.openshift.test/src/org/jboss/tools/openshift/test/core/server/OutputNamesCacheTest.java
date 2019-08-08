@@ -15,30 +15,21 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IModule2;
 import org.eclipse.wst.server.core.IModuleType;
 import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.IServerWorkingCopy;
-import org.eclipse.wst.server.core.internal.ProjectProperties;
-import org.eclipse.wst.server.core.internal.ServerPlugin;
 import org.jboss.ide.eclipse.as.core.util.IWTPConstants;
 import org.jboss.tools.openshift.core.server.OutputNamesCacheFactory;
 import org.jboss.tools.openshift.core.server.OutputNamesCacheFactory.OutputNamesCache;
 import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
-import org.jboss.tools.test.util.ResourcesUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
