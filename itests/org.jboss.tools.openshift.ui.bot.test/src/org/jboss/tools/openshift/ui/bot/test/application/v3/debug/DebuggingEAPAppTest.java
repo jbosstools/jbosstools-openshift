@@ -99,6 +99,8 @@ public class DebuggingEAPAppTest extends AbstractTest {
 	private static final String GIT_REPO_URL = "https://github.com/jboss-developer/jboss-eap-quickstarts";
 
 	private static final String GIT_REPO_DIRECTORY = "target/git_repo";
+	
+	private static final String GIT_REPO_BRANCH = "openshift";
 
 	private static final String PROJECT_NAME = "helloworld";
 
@@ -157,7 +159,7 @@ public class DebuggingEAPAppTest extends AbstractTest {
 	}
 
 	private static void cloneGitRepoAndImportProject() {
-		OpenShiftUtils.cloneGitRepository(GIT_REPO_DIRECTORY, GIT_REPO_URL, true);
+		OpenShiftUtils.cloneGitRepository(GIT_REPO_DIRECTORY, GIT_REPO_URL, GIT_REPO_BRANCH, true);
 		OpenShiftUtils.importProjectUsingSmartImport(GIT_REPO_DIRECTORY, PROJECT_NAME);
 	}
 

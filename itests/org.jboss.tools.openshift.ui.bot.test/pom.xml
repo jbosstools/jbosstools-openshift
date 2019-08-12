@@ -14,7 +14,7 @@
 
 	<properties>
 		<systemProperties>
-			-Dtest.configurations.dir=${configurations.dir} -Dopenshift.server=${openshift.server} -Dopenshift.username=${openshift.username} -Dopenshift.password=${openshift.password} -Dopenshift.token=${openshift.token} -Dopenshift.authmethod=${openshift.authmethod} -Dsecurestorage.password=${securestorage.password} -Dusage_reporting_enabled=false -Dopenshift.io.username=${openshift.io.username} -Dopenshift.io.password=${openshift.io.password} -Duse.cdk=${use.cdk} -Doc.linux.latest=${oc.linux.latest} -Doc.windows.latest=${oc.windows.latest} -Doc.mac.latest=${oc.mac.latest} -Doc.linux.1.1.64=${oc.linux.1.1.64} -Doc.windows.1.1.64=${oc.windows.1.1.64} -Doc.mac.1.1.64=${oc.mac.1.1.64}
+			-Dtest.configurations.dir=${configurations.dir} -Dopenshift.server=${openshift.server} -Dopenshift.username=${openshift.username} -Dopenshift.password=${openshift.password} -Dopenshift.token=${openshift.token} -Dopenshift.authmethod=${openshift.authmethod} -Dsecurestorage.password=${securestorage.password} -Dusage_reporting_enabled=false -Duse.cdk=${use.cdk} -Doc.linux.latest=${oc.linux.latest} -Doc.windows.latest=${oc.windows.latest} -Doc.mac.latest=${oc.mac.latest} -Doc.linux.1.1.64=${oc.linux.1.1.64} -Doc.windows.1.1.64=${oc.windows.1.1.64} -Doc.mac.1.1.64=${oc.mac.1.1.64}
 		</systemProperties>
 		<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift3StableBotTests</test.class>
 		<surefire.timeout>7200</surefire.timeout>
@@ -23,8 +23,6 @@
 		<openshift.password></openshift.password>
 		<openshift.token></openshift.token>
 		<openshift.authmethod>basic</openshift.authmethod>
-		<openshift.io.username></openshift.io.username>
-		<openshift.io.password></openshift.io.password>
 		<github.username></github.username>
 		<github.password></github.password>
 		<securestorage.password></securestorage.password>
