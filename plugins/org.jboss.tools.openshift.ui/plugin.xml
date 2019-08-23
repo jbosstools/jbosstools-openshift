@@ -1762,12 +1762,12 @@ $            <command
 	<extension point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
 		<subsystem
 			system="deploymentPage"
-			id="deploymentPage.standard"
+			id="deploymentPage.openshift"
 			name="Deployment Page"
 			class="org.jboss.ide.eclipse.as.ui.editor.internal.StandardDeploymentPageController" />
 		<subsystemMapping
-			id="deploymentPage.standard"
-			mappedId="deploymentPage.standard"
+			id="deploymentPage.openshift"
+			mappedId="deploymentPage.openshift"
 			serverTypes="org.jboss.tools.openshift.server.type" />
 	</extension>
 
