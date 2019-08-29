@@ -269,7 +269,7 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 		updateWithResources(loadProjects());
 		state.set(LoadingState.LOADED);
 		fireChanged();
-		for (ProjectWrapper project : projects.values()) {
+		for (ProjectWrapper project : new ArrayList<>(projects.values())) {
 			project.refresh();
 		}
 	}
