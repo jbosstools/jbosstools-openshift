@@ -161,20 +161,23 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		IProject project = OpenShiftServerUtils.getDeployProject(getServerOrWC());
 		String currentMode = beh.getServer().getMode();
 
-		Job toggleDebuggingAndSetState = new Job(NLS.bind("Setting up debugging for {0}", project.getName())) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				IStatus status = toggleDebugging(mode, beh, monitor);
-				setServerState(status, mode, currentMode, beh, monitor);
-				return status;
-			}
-		};
+		Job warnJob = Job.create("Warn if debug preferences set to show method result...", 
+				progressMonitor -> { new JavaDebugPreferences().warnIfShowMethodResultEnabled(mode); }
+		);
+		Job toggleDebuggingAndSetState = Job.create(NLS.bind("Setting up debugging for {0}", project.getName()), 
+				progressMonitor -> {
+					IStatus status = toggleDebugging(mode, beh, monitor);
+					setServerState(status, mode, currentMode, beh, monitor);
+					return status;			
+		});
 
 		if (!new MavenCharacter(project).hasNature()) {
-			toggleDebuggingAndSetState.schedule();
+			new JobChainBuilder(warnJob)
+				.runWhenDone(toggleDebuggingAndSetState)
+				.schedule();
 		} else {
 			new JobChainBuilder(new ActivateMavenProfileJob(Action.ACTIVATE, project))
+				.runWhenDone(warnJob)
 				.runWhenSuccessfullyDone(toggleDebuggingAndSetState)
 				.schedule();
 		}
