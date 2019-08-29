@@ -18,6 +18,8 @@ import java.util.Map;
  */
 public interface IOpenShiftCorePreferences {
 
+	static final String WARN_SHOW_METHOD_RESULT = "org.jboss.tools.openshift.warnShowMethodResult";
+
 	String[] loadConnections();
 
 	void saveConnections(String[] connections);
