@@ -38,6 +38,7 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
+import org.jboss.tools.openshift.reddeer.condition.TreeHasItem;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
@@ -356,16 +357,10 @@ public class BuilderImageApplicationWizardHandlingTest extends AbstractTest {
 	}
 	
 	/**************
-	  NAVIGATATION
+	  NAVIGATION
 	***************/
 	public static void nextToBuildConfigurationWizardPage() {
-//		List<TreeItem> templates = new DefaultTree().getAllItems();
-//		for (TreeItem item : templates) {
-//			if (item.getText().contains(BUILDER_IMAGE)) {
-//				item.select();
-//				break;
-//			}
-//		}
+		new WaitUntil(new TreeHasItem(BUILDER_IMAGE), TimePeriod.LONG);
 		new DefaultTreeItem(BUILDER_IMAGE).select();
 		
 		

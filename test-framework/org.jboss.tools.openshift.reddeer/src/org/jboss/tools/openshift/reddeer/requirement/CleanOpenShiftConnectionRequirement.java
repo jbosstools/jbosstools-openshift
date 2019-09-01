@@ -20,13 +20,14 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.reddeer.common.wait.TimePeriod;
-import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.junit.requirement.Requirement;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.reddeer.condition.core.ProjectExists;
+import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectDoesNotExist;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IResource;
 
@@ -50,10 +51,21 @@ public class CleanOpenShiftConnectionRequirement implements Requirement<CleanCon
 		Connection connection = ConnectionUtils.getConnectionOrDefault(cleanConnection.connectionURL());
 		assertNotNull("There is no connection with URL " + cleanConnection.connectionURL(), connection);
 		List<IResource> projects = connection.getResources(ResourceKind.PROJECT);
-		for (IResource project: projects) {
+		for (IResource project : projects) {
 			String projectName = project.getName();
-			connection.deleteResource(project);
-			new WaitWhile(new ProjectExists(projectName, connection), TimePeriod.LONG);
+			if (projectName.startsWith("openshift") || projectName.equals("default") || projectName.startsWith("kube-")) {
+				continue;
+			}
+			try {
+				connection.deleteResource(project);
+			} catch (OpenShiftException ex) {
+				//deleting on OS4 could take longer, try in once again, also project could be already in terminating state
+				connection.refresh();
+				connection.deleteResource(project);
+			}
+			connection.refresh();
+			new WaitUntil(new OpenShiftProjectDoesNotExist(projectName, connection), TimePeriod.getCustom(120));
+			
 		}
 		connection.refresh();
 	}

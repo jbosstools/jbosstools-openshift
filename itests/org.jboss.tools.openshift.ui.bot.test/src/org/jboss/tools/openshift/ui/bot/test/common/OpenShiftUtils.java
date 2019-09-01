@@ -59,6 +59,8 @@ import org.jboss.tools.openshift.reddeer.view.resources.Service;
 import org.jboss.tools.openshift.reddeer.wizard.importapp.ImportApplicationWizard;
 import org.jboss.tools.openshift.reddeer.wizard.server.ServerSettingsWizard;
 
+import com.openshift.restclient.OpenShiftException;
+
 @SuppressWarnings("restriction")
 public class OpenShiftUtils {
 	
@@ -101,7 +103,15 @@ public class OpenShiftUtils {
 		for (OpenShiftProject project : projects) {
 			if (project != null) {
 				String projectName = project.getName();
+				if (projectName.startsWith("openshift") || projectName.equals("default") || projectName.startsWith("kube-")) {
+					continue;
+				}
 				try {
+					project.delete();
+					new WaitWhile(new OpenShiftProjectExists(projectName, connection), TimePeriod.LONG);
+				} catch (OpenShiftException e) {
+					//on OS4 delete could take more time, try it once again
+					explorer.getOpenShift3Connection(connection).refresh();
 					project.delete();
 					new WaitWhile(new OpenShiftProjectExists(projectName, connection), TimePeriod.LONG);
 				} catch (CoreLayerException ex) {
@@ -148,7 +158,9 @@ public class OpenShiftUtils {
 		try {
 			new WaitUntil(new ShellIsAvailable(new WithTextMatcher(new RegexMatcher(OpenShiftLabel.Shell.CHEATSHEET + "|" + OpenShiftLabel.Shell.CREATE_SERVER_ADAPTER))), TimePeriod.LONG);
 			new NoButton().click();
-			new DefaultShell("Create server adapter");
+			new DefaultShell(OpenShiftLabel.Shell.CREATE_SERVER_ADAPTER);
+			new NoButton().click();
+			new DefaultShell(OpenShiftLabel.Shell.CHEATSHEET);
 			new NoButton().click();
 		} catch (CoreLayerException ex) {
 			// Swallow, shells are not opened
