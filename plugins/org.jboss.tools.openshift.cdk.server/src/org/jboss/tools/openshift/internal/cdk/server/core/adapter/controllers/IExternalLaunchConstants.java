@@ -10,12 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers;
 
+import org.eclipse.debug.core.ILaunchManager;
+
 public interface IExternalLaunchConstants {
 
 	public static final String EXTERNAL_TOOLS = "org.eclipse.ui.externaltools.ProgramLaunchConfigurationType";
 	public static final String ATTR_LOCATION = "org.eclipse.ui.externaltools.ATTR_LOCATION";
 	public static final String ATTR_ARGS = "org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS";
 	public static final String ATTR_WORKING_DIR = "org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY";
-	public static final String ENVIRONMENT_VARS_KEY = "org.eclipse.debug.core.environmentVariables";
+	public static final String ENVIRONMENT_VARS_KEY = ILaunchManager.ATTR_ENVIRONMENT_VARIABLES; 
+	public static final String ATTR_APPEND_ENVIRONMENT_VARIABLES = ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES;
 
 }

@@ -28,9 +28,9 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
+import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
-import org.jboss.tools.openshift.internal.cdk.server.core.VagrantBinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CDKLaunchUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CommandTimeoutException;
 import org.jboss.tools.openshift.internal.cdk.server.core.listeners.CDKLaunchEnvironmentUtil;
@@ -70,9 +70,9 @@ public class VagrantPoller extends AbstractCDKPoller {
 
 		String[] args = new String[] { CDKConstants.VAGRANT_CMD_STATUS, CDKConstants.VAGRANT_FLAG_MACHINE_READABLE,
 				CDKConstants.VAGRANT_FLAG_NO_COLOR };
-		String vagrantcmdloc = VagrantBinaryUtility.getVagrantLocation(server);
+		String vagrantcmdloc = BinaryUtility.VAGRANT_BINARY.getLocation(server);
 		try {
-			String[] lines = CDKLaunchUtility.callMachineReadable(vagrantcmdloc, args, getWorkingDirectory(server),
+			String[] lines = new CDKLaunchUtility().callMachineReadable(vagrantcmdloc, args, getWorkingDirectory(server),
 					env);
 			IStatus vmStatus = parseOutput(lines);
 			if (vmStatus.isOK()) {

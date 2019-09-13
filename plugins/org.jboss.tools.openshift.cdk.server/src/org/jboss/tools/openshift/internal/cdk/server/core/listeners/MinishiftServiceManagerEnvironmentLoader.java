@@ -24,9 +24,9 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.JBossServerCorePlugin;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
-import org.jboss.tools.openshift.internal.cdk.server.core.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK32Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK3Server;
 
@@ -38,7 +38,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 
 	@Override
 	public ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server, boolean suppressErrors) {
-		String minishiftLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
+		String minishiftLoc = BinaryUtility.MINISHIFT_BINARY.getLocation(server);
 		if (minishiftLoc == null || minishiftLoc.isEmpty() || !(new File(minishiftLoc).exists())) {
 			if (!suppressErrors) {
 				String msg = "Server " + server.getName() + " does not have a minishift location defined.";
@@ -126,7 +126,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 
 	protected String getOpenshiftRegistry(IServer server, boolean suppressErrors) {
 		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server, true);
-		String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
+		String cmdLoc = BinaryUtility.MINISHIFT_BINARY.getLocation(server);
 		String[] args = new String[] { "openshift", "registry" };
 		args = CDK32Server.getArgsWithProfile(server, args);
 		File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();
@@ -174,7 +174,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 
 	protected Map<String, String> loadDockerEnv(IServer server) {
 		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server, true);
-		String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
+		String cmdLoc = BinaryUtility.MINISHIFT_BINARY.getLocation(server);
 		String[] args = new String[] { "docker-env" };
 		args = CDK32Server.getArgsWithProfile(server, args);
 
@@ -194,7 +194,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		String[] args = new String[] { "console", "--machine-readable" };
 		args = CDK32Server.getArgsWithProfile(server, args);
 		File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();
-		String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
+		String cmdLoc = BinaryUtility.MINISHIFT_BINARY.getLocation(server);
 		try {
 			Properties ret = callAndParseProperties(env, args, cmdLoc, wd);
 			return ret;

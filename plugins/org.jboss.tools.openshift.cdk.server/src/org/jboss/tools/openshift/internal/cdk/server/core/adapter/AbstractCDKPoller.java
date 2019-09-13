@@ -43,7 +43,7 @@ public abstract class AbstractCDKPoller implements IServerStatePoller2 {
 			public void run() {
 				pollerRun();
 			}
-		}, "CDK Poller"); //$NON-NLS-1$
+		},name);
 		t.start();
 	}
 
@@ -72,16 +72,20 @@ public abstract class AbstractCDKPoller implements IServerStatePoller2 {
 		this.state = state;
 	}
 
+	public String productName() {
+		return "CDK";
+	}
+	
 	@Override
 	public IStatus getCurrentStateSynchronous(IServer server) {
 		Map<String, String> env = createEnvironment(server);
 		int severity = onePingSafe(server, env).getSeverity();
 		if (severity == IStatus.OK) {
-			return new Status(IStatus.OK, CDKCoreActivator.PLUGIN_ID, "CDK Instance is Up");
+			return new Status(IStatus.OK, CDKCoreActivator.PLUGIN_ID, productName() + " Instance is Up");
 		} else if (severity == IStatus.ERROR) {
-			return new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "CDK Instance is shutoff");
+			return new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, productName() + " Instance is shutoff");
 		} else {
-			return new Status(IStatus.INFO, CDKCoreActivator.PLUGIN_ID, "CDK Instance is indeterminate");
+			return new Status(IStatus.INFO, CDKCoreActivator.PLUGIN_ID, productName() + " Instance is indeterminate");
 		}
 	}
 
@@ -97,7 +101,7 @@ public abstract class AbstractCDKPoller implements IServerStatePoller2 {
 			CDKCoreActivator.pluginLog().logError(ioe.getMessage(), ioe);
 		}
 		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID,
-				"Response status indicates the CDK is starting.");
+				"Response status indicates " + productName() + " is starting.");
 	}
 
 	protected abstract IStatus onePing(IServer server, Map<String, String> env)

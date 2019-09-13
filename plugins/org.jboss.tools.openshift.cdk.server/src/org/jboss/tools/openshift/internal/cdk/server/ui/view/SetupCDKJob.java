@@ -25,14 +25,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
-import org.jboss.tools.openshift.internal.cdk.server.core.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK3Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CDKLaunchUtility;
 
 public class SetupCDKJob extends Job {
 
-	private IServer server;
+	protected IServer server;
 	private Shell shell;
 	private boolean wait;
 
@@ -44,18 +44,41 @@ public class SetupCDKJob extends Job {
 		this(server, shell, false);
 	}
 
-	public SetupCDKJob(IServer server, Shell shell, boolean wait) {
-		super("Setup CDK");
+	protected SetupCDKJob(IServer server, Shell shell, String name, boolean wait) {
+		super(name);
 		this.server = server;
 		this.shell = shell;
 		this.wait = wait;
 	}
 
+
+	public SetupCDKJob(IServer server, Shell shell, boolean wait) {
+		this(server, shell, "Setup CDK", wait);
+	}
+	
+	protected String getContainerHome() {
+		CDK3Server cdk3 = (CDK3Server) server.loadAdapter(CDK3Server.class, new NullProgressMonitor());
+		String home = cdk3.getMinishiftHome();
+		return home;
+	}
+	
+	protected boolean isValid() {
+		CDK3Server cdk3 = (CDK3Server) server.loadAdapter(CDK3Server.class, new NullProgressMonitor());
+		return cdk3 != null && getBinaryLocation() != null && new File(getBinaryLocation()).exists();
+	}
+
+	protected String getBinaryLocation() {
+		return  BinaryUtility.MINISHIFT_BINARY.getLocation(server);
+	}
+	protected String getLaunchArgs() {
+		return "setup-cdk --force";
+	}
+	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		CDK3Server cdk3 = (CDK3Server) server.loadAdapter(CDK3Server.class, new NullProgressMonitor());
-		if (cdk3 != null) {
-			if (!promptRun(cdk3)) {
+		if( isValid()) {
+			String home = getContainerHome();
+			if (!promptRun(home)) {
 				return Status.CANCEL_STATUS;
 			}
 
@@ -69,12 +92,15 @@ public class SetupCDKJob extends Job {
 				listener.setLaunchAndWait(launch);
 				DebugPlugin.getDefault().removeDebugEventListener(listener);
 			}
+		} else {
+			return new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, 
+					"Server " + server.getName() + " is not configured properly.");
 		}
 		return Status.OK_STATUS;
 	}
 
-	private boolean promptRun(CDK3Server cdk3) {
-		String home = cdk3.getMinishiftHome();
+	
+	private boolean promptRun(String home) {
 		final int[] retmain = new int[1];
 		if (new File(home).exists()) {
 			Display.getDefault().syncExec(() -> {
@@ -82,7 +108,7 @@ public class SetupCDKJob extends Job {
 					shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				
 				String title = "Warning: Folder already exists!";
-				String msgText = "Setup CDK will delete all existing contents of {0}. Are you sure you want to continue?";
+				String msgText = "Setup will delete all existing contents of {0}. Are you sure you want to continue?";
 				String msg = NLS.bind(msgText, home);
 				MessageDialog messageDialog = new MessageDialog(shell, title, null, msg, MessageDialog.WARNING, 
 						new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 0);
@@ -94,10 +120,10 @@ public class SetupCDKJob extends Job {
 		}
 		return true;
 	}
-
-	private ILaunch launchSetup(IServer server) {
-		String cmd = MinishiftBinaryUtility.getMinishiftLocation(server);
-		String args = "setup-cdk --force";
+	
+	protected ILaunch launchSetup(IServer server) {
+		String cmd = getBinaryLocation();
+		String args = getLaunchArgs();
 		try {
 			ILaunchConfiguration lc = server.getLaunchConfiguration(true, new NullProgressMonitor());
 			ILaunchConfigurationWorkingCopy lc2 = new CDKLaunchUtility().createExternalToolsLaunch(server, args,

@@ -51,10 +51,10 @@ import org.jboss.tools.openshift.internal.cdk.server.core.listeners.ServiceManag
 import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
 
 public class CDKActionProvider extends CommonActionProvider {
-	private ICommonActionExtensionSite actionSite;
+	protected ICommonActionExtensionSite actionSite;
 	private ShowInViewAfterStartupAction showInOpenshiftViewAction;
 	private ShowInViewAfterStartupAction showInDockerViewAction;
-	private SetupCDKAction setupCDKAction;
+	private SetupAction setupAction;
 
 	private static final String DOCKER_VIEW_ID = "org.eclipse.linuxtools.docker.ui.dockerExplorerView";
 	private static final String OPENSHIFT_VIEW_ID = "org.jboss.tools.openshift.express.ui.explorer.expressConsoleView";
@@ -78,15 +78,27 @@ public class CDKActionProvider extends CommonActionProvider {
 					OPENSHIFT_VIEW_ID);
 			showInDockerViewAction = new ShowInDockerViewAfterStartupAction(wsSite.getSelectionProvider(),
 					DOCKER_VIEW_ID);
-			setupCDKAction = new SetupCDKAction(wsSite.getSelectionProvider());
+			setupAction = new SetupAction(getSetupActionName(), wsSite.getSelectionProvider());
 		}
 	}
 
-	private class SetupCDKAction extends Action {
+	protected String getSetupActionName() {
+		return "Setup CDK";
+	}
+	
+	protected List<String> getSetupServerTypes() {
+		return Arrays.asList(CDK3Server.MINISHIFT_BASED_CDKS);
+	}
+	
+	protected void scheduleSetupJob(IServer server) {
+		new SetupCDKJob(server, actionSite.getViewSite().getShell(), true).schedule();
+	}
+	
+	private class SetupAction extends Action {
 		private ISelectionProvider sp;
 
-		public SetupCDKAction(ISelectionProvider sp) {
-			super("Setup CDK");
+		public SetupAction(String name, ISelectionProvider sp) {
+			super(name);
 			this.sp = sp;
 		}
 
@@ -94,7 +106,7 @@ public class CDKActionProvider extends CommonActionProvider {
 		public void run() {
 			IServer s = getServerFromSelection();
 			if (shouldRun(s)) {
-				run2(s);
+				scheduleSetupJob(s);
 			}
 		}
 		
@@ -107,12 +119,8 @@ public class CDKActionProvider extends CommonActionProvider {
 				return false;
 			
 			String typeId = server.getServerType().getId();
-			List<String> types = Arrays.asList(CDK3Server.MINISHIFT_BASED_CDKS);
+			List<String> types = getSetupServerTypes();
 			return types.contains(typeId);
-		}
-
-		private void run2(IServer server) {
-			new SetupCDKJob(server, actionSite.getViewSite().getShell(), true).schedule();
 		}
 		
 		private IServer getServerFromSelection() {
@@ -173,19 +181,22 @@ public class CDKActionProvider extends CommonActionProvider {
 		if (quick != null && selection != null && selection.size() == 1) {
 			if (selection.getFirstElement() instanceof IServer) {
 				IServer server = (IServer) selection.getFirstElement();
-				if (acceptsServer(server)) {
-					if (menu instanceof MenuManager) {
-						((MenuManager) quick).add(showInDockerViewAction);
-						((MenuManager) quick).add(showInOpenshiftViewAction);
-					}
-				}
-				if (setupCDKAction.shouldRun()) {
-					menu.insertBefore(ServerActionProvider.TOP_SECTION_END_SEPARATOR, setupCDKAction);
-				}
+				fillContextMenuInternal(menu, quick, server);
 			}
 		}
 	}
 
+	protected void fillContextMenuInternal(IMenuManager menu, IContributionItem quick, IServer server) {
+		if (acceptsServer(server)) {
+			if (menu instanceof MenuManager) {
+				((MenuManager) quick).add(showInDockerViewAction);
+				((MenuManager) quick).add(showInOpenshiftViewAction);
+			}
+		}
+		if (setupAction.shouldRun()) {
+			menu.insertBefore(ServerActionProvider.TOP_SECTION_END_SEPARATOR, setupAction);
+		}
+	}
 
 	private boolean acceptsServer(IServer s) {
 		// For now lets just do cdk servers, but we can change this if we wanted it

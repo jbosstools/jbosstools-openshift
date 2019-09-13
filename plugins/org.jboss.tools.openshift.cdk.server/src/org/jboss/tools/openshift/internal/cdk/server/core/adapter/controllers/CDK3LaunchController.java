@@ -48,9 +48,9 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.AbstractStartJavaServerLaunchDelegate;
 import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
-import org.jboss.tools.openshift.internal.cdk.server.core.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.AbstractCDKPoller;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK32Poller;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK32Server;
@@ -188,7 +188,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 
 		String minishiftLoc = s.getAttribute(CDK3Server.MINISHIFT_FILE, (String) null);
 		if (minishiftLoc == null)
-			minishiftLoc = MinishiftBinaryUtility.getMinishiftLocation(workingCopy);
+			minishiftLoc = BinaryUtility.MINISHIFT_BINARY.getLocation(workingCopy);
 
 		if (minishiftLoc != null) {
 			String minishiftCmdFolder = new Path(minishiftLoc).removeLastSegments(1).toOSString();
@@ -207,7 +207,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 	}
 	
 	private String launchGetMinishiftBinary(IServer s, ControllableServerBehavior beh) throws CoreException {
-		String minishiftLoc = MinishiftBinaryUtility.getMinishiftLocation(s);
+		String minishiftLoc = BinaryUtility.MINISHIFT_BINARY.getLocation(s);
 		if (minishiftLoc == null || !(new File(minishiftLoc).exists())) {
 			beh.setServerStopped();
 			if (minishiftLoc == null)

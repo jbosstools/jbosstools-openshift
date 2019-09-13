@@ -25,7 +25,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.tools.as.runtimes.integration.ui.composites.DownloadRuntimeHyperlinkComposite;
-import org.jboss.tools.openshift.internal.cdk.server.core.MinishiftBinaryUtility;
+import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK3Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
 import org.jboss.tools.openshift.internal.cdk.server.core.detection.MinishiftVersionLoader;
@@ -270,7 +270,7 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		if (homeDir != null) {
 			homeText.setText(homeDir);
 		} else {
-			homeDir = MinishiftBinaryUtility.getMinishiftLocation();
+			homeDir = BinaryUtility.MINISHIFT_BINARY.getLocation();
 			if (homeDir != null) {
 				homeText.setText(homeDir);
 			}

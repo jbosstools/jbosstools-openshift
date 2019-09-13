@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,9 +30,6 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamsProxy;
 import org.eclipse.debug.core.model.RuntimeProcess;
 import org.eclipse.debug.internal.core.LaunchManager;
-import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
-import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
-import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
@@ -42,8 +37,8 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemContro
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
+import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
-import org.jboss.tools.openshift.internal.cdk.server.core.VagrantBinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.AbstractCDKPoller;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.OpenShiftNotReadyPollingException;
 
@@ -84,7 +79,7 @@ public abstract class AbstractCDKLaunchController extends AbstractSubsystemContr
 	}
 
 	protected IProcess addProcessToLaunch(Process p, ILaunch launch, IServer s, boolean terminal) {
-		String cmdLoc = VagrantBinaryUtility.getVagrantLocation(s);
+		String cmdLoc = BinaryUtility.VAGRANT_BINARY.getLocation(s);
 		return addProcessToLaunch(p, launch, s, terminal, cmdLoc);
 	}
 
@@ -120,22 +115,7 @@ public abstract class AbstractCDKLaunchController extends AbstractSubsystemContr
 	}
 
 	protected void linkTerminal(Process p) {
-		InputStream in = p.getInputStream();
-		InputStream err = p.getErrorStream();
-		OutputStream out = p.getOutputStream();
-		Map<String, Object> properties = new HashMap<>();
-		properties.put(ITerminalsConnectorConstants.PROP_DELEGATE_ID,
-				"org.eclipse.tm.terminal.connector.streams.launcher.streams");
-		properties.put(ITerminalsConnectorConstants.PROP_TERMINAL_CONNECTOR_ID,
-				"org.eclipse.tm.terminal.connector.streams.StreamsConnector");
-		properties.put(ITerminalsConnectorConstants.PROP_TITLE, getServer().getName());
-		properties.put(ITerminalsConnectorConstants.PROP_LOCAL_ECHO, false);
-		properties.put(ITerminalsConnectorConstants.PROP_FORCE_NEW, true);
-		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDIN, out);
-		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDOUT, in);
-		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDERR, err);
-		ITerminalService service = TerminalServiceFactory.getService();
-		service.openConsole(properties, null);
+		ProcessLaunchUtility.linkTerminal(getServer(), p);
 	}
 
 	protected LaunchManager getLaunchManager() {
