@@ -21,9 +21,9 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerDelegate;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
-import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
 
 public class CRC100Server extends ServerDelegate {
+	public static final String CRC_100_SERVER_TYPE_ID = "org.jboss.tools.openshift.cdk.server.type.crc.v100";
 	private static final String CRC_10_BASE_NAME = "CodeReady Containers 1.0";
 	public static final String PROPERTY_PULL_SECRET_FILE = "crc.pullsecret.file";
 	public static final String PROPERTY_BINARY_FILE = "crc.binary.file";

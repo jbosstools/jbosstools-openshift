@@ -109,7 +109,7 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 		if (con == null) {
 			con = util.createOpenshiftConnection(server, adb);
 		} else {
-			util.updateOpenshiftConnection(adb, con);
+			util.setDockerRegistry(adb, con);
 		}
 		if (con != null) {
 			con.connect();

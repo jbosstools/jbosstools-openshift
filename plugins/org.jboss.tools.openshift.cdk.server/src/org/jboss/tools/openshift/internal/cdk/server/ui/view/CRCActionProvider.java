@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Server;
 
 public class CRCActionProvider extends CDKActionProvider {
 
@@ -23,7 +24,7 @@ public class CRCActionProvider extends CDKActionProvider {
 	
 	protected List<String> getSetupServerTypes() {
 		return Arrays.asList(new String[] {
-				"org.jboss.tools.openshift.cdk.server.type.crc.v100"
+				CRC100Server.CRC_100_SERVER_TYPE_ID
 		});
 	}
 	

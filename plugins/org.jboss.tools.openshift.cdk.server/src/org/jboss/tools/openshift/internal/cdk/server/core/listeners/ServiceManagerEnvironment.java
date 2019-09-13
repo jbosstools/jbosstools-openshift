@@ -91,7 +91,8 @@ public class ServiceManagerEnvironment {
 	}
 
 	public String getAuthorizationScheme() {
-		String authScheme = env.containsKey(DOTCDK_AUTH_SCHEME) ? env.get(DOTCDK_AUTH_SCHEME) : "Basic";
+		String authScheme = env.containsKey(DOTCDK_AUTH_SCHEME) ? 
+				env.get(DOTCDK_AUTH_SCHEME) : "Basic";
 		return authScheme;
 	}
 
