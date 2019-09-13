@@ -255,6 +255,14 @@
             insertionId="org.eclipse.wst.server.editor.overview.left"
             order="9"
             typeIds="org.jboss.tools.openshift.cdk.server.type.v32"/>
+            
+      <section
+            class="org.jboss.tools.openshift.internal.cdk.server.ui.CRCLocationSection"
+            id="org.jboss.tools.openshift.cdk.server.ui.internal.crc.LocationSection"
+            insertionId="org.eclipse.wst.server.editor.overview.left"
+            order="8"
+            typeIds="org.jboss.tools.openshift.cdk.server.type.crc.v100"/>
+      
    </extension>
    
    
