@@ -47,7 +47,6 @@ import org.jboss.ide.eclipse.as.wtp.core.server.launch.AbstractStartJavaServerLa
 import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.AbstractCDKPoller;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK3Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Poller;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Server;
@@ -59,7 +58,8 @@ public class CRC100LaunchController extends AbstractCDKLaunchController
 
 	@Override
 	public void initialize(ILaunchConfigurationWorkingCopy wc) throws CoreException {
-		String bin = wc.getAttribute(CDK3Server.MINISHIFT_FILE, (String)null);
+		final IServer s = getServerFromLaunch(wc);
+		String bin = s.getAttribute(CRC100Server.PROPERTY_BINARY_FILE, (String)null);
 		wc.setAttribute(FLAG_INITIALIZED, true);
 		String workingDir = new File(bin).getParentFile().getAbsolutePath();
 		wc.setAttribute(ATTR_WORKING_DIR, workingDir);
