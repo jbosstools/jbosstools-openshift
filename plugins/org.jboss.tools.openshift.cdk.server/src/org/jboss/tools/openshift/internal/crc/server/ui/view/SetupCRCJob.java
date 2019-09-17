@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.internal.cdk.server.ui.view;
+package org.jboss.tools.openshift.internal.crc.server.ui.view;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,13 +6,16 @@ import java.util.HashMap;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.Launch;
+import org.eclipse.jdt.internal.launching.sourcelookup.advanced.AdvancedSourceLookupDirector;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.util.ArgsUtil;
 import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK3Server;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.ProcessLaunchUtility;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.ProcessUtility;
+import org.jboss.tools.openshift.internal.cdk.server.ui.view.SetupCDKJob;
+import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
 public class SetupCRCJob extends SetupCDKJob {
 
@@ -21,12 +24,16 @@ public class SetupCRCJob extends SetupCDKJob {
 	public SetupCRCJob(IServer server, Shell shell) {
 		this(server, shell, true);
 	}
-	
-	private SetupCRCJob(IServer server, Shell shell, boolean useTerminal) {
-		super(server, shell, "Setup CRC", false);
+
+	public SetupCRCJob(IServer server, Shell shell, boolean useTerminal) {
+		this(server, shell, useTerminal, false);
+	}
+
+	public SetupCRCJob(IServer server, Shell shell, boolean useTerminal, boolean wait) {
+		super(server, shell, "Setup CRC", wait);
 		this.useTerminal = useTerminal;
 	}
-	
+
 	protected String getContainerHome() {
 		return new File(System.getProperty("user.home"), ".crc").getAbsolutePath();
 	}
@@ -43,13 +50,15 @@ public class SetupCRCJob extends SetupCDKJob {
 	}
 	protected ILaunch launchSetup(IServer server) {
 		if( useTerminal) {
-			launchSetupViaTerminal(server);
-			return null;
+			Process p = launchSetupViaTerminal(server);
+			ILaunch l = new Launch(null, "run", null);
+			ProcessUtility.addProcessToLaunch(p, l, server, true, getBinaryLocation());
+			return l;
 		} else {
 			return super.launchSetup(server);
 		}
 	}
-	protected void launchSetupViaTerminal(IServer server) {
+	protected Process launchSetupViaTerminal(IServer server) {
 		String cmd = getBinaryLocation();
 		File wd = new File(cmd).getParentFile();
 		String args = getLaunchArgs();
@@ -61,5 +70,6 @@ public class SetupCRCJob extends SetupCDKJob {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+		return p;
 	}
 }

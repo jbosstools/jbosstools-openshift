@@ -16,8 +16,8 @@ import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.foundation.ui.plugin.BaseUIPlugin;
 import org.jboss.tools.foundation.ui.plugin.BaseUISharedImages;
-import org.jboss.tools.openshift.internal.cdk.server.core.listeners.ConfigureCRCFrameworksListener;
 import org.jboss.tools.openshift.internal.cdk.server.core.listeners.ConfigureDependentFrameworksListener;
+import org.jboss.tools.openshift.internal.crc.server.core.listeners.ConfigureCRCFrameworksListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 

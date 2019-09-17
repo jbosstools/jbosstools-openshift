@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.internal.cdk.server.ui;
+package org.jboss.tools.openshift.internal.crc.server.ui;
 
 import java.io.File;
 
@@ -24,7 +24,8 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.tools.as.runtimes.integration.ui.composites.DownloadRuntimeHyperlinkComposite;
 import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Server;
+import org.jboss.tools.openshift.internal.cdk.server.ui.CDKServerWizardFragment;
+import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 import org.jboss.tools.runtime.ui.wizard.DownloadRuntimesTaskWizard;
 
 public class CRC100ServerWizardFragment extends CDKServerWizardFragment {

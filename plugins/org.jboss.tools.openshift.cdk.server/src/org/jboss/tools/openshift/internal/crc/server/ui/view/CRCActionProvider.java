@@ -8,13 +8,14 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.cdk.server.ui.view;
+package org.jboss.tools.openshift.internal.crc.server.ui.view;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Server;
+import org.jboss.tools.openshift.internal.cdk.server.ui.view.CDKActionProvider;
+import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
 public class CRCActionProvider extends CDKActionProvider {
 

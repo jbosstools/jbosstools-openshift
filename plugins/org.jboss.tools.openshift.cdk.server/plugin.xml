@@ -71,17 +71,17 @@
             supportsRemoteHosts="false"/>
 
     <serverType
-            behaviourClass="org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRCServerBehaviour"
-            class="org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Server"
+            behaviourClass="org.jboss.tools.openshift.internal.crc.server.core.adapter.CRCServerBehaviour"
+            class="org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server"
             name="%openshift.crc.100.name"
             description="%openshift.crc.100.description"
             hasConfiguration="false"
-            id="org.jboss.tools.openshift.cdk.server.type.crc.v100"
+            id="org.jboss.tools.openshift.crc.server.type.crc.v100"
             initialState="stopped"
             launchConfigId="org.jboss.tools.openshift.cdk.server.core.internal.behaviour.launchType"
             launchModes="run"
             runtime="false"
-            runtimeTypeId="org.jboss.tools.openshift.cdk.server.runtime.type.crc.100"
+            runtimeTypeId="org.jboss.tools.openshift.crc.server.runtime.type.crc.100"
             startBeforePublish="false"
             startTimeout="1800000"
             stopTimeout="900000"
@@ -135,7 +135,7 @@
       <runtimeType
             class="org.jboss.tools.openshift.internal.cdk.server.core.adapter.runtime.DummyServerRuntime"
             description="A runtime representing a CRC 1.0.0 container."
-            id="org.jboss.tools.openshift.cdk.server.runtime.type.crc.100"
+            id="org.jboss.tools.openshift.crc.server.runtime.type.crc.100"
             name="CRC 1.0"
             supportsManualCreation="false"
             vendor="%enterpriseProviderName"
@@ -168,7 +168,7 @@
          point="org.eclipse.wst.server.ui.serverImages">
       <image
             icon="$nl$/icons/cdk_box_16.png"
-            typeIds="org.jboss.tools.openshift.cdk.server.type,org.jboss.tools.openshift.cdk.server.type.v3,org.jboss.tools.openshift.cdk.server.type.v32,org.jboss.tools.openshift.cdk.server.type.minishift.v17,org.jboss.tools.openshift.cdk.server.runtime.type,org.jboss.tools.openshift.cdk.server.type.crc.v100,org.jboss.tools.openshift.cdk.server.runtime.type.crc.100"
+            typeIds="org.jboss.tools.openshift.cdk.server.type,org.jboss.tools.openshift.cdk.server.type.v3,org.jboss.tools.openshift.cdk.server.type.v32,org.jboss.tools.openshift.cdk.server.type.minishift.v17,org.jboss.tools.openshift.cdk.server.runtime.type,org.jboss.tools.openshift.crc.server.type.crc.v100,org.jboss.tools.openshift.crc.server.runtime.type.crc.100"
             id="org.jboss.tools.openshift.cdk.server.type.icon"/>
    </extension>
 
@@ -200,9 +200,9 @@
    <extension
          point="org.eclipse.wst.server.ui.wizardFragments">
       <fragment
-            class="org.jboss.tools.openshift.internal.cdk.server.ui.CRC100ServerWizardFragment"
-            typeIds="org.jboss.tools.openshift.cdk.server.type.crc.v100"
-        	id="org.jboss.tools.openshift.internal.cdk.server.ui.CRC100ServerWizardFragment"/>
+            class="org.jboss.tools.openshift.internal.crc.server.ui.CRC100ServerWizardFragment"
+            typeIds="org.jboss.tools.openshift.crc.server.type.crc.v100"
+        	id="org.jboss.tools.openshift.internal.crc.server.ui.CRC100ServerWizardFragment"/>
    </extension>
 
 
@@ -257,11 +257,11 @@
             typeIds="org.jboss.tools.openshift.cdk.server.type.v32"/>
             
       <section
-            class="org.jboss.tools.openshift.internal.cdk.server.ui.CRCLocationSection"
-            id="org.jboss.tools.openshift.cdk.server.ui.internal.crc.LocationSection"
+            class="org.jboss.tools.openshift.internal.crc.server.ui.CRCLocationSection"
+            id="org.jboss.tools.openshift.crc.server.ui.internal.crc.LocationSection"
             insertionId="org.eclipse.wst.server.editor.overview.left"
             order="8"
-            typeIds="org.jboss.tools.openshift.cdk.server.type.crc.v100"/>
+            typeIds="org.jboss.tools.openshift.crc.server.type.crc.v100"/>
       
    </extension>
    
@@ -363,24 +363,24 @@
             system="launch"
             id="launch.crc100"
             name="Launch the CRC 1.0 Server"
-            class="org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CRC100LaunchController">
+            class="org.jboss.tools.openshift.internal.crc.server.core.adapter.controllers.CRC100LaunchController">
       </subsystem>
       <subsystemMapping
             id="launch.crc100"
             mappedId="launch.crc100"
-            serverTypes="org.jboss.tools.openshift.cdk.server.type.crc.v100">
+            serverTypes="org.jboss.tools.openshift.crc.server.type.crc.v100">
       </subsystemMapping>
 
       <subsystem
             system="shutdown"
             id="shutdown.crc100"
             name="Shutdown the CRC 1.0 Server"
-            class="org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CRC100ShutdownController">
+            class="org.jboss.tools.openshift.internal.crc.server.core.adapter.controllers.CRC100ShutdownController">
       </subsystem>
       <subsystemMapping
             id="shutdown.crc100"
             mappedId="shutdown.crc100"
-            serverTypes="org.jboss.tools.openshift.cdk.server.type.crc.v100">
+            serverTypes="org.jboss.tools.openshift.crc.server.type.crc.v100">
       </subsystemMapping>
    </extension>
    
@@ -408,8 +408,8 @@
 
     <extension point="org.eclipse.ui.navigator.navigatorContent">
        <actionProvider
-          class="org.jboss.tools.openshift.internal.cdk.server.ui.view.CRCActionProvider"
-          id="org.jboss.tools.openshift.internal.cdk.server.ui.view.CRCActionProvider">
+          class="org.jboss.tools.openshift.internal.crc.server.ui.view.CRCActionProvider"
+          id="org.jboss.tools.openshift.internal.crc.server.ui.view.CRCActionProvider">
           <enablement>
              <instanceof value="org.eclipse.wst.server.core.IServer"></instanceof>
           </enablement>
@@ -420,7 +420,7 @@
 	          viewerId="org.eclipse.wst.server.ui.ServersView">
 	       <includes>
 	          <actionExtension
-	                pattern="org.jboss.tools.openshift.internal.cdk.server.ui.view.CRCActionProvider"/>
+	                pattern="org.jboss.tools.openshift.internal.crc.server.ui.view.CRCActionProvider"/>
 	       </includes>
 	    </viewerActionBinding>
 	</extension>

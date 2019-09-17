@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers;
+package org.jboss.tools.openshift.internal.crc.server.core.adapter.controllers;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,10 +48,13 @@ import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.AbstractCDKPoller;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Poller;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Server;
-import org.jboss.tools.openshift.internal.cdk.server.ui.view.SetupCRCJob;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.AbstractCDKLaunchController;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CDKLaunchUtility;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.IExternalLaunchConstants;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
+import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Poller;
+import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
+import org.jboss.tools.openshift.internal.crc.server.ui.view.SetupCRCJob;
 
 public class CRC100LaunchController extends AbstractCDKLaunchController
 		implements ILaunchServerController, IExternalLaunchConstants {
@@ -164,7 +167,7 @@ public class CRC100LaunchController extends AbstractCDKLaunchController
 				retmain[0] = messageDialog.open();
 			});
 			if( retmain[0] == IDialogConstants.OK_ID) {
-				Job j = new SetupCRCJob(s, null);
+				Job j = new SetupCRCJob(s, null, true, true);
 				j.schedule();
 				
 				try {

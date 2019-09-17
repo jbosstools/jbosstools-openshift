@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.cdk.server.ui;
+package org.jboss.tools.openshift.internal.crc.server.ui;
 
 import java.io.File;
 
@@ -27,7 +27,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Server;
+import org.jboss.tools.openshift.internal.cdk.server.ui.AbstractLocationSection;
+import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
 public class CRCLocationSection extends AbstractLocationSection {
 

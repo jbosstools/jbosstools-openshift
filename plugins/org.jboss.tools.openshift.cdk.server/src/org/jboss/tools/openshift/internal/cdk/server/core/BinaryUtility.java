@@ -18,9 +18,9 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK32Server;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.IExternalLaunchConstants;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationBinary;
+import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
 public class BinaryUtility {
 	public static final BinaryUtility VAGRANT_BINARY = new BinaryUtility(

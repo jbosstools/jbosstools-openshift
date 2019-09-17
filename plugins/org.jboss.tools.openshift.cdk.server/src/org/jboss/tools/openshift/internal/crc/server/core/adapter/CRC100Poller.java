@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.cdk.server.core.adapter;
+package org.jboss.tools.openshift.internal.crc.server.core.adapter;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +23,8 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.JBossServerCorePlugin;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.AbstractCDKPoller;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.OpenShiftNotReadyPollingException;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CDKLaunchUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CommandTimeoutException;
 import org.jboss.tools.openshift.internal.cdk.server.core.listeners.ServiceManagerEnvironment;

@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers;
+package org.jboss.tools.openshift.internal.crc.server.core.adapter.controllers;
 
 import java.io.IOException;
 
@@ -11,8 +11,10 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.IServerStatePoller2;
 import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Poller;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Server;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.AbstractCDKShutdownController;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CDKLaunchUtility;
+import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Poller;
+import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
 public class CRC100ShutdownController extends AbstractCDKShutdownController {
 

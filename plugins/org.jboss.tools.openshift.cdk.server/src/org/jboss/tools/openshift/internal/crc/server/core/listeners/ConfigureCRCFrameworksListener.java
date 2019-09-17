@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.cdk.server.core.listeners;
+package org.jboss.tools.openshift.internal.crc.server.core.listeners;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +28,8 @@ import org.eclipse.wst.server.core.ServerEvent;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CRC100Server;
+import org.jboss.tools.openshift.internal.cdk.server.core.listeners.CDKOpenshiftUtility;
+import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
 public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 	private boolean enabled = true;
