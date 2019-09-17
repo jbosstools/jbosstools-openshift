@@ -35,7 +35,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RemoveCDKServers
 @ContainerRuntimeServer(
-		version = CDKVersion.CDK370,
+		version = CDKVersion.CDK390,
 		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		usernameProperty="developers.username",
@@ -95,7 +95,9 @@ public class CDKImageRegistryUrlDiscoveryTest extends CDKImageRegistryUrlAbstrac
 		stopServerAdapter(getCDKServer());
 		// start server adapter -> should bring up the value of registry url in existing
 		// connection
-		startServerAdapter(getCDKServer(), () -> skipRegistrationViaFlag(getCDKServer(), true), false);
+		startServerAdapter(getCDKServer(), () -> { 
+			skipRegistrationViaFlag(getCDKServer(), true);
+		}, false);
 		wizard = getOpenshiftConnectionWizard(CDKTestUtils.findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 		switchOffPasswordSaving(wizard);
 		checkImageRegistryUrl(wizard, OPENSHIFT_REGISTRY);

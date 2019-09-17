@@ -19,10 +19,11 @@ import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.Remo
 
 @RemoveCDKServers
 @ContainerRuntimeServer(
-		version = CDKVersion.CDK370,
+		version = CDKVersion.CDK390,
 		usernameProperty="developers.username",
 		passwordProperty="developers.password",
-		createServerAdapter=false)
+		createServerAdapter=false,
+		useExistingBinaryInProperty="cdk32.minishift")
 public class CDK32RuntimeDetectionTest extends CDKRuntimeDetectionTemplate {
 
 	@InjectRequirement

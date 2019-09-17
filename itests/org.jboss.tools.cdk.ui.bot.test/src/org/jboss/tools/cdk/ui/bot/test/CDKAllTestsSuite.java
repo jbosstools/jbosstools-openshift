@@ -14,7 +14,6 @@ import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32IntegrationTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32ServerAdapterProfilesTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDKServerAdapterSetupCDKTest;
-import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDKWrongCredentialsTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlDiscoveryFailureTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlDiscoveryTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlValidatorTest;
@@ -23,11 +22,8 @@ import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK3ServerEditorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.launch.CDKLaunchConfigurationTest;
 import org.jboss.tools.cdk.ui.bot.test.server.runtime.CDK32RuntimeDetectionDevstudioStartUpTest;
 import org.jboss.tools.cdk.ui.bot.test.server.runtime.CDK32RuntimeDetectionTest;
-import org.jboss.tools.cdk.ui.bot.test.server.runtime.CDK3RuntimeDetectionTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK32ServerWizardTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK3ServerWizardTest;
-import org.jboss.tools.cdk.ui.bot.test.server.wizard.download.CDK32DownloadRuntimeTest;
-import org.jboss.tools.cdk.ui.bot.test.server.wizard.download.CDK3DownloadRuntimeTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.download.DownloadContainerRuntimeDefaultSettingsTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.download.DownloadRuntimesWizardTest;
 import org.junit.runner.RunWith;
@@ -40,7 +36,7 @@ import org.junit.runners.Suite;
 	
 	// Runtime detection test after devstudio startup - must be first
 	CDK32RuntimeDetectionDevstudioStartUpTest.class,
-	CDK3RuntimeDetectionTest.class,
+	//CDK3RuntimeDetectionTest.class,
 	CDK32RuntimeDetectionTest.class,
 	
 	// Wizard tests by server adapter type
@@ -48,8 +44,8 @@ import org.junit.runners.Suite;
 	CDK32ServerWizardTest.class,
 	
 	// Downloading and installation of CDK/Minishift runtimes via new server wizard
-	CDK3DownloadRuntimeTest.class,
-	CDK32DownloadRuntimeTest.class,
+	//CDK3DownloadRuntimeTest.class,
+	//CDK32DownloadRuntimeTest.class,
 	DownloadContainerRuntimeDefaultSettingsTest.class,
 	DownloadRuntimesWizardTest.class,
 	
@@ -75,7 +71,7 @@ import org.junit.runners.Suite;
 
 	// Extended test case checking for error during CDK 3.2+ start up 
 	// with no or wrong credentials passed into env.
-	CDKWrongCredentialsTest.class,
+	//CDKWrongCredentialsTest.class,
 	
 	// Integration test for creating/operating of CDK 3.2+ server adapter with multiple profiles set
 	CDK32ServerAdapterProfilesTest.class

@@ -32,7 +32,7 @@ import org.junit.Test;
  */
 public class DownloadRuntimesWizardTest extends DownloadContainerRuntimeAbstractTest {
 
-	private static final CDKVersion version = CDKVersion.CDK370;
+	private static final CDKVersion version = CDKVersion.CDK390;
 	
 	private static final String INVALID_CREDENTIALS = "credentials have failed to validate";
 	

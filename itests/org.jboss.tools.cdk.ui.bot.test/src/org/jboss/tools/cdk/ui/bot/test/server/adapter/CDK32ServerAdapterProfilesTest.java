@@ -45,7 +45,7 @@ import org.junit.runner.RunWith;
 @CleanOpenShiftExplorer
 @RemoveCDKServers
 @ContainerRuntimeServer(
-		version = CDKVersion.CDK370,
+		version = CDKVersion.CDK390,
 		usernameProperty="developers.username",
 		passwordProperty="developers.password",
 		useExistingBinaryFromConfig=true,
@@ -108,7 +108,9 @@ public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest
 	public void testCDK32ServerAdapterWithMultipleProfiles() {
 		// fisrt adapter start verification
 		serverRequirement.configureCDKServerAdapter(false);
-		startServerAdapter(getCDKServer(), () -> { skipRegistrationViaFlag(getCDKServer(), true);}, false);
+		startServerAdapter(getCDKServer(), () -> {
+			skipRegistrationViaFlag(getCDKServer(), true);
+		}, false);
 		new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
 		new WaitWhile(new JobIsRunning(), TimePeriod.SHORT, false);
 		int conCount = view.getOpenShift3Connections().size();
@@ -116,9 +118,9 @@ public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest
 		assertEquals("Expected only one OS connection, got " + conCount, 1, conCount);
 		assertEquals("Expected only one Docker connection, got " + docCount, 1, docCount);
 		// second adapter start verification
-		startServerAdapter(getSecondCDKServer(), 
-				() -> { skipRegistrationViaFlag(getSecondCDKServer(), true);
-				}, false);
+		startServerAdapter(getSecondCDKServer(), () -> { 
+			skipRegistrationViaFlag(getSecondCDKServer(), true);
+		}, false);
 		new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
 		new WaitWhile(new JobIsRunning(), TimePeriod.SHORT, false);
 		// check counts of connections
