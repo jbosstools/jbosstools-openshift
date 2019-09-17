@@ -10,8 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.ui.bot.test.server.adapter;
 
+import org.eclipse.linuxtools.docker.reddeer.requirements.CleanDockerExplorerRequirement.CleanDockerExplorer;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.securestorage.SecureStorageRequirement.DisableSecureStorage;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
@@ -28,6 +30,8 @@ import org.junit.runner.RunWith;
  * @author odockal
  *
  */
+@DisableSecureStorage
+@CleanDockerExplorer
 @CleanOpenShiftExplorer
 @RemoveCDKServers
 @ContainerRuntimeServer(

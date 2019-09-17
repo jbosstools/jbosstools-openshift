@@ -21,6 +21,7 @@ public enum CDKServerAdapterType {
 	CDK3 	("CDK 3.0+", "org.jboss.tools.openshift.cdk.server.type.v3", "CDK"),
 	CDK32 	("CDK 3.2+", "org.jboss.tools.openshift.cdk.server.type.v32", "CDK"),
 	MINISHIFT17 ("Minishift", "org.jboss.tools.openshift.cdk.server.type.minishift.v17", "Minishift"),
+	CRC ("CRC 1.0", "org.jboss.tools.openshift.crc.server.type.crc.v100", "CRC"),
 	NO_CDK  ("", "", "");
 	
 	private final String runtimeTypeName;

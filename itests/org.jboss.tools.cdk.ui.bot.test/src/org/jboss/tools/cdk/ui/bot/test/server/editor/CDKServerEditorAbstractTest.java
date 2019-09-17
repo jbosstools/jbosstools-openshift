@@ -34,7 +34,6 @@ import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
-import org.jboss.tools.cdk.reddeer.server.ui.editor.CDKPart;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.MinishiftServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
@@ -105,7 +104,7 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 	}
 	
 	protected void checkEditorStateAfterSave(String location, boolean canSave) {
-		LabeledText label = ((CDKPart) editor).getMinishiftBinaryLabel();
+		LabeledText label = editor.getBinaryLabel();
 		label.setText(location);
 		new WaitUntil(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.SHORT, false);
 		new WaitWhile(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);

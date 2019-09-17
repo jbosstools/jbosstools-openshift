@@ -40,7 +40,7 @@ public class MinishiftServerEditor extends ServerEditor {
 	public MinishiftServerEditor(String title) {
 		super(title);
 		this.generalSection = new DefaultSection(GENERAL);
-		this.cdkSection = new DefaultSection(CDK_DETAILS);
+		this.cdkSection = getDefaultSection();
 	}
 	
 	public void openLaunchConfigurationFromLink() {
@@ -66,12 +66,20 @@ public class MinishiftServerEditor extends ServerEditor {
 		return new DefaultHyperlink(generalSection, "Open launch configuration");
 	}
 	
+	public DefaultSection getDefaultSection() {
+		return new DefaultSection(CDK_DETAILS);
+	}
+	
 	public DefaultSection getCDKSection() {
 		return this.cdkSection;
 	}
 	
 	public DefaultSection getGeneralSection() {
 		return this.generalSection;
+	}
+	
+	public LabeledText getBinaryLabel() {
+		return null;
 	}
 	
 }

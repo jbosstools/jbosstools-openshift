@@ -35,8 +35,6 @@ import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.handlers.ServerOperationHandler;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
-import org.jboss.tools.cdk.reddeer.requirements.CleanDockerExplorerRequirement.CleanDockerExplorer;
-import org.jboss.tools.cdk.reddeer.requirements.DisableSecureStorageRequirement.DisableSecureStorage;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK32ServerEditor;
@@ -58,9 +56,7 @@ import org.junit.BeforeClass;
  * @author odockal
  *
  */
-@DisableSecureStorage
 @OpenPerspective(value=JBossPerspective.class)
-@CleanDockerExplorer
 public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 
 	protected ServersView2 serversView;

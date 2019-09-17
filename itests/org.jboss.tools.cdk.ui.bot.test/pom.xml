@@ -15,13 +15,15 @@
 	<properties>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
 		<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDKAllTestsSuite</suiteClass>
-		<systemProperties>-Drd.timePeriodFactor=${rd.timePeriodFactor} -Dvagrantfile=${vagrantfile} -Ddevelopers.username=${developers.username} -Ddevelopers.password=${developers.password} -Dminishift=${minishift} -Dcdk32.minishift=${cdk32.minishift} -Dcdk.minishift=${cdk.minishift} -Dhypervisor=${hypervisor}</systemProperties>
+		<systemProperties>-Drd.timePeriodFactor=${rd.timePeriodFactor} -Dvagrantfile=${vagrantfile} -Ddevelopers.username=${developers.username} -Ddevelopers.password=${developers.password} -Dminishift=${minishift} -Dcdk32.minishift=${cdk32.minishift} -Dcdk.minishift=${cdk.minishift} -Dhypervisor=${hypervisor} -Dcrc.binary=${crc.binary} -Dcrc.secret=${crc.secret}</systemProperties>
 		<developers.username></developers.username>
 		<vagrantfile></vagrantfile>
 		<minishift></minishift>
 		<cdk32.minishift></cdk32.minishift>
 		<cdk.minishift></cdk.minishift>
 		<hypervisor></hypervisor>
+		<crc.binary></crc.binary>
+		<crc.secret></crc.secret>
 		<rd.timePeriodFactor>1.0</rd.timePeriodFactor>
 	</properties>
 	
@@ -48,6 +50,12 @@
 			<id>ui-tests</id>
 			<properties>
 				<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDKUITestsSuite</suiteClass>
+			</properties>
+		</profile>
+		<profile>
+			<id>crc-tests</id>
+			<properties>
+				<suiteClass>org.jboss.tools.cdk.ui.bot.test.CRCAllTestsSuite</suiteClass>
 			</properties>
 		</profile>
 	</profiles>

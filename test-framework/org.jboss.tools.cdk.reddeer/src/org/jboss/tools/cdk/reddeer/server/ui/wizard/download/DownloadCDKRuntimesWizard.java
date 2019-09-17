@@ -36,11 +36,16 @@ public class DownloadCDKRuntimesWizard extends WizardDialog {
 
 	@Override
 	public void finish() {
+		finish(TimePeriod.getCustom(600));
+	}
+	
+	@Override
+	public void finish(TimePeriod timeout) {
 		log.info("Finish wizard");
 		Button button = new PushButton(this, "Finish");
 		button.click();
 		new WaitUntil(new JobIsRunning(), TimePeriod.LONG, false);
-		new WaitWhile(new RuntimeIsDownloading(), TimePeriod.getCustom(600));
+		new WaitWhile(new RuntimeIsDownloading(), timeout);
 	}
 	
 	private class RuntimeIsDownloading extends AbstractWaitCondition{

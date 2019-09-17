@@ -19,6 +19,8 @@ import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKRuntimeOS;
+import org.jboss.tools.cdk.reddeer.requirements.CleanDockerExplorerRequirement.CleanDockerExplorer;
+import org.jboss.tools.cdk.reddeer.requirements.DisableSecureStorageRequirement.DisableSecureStorage;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDKServerAdapterAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
@@ -40,6 +42,8 @@ import org.junit.runner.RunWith;
  * @author odockal
  *
  */
+@DisableSecureStorage
+@CleanDockerExplorer
 @CleanOpenShiftExplorer
 @RunWith(RedDeerSuite.class)
 public abstract class CDKImageRegistryUrlAbstractTest extends CDKServerAdapterAbstractTest {

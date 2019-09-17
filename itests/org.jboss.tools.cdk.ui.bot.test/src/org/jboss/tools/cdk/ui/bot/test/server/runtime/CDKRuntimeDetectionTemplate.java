@@ -98,6 +98,7 @@ public abstract class CDKRuntimeDetectionTemplate extends CDKAbstractTest {
 		
 		RuntimeDetectionPreferencePage page = new RuntimeDetectionPreferencePage(dialog);
 		dialog.select(page);
+		page.removePathContaining(".crc");
 		page.removePathContaining(".minishift");
 		assertThat("Runtime detection prefs should have predefined jboss-runtimes path", page.getAllPaths(), hasItem(JBOSS_RUNTIMES));
 		assertThat("Runtime detection prefs should not have set .minishift in paths in this test", page.getAllPaths(), not(hasItem(DEFAULT_MINISHIFT_HOME)));

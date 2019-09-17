@@ -31,7 +31,7 @@ public class NewCDK3ServerWizardPage extends NewServerContainerWizardPage {
 	
 	public LabeledText getMinishiftBinaryLabeledText() {
 		new DefaultShell(CDKLabel.Shell.NEW_SERVER_WIZARD);
-		return new LabeledText(CDKLabel.Labels.MINISHIFT_BINARY);	
+		return new LabeledText(CDKLabel.Labels.MINISHIFT_BINARY);
 	}
 	
 	public void setMinishiftBinary(final String binary) {

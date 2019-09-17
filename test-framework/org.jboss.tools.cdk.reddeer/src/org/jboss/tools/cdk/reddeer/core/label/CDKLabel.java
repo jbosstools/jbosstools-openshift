@@ -62,6 +62,10 @@ public class CDKLabel {
 		public static final String ADD_CREDENTIAL = "Add a Credential";
 		public static final String FOLDER = "Folder: ";
 		public static final String SECURE_STORAGE = "Secure Storage";
+		public static final String CRC_PULL_SECRET_FILE = "CRC Pull Secret File: ";
+		public static final String CRC_BINARY = "CRC Binary: ";
+		public static final String CRC_PULL_SECRET_FILE_EDITOR = "Pull Secret File:";
+		public static final String CRC_BINARY_EDITOR = "crc binary file:";
 	}
 	
 	public static class Links {
@@ -70,6 +74,7 @@ public class CDKLabel {
 	
 	public static class Sections {
 		public static final String CDK_DETAILS = "CDK Details";
+		public static final String CRC_DETAILS = "CRC Details";
 		public static final String GENERAL = "General Information";
 		public static final String CREDENTIALS = "Credentials";
 	}
@@ -98,7 +103,8 @@ public class CDKLabel {
 		public static final String SERVER_TYPE_GROUP = "Red Hat JBoss Middleware"; 
 		public static final String CDK_SERVER_NAME = "Red Hat Container Development Kit 2.x"; 
 		public static final String CDK3_SERVER_NAME = "Red Hat Container Development Kit 3"; 
-		public static final String CDK32_SERVER_NAME = "Red Hat Container Development Kit 3.2+"; 
+		public static final String CDK32_SERVER_NAME = "Red Hat Container Development Kit 3.2+";
+		public static final String CRC_SERVER_NAME = "Red Hat CodeReady Containers 1.0 (Tech Preview)"; 
 		public static final String MINISHIFT_SERVER_NAME = "Minishift 1.7+"; 
 	}
 	
@@ -106,12 +112,15 @@ public class CDKLabel {
 		// page description messages
 		
 		public static final String NO_USER = "Red Hat Access credentials"; 
-		public static final String DOES_NOT_EXIST = "does not exist"; 
+		public static final String DOES_NOT_EXIST = "does not exist";
+		public static final String NOT_FILE = "is not a file"; 
 		public static final String CANNOT_RUN_PROGRAM = "Cannot run program"; 
 		public static final String NOT_EXECUTABLE = CDKUtils.IS_WINDOWS ? CANNOT_RUN_PROGRAM : "is not executable"; 
 		public static final String CHECK_MINISHIFT_VERSION = "Unknown error while checking minishift version"; 
 		public static final String NOT_COMPATIBLE = "is not compatible with this server adapter";
 		public static final String SERVER_ADAPTER_REPRESENTING = "server adapter representing";
+		public static final String SELECT_VALID_IMAGE = "Please select a valid Image";
+		public static final String SELECT_VALID_SECRET_FILE = "Please select a valid Pull Secret file.";
 	}
 	
 	public static class Others {

@@ -57,6 +57,7 @@ import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizardPage;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCRCServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewMinishiftServerWizardPage;
 
 
@@ -327,6 +328,8 @@ public final class CDKUtils {
 				return new NewCDK32ServerWizardPage(dialog);
 			case CDKLabel.Server.MINISHIFT_SERVER_NAME:
 				return new NewMinishiftServerWizardPage(dialog);
+			case CDKLabel.Server.CRC_SERVER_NAME:
+				return new NewCRCServerWizardPage(dialog);
 			default:
 				return null;
 		}
