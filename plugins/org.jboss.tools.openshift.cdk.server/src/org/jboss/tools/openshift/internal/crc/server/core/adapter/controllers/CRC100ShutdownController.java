@@ -1,20 +1,27 @@
+/******************************************************************************* 
+ * Copyright (c) 2019 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.crc.server.core.adapter.controllers;
 
 import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.IServerStatePoller2;
 import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.AbstractCDKShutdownController;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CDKLaunchUtility;
 import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Poller;
-import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
 public class CRC100ShutdownController extends AbstractCDKShutdownController {
 

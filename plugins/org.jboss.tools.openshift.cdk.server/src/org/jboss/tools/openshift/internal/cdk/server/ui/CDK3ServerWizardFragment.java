@@ -144,7 +144,7 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 	}
 
 	@Override
-	protected String findError() {
+	protected String findError(boolean toggleDecorators) {
 		// Validate credentials
 		if (shouldCreateCredentialWidgets()) {
 			if (credentials.getDomain() == null || credentials.getUser() == null) {
@@ -158,15 +158,15 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		}
 
 		// Validate home directory
-		String retString = validateHomeDirectory();
+		String retString = validateHomeDirectory(toggleDecorators);
 		if (retString != null)
 			return retString;
 
 		// Validate versions
-		return validateMinishiftVersion();
+		return validateMinishiftVersion(toggleDecorators);
 	}
 
-	protected String validateMinishiftVersion() {
+	protected String validateMinishiftVersion(boolean toggleDecorators) {
 		String ret = null;
 		if (minishiftVersionProps == null) {
 			ret = "Unknown error when checking minishift version: " + homeDir;
@@ -180,7 +180,8 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 			if (versionCompatError != null)
 				ret = versionCompatError;
 		}
-		toggleHomeDecorator(ret);
+		if( toggleDecorators )
+			toggleHomeDecorator(ret);
 		return ret;
 	}
 

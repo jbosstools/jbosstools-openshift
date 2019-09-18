@@ -1,3 +1,13 @@
+/******************************************************************************* 
+ * Copyright (c) 2019 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.crc.server.ui;
 
 import java.io.File;
@@ -38,7 +48,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		String title = "Red Hat CodeReady Containers";
 		String desc = "A server adapter representing a Red Hat CodeReady Container.";
-		String label = "crc binary: ";
+		String label = "CRC Binary: ";
 		return createComposite(parent, handle, title, desc, label);
 	}
 	protected boolean shouldCreateCredentialWidgets() {
@@ -48,12 +58,17 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 		browseHomeDirClicked(false);
 	}
 
-	protected String validateHomeDirectory() {
+	protected String validateHomeDirectory(boolean toggle) {
 		String retString = null;
 		if (homeDir == null || !(new File(homeDir)).exists()) {
-			retString = "The selected file does not exist.";
-		} 
-		toggleHomeDecorator(retString);
+			retString = "The selected CRC Binary file does not exist.";
+		} else if( !(new File(homeDir)).isFile()) {
+			retString = "The CRC Binary File selection is not a file.";
+		} else if( !(new File(homeDir)).canExecute()) {
+			retString = "The CRC Binary File selection is not executable.";
+		}
+		if( toggle )
+			toggleHomeDecorator(retString);
 		return retString;
 	}
 	@Override
@@ -122,20 +137,20 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 			pullSecretDecorator.show();
 		}
 	}
-	protected String findError() {
-		String err = super.findError();
+	protected String findError(boolean toggleDecorators) {
+		String err = super.findError(toggleDecorators);
 		if( err != null )
 			return err;
-		String pullSecretErr = validatePullSecret();
+		String pullSecretErr = validatePullSecret(toggleDecorators);
 		if( pullSecretErr != null )
 			return pullSecretErr;
 		return null;
 	}
 	
-	private String validatePullSecret() {
+	private String validatePullSecret(boolean toggleDecorators) {
 		String msg = null;
 		if(pullSecretFile == null || !(new File(pullSecretFile)).isFile() ) {
-			msg = "Please select a valid Image Pull Secret file."; 
+			msg = "Please select valid Pull Secret file."; 
 		}
 		togglePullSecretDecorator(msg);
 		return msg;
@@ -189,7 +204,12 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 			homeText.setText(newHome);
 		}
 	}
-	
+
+	@Override
+	protected void hideDecorators() {
+		homeDecorator.hide();
+		pullSecretDecorator.hide();
+	}
 
 	@Override
 	public void performFinish(IProgressMonitor monitor) throws CoreException {

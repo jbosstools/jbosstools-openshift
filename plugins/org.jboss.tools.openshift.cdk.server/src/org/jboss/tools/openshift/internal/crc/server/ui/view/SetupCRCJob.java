@@ -1,3 +1,13 @@
+/******************************************************************************* 
+ * Copyright (c) 2019 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.crc.server.ui.view;
 
 import java.io.File;
@@ -7,7 +17,6 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.Launch;
-import org.eclipse.jdt.internal.launching.sourcelookup.advanced.AdvancedSourceLookupDirector;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.util.ArgsUtil;
@@ -34,20 +43,25 @@ public class SetupCRCJob extends SetupCDKJob {
 		this.useTerminal = useTerminal;
 	}
 
+	@Override
 	protected String getContainerHome() {
 		return new File(System.getProperty("user.home"), ".crc").getAbsolutePath();
 	}
 	
+	@Override
 	protected boolean isValid() {
 		return (CRC100Server) server.loadAdapter(CRC100Server.class, new NullProgressMonitor()) != null;
 	}
 
+	@Override
 	protected String getBinaryLocation() {
 		return  BinaryUtility.CRC_BINARY.getLocation(server);
 	}
+	@Override
 	protected String getLaunchArgs() {
 		return "setup";
 	}
+	@Override
 	protected ILaunch launchSetup(IServer server) {
 		if( useTerminal) {
 			Process p = launchSetupViaTerminal(server);
