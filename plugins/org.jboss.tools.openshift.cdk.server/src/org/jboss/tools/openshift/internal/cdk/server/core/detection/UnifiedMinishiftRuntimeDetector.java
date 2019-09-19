@@ -26,9 +26,9 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.dmr.ModelNode;
 import org.jboss.tools.foundation.core.credentials.CredentialService;
+import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
-import org.jboss.tools.openshift.internal.cdk.server.core.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK32Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK3Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
@@ -194,7 +194,7 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	private boolean minishiftFileMatches(RuntimeDefinition def, IServer server) {
 		String fromServer = server.getAttribute(CDK3Server.MINISHIFT_FILE, (String) null);
 		String fromProblemResolver = (String) def.getProperty(OVERRIDE_MINISHIFT_LOCATION);
-		String fromPath = MinishiftBinaryUtility.getMinishiftLocation();
+		String fromPath = BinaryUtility.MINISHIFT_BINARY.getLocation();
 
 		// If all are null... go for it 
 		if (fromServer == null) {
@@ -282,7 +282,7 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	private String getMinishiftLoc(RuntimeDefinition runtimeDefinition) {
 		String fromDef = (String) runtimeDefinition.getProperty(OVERRIDE_MINISHIFT_LOCATION);
 		if (doesNotExist(fromDef)) {
-			return MinishiftBinaryUtility.getMinishiftLocation();
+			return BinaryUtility.MINISHIFT_BINARY.getLocation();
 		}
 		return fromDef;
 	}
@@ -290,7 +290,7 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	@Override
 	public void calculateProblems(RuntimeDefinition def) {
 		String override = (String) def.getProperty(OVERRIDE_MINISHIFT_LOCATION);
-		String minishiftLoc = MinishiftBinaryUtility.getMinishiftLocation();
+		String minishiftLoc = BinaryUtility.MINISHIFT_BINARY.getLocation();
 		if (doesNotExist(override) && doesNotExist(minishiftLoc)) {
 			RuntimeDetectionProblem p = createDetectionProblem("Set minishift binary location.",
 					"The minishift binary could not be located on the system path.", IStatus.ERROR,

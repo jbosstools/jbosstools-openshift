@@ -18,9 +18,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.ide.eclipse.as.core.server.IServerStatePoller2;
+import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
-import org.jboss.tools.openshift.internal.cdk.server.core.MinishiftBinaryUtility;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.AbstractCDKPoller;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK32Poller;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK3Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
@@ -50,7 +50,7 @@ public class CDK3ShutdownController extends AbstractCDKShutdownController {
 	}
 
 	@Override
-	protected AbstractCDKPoller getCDKPoller(IServer server) {
+	protected IServerStatePoller2 getPoller(IServer server) {
 		if (server.getServerType().getId().equals(CDK3Server.CDK_V3_SERVER_TYPE)) {
 			return new MinishiftPoller();
 		}
@@ -76,9 +76,9 @@ public class CDK3ShutdownController extends AbstractCDKShutdownController {
 		return cmd;
 	}
 
-	protected Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException {
+	protected Process call(IServer s, String args, String launchConfigName) throws CoreException, IOException {
 		CDKServer cdk = (CDKServer)getServer().loadAdapter(CDKServer.class, new NullProgressMonitor());
-		return new CDKLaunchUtility().callMinishiftInteractive(getServer(), cmd, getServer().getName(), cdk.skipUnregistration());
+		return new CDKLaunchUtility().callMinishiftInteractive(getServer(), args, getServer().getName(), cdk.skipUnregistration());
 	}
 
 	@Override
@@ -88,6 +88,6 @@ public class CDK3ShutdownController extends AbstractCDKShutdownController {
 
 	@Override
 	protected String getCommandLocation() {
-		return MinishiftBinaryUtility.getMinishiftLocation(getServer());
+		return BinaryUtility.MINISHIFT_BINARY.getLocation(getServer());
 	}
 }

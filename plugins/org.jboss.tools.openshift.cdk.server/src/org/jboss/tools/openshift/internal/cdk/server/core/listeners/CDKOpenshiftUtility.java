@@ -50,9 +50,14 @@ public class CDKOpenshiftUtility {
 	 * @return
 	 */
 	public IConnection findExistingOpenshiftConnection(IServer server, ServiceManagerEnvironment adb) {
+		return findExistingOpenshiftConnection(server, adb.openshiftHost, adb.openshiftPort);
+	}
+
+	public IConnection findExistingOpenshiftConnection(IServer server,
+			String host, int port) {
 		Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
 		for (IConnection c : connections) {
-			if (serverMatchesConnection(server, c, adb)) {
+			if (serverMatchesConnection(server, c, host, port)) {
 				return c;
 			}
 		}
@@ -67,10 +72,15 @@ public class CDKOpenshiftUtility {
 	 * @return
 	 */
 	public IConnection[] findExistingOpenshiftConnections(IServer server, ServiceManagerEnvironment adb) {
+		return findExistingOpenshiftConnections(server, adb.openshiftHost, adb.openshiftPort);
+	}
+
+	public IConnection[] findExistingOpenshiftConnections(IServer server, 
+			String host, int port) {
 		Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
 		ArrayList<IConnection> ret = new ArrayList<>();
 		for (IConnection c : connections) {
-			if (serverMatchesConnection(server, c, adb)) {
+			if (serverMatchesConnection(server, c, host, port)) {
 				ret.add(c);
 			}
 		}
@@ -78,10 +88,15 @@ public class CDKOpenshiftUtility {
 	}
 
 	public boolean serverMatchesConnection(IServer server, IConnection c, ServiceManagerEnvironment adb) {
-		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
+		return serverMatchesConnection(server, c, adb.openshiftHost, adb.openshiftPort);
+	}
+	
+	public boolean serverMatchesConnection(IServer server, IConnection c, 
+			String host, int port) {
+		String soughtHost = host + ":" + port;
 		if (c.getType() == ConnectionType.Kubernetes) {
-			String host = c.getHost();
-			if (host.equals(soughtHost)) {
+			String cHost = c.getHost();
+			if (cHost.equals(soughtHost)) {
 				return true;
 			}
 		}
@@ -109,49 +124,62 @@ public class CDKOpenshiftUtility {
 		return createOpenshiftConnection(server, env, ConnectionsRegistrySingleton.getInstance());
 	}
 
-	public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment env, ConnectionsRegistry registry) {
+	public IConnection createOpenshiftConnection(IServer server, 
+			ServiceManagerEnvironment env, ConnectionsRegistry registry) {
+		String ocLocation = getOcLocation(env, server);
+		String host = env.openshiftHost;
+		int port = env.openshiftPort;
+		String authType = env.getAuthorizationScheme();
+		String username = env.getUsername();
+		String password = env.getPassword();
+		IConnection con = createOpenshiftConnection(server, host, port, 
+				authType, username, password, ocLocation, registry);
+		setDockerRegistry(env, con, false);
+		return con;
+	}
+	public IConnection createOpenshiftConnection(IServer server, 
+			String host, int port, String authType, 
+			String username, String password, 
+			String ocLocation, ConnectionsRegistry registry) {
 
 		// Create the connection
-		String soughtHost = env.openshiftHost + ":" + env.openshiftPort;
+		String soughtHost = host + ":" + port;
 		ConnectionsFactoryTracker connectionsFactory = new ConnectionsFactoryTracker();
 		connectionsFactory.open();
 		IConnectionFactory factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
 		IConnection con = factory.create(soughtHost);
 
 		// Set some defaults
-		String authScheme = env.getAuthorizationScheme();
-		String username = env.getUsername();
-		String password = env.getPassword();
-		if (authScheme != null && !authScheme.isEmpty()) {
-			authScheme = new String("" + authScheme.charAt(0)).toUpperCase() + authScheme.substring(1);
-
-		}
-
-		((Connection) con).setAuthScheme(authScheme);
+		authType = getOrDefaultAuthType(authType);
+		((Connection) con).setAuthScheme(authType);
 		((Connection) con).setUsername(username);
 		if (password != null) {
 			((Connection) con).setPassword(password);
 		}
 		((Connection) con).setRememberPassword(true);
 
-		setOcLocation(env, con, server);
-
-		updateOpenshiftConnection(env, con, false);
-
+		if (ocLocation != null) {
+			((Connection) con).setExtendedProperty(ICommonAttributes.OC_LOCATION_KEY, ocLocation);
+			((Connection) con).setExtendedProperty(ICommonAttributes.OC_OVERRIDE_KEY, true);
+		}
 		if (registry != null)
 			registry.add(con);
 		return con;
 	}
 
-	private void setOcLocation(ServiceManagerEnvironment env, IConnection con, IServer server) {
+	private String getOrDefaultAuthType(String suggestedAuthType) {
+		if( suggestedAuthType == null || suggestedAuthType.isEmpty() || suggestedAuthType.length() <= 1) {
+			return "Basic";
+		}
+		return new String("" + suggestedAuthType.charAt(0)).toUpperCase() + suggestedAuthType.substring(1);
+	}
+	
+	private String getOcLocation(ServiceManagerEnvironment env, IServer server) {
 		String ocLocation = env.get(ServiceManagerEnvironmentLoader.OC_LOCATION_KEY);
 		if (ocLocation == null) {
 			ocLocation = findOCInMinishiftHome(server);
 		}
-		if (ocLocation != null) {
-			((Connection) con).setExtendedProperty(ICommonAttributes.OC_LOCATION_KEY, ocLocation);
-			((Connection) con).setExtendedProperty(ICommonAttributes.OC_OVERRIDE_KEY, true);
-		}
+		return ocLocation;
 	}
 
 	private String findOCInMinishiftHome(IServer server) {
@@ -173,11 +201,11 @@ public class CDKOpenshiftUtility {
 		return ocLocation;
 	}
 
-	public void updateOpenshiftConnection(ServiceManagerEnvironment env, IConnection con) {
-		updateOpenshiftConnection(env, con, true);
+	public void setDockerRegistry(ServiceManagerEnvironment env, IConnection con) {
+		setDockerRegistry(env, con, true);
 	}
 
-	public void updateOpenshiftConnection(ServiceManagerEnvironment env, IConnection con, boolean fireUpdate) {
+	public void setDockerRegistry(ServiceManagerEnvironment env, IConnection con, boolean fireUpdate) {
 		String dockerReg = env.getDockerRegistry();
 		((Connection) con).setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, dockerReg);
 		if (fireUpdate) {

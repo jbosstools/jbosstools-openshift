@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
 
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CDKLaunchUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CommandTimeoutException;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.ProcessLaunchUtility;
 
 public class MinishiftVersionLoader {
 	public static String ERROR_KEY = "properties.load.error";
@@ -18,7 +18,7 @@ public class MinishiftVersionLoader {
 	public static MinishiftVersions getVersionProperties(String commandPath) {
 		Properties ret = new Properties();
 		try {
-			String[] lines = CDKLaunchUtility.call(commandPath, new String[] { "version" },
+			String[] lines = ProcessLaunchUtility.call(commandPath, new String[] { "version" },
 					new File(commandPath).getParentFile(), new HashMap<String, String>(), 5000, false);
 
 			for (int i = 0; i < lines.length; i++) {

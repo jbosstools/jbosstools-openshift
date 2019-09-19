@@ -25,8 +25,8 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CDKLaunchUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CommandTimeoutException;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.ProcessLaunchUtility;
 
 public abstract class ServiceManagerEnvironmentLoader {
 
@@ -127,7 +127,7 @@ public abstract class ServiceManagerEnvironmentLoader {
 			throws IOException {
 		String[] lines = null;
 		try {
-			lines = CDKLaunchUtility.call(cmdLoc, args, wd, env, 30000, false);
+			lines = ProcessLaunchUtility.call(cmdLoc, args, wd, env, 30000, false);
 		} catch (IOException ce) {
 			throw ce;
 		} catch (CommandTimeoutException ce) {
@@ -156,7 +156,7 @@ public abstract class ServiceManagerEnvironmentLoader {
 			throws IOException {
 		String[] lines = null;
 		try {
-			lines = CDKLaunchUtility.call(cmdLoc, args, wd, env, 30000, false);
+			lines = ProcessLaunchUtility.call(cmdLoc, args, wd, env, 30000, false);
 		} catch (IOException ioe) {
 			throw ioe;
 		} catch (CommandTimeoutException ce) {

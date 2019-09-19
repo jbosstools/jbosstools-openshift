@@ -15,15 +15,15 @@ import java.io.IOException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.ide.eclipse.as.core.server.IServerStatePoller2;
+import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
-import org.jboss.tools.openshift.internal.cdk.server.core.VagrantBinaryUtility;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.AbstractCDKPoller;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.VagrantPoller;
 
 public class CDKShutdownController extends AbstractCDKShutdownController {
-
-	protected AbstractCDKPoller getCDKPoller(IServer server) {
+	@Override
+	protected IServerStatePoller2 getPoller(IServer server) {
 		return new VagrantPoller();
 	}
 
@@ -32,9 +32,9 @@ public class CDKShutdownController extends AbstractCDKShutdownController {
 		return cmd;
 	}
 
-	protected Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException {
+	protected Process call(IServer s, String args, String launchConfigName) throws CoreException, IOException {
 		CDKServer cdk = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
-		return new CDKLaunchUtility().callInteractive(getServer(), cmd, getServer().getName(), cdk.skipUnregistration());
+		return new CDKLaunchUtility().callInteractive(getServer(), args, getServer().getName(), cdk.skipUnregistration());
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class CDKShutdownController extends AbstractCDKShutdownController {
 
 	@Override
 	protected String getCommandLocation() {
-		return VagrantBinaryUtility.getVagrantLocation();
+		return BinaryUtility.VAGRANT_BINARY.getLocation();
 	}
 
 }

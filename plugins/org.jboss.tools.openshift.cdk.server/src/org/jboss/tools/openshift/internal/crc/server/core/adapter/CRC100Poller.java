@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2015 Red Hat, Inc. 
+ * Copyright (c) 2019 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -8,46 +8,38 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.cdk.server.core.adapter;
+package org.jboss.tools.openshift.internal.crc.server.core.adapter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.JBossServerCorePlugin;
-import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
-import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.AbstractCDKPoller;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.OpenShiftNotReadyPollingException;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CDKLaunchUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CommandTimeoutException;
-import org.jboss.tools.openshift.internal.cdk.server.core.listeners.CDKLaunchEnvironmentUtil;
 import org.jboss.tools.openshift.internal.cdk.server.core.listeners.ServiceManagerEnvironment;
 import org.jboss.tools.openshift.internal.cdk.server.core.listeners.ServiceManagerEnvironmentLoader;
 
-import com.openshift.restclient.ClientBuilder;
-import com.openshift.restclient.IClient;
-import com.openshift.restclient.ISSLCertificateCallback;
-import com.openshift.restclient.OpenShiftException;
-
-public class MinishiftPoller extends AbstractCDKPoller {
-	public MinishiftPoller() {
-
+public class CRC100Poller extends AbstractCDKPoller {
+	public CRC100Poller() {
 	}
 
 	protected void launchThread() {
-		launchThread("CDK Minishift Poller");
+		launchThread("CodeReady Containers Poller");
 	}
 
 	protected Map<String, String> createEnvironment(IServer server) {
-		return CDKLaunchEnvironmentUtil.createEnvironment(server, true);
+		return new HashMap<>();
 	}
 
 	@Override
@@ -67,11 +59,10 @@ public class MinishiftPoller extends AbstractCDKPoller {
 			throws PollingException, IOException, TimeoutException {
 
 		String[] args = new String[] { CDKConstants.VAGRANT_CMD_STATUS };
-		args = CDK32Server.getArgsWithProfile(server, args);
-		String cmdLoc = BinaryUtility.MINISHIFT_BINARY.getLocation(server);
+		String cmdLoc = CRC100Server.getCRCBinaryLocation(server);
 		try {
-			String[] lines = new CDKLaunchUtility().callMachineReadable(cmdLoc, args, getWorkingDirectory(server),
-					env);
+			String[] lines = new CDKLaunchUtility().callMachineReadable(cmdLoc, args, 
+					getWorkingDirectory(server), env);
 			IStatus stat = parseOutput(lines);
 			if (stat.isOK()) {
 				checkOpenShiftHealth(server, 4000);
@@ -98,17 +89,18 @@ public class MinishiftPoller extends AbstractCDKPoller {
 	}
 
 	protected IStatus parseOutput(String[] lines) {
-		if (lines.length == 1 && lines[0] != null) {
-			if ("Running".equals(lines[0])) {
-				// throws OpenShiftNotReadyPollingException on failure
+		if( lines != null && lines.length > 0 ) {
+			String line1 = lines[0];
+			if(line1.startsWith("CRC VM:") && line1.trim().endsWith("Running")) {
 				return Status.OK_STATUS;
 			}
-			if ("Stopped".equals(lines[0]) || "Does Not Exist".equals(lines[0])) {
-				return CDKCoreActivator.statusFactory().errorStatus("minishift status indicates the CDK is stopped.");
+			if(line1.startsWith("CRC VM:") && line1.trim().endsWith("Stopped")) {
+				return CDKCoreActivator.statusFactory()
+						.errorStatus("crc status indicates the CodeReady Container is stopped.");
 			}
 		}
 		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID,
-				"minishift status indicates the CDK is starting.");
+				"The CRC Container is starting.");
 	}
 
 	private boolean checkOpenShiftHealth(IServer server, int timeout) throws OpenShiftNotReadyPollingException {
@@ -123,25 +115,28 @@ public class MinishiftPoller extends AbstractCDKPoller {
 	}
 
 	protected boolean checkOpenShiftHealth(String url, int timeout) throws OpenShiftNotReadyPollingException {
-		ISSLCertificateCallback sslCallback = new LazySSLCertificateCallback();
-		IClient client = new ClientBuilder(url).sslCertificateCallback(sslCallback)
-				.withConnectTimeout(timeout, TimeUnit.MILLISECONDS).build();
-
-		Exception e = null;
-		try {
-			String v = client.getServerReadyStatus();
-			if ("ok".equals(v))
-				return true;
-		} catch (OpenShiftException ex) {
-			e = ex;
-		}
-
-		String msg = NLS.bind(
-				"The CDK VM is up and running, but OpenShift is unreachable at url {0}. "
-						+ "The VM may not have been registered successfully. Please check your console output for more information",
-				url);
-		throw new OpenShiftNotReadyPollingException(CDKCoreActivator.statusFactory().errorStatus(
-				CDKCoreActivator.PLUGIN_ID, msg, e, OpenShiftNotReadyPollingException.OPENSHIFT_UNREACHABLE_CODE));
+//		ISSLCertificateCallback sslCallback = new LazySSLCertificateCallback();
+//		IClient client = new ClientBuilder(url).sslCertificateCallback(sslCallback)
+//				.withConnectTimeout(timeout, TimeUnit.MILLISECONDS).build();
+//
+//		Exception e = null;
+//		try {
+//			String v = client.getServerReadyStatus();
+//			if ("ok".equals(v))
+//				return true;
+//		} catch (OpenShiftException ex) {
+//			e = ex;
+//		}
+//
+//		String msg = NLS.bind(
+//				"The CDK VM is up and running, but OpenShift is unreachable at url {0}. "
+//						+ "The VM may not have been registered successfully. Please check your console output for more information",
+//				url);
+//		throw new OpenShiftNotReadyPollingException(CDKCoreActivator.statusFactory().errorStatus(
+//				CDKCoreActivator.PLUGIN_ID, msg, e, OpenShiftNotReadyPollingException.OPENSHIFT_UNREACHABLE_CODE));
+		
+		// TODO
+		return true;
 	}
 
 }

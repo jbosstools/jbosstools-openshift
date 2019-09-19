@@ -11,10 +11,6 @@
 package org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.eclipse.core.runtime.CoreException;
@@ -29,10 +25,8 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
-import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
-import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.ide.eclipse.as.core.server.IServerStatePoller2;
 import org.jboss.ide.eclipse.as.core.server.internal.PollThread;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
 import org.jboss.ide.eclipse.as.core.util.PollThreadUtils;
@@ -50,11 +44,17 @@ import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 public abstract class AbstractCDKShutdownController extends AbstractSubsystemController
 		implements IServerShutdownController, IExternalLaunchConstants {
 
-	protected abstract AbstractCDKPoller getCDKPoller(IServer server);
+	protected IServerStatePoller2 getPoller(IServer server) {
+		return getCDKPoller(server);
+	}
+	@Deprecated
+	protected AbstractCDKPoller getCDKPoller(IServer server) {
+		return null;
+	}
 
 	protected abstract String getShutdownArgs();
 
-	protected abstract Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException;
+	protected abstract Process call(IServer s, String args, String launchConfigName) throws CoreException, IOException;
 
 	@Override
 	public IStatus canStop() {
@@ -85,7 +85,7 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 	}
 
 	protected void pollState() {
-		IStatus state = PollThreadUtils.isServerStarted(getServer(), getCDKPoller(getServer()));
+		IStatus state = PollThreadUtils.isServerStarted(getServer(), getPoller(getServer()));
 		boolean started = state.isOK();
 		if (!started) {
 			if (state.getSeverity() == IStatus.ERROR) {
@@ -160,13 +160,20 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 		processTerminated(getServer(), null);
 	}
 
+	protected ILaunchConfigurationWorkingCopy createShutdownLaunchConfiguration(ILaunchConfiguration lc, String cmd,
+			String args) throws CoreException {
+		CDKServer cdk = (CDKServer)getServer().loadAdapter(CDKServer.class, new NullProgressMonitor());
+		ILaunchConfigurationWorkingCopy lc2 = new CDKLaunchUtility().createExternalToolsLaunch(getServer(), args,
+				new Path(cmd).lastSegment(), lc, cmd, cdk.skipUnregistration());
+		return lc2;
+	}
+
 	private void shutdownViaLaunch() throws CoreException {
 		String args = getShutdownArgs();
 		String cmd = getCommandLocation();
-		CDKServer cdk = (CDKServer)getServer().loadAdapter(CDKServer.class, new NullProgressMonitor());
 		ILaunchConfiguration lc = getServer().getLaunchConfiguration(true, new NullProgressMonitor());
-		ILaunchConfigurationWorkingCopy lc2 = new CDKLaunchUtility().createExternalToolsLaunch(getServer(), args,
-				new Path(cmd).lastSegment(), lc, cmd, cdk.skipUnregistration());
+		ILaunchConfigurationWorkingCopy lc2 = createShutdownLaunchConfiguration(lc, cmd, args);
+		
 		IProcess p = null;
 		ILaunch launch = null;
 		try {
@@ -175,13 +182,14 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 			if (all.length > 0)
 				p = all[0];
 		} catch (CoreException ce) {
+			ce.printStackTrace();
 			CDKCoreActivator.pluginLog().logError(ce);
 			getBehavior().setServerStarted();
 			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, ce.getMessage(), ce));
 		}
 
 		if (p == null) {
-			getBehavior().setServerStopped();
+			getBehavior().setServerStarted();
 			throw new CoreException(
 					new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Call to shutdown command has failed."));
 		}
@@ -205,22 +213,7 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 	}
 
 	private void linkTerminal(Process p) {
-		InputStream in = p.getInputStream();
-		InputStream err = p.getErrorStream();
-		OutputStream out = p.getOutputStream();
-		Map<String, Object> properties = new HashMap<>();
-		properties.put(ITerminalsConnectorConstants.PROP_DELEGATE_ID,
-				"org.eclipse.tm.terminal.connector.streams.launcher.streams");
-		properties.put(ITerminalsConnectorConstants.PROP_TERMINAL_CONNECTOR_ID,
-				"org.eclipse.tm.terminal.connector.streams.StreamsConnector");
-		properties.put(ITerminalsConnectorConstants.PROP_TITLE, getServer().getName());
-		properties.put(ITerminalsConnectorConstants.PROP_LOCAL_ECHO, false);
-		properties.put(ITerminalsConnectorConstants.PROP_FORCE_NEW, true);
-		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDIN, out);
-		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDOUT, in);
-		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDERR, err);
-		ITerminalService service = TerminalServiceFactory.getService();
-		service.openConsole(properties, null);
+		ProcessLaunchUtility.linkTerminal(getServer(), p);
 	}
 
 	private void processTerminated(IServer server, IDebugEventSetListener listener) {
@@ -236,7 +229,7 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 				}
 
 				// Poll the server once more 
-				IStatus stat = getCDKPoller(server).getCurrentStateSynchronous(getServer());
+				IStatus stat = getPoller(server).getCurrentStateSynchronous(getServer());
 				if (stat.getSeverity() == IStatus.ERROR) {
 					beh.setServerStopped();
 					beh.setRunMode("run");

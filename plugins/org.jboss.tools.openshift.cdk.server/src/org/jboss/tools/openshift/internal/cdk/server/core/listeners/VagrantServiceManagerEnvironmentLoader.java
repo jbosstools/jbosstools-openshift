@@ -18,9 +18,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
-import org.jboss.tools.openshift.internal.cdk.server.core.VagrantBinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK32Server;
 
 public class VagrantServiceManagerEnvironmentLoader extends ServiceManagerEnvironmentLoader {
@@ -69,7 +69,7 @@ public class VagrantServiceManagerEnvironmentLoader extends ServiceManagerEnviro
 				CDKConstants.VAGRANT_CMD_SERVICE_MANAGER_ARG_ENV };
 		args = CDK32Server.getArgsWithProfile(server, args);
 
-		String cmdLoc = VagrantBinaryUtility.getVagrantLocation(server);
+		String cmdLoc = BinaryUtility.VAGRANT_BINARY.getLocation(server);
 		File wd = CDKServerUtility.getWorkingDirectory(server);
 		try {
 			HashMap<String, String> adbEnv = callAndParseEnvVar(env, args, cmdLoc, wd);

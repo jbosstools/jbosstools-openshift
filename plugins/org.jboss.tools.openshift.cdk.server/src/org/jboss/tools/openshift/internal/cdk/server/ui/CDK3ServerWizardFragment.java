@@ -25,7 +25,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.tools.as.runtimes.integration.ui.composites.DownloadRuntimeHyperlinkComposite;
-import org.jboss.tools.openshift.internal.cdk.server.core.MinishiftBinaryUtility;
+import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK3Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
 import org.jboss.tools.openshift.internal.cdk.server.core.detection.MinishiftVersionLoader;
@@ -144,7 +144,7 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 	}
 
 	@Override
-	protected String findError() {
+	protected String findError(boolean toggleDecorators) {
 		// Validate credentials
 		if (shouldCreateCredentialWidgets()) {
 			if (credentials.getDomain() == null || credentials.getUser() == null) {
@@ -158,15 +158,15 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		}
 
 		// Validate home directory
-		String retString = validateHomeDirectory();
+		String retString = validateHomeDirectory(toggleDecorators);
 		if (retString != null)
 			return retString;
 
 		// Validate versions
-		return validateMinishiftVersion();
+		return validateMinishiftVersion(toggleDecorators);
 	}
 
-	protected String validateMinishiftVersion() {
+	protected String validateMinishiftVersion(boolean toggleDecorators) {
 		String ret = null;
 		if (minishiftVersionProps == null) {
 			ret = "Unknown error when checking minishift version: " + homeDir;
@@ -180,7 +180,8 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 			if (versionCompatError != null)
 				ret = versionCompatError;
 		}
-		toggleHomeDecorator(ret);
+		if( toggleDecorators )
+			toggleHomeDecorator(ret);
 		return ret;
 	}
 
@@ -270,7 +271,7 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		if (homeDir != null) {
 			homeText.setText(homeDir);
 		} else {
-			homeDir = MinishiftBinaryUtility.getMinishiftLocation();
+			homeDir = BinaryUtility.MINISHIFT_BINARY.getLocation();
 			if (homeDir != null) {
 				homeText.setText(homeDir);
 			}

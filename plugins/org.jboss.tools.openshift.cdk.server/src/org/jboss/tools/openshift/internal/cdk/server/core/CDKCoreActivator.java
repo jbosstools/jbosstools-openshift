@@ -17,6 +17,7 @@ import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.foundation.ui.plugin.BaseUIPlugin;
 import org.jboss.tools.foundation.ui.plugin.BaseUISharedImages;
 import org.jboss.tools.openshift.internal.cdk.server.core.listeners.ConfigureDependentFrameworksListener;
+import org.jboss.tools.openshift.internal.crc.server.core.listeners.ConfigureCRCFrameworksListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -34,7 +35,8 @@ public class CDKCoreActivator extends BaseUIPlugin {
 	}
 
 	private UnitedServerListener configureDependentFrameworksListener;
-
+	private UnitedServerListener configureCRCListener;
+	
 	/*
 	 * NOT API, public only for testing
 	 */
@@ -43,6 +45,12 @@ public class CDKCoreActivator extends BaseUIPlugin {
 			configureDependentFrameworksListener = new ConfigureDependentFrameworksListener();
 		}
 		return configureDependentFrameworksListener;
+	}
+	public UnitedServerListener getConfigureCRCListener() {
+		if (configureCRCListener == null) {
+			configureCRCListener = new ConfigureCRCFrameworksListener();
+		}
+		return configureCRCListener;
 	}
 
 	/*
@@ -54,6 +62,7 @@ public class CDKCoreActivator extends BaseUIPlugin {
 		super.start(context);
 		plugin = this;
 		UnitedServerListenerManager.getDefault().addListener(getConfigureDependentFrameworksListener());
+		UnitedServerListenerManager.getDefault().addListener(getConfigureCRCListener());
 	}
 
 	/*
@@ -62,6 +71,7 @@ public class CDKCoreActivator extends BaseUIPlugin {
 	 */
 	@Override
 	public void stop(BundleContext context) throws Exception {
+		UnitedServerListenerManager.getDefault().removeListener(getConfigureCRCListener());
 		UnitedServerListenerManager.getDefault().removeListener(getConfigureDependentFrameworksListener());
 		plugin = null;
 		super.stop(context);

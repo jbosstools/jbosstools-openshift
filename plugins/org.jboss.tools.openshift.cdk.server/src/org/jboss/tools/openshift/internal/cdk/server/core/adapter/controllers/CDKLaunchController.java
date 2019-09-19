@@ -41,9 +41,9 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBeha
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.AbstractStartJavaServerLaunchDelegate;
 import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
+import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
-import org.jboss.tools.openshift.internal.cdk.server.core.VagrantBinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.AbstractCDKPoller;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServerBehaviour;
@@ -79,7 +79,7 @@ public class CDKLaunchController extends AbstractCDKLaunchController
 			env.remove(userKey);
 		}
 
-		String vLoc = VagrantBinaryUtility.getVagrantLocation(workingCopy);
+		String vLoc = BinaryUtility.VAGRANT_BINARY.getLocation(workingCopy);
 		if (vLoc != null) {
 			String vagrantCmdFolder = new Path(vLoc).removeLastSegments(1).toOSString();
 			CommandLocationLookupStrategy.get().ensureOnPath(env, vagrantCmdFolder);
@@ -118,7 +118,7 @@ public class CDKLaunchController extends AbstractCDKLaunchController
 			env.put(userKey, userName);
 			wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
 		}
-		wc.setAttribute(ATTR_LOCATION, VagrantBinaryUtility.getVagrantLocation());
+		wc.setAttribute(ATTR_LOCATION, BinaryUtility.VAGRANT_BINARY.getLocation());
 
 		String args = CDKConstants.VAGRANT_CMD_UP + " " + CDKConstants.VAGRANT_FLAG_NO_COLOR;
 		wc.setAttribute(ATTR_ARGS, args);
@@ -134,7 +134,7 @@ public class CDKLaunchController extends AbstractCDKLaunchController
 				.getControllableBehavior(configuration);
 		beh.setServerStarting();
 
-		String vagrantLoc = VagrantBinaryUtility.getVagrantLocation(s);
+		String vagrantLoc = BinaryUtility.VAGRANT_BINARY.getLocation(s);
 		if (vagrantLoc == null || !(new File(vagrantLoc).exists())) {
 			beh.setServerStopped();
 			if (vagrantLoc == null)

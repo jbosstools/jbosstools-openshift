@@ -62,7 +62,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 	@Override
 	public boolean isComplete() {
 		// Only one instance created per workspace, so we need to workaround this
-		boolean b = browseButton != null && !browseButton.isDisposed() && findError() == null && super.isComplete();
+		boolean b = browseButton != null && !browseButton.isDisposed() && findError(false) == null && super.isComplete();
 		return b;
 	}
 
@@ -172,10 +172,14 @@ public class CDKServerWizardFragment extends WizardFragment {
 	}
 
 	protected void validateAndPack(Composite main) {
-		String err = findError();
+		String err = findError(true);
 		setComplete(err == null);
 		handle.update();
 		main.pack(true);
+		hideDecorators();
+	}
+	
+	protected void hideDecorators() {
 		homeDecorator.hide();
 	}
 
@@ -197,7 +201,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 	}
 
 	protected void validate() {
-		String err = findError();
+		String err = findError(true);
 		if (err != null) {
 			handle.setMessage(err, IMessageProvider.ERROR);
 			setComplete(false);
@@ -227,26 +231,30 @@ public class CDKServerWizardFragment extends WizardFragment {
 	}
 
 	protected String findError() {
+		return findError(false);
+	}
+	protected String findError(boolean toggleDecorators) {
 		if (shouldCreateCredentialWidgets()) {
 			if (credentials.getDomain() == null || credentials.getUser() == null) {
 				return "The Container Development Environment Server Adapter requires Red Hat Access credentials.";
 			}
 		}
-		String retString = validateHomeDirectory();
+		String retString = validateHomeDirectory(toggleDecorators);
 		if (retString != null)
 			return retString;
 
 		return retString;
 	}
 
-	protected String validateHomeDirectory() {
+	protected String validateHomeDirectory(boolean toggleDecorators) {
 		String retString = null;
 		if (homeDir == null || !(new File(homeDir)).exists()) {
 			retString = "The selected folder does not exist.";
 		} else if (!(new File(homeDir, "Vagrantfile").exists())) {
 			retString = "The selected folder does not have a Vagrantfile";
 		}
-		toggleHomeDecorator(retString);
+		if( toggleDecorators)
+			toggleHomeDecorator(retString);
 		return retString;
 	}
 
