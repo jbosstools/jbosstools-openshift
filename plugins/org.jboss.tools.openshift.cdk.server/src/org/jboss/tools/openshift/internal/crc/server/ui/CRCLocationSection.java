@@ -113,7 +113,6 @@ public class CRCLocationSection extends AbstractLocationSection {
 	}
 	
 	protected void validateBinary() {
-		System.out.println("Validating");
 		String s = getBinaryErrorString();
 		if (s == null) {
 			txtDecorator.hide();
@@ -148,7 +147,7 @@ public class CRCLocationSection extends AbstractLocationSection {
 		return null;
 	}
 	protected String getPullSecretErrorString() {
-		String txt = getLocationText().getText();
+		String txt = pullSecretText.getText();
 		if( txt == null || txt.isEmpty()) {
 			return "Please select a valid pull secret file.";
 		}

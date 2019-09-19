@@ -80,27 +80,21 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 	private void configureOpenshift(IServer server) {
 		String host = "https://api.crc.testing";
 		int port = 6443;
-		String user = "kubeadmin";
-		File passwordFile = findPasswordFile(server);
+		String user = "developer";
+		String pass = "developer";
 		File oc = findOcBin(server);
 		String ocLoc = oc == null ? null : oc.getAbsolutePath();
-		String passwordContent = null;
-		if( passwordFile != null ) {
-			try {
-				passwordContent = new String(Files.readAllBytes(passwordFile.toPath())).trim();
-			} catch(IOException ioe) {
-				ioe.printStackTrace();
-			}
-		}
 
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
 		IConnection con = util.findExistingOpenshiftConnection(server, host, port);
 		if (con == null) {
 			con = util.createOpenshiftConnection(server, host, port, 
-					"Basic", user, passwordContent, ocLoc, 
+					"Basic", user, pass, ocLoc, 
 					ConnectionsRegistrySingleton.getInstance());
 		} else {
-			//util.updateOpenshiftConnection(adb, con);
+			con.setUsername(user);
+			con.setPassword(pass);
+			ConnectionsRegistrySingleton.getInstance().update(con, con);
 		}
 		if (con != null) {
 			con.connect();
@@ -116,7 +110,19 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 		return new File(bin, binName);
 	}
 
-	private File findPasswordFile(IServer server) {
+	private String getAdminPassword(IServer server) {
+		File passwordFile = findAdminPasswordFile(server);
+		String passwordContent = null;
+		if( passwordFile != null ) {
+			try {
+				passwordContent = new String(Files.readAllBytes(passwordFile.toPath())).trim();
+			} catch(IOException ioe) {
+				ioe.printStackTrace();
+			}
+		}
+		return passwordContent;
+	}
+	private File findAdminPasswordFile(IServer server) {
 		CRC100Server crc = (CRC100Server)server.loadAdapter(CRC100Server.class, new NullProgressMonitor());
 		String home = crc.getCRCHome(server);
 		File fHome = new File(home);

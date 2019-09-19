@@ -60,7 +60,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 
 	protected String validateHomeDirectory(boolean toggle) {
 		String retString = null;
-		if (homeDir == null || !(new File(homeDir)).exists()) {
+		if (homeDir == null || homeDir.isEmpty() ||  !(new File(homeDir)).exists()) {
 			retString = "The selected CRC Binary file does not exist.";
 		} else if( !(new File(homeDir)).isFile()) {
 			retString = "The CRC Binary File selection is not a file.";
@@ -149,7 +149,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 	
 	private String validatePullSecret(boolean toggleDecorators) {
 		String msg = null;
-		if(pullSecretFile == null || !(new File(pullSecretFile)).isFile() ) {
+		if(pullSecretFile == null || pullSecretFile.isEmpty() || !(new File(pullSecretFile)).isFile() ) {
 			msg = "Please select valid Pull Secret file."; 
 		}
 		togglePullSecretDecorator(msg);
