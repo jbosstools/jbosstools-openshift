@@ -13,25 +13,32 @@ package org.jboss.tools.openshift.internal.crc.server.core.listeners;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
 import org.jboss.tools.openshift.internal.cdk.server.core.listeners.CDKOpenshiftUtility;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinary;
 import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
 public class ConfigureCRCFrameworksListener extends UnitedServerListener {
+
+	private static final String CRC_HOST = "https://api.crc.testing";
+	private static final int CRC_HOST_PORT = 6443;
+	private static final String CRC_DEV_USERNAME = "developer";
+	private static final String CRC_DEV_PASSWORD = "developer";
 	private boolean enabled = true;
 
 	public void enable() {
@@ -44,10 +51,10 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 
 	@Override
 	public void serverChanged(final ServerEvent event) {
-		if (enabled && canHandleServer(event.getServer())) {
-			if (serverSwitchesToState(event, IServer.STATE_STARTED)) {
-				scheduleConfigureFrameworksJob(event);
-			}
+		if (enabled 
+				&& canHandleServer(event.getServer())
+				&& serverSwitchesToState(event, IServer.STATE_STARTED)) {
+			scheduleConfigureFrameworksJob(event);
 		}
 	}
 
@@ -55,18 +62,14 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 		new Job("Configuring CRC Openshift Connection...") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					if (canHandleServer(event.getServer()))
-						configureFrameworks(event.getServer());
-					return Status.OK_STATUS;
-				} catch (CoreException ce) {
-					return ce.getStatus();
-				}
+				if (canHandleServer(event.getServer()))
+					configureFrameworks(event.getServer());
+				return Status.OK_STATUS;
 			}
 		}.schedule(1000);
 	}
 
-	protected void configureFrameworks(IServer server) throws CoreException {
+	protected void configureFrameworks(IServer server) {
 		configureOpenshift(server);
 	}
 
@@ -78,17 +81,16 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 	}
 
 	private void configureOpenshift(IServer server) {
-		String host = "https://api.crc.testing";
-		int port = 6443;
-		String user = "developer";
-		String pass = "developer";
+		String host = CRC_HOST;
+		String user = CRC_DEV_USERNAME;
+		String pass = CRC_DEV_PASSWORD;
 		File oc = findOcBin(server);
 		String ocLoc = oc == null ? null : oc.getAbsolutePath();
 
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
-		IConnection con = util.findExistingOpenshiftConnection(server, host, port);
+		IConnection con = util.findExistingOpenshiftConnection(server, host, CRC_HOST_PORT);
 		if (con == null) {
-			con = util.createOpenshiftConnection(server, host, port, 
+			con = util.createOpenshiftConnection(server, host, CRC_HOST_PORT,
 					"Basic", user, pass, ocLoc, 
 					ConnectionsRegistrySingleton.getInstance());
 		} else {
@@ -102,12 +104,9 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 	}
 	
 	private File findOcBin(IServer server) {
-		CRC100Server crc = (CRC100Server)server.loadAdapter(CRC100Server.class, new NullProgressMonitor());
-		String home = crc.getCRCHome(server);
-		File fHome = new File(home);
-		File bin = new File(fHome, "bin");
-		String binName = Platform.getOS().equals(Platform.OS_WIN32) ? "oc.exe" : "oc";
-		return new File(bin, binName);
+		String home = getServerHome(server);
+		String ocBinaryName = OCBinary.getInstance().getName();
+		return Paths.get(home, "bin", ocBinaryName).toFile();
 	}
 
 	private String getAdminPassword(IServer server) {
@@ -117,18 +116,23 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 			try {
 				passwordContent = new String(Files.readAllBytes(passwordFile.toPath())).trim();
 			} catch(IOException ioe) {
-				ioe.printStackTrace();
+				CDKCoreActivator.pluginLog().logError(NLS.bind(
+						"Could not load password file {0}", passwordFile.getAbsolutePath()),
+						ioe);
 			}
 		}
 		return passwordContent;
 	}
 	private File findAdminPasswordFile(IServer server) {
-		CRC100Server crc = (CRC100Server)server.loadAdapter(CRC100Server.class, new NullProgressMonitor());
-		String home = crc.getCRCHome(server);
-		File fHome = new File(home);
-		File cache = new File(fHome, "cache");
+		String home = getServerHome(server);
+		File cache = Paths.get(home, "cache").toFile();
 		File passwordFile = findFile(cache, "kubeadmin-password");
 		return passwordFile;
+	}
+
+	private String getServerHome(IServer server) {
+		CRC100Server crc = (CRC100Server)server.loadAdapter(CRC100Server.class, new NullProgressMonitor());
+		return crc.getCRCHome(server);
 	}
 
 	private File findFile(File root, String name) {
