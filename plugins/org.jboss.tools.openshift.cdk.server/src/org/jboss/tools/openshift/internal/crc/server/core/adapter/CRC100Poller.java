@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.JBossServerCorePlugin;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKConstants;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.AbstractCDKPoller;
@@ -31,8 +32,6 @@ import org.jboss.tools.openshift.internal.cdk.server.core.listeners.ServiceManag
 import org.jboss.tools.openshift.internal.cdk.server.core.listeners.ServiceManagerEnvironmentLoader;
 
 public class CRC100Poller extends AbstractCDKPoller {
-	public CRC100Poller() {
-	}
 
 	protected void launchThread() {
 		launchThread("CodeReady Containers Poller");
@@ -47,7 +46,7 @@ public class CRC100Poller extends AbstractCDKPoller {
 		return TIMEOUT_BEHAVIOR_FAIL;
 	}
 
-	private File getWorkingDirectory(IServer s) throws PollingException {
+	private File getWorkingDirectory(IServer s) {
 		File f = JBossServerCorePlugin.getServerStateLocation(s).toFile();
 		if (!f.exists()) {
 			f.mkdirs();
@@ -75,7 +74,7 @@ public class CRC100Poller extends AbstractCDKPoller {
 			// it got all the output
 			List<String> inLines = vte.getInLines();
 			if (inLines != null) {
-				String[] asArr = (String[]) inLines.toArray(new String[inLines.size()]);
+				String[] asArr = inLines.toArray(new String[inLines.size()]);
 				IStatus stat = parseOutput(asArr);
 				if (stat.isOK()) {
 					checkOpenShiftHealth(server, 4000);
@@ -99,8 +98,7 @@ public class CRC100Poller extends AbstractCDKPoller {
 						.errorStatus("crc status indicates the CodeReady Container is stopped.");
 			}
 		}
-		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID,
-				"The CRC Container is starting.");
+		return StatusFactory.infoStatus(CDKCoreActivator.PLUGIN_ID, "The CRC Container is starting.");
 	}
 
 	private boolean checkOpenShiftHealth(IServer server, int timeout) throws OpenShiftNotReadyPollingException {

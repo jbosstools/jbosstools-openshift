@@ -107,6 +107,7 @@ public class CRCLocationSection extends AbstractLocationSection {
 		});
 
 	}
+
 	protected void validate() {
 		validateBinary();
 		validatePullSecret();
@@ -146,6 +147,7 @@ public class CRCLocationSection extends AbstractLocationSection {
 		}
 		return null;
 	}
+
 	protected String getPullSecretErrorString() {
 		String txt = pullSecretText.getText();
 		if( txt == null || txt.isEmpty()) {
@@ -157,7 +159,6 @@ public class CRCLocationSection extends AbstractLocationSection {
 		}
 		return null;
 	}
-
 
 	public class SetPullSecretPropertyCommand
 			extends org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyTextCommand {

@@ -27,12 +27,6 @@ public class CRC100Server extends ServerDelegate {
 	private static final String CRC_10_BASE_NAME = "CodeReady Containers 1.0";
 	public static final String PROPERTY_PULL_SECRET_FILE = "crc.pullsecret.file";
 	public static final String PROPERTY_BINARY_FILE = "crc.binary.file";
-	
-	
-	@Override
-	public void setDefaults(IProgressMonitor monitor) {
-		super.setDefaults(monitor);
-	}
 
 	public static String getServerTypeBaseName() {
 		return CRC_10_BASE_NAME;
@@ -70,9 +64,11 @@ public class CRC100Server extends ServerDelegate {
 	public String getCRCHome(IServer server) {
 		return getDefaultCRCHome();
 	}
+
 	public String getDefaultCRCHome() {
 		return new File(System.getProperty("user.home"), ".crc").getAbsolutePath();
 	}
+
 	public static String getCRCBinaryLocation(IServer server) {
 		return BinaryUtility.CRC_BINARY.getLocation(server, true, false, false);
 	}

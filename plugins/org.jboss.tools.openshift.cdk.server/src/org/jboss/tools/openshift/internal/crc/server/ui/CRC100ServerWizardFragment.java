@@ -51,9 +51,11 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 		String label = "CRC Binary: ";
 		return createComposite(parent, handle, title, desc, label);
 	}
+
 	protected boolean shouldCreateCredentialWidgets() {
 		return false;
 	}
+
 	protected void browseHomeDirClicked() {
 		browseHomeDirClicked(false);
 	}
@@ -71,6 +73,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 			toggleHomeDecorator(retString);
 		return retString;
 	}
+
 	@Override
 	protected void fillTextField() {
 		if (homeDir != null) {
@@ -82,6 +85,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 			}
 		}
 	}
+
 	protected Composite createComposite(Composite parent, IWizardHandle handle, String title, String desc,
 			String homeLabel) {
 		// boilerplate
@@ -92,6 +96,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 		validateAndPack(main);
 		return main;
 	}
+
 	protected void createSecretWidgets(Composite main) {
 
 		// Point to file / folder to run
@@ -121,6 +126,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 		pullSecretText.addModifyListener(new PullSecretModifyListener());
 		pullSecretBrowse.addSelectionListener(new PullSecretBrowseListener());
 	}
+
 	protected class PullSecretModifyListener implements ModifyListener {
 		@Override
 		public void modifyText(ModifyEvent e) {
@@ -137,6 +143,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 			pullSecretDecorator.show();
 		}
 	}
+
 	protected String findError(boolean toggleDecorators) {
 		String err = super.findError(toggleDecorators);
 		if( err != null )
@@ -155,6 +162,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 		togglePullSecretDecorator(msg);
 		return msg;
 	}
+
 	protected class PullSecretBrowseListener implements SelectionListener {
 		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
@@ -199,6 +207,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 		};
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.END, SWT.END).applyTo(hyperlink);
 	}
+
 	protected void handleDownloadedFile(String newHome) {
 		if( !homeText.isDisposed()) {
 			homeText.setText(newHome);
