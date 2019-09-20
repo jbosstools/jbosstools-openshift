@@ -76,14 +76,13 @@ public class CRC100LaunchController extends AbstractCDKLaunchController
 	protected void performOverrides(ILaunchConfigurationWorkingCopy workingCopy) throws CoreException {
 		// Overrides, things that should always match whats in server editor
 		final IServer s = getServerFromLaunch(workingCopy);
-		final CDKServer cdkServer = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());
-		performOverrides(workingCopy, s, cdkServer);
+		performOverrides(workingCopy, s);
 	}
 
 	/*
 	 * Not expected to be extended. 
 	 */
-	protected void performOverrides(ILaunchConfigurationWorkingCopy workingCopy, IServer s, CDKServer cdkServer)
+	protected void performOverrides(ILaunchConfigurationWorkingCopy workingCopy, IServer s)
 			throws CoreException {
 		String workingDir = JBossServerCorePlugin.getServerStateLocation(s).toOSString();
 		workingCopy.setAttribute(ATTR_WORKING_DIR, workingDir);
@@ -120,7 +119,7 @@ public class CRC100LaunchController extends AbstractCDKLaunchController
 	}
 
 	private void setCRCLocationOnLaunchConfig(IServer s, ILaunchConfigurationWorkingCopy workingCopy,
-			Map<String, String> env) throws CoreException {
+			Map<String, String> env) {
 		String binLoc = s.getAttribute(CRC100Server.PROPERTY_BINARY_FILE, (String) null);
 		if (binLoc != null) {
 			String cmdFolder = new Path(binLoc).removeLastSegments(1).toOSString();
@@ -152,8 +151,7 @@ public class CRC100LaunchController extends AbstractCDKLaunchController
 		return crcBin;
 	}
 	
-	private void launchCheckSetupCRC(IServer s, CRC100Server crcServer, ControllableServerBehavior beh) throws CoreException {
-		CRC100Server crc = (CRC100Server)crcServer;
+	private void launchCheckSetupCRC(IServer s, CRC100Server crc, ControllableServerBehavior beh) throws CoreException {
 		if( !crc.isInitialized()) {
 			int[] retmain = new int[1];
 			retmain[0] = -1;
