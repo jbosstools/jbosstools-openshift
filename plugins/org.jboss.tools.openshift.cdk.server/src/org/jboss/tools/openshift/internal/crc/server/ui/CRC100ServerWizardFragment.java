@@ -24,7 +24,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -35,13 +34,13 @@ import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.tools.as.runtimes.integration.ui.composites.DownloadRuntimeHyperlinkComposite;
 import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.ui.CDKServerWizardFragment;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 import org.jboss.tools.runtime.ui.wizard.DownloadRuntimesTaskWizard;
 
 public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 	private String pullSecretFile;
 	private Text pullSecretText;
-	private Button pullSecretBrowse;
 	private ControlDecoration pullSecretDecorator;
 	
 	@Override
@@ -52,14 +51,17 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 		return createComposite(parent, handle, title, desc, label);
 	}
 
+	@Override
 	protected boolean shouldCreateCredentialWidgets() {
 		return false;
 	}
 
+	@Override
 	protected void browseHomeDirClicked() {
 		browseHomeDirClicked(false);
 	}
 
+	@Override
 	protected String validateHomeDirectory(boolean toggle) {
 		String retString = null;
 		if (homeDir == null || homeDir.isEmpty() ||  !(new File(homeDir)).exists()) {
@@ -86,6 +88,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 		}
 	}
 
+	@Override
 	protected Composite createComposite(Composite parent, IWizardHandle handle, String title, String desc,
 			String homeLabel) {
 		// boilerplate
@@ -98,24 +101,23 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 	}
 
 	protected void createSecretWidgets(Composite main) {
-
 		// Point to file / folder to run
 		Label l = new Label(main, SWT.NONE);
 		l.setText("CRC Pull Secret File: ");
-		GridData pullSecretData = new GridData();
-		pullSecretData.grabExcessHorizontalSpace = true;
-		pullSecretData.horizontalAlignment = SWT.FILL;
-		pullSecretData.widthHint = 100;
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL)
+			.applyTo(l);
 		pullSecretText = new Text(main, SWT.BORDER);
-		pullSecretText.setLayoutData(pullSecretData);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.applyTo(pullSecretText);
 		
-		
-		pullSecretBrowse = new Button(main, SWT.PUSH);
+		Button pullSecretBrowse = new Button(main, SWT.PUSH);
 		pullSecretBrowse.setText("Browse...");
-		GridData browseData = new GridData();
-		browseData.grabExcessHorizontalSpace = true;
-		browseData.horizontalAlignment = SWT.FILL;
-		pullSecretBrowse.setLayoutData(browseData);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).hint(UIUtils.getDefaultButtonWidth(pullSecretBrowse), SWT.DEFAULT)
+			.applyTo(pullSecretBrowse);
+
 		pullSecretDecorator = new ControlDecoration(pullSecretText, SWT.TOP | SWT.LEFT);
 		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
@@ -144,17 +146,18 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 		}
 	}
 
+	@Override
 	protected String findError(boolean toggleDecorators) {
 		String err = super.findError(toggleDecorators);
 		if( err != null )
 			return err;
-		String pullSecretErr = validatePullSecret(toggleDecorators);
+		String pullSecretErr = validatePullSecret();
 		if( pullSecretErr != null )
 			return pullSecretErr;
 		return null;
 	}
 	
-	private String validatePullSecret(boolean toggleDecorators) {
+	private String validatePullSecret() {
 		String msg = null;
 		if(pullSecretFile == null || pullSecretFile.isEmpty() || !(new File(pullSecretFile)).isFile() ) {
 			msg = "Please select valid Pull Secret file."; 

@@ -1,3 +1,13 @@
+/******************************************************************************* 
+ * Copyright (c) 2019 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.cdk.server.ui;
 
 import java.io.File;
@@ -73,6 +83,7 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		l.setText("Register a Red Hat account <a>here</a> if you do not have one already.");
 		l.setLayoutData(GridDataFactory.fillDefaults().span(3, 1).create());
 		l.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				RuntimeUIActivator.getDefault().createRedHatAccount();
 			}
@@ -113,7 +124,6 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		Label l = new Label(main, SWT.NONE);
 		l.setText("Hypervisor:");
 		GridData comboData = new GridData();
-		comboData.grabExcessHorizontalSpace = true;
 		comboData.horizontalAlignment = SWT.FILL;
 		comboData.horizontalSpan = 2;
 		hypervisorCombo = new Combo(main, SWT.BORDER | SWT.SINGLE | SWT.READ_ONLY);
@@ -256,11 +266,7 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				minishiftVersionProps = MinishiftVersionLoader.getVersionProperties(homeDir);
-				Display.getDefault().asyncExec(new Runnable() {
-					public void run() {
-						validate();
-					}
-				});
+				Display.getDefault().asyncExec(CDK3ServerWizardFragment.this::validate);
 				return Status.OK_STATUS;
 			}
 		};

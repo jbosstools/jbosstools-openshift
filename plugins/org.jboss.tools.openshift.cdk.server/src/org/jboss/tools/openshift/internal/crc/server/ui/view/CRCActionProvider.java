@@ -19,16 +19,17 @@ import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
 public class CRCActionProvider extends CDKActionProvider {
 
+	@Override
 	protected String getSetupActionName() {
 		return "Setup CRC";
 	}
 	
+	@Override
 	protected List<String> getSetupServerTypes() {
-		return Arrays.asList(new String[] {
-				CRC100Server.CRC_100_SERVER_TYPE_ID
-		});
+		return Arrays.asList(CRC100Server.CRC_100_SERVER_TYPE_ID);
 	}
 	
+	@Override
 	protected void scheduleSetupJob(IServer server) {
 		new SetupCRCJob(server, actionSite.getViewSite().getShell()).schedule();
 	}
