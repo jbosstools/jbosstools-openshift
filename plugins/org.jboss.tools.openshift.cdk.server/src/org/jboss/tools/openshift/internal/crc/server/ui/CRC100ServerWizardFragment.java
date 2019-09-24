@@ -14,6 +14,7 @@ import java.io.File;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -160,7 +161,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 	private String validatePullSecret() {
 		String msg = null;
 		if(pullSecretFile == null || pullSecretFile.isEmpty() || !(new File(pullSecretFile)).isFile() ) {
-			msg = "Please select valid Pull Secret file."; 
+			msg = "Please select a valid Pull Secret file.\nSee https://cloud.redhat.com/openshift/install/crc/installer-provisioned for instructions."; 
 		}
 		togglePullSecretDecorator(msg);
 		return msg;
@@ -213,7 +214,12 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 
 	protected void handleDownloadedFile(String newHome) {
 		if( !homeText.isDisposed()) {
-			homeText.setText(newHome);
+			String suffix = Platform.getOS().equals(Platform.OS_WIN32) ? 
+					"crc.exe" : "crc";
+			File f = new File(newHome, suffix);
+			if( f.exists())
+				f.setExecutable(true);
+			homeText.setText(f.getAbsolutePath());
 		}
 	}
 

@@ -91,7 +91,7 @@ public class CDKActionProvider extends CommonActionProvider {
 	}
 	
 	protected void scheduleSetupJob(IServer server) {
-		new SetupCDKJob(server, actionSite.getViewSite().getShell(), true).schedule();
+		new SetupCDKJob(server, actionSite.getViewSite().getShell(), false).schedule();
 	}
 	
 	private class SetupAction extends Action {

@@ -439,6 +439,10 @@
             class="org.jboss.tools.openshift.internal.cdk.server.ui.detection.MissingMinishiftResolutionProvider"
             weight="10">
       </resolutionProvider>
+      <resolutionProvider
+            class="org.jboss.tools.openshift.internal.crc.server.ui.detection.MissingPullSecretResolutionProvider"
+            weight="10">
+      </resolutionProvider>
    </extension>
    <extension
          point="org.jboss.tools.openshift.core.connection.registryprovider">

@@ -36,6 +36,8 @@ import org.jboss.tools.openshift.internal.cdk.server.core.adapter.Minishift17Ser
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.VersionUtil;
 import org.jboss.tools.openshift.internal.cdk.server.core.detection.MinishiftVersionLoader.MinishiftVersions;
 import org.jboss.tools.openshift.internal.cdk.server.ui.detection.MissingMinishiftResolutionProvider;
+import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
+import org.jboss.tools.openshift.internal.crc.server.ui.detection.MissingPullSecretResolutionProvider;
 import org.jboss.tools.runtime.core.model.RuntimeDefinition;
 import org.jboss.tools.runtime.core.model.RuntimeDetectionProblem;
 
@@ -48,18 +50,15 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	public static final String CDK_RUNTIME_TYPE = "CDK 3.0+";
 	public static final String CDK_32_RUNTIME_TYPE = "CDK 3.2+";
 	public static final String MS_17_RUNTIME_TYPE = "Minishift 1.7+";
+	public static final String CRC_1x_RUNTIME_TYPE = "CRC 1.0";
 	
 	
 	public static final String PROP_CDK_VERSION = "cdk.version";
 	public static final String PROP_MINISHIFT_VERSION_RESPONSE = "minishift.version.response";
 	public static final String PROP_SERVER_TYPE = "minishift.definition.servertype";
 	
-	public static final String OVERRIDE_MINISHIFT_LOCATION = "OVERRIDE_MINISHIFT_LOCATION";
-
-	// Generated from whitelistGenerator.sh
-	
-	private static final Pattern WHITELIST_PATTERN = Pattern.compile("cdk-[0-9][.][0-9].*-minishift-(linux|darwin|windows)-amd64(.exe)?");
-	
+	public static final String OVERRIDE_BINARY_LOCATION = "OVERRIDE_BINARY_LOCATION";
+	private static final Pattern WHITELIST_PATTERN = Pattern.compile("(crc|cdk-[0-9][.][0-9].*-minishift-(linux|darwin|windows)-amd64)(.exe)?");
 	
 	@Override
 	public RuntimeDefinition getRuntimeDefinition(File root, IProgressMonitor monitor) {
@@ -102,10 +101,15 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 			type = MS_17_RUNTIME_TYPE;
 			serverType = CDK3Server.MINISHIFT_1_7_SERVER_TYPE;
 			vers = minishiftVersionProps.getMinishiftVersion();
+		} else if (VersionUtil.matchesCRC10(minishiftVersionProps) == null) {
+			baseName = CRC100Server.getServerTypeBaseName();
+			type = CRC_1x_RUNTIME_TYPE;
+			serverType = CRC100Server.CRC_100_SERVER_TYPE_ID;
+			vers = minishiftVersionProps.getCRCVersion();
 		}
 		RuntimeDefinition def = createDefinition(baseName, vers, type, root);
 		def.setProperty(PROP_MINISHIFT_VERSION_RESPONSE, minishiftVersionProps);
-		def.setProperty(OVERRIDE_MINISHIFT_LOCATION, minishiftPath);
+		def.setProperty(OVERRIDE_BINARY_LOCATION, minishiftPath);
 		def.setProperty(PROP_SERVER_TYPE, serverType);
 		calculateProblems(def);
 		return def;
@@ -193,7 +197,7 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	
 	private boolean minishiftFileMatches(RuntimeDefinition def, IServer server) {
 		String fromServer = server.getAttribute(CDK3Server.MINISHIFT_FILE, (String) null);
-		String fromProblemResolver = (String) def.getProperty(OVERRIDE_MINISHIFT_LOCATION);
+		String fromProblemResolver = (String) def.getProperty(OVERRIDE_BINARY_LOCATION);
 		String fromPath = BinaryUtility.MINISHIFT_BINARY.getLocation();
 
 		// If all are null... go for it 
@@ -224,7 +228,13 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 
 	@Override
 	protected void initializeServer(IServerWorkingCopy wc, RuntimeDefinition runtimeDefinition) throws CoreException {
-		if( runtimeDefinition.getProperty(PROP_MINISHIFT_VERSION_RESPONSE) != null ) {
+		
+		if( CRC_1x_RUNTIME_TYPE.equals(runtimeDefinition.getType())) {
+			String binFromDef = (String) runtimeDefinition.getProperty(OVERRIDE_BINARY_LOCATION);
+			String pullSecret = (String) runtimeDefinition.getProperty(CRC100Server.PROPERTY_PULL_SECRET_FILE);
+			wc.setAttribute(CRC100Server.PROPERTY_BINARY_FILE, binFromDef);
+			wc.setAttribute(CRC100Server.PROPERTY_PULL_SECRET_FILE, pullSecret);
+		} else if( runtimeDefinition.getProperty(PROP_MINISHIFT_VERSION_RESPONSE) != null ) {
 			// This is a definition based on a minishift binary, not a minishift home
 			String folder = runtimeDefinition.getLocation().getAbsolutePath();
 			wc.setAttribute(CDK3Server.PROP_HYPERVISOR, getHypervisor(folder));
@@ -280,7 +290,7 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	}
 
 	private String getMinishiftLoc(RuntimeDefinition runtimeDefinition) {
-		String fromDef = (String) runtimeDefinition.getProperty(OVERRIDE_MINISHIFT_LOCATION);
+		String fromDef = (String) runtimeDefinition.getProperty(OVERRIDE_BINARY_LOCATION);
 		if (doesNotExist(fromDef)) {
 			return BinaryUtility.MINISHIFT_BINARY.getLocation();
 		}
@@ -289,7 +299,27 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 
 	@Override
 	public void calculateProblems(RuntimeDefinition def) {
-		String override = (String) def.getProperty(OVERRIDE_MINISHIFT_LOCATION);
+		if( CRC_1x_RUNTIME_TYPE.equals(def.getType())) {
+			calculateCRCProblems(def);
+		} else {
+			calculateMinishiftCdkProblems(def);
+		}
+	}
+	
+	private void calculateCRCProblems(RuntimeDefinition def) {
+		def.setProblems(new RuntimeDetectionProblem[] {});
+		String pullSecret = (String)def.getProperty(CRC100Server.PROPERTY_PULL_SECRET_FILE);
+		if( pullSecret == null ) {
+			RuntimeDetectionProblem p = createDetectionProblem(
+					"Set CRC Pull Secret file.",
+					"The CRC Pull Secret file has not been set.", IStatus.ERROR,
+					MissingPullSecretResolutionProvider.PROBLEM_CRC_MISSING_PULL_SECRET);
+			def.setProblems(new RuntimeDetectionProblem[] { p });
+		}		
+	}
+
+	private void calculateMinishiftCdkProblems(RuntimeDefinition def) {
+		String override = (String) def.getProperty(OVERRIDE_BINARY_LOCATION);
 		String minishiftLoc = BinaryUtility.MINISHIFT_BINARY.getLocation();
 		if (doesNotExist(override) && doesNotExist(minishiftLoc)) {
 			RuntimeDetectionProblem p = createDetectionProblem("Set minishift binary location.",
