@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.internal.cdk.server.ui;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
@@ -48,18 +47,9 @@ public class CDK32LocationSection extends MinishiftLocationSection {
 	@Override
 	protected void addListeners() {
 		super.addListeners();
-		msProfileListener = new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				execute(new SetMinishiftProfilePropertyCommand(server));
-			}
-		};
+		msProfileListener = event -> execute(new SetMinishiftProfilePropertyCommand(server));
 		msProfileText.addModifyListener(msProfileListener);
-		msProfileText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				validate();
-			}
-		});
+		msProfileText.addModifyListener(event -> validate());
 	}
 
 	public class SetMinishiftProfilePropertyCommand
@@ -70,6 +60,7 @@ public class CDK32LocationSection extends MinishiftLocationSection {
 		}
 	}
 
+	@Override
 	protected String isVersionCompatible(MinishiftVersions versions) {
 		String cdkVers = versions.getCDKVersion();
 		if (cdkVers == null) {

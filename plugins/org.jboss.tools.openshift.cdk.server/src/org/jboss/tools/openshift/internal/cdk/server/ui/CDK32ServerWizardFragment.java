@@ -15,8 +15,6 @@ import java.io.File;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -36,6 +34,7 @@ import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDK3Server;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.VersionUtil;
 import org.jboss.tools.openshift.internal.cdk.server.core.detection.MinishiftVersionLoader.MinishiftVersions;
 import org.jboss.tools.openshift.internal.cdk.server.core.listeners.CDKServerUtility;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 	protected String profileName, minishiftHome;
@@ -70,17 +69,19 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 		Label l = new Label(main, SWT.NONE);
 		l.setText("Minishift Home:");
 		GridData homeData = new GridData();
-		homeData.grabExcessHorizontalSpace = true;
 		homeData.horizontalAlignment = SWT.FILL;
-		homeData.widthHint = 100;
 		Text msHomeText = new Text(main, SWT.SINGLE | SWT.BORDER);
 		msHomeText.setLayoutData(homeData);
 		String defMSHome = CDKServerUtility.getDefaultMinishiftHome();
 		msHomeText.setText(defMSHome);
+		GridData msHomeTextData = new GridData();
+		msHomeTextData.horizontalAlignment = SWT.FILL;
+		msHomeTextData.grabExcessHorizontalSpace = true;
+		msHomeText.setLayoutData(msHomeTextData);
 		Button msHomeBrowse = new Button(main, SWT.PUSH);
 		msHomeBrowse.setText("Browse...");
 		GridData browseData = new GridData();
-		browseData.grabExcessHorizontalSpace = true;
+		browseData.widthHint = UIUtils.getDefaultButtonWidth(msHomeBrowse);
 		browseData.horizontalAlignment = SWT.FILL;
 		msHomeBrowse.setLayoutData(browseData);
 		
@@ -92,13 +93,7 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 			}
 		};
 		msHomeBrowse.addSelectionListener(msHomeSelListener);
-		ModifyListener msHomeModListener = new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				minishiftHome = msHomeText.getText();
-			}
-		}; 
-		msHomeText.addModifyListener(msHomeModListener);
+		msHomeText.addModifyListener(event -> minishiftHome = msHomeText.getText());
 	}	
 	
 	protected void createProfileWidgets(Composite main) {
@@ -106,20 +101,21 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 		Label l = new Label(main, SWT.NONE);
 		l.setText("Minishift Profile:");
 		GridData profileData = new GridData();
-		profileData.grabExcessHorizontalSpace = true;
 		profileData.horizontalAlignment = SWT.FILL;
 		profileData.horizontalSpan = 2;
-		profileText = new Text(main, SWT.BORDER | SWT.SINGLE);
+		this.profileText = new Text(main, SWT.BORDER | SWT.SINGLE);
 		profileText.setLayoutData(profileData);
 		profileText.setText(CDK32Server.MINISHIFT_DEFAULT_PROFILE);
 		profileName = CDK32Server.MINISHIFT_DEFAULT_PROFILE;
+		GridData profileTextData = new GridData();
+		profileTextData.horizontalAlignment = SWT.FILL;
+		profileTextData.grabExcessHorizontalSpace = true;
+		profileTextData.horizontalSpan = 2;
+		profileText.setLayoutData(profileTextData);
 
-		profileText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				profileName = profileText.getText();
-				validate();
-			}
+		profileText.addModifyListener(event -> {
+			profileName = profileText.getText();
+			validate();
 		});
 	}
 
