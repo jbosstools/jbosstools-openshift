@@ -1,3 +1,13 @@
+/******************************************************************************* 
+ * Copyright (c) 2019 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.cdk.server.core.detection;
 
 import java.io.File;
@@ -15,8 +25,11 @@ import org.jboss.tools.stacks.core.model.StacksManager;
 import org.osgi.framework.Bundle;
 
 public class MinishiftDownloadRuntimesProvider extends AbstractStacksDownloadRuntimesProvider {
-	private static final String MINISHIFT_YAML_URL = "https://raw.githubusercontent.com/jboss-developer/jboss-stacks/1.0.0.Final/minishift.yaml";
+	private static final String MINISHIFT_YAML_DEFAULT_URL = "https://raw.githubusercontent.com/jboss-developer/jboss-stacks/1.0.0.Final/minishift.yaml";
 	private static final String BUNDLED_YAML = "resources/minishift.yaml";
+	private static final String URL_PROPERTY_MINISHIFT_STACKS = "org.jboss.tools.stacks.minishift.url";
+	private static final String MINISHIFT_YAML_URL = System.getProperty(URL_PROPERTY_MINISHIFT_STACKS, MINISHIFT_YAML_DEFAULT_URL);
+
 	
 	public MinishiftDownloadRuntimesProvider() {
 		// Zero-arg constructor for loading via extension pt

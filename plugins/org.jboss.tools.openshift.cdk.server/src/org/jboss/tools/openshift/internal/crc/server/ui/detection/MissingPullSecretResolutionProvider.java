@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.cdk.server.ui.detection;
+package org.jboss.tools.openshift.internal.crc.server.ui.detection;
 
 import java.io.File;
 
@@ -16,40 +16,39 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.jboss.tools.openshift.internal.cdk.server.core.detection.UnifiedMinishiftRuntimeDetector;
+import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 import org.jboss.tools.runtime.core.model.IRuntimeDetectionResolution;
 import org.jboss.tools.runtime.core.model.IRuntimeDetectionResolutionProvider;
 import org.jboss.tools.runtime.core.model.RuntimeDefinition;
 import org.jboss.tools.runtime.core.model.RuntimeDetectionProblem;
 
-public class MissingMinishiftResolutionProvider implements IRuntimeDetectionResolutionProvider {
+public class MissingPullSecretResolutionProvider implements IRuntimeDetectionResolutionProvider {
+	public static final int PROBLEM_CRC_MISSING_PULL_SECRET = 2020;
 
-	public static final int MISSING_MINISHIFT_PROBLEM_ID = 2008;
-
-	public MissingMinishiftResolutionProvider() {
+	public MissingPullSecretResolutionProvider() {
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public IRuntimeDetectionResolution[] getResolutions(RuntimeDetectionProblem problem, RuntimeDefinition def) {
-		if (problem.getCode() == MISSING_MINISHIFT_PROBLEM_ID) {
-			return new IRuntimeDetectionResolution[] { new MissingMinishiftResolution() };
+		if (problem.getCode() == PROBLEM_CRC_MISSING_PULL_SECRET) {
+			return new IRuntimeDetectionResolution[] { new MissingPullSecretResolution() };
 		}
 		return null;
 	}
-
-	public static class MissingMinishiftResolution implements IRuntimeDetectionResolution {
+	public static class MissingPullSecretResolution implements IRuntimeDetectionResolution {
 
 		@Override
 		public String getLabel() {
-			return "Set minishift binary location.";
+			return "Set CRC Pull Secret file.";
 		}
 
 		@Override
 		public void run(RuntimeDetectionProblem problem, RuntimeDefinition definition) {
 			File found = getFile(null, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 			if (found != null) {
-				definition.setProperty(UnifiedMinishiftRuntimeDetector.OVERRIDE_BINARY_LOCATION, found.getAbsolutePath());
+				definition.setProperty(CRC100Server.PROPERTY_PULL_SECRET_FILE,
+						found.getAbsolutePath());
 			}
 		}
 
@@ -69,4 +68,5 @@ public class MissingMinishiftResolutionProvider implements IRuntimeDetectionReso
 			return null;
 		}
 	}
+
 }

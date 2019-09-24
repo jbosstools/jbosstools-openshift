@@ -1,3 +1,13 @@
+/******************************************************************************* 
+ * Copyright (c) 2019 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.cdk.server.core.detection;
 
 import java.io.File;
@@ -9,12 +19,14 @@ import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.Co
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.ProcessLaunchUtility;
 
 public class MinishiftVersionLoader {
-	public static String ERROR_KEY = "properties.load.error";
-	public static String VERSION_KEY = "Minishift version";
-	public static String VERSION_KEY2 = "minishift";
-	public static String CDK_VERSION_KEY = "CDK";
-	public static String CDK_VERSION_KEY_OLD = "CDK Version";
-
+	public static final String ERROR_KEY = "properties.load.error";
+	public static final String VERSION_KEY = "Minishift version";
+	public static final String VERSION_KEY2 = "minishift";
+	public static final String CDK_VERSION_KEY = "CDK";
+	public static final String CDK_VERSION_KEY_OLD = "CDK Version";
+	public static final String CRC_VERSION_KEY = "CRC";
+	public static final String CRC_VERSION_KEY_OLD = "CRC Version";
+	
 	public static MinishiftVersions getVersionProperties(String commandPath) {
 		Properties ret = new Properties();
 		try {
@@ -76,6 +88,9 @@ public class MinishiftVersionLoader {
 			if (v.trim().startsWith("v")) {
 				return v.trim().substring(1);
 			}
+			if( v.contains("+")) {
+				v = v.substring(0, v.indexOf("+"));
+			}
 			return v.trim();
 		}
 
@@ -88,6 +103,10 @@ public class MinishiftVersionLoader {
 			return cleanVersion(v);
 		}
 
+		public String getCRCVersion() {
+			String v = p.getProperty("version");
+			return cleanVersion(v);
+		}
 		public boolean isValid() {
 			return getMinishiftVersion() != null;
 		}
