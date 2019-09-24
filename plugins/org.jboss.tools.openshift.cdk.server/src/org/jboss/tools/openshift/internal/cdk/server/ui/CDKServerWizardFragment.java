@@ -18,6 +18,7 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -25,7 +26,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -41,9 +41,9 @@ import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import org.jboss.tools.foundation.core.credentials.CredentialService;
 import org.jboss.tools.foundation.ui.credentials.ChooseCredentialComponent;
-import org.jboss.tools.foundation.ui.credentials.ICredentialCompositeListener;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 public class CDKServerWizardFragment extends WizardFragment {
 	protected IWizardHandle handle;
@@ -97,13 +97,11 @@ public class CDKServerWizardFragment extends WizardFragment {
 		// create credentials row
 		selectedUser = null;
 		credentials = new ChooseCredentialComponent(new String[] { CredentialService.REDHAT_ACCESS });
-		credentials.addCredentialListener(new ICredentialCompositeListener() {
-			@Override
-			public void credentialsChanged() {
+		credentials.addCredentialListener(() -> {
 				selectedUser = credentials.getUser();
 				validate();
 			}
-		});
+		);
 		credentials.create(main);
 		credentials.gridLayout(3);
 		selectedUser = credentials.getUser();
@@ -114,20 +112,20 @@ public class CDKServerWizardFragment extends WizardFragment {
 		// Point to file / folder to run
 		Label l = new Label(main, SWT.NONE);
 		l.setText(homeLabel);
-		GridData homeData = new GridData();
-		homeData.grabExcessHorizontalSpace = true;
-		homeData.horizontalAlignment = SWT.FILL;
-		homeData.widthHint = 100;
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(l);
 		homeText = new Text(main, SWT.BORDER);
-		homeText.setLayoutData(homeData);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.applyTo(homeText);
 		
 		
-		browseButton = new Button(main, SWT.PUSH);
+		this.browseButton = new Button(main, SWT.PUSH);
 		browseButton.setText("Browse...");
-		GridData browseData = new GridData();
-		browseData.grabExcessHorizontalSpace = true;
-		browseData.horizontalAlignment = SWT.FILL;
-		browseButton.setLayoutData(browseData);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).hint(UIUtils.getDefaultButtonWidth(browseButton), SWT.DEFAULT)
+			.applyTo(browseButton);
 
 		homeText.addModifyListener(createHomeModifyListener());
 		browseButton.addSelectionListener(createBrowseListener());
