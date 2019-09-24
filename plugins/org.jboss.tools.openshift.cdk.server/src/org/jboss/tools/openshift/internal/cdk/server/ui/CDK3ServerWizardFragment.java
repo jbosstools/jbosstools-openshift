@@ -185,14 +185,16 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		return ret;
 	}
 
-	protected String validateHomeDirectory() {
+	@Override
+	protected String validateHomeDirectory(boolean toggleDecorators) {
 		String retString = null;
 		if (homeDir == null || !(new File(homeDir)).exists()) {
 			retString = "The selected file does not exist.";
 		} else if (!(new File(homeDir).canExecute())) {
 			retString = "The selected file is not executable.";
 		}
-		toggleHomeDecorator(retString);
+		if(toggleDecorators)
+			toggleHomeDecorator(retString);
 		return retString;
 	}
 

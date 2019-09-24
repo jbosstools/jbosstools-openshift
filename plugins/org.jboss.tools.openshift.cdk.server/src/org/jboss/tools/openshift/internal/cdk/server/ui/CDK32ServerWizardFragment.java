@@ -123,6 +123,7 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 		});
 	}
 
+	@Override
 	protected String isVersionCompatible(MinishiftVersions versions) {
 		return isCDKVersionCompatible(versions);
 	}
