@@ -223,24 +223,18 @@ public class CDKActionProvider extends CommonActionProvider {
 			IViewDescriptor desc = reg.find(viewId);
 			setText(desc.getLabel());
 			setImageDescriptor(desc.getImageDescriptor());
-			serverListener = new IServerListener() {
-				@Override
-				public void serverChanged(final ServerEvent event) {
+			serverListener = event -> {
 					// If this is the server that was / is selected
 					if (previousSelection != null && previousSelection.size() > 0
 							&& previousSelection.getFirstElement().equals(event.getServer())) {
 						// and it switches state, update enablement
-						Display.getDefault().asyncExec(new Runnable() {
-							@Override
-							public void run() {
+						Display.getDefault().asyncExec(() -> {
 								if (UnitedServerListener.serverSwitchesToState(event, IServer.STATE_STARTED)) {
 									setEnabled(true);
 								} else if (UnitedServerListener.serverSwitchesToState(event, IServer.STATE_STOPPED)) {
 									setEnabled(false);
 								}
-							}
 						});
-					}
 				}
 			};
 			selectionChanged(sp.getSelection());

@@ -32,7 +32,7 @@ public class CRC100ShutdownController extends AbstractCDKShutdownController {
 
 	@Override
 	protected Process call(IServer s, String args, String launchConfigName) throws CoreException, IOException {
-		return new CDKLaunchUtility().callCRCConsole(getServer(), args, getServer().getName());
+		return new CDKLaunchUtility().callCRCConsole(getServer(), args);
 	}
 
 	@Override

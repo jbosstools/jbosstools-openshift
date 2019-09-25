@@ -43,11 +43,11 @@ public class CDK32Server extends CDK3Server {
 				profileName = CDK32Server.MINISHIFT_DEFAULT_PROFILE;
 			}
 			if (profileName != null) {
-				List<String> al = new ArrayList<String>();
+				List<String> al = new ArrayList<>();
 				al.add("--profile");
 				al.add(profileName);
 				al.addAll(Arrays.asList(args));
-				return (String[]) al.toArray(new String[al.size()]);
+				return al.toArray(new String[al.size()]);
 			}
 		}
 		return args;

@@ -252,6 +252,7 @@ public class CDKLaunchController extends AbstractCDKLaunchController
 		}
 	}
 
+	@Override
 	protected LaunchManager getLaunchManager() {
 		return (LaunchManager) DebugPlugin.getDefault().getLaunchManager();
 	}
@@ -260,6 +261,7 @@ public class CDKLaunchController extends AbstractCDKLaunchController
 		return new VagrantPoller();
 	}
 
+	@Override
 	protected void processTerminatedDelay() {
 		try {
 			// sleep to allow vagrant to unlock queries. 

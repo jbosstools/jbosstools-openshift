@@ -10,13 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugEvent;
@@ -24,11 +22,8 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.core.model.IStreamsProxy;
-import org.eclipse.debug.core.model.RuntimeProcess;
 import org.eclipse.debug.internal.core.LaunchManager;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.internal.Server;
@@ -68,10 +63,6 @@ public abstract class AbstractCDKLaunchController extends AbstractSubsystemContr
 	protected abstract void performOverrides(ILaunchConfigurationWorkingCopy workingCopy) throws CoreException;
 
 	protected abstract void initialize(ILaunchConfigurationWorkingCopy wc) throws CoreException;
-
-	@Override
-	public abstract void launch(ILaunchConfiguration configuration, String mode, ILaunch launch,
-			IProgressMonitor monitor) throws CoreException;
 
 	@Deprecated
 	protected IProcess addProcessToLaunch(Process p, ILaunch launch, IServer s) {
@@ -113,7 +104,7 @@ public abstract class AbstractCDKLaunchController extends AbstractSubsystemContr
 							&& processes[0].equals(events[i].getSource())
 							&& events[i].getKind() == DebugEvent.TERMINATE) {
 						// Register this launch as terminated
-						((LaunchManager) getLaunchManager()).fireUpdate(new ILaunch[] { launch },
+						getLaunchManager().fireUpdate(new ILaunch[] { launch },
 								LaunchManager.TERMINATE);
 						processTerminated(getServer(), processes[0], this);
 						DebugPlugin.getDefault().removeDebugEventListener(this);

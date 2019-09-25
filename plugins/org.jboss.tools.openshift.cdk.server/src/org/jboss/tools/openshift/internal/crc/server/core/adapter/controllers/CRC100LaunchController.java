@@ -187,7 +187,7 @@ public class CRC100LaunchController extends AbstractCDKLaunchController
 
 		Process p = null;
 		try {
-			p = new CDKLaunchUtility().callCRCConsole(s, args, getStartupLaunchName(s));
+			p = new CDKLaunchUtility().callCRCConsole(s, args);
 		} catch (IOException ioe) {
 			CDKCoreActivator.pluginLog().logError(ioe);
 			beh.setServerStopped();

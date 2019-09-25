@@ -12,14 +12,17 @@ package org.jboss.tools.openshift.internal.cdk.server.core.adapter;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
 
 public class CDK32Poller extends MinishiftPoller {
 
+	@Override
 	protected void launchThread() {
 		launchThread("CDK Minishift 3.2+ Poller");
 	}
 
+	@Override
 	protected IStatus parseOutput(String[] lines) {
 		for (int i = 0; i < lines.length; i++) {
 			if (lines[i] != null && lines[i].startsWith("Minishift:")) {
@@ -34,7 +37,7 @@ public class CDK32Poller extends MinishiftPoller {
 				}
 			}
 		}
-		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID,
+		return StatusFactory.infoStatus(CDKCoreActivator.PLUGIN_ID,
 				"minishift status indicates the CDK is starting.");
 	}
 }

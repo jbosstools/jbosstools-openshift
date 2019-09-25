@@ -47,6 +47,7 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 	protected IServerStatePoller2 getPoller(IServer server) {
 		return getCDKPoller(server);
 	}
+
 	@Deprecated
 	protected AbstractCDKPoller getCDKPoller(IServer server) {
 		return null;

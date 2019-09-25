@@ -29,6 +29,7 @@ public class CDK32CredentialSection extends CDKCredentialSection {
 		// TODO Auto-generated constructor stub
 	}
 
+	@Override
 	protected Composite createWidgets(Composite parent, CDKServer cdkServer, FormToolkit toolkit) {
 		Composite composite = initializeSectionWidget(parent, toolkit);
 		createChooseCredentialsWidgets(composite, toolkit);

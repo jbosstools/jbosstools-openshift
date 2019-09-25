@@ -97,12 +97,9 @@ public class CDKCredentialSection extends ServerEditorSection {
 		passCredentialsButton.addSelectionListener(passCredentialsListener);
 
 		credentialComposite = createChooseCredentialComponent(composite);
-		credentialComposite.addCredentialListener(new ICredentialCompositeListener() {
-			@Override
-			public void credentialsChanged() {
-				execute(new SetUsernameCommand(server));
-			}
-		});
+		credentialComposite.addCredentialListener(() ->
+				execute(new SetUsernameCommand(server))
+		);
 		GridDataFactory.generate(passCredentialsButton, new Point(3, 1));
 		credentialComposite.gridLayout(3);
 
@@ -120,20 +117,12 @@ public class CDKCredentialSection extends ServerEditorSection {
 		Label passEnvLabel = toolkit.createLabel(nested, "Password: ");
 		envPassText = toolkit.createText(nested, cdkServer.getPasswordEnvironmentKey(), SWT.SINGLE | SWT.BORDER);
 
-		envUserListener = new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
+		envUserListener = modifyEvent ->
 				execute(new SetUsernameVariableCommand(server));
-			}
-		};
 		envUserText.addModifyListener(envUserListener);
 
-		envPassListener = new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
+		envPassListener = modifyEvent -> 
 				execute(new SetPasswordVariableCommand(server));
-			}
-		};
 		envPassText.addModifyListener(envPassListener);
 
 		// Layout the widgets

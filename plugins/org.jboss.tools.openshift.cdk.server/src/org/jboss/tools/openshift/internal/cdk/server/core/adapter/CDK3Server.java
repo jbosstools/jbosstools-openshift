@@ -48,6 +48,7 @@ public class CDK3Server extends CDKServer {
 		return new String[] { VIRTUALBOX, VMWAREFUSION, KVM, XHYVE, HYPERV };
 	}
 
+	@Override
 	protected String getBaseName() {
 		return CDK3Server.getServerTypeBaseName();
 	}

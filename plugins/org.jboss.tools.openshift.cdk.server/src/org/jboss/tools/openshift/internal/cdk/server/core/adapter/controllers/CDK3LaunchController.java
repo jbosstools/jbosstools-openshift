@@ -74,7 +74,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 	}
 
 	// NOT API! Made public for testing purposes
-	public void initialize(ILaunchConfigurationWorkingCopy wc, String userName, IServer server) throws CoreException {
+	public void initialize(ILaunchConfigurationWorkingCopy wc, String userName, IServer server) {
 		wc.setAttribute(FLAG_INITIALIZED, true);
 		String workingDir = JBossServerCorePlugin.getServerStateLocation(server).toOSString();
 		wc.setAttribute(ATTR_WORKING_DIR, workingDir);
