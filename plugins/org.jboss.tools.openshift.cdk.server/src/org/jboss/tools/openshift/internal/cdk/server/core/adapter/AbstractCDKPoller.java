@@ -1,3 +1,13 @@
+/******************************************************************************* 
+ * Copyright (c) 2019 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.cdk.server.core.adapter;
 
 import java.io.IOException;
@@ -11,6 +21,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.IServerStatePoller2;
 import org.jboss.ide.eclipse.as.core.server.IServerStatePollerType;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
 
 public abstract class AbstractCDKPoller implements IServerStatePoller2 {
@@ -38,12 +49,7 @@ public abstract class AbstractCDKPoller implements IServerStatePoller2 {
 	protected abstract void launchThread();
 
 	protected void launchThread(String name) {
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				pollerRun();
-			}
-		},name);
+		Thread t = new Thread(this::pollerRun,name);
 		t.start();
 	}
 
@@ -100,7 +106,7 @@ public abstract class AbstractCDKPoller implements IServerStatePoller2 {
 		} catch (IOException ioe) {
 			CDKCoreActivator.pluginLog().logError(ioe.getMessage(), ioe);
 		}
-		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID,
+		return StatusFactory.infoStatus(CDKCoreActivator.PLUGIN_ID,
 				"Response status indicates " + productName() + " is starting.");
 	}
 

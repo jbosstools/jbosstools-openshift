@@ -179,7 +179,7 @@ public class CDKLaunchUtility {
 	}
 
 	
-	public Process callCRCConsole(IServer s, String args, String launchCOnfigName) 
+	public Process callCRCConsole(IServer s, String args) 
 			throws CoreException, IOException {
 		String crc = BinaryUtility.CRC_BINARY.getLocation(s);
 		File wd = new File(crc).getParentFile();

@@ -17,8 +17,8 @@ import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -129,31 +129,19 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 	}
 
 	protected void addListeners() {
-		browseListener = new SelectionListener() {
+		browseListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				locationBrowseClicked();
 				validate();
 			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
 		};
 		browse.addSelectionListener(browseListener);
 
-		locationListener = new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
+		locationListener = modifyEvent ->
 				execute(new SetLocationPropertyCommand(server));
-			}
-		};
 		location.addModifyListener(locationListener);
-		location.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				validate();
-			}
-		});
+		location.addModifyListener(modifyEvent -> validate());
 	}
 
 	protected void validate() {
