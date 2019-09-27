@@ -106,7 +106,7 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 		Label l = new Label(main, SWT.NONE);
 		l.setText("CRC Pull Secret File: ");
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL)
+			.align(SWT.FILL, SWT.CENTER)
 			.applyTo(l);
 		pullSecretText = new Text(main, SWT.BORDER);
 		GridDataFactory.fillDefaults()
