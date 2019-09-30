@@ -19,14 +19,38 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerDelegate;
+import org.jboss.ide.eclipse.as.core.util.ServerNamingUtility;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
+import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
 
 public class CRC100Server extends ServerDelegate {
 	public static final String CRC_100_SERVER_TYPE_ID = "org.jboss.tools.openshift.crc.server.type.crc.v100";
 	private static final String CRC_10_BASE_NAME = "CodeReady Containers 1.0";
 	public static final String PROPERTY_PULL_SECRET_FILE = "crc.pullsecret.file";
 	public static final String PROPERTY_BINARY_FILE = "crc.binary.file";
+
+	
+	@Override
+	public void setDefaults(IProgressMonitor monitor) {
+		getServerWorkingCopy().setHost("localhost"); //$NON-NLS-1$
+		setDefaultServerName(monitor);
+	}
+
+	/**
+	 * Initializes this server with a default server name. 
+	 * This method is called when a new server is created so that the server 
+	 * can be initialized with a name suitable to the server type. 
+	 * 
+	 * This method currently overrides a *nonexistant* upstream method, which
+	 * is only proposed in upstream bug. 
+	 * 
+	 * @param monitor a progress monitor, or <code>null</code> if progress
+	 *    reporting and cancellation are not desired
+	 */
+	public void setDefaultServerName(IProgressMonitor monitor) {
+		getServerWorkingCopy().setName(ServerNamingUtility.getDefaultServerName(getBaseName()));
+	}
 
 	public static String getServerTypeBaseName() {
 		return CRC_10_BASE_NAME;
