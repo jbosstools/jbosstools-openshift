@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.core.connection;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 import com.openshift.restclient.OpenShiftException;
@@ -55,8 +56,21 @@ public interface IOpenShiftConnection extends IConnection {
 	 */
 	<T extends IResource> T getResource(String kind, String namespace, String name);
 
-	@Override
-	String getUsername();
+	/**
+	 * Returns the url to the console (web frontend) for this (server) connection.
+	 * 
+	 * @param monitor
+	 * @return
+	 */
+	String getConsoleURL(IProgressMonitor monitor);
+
+    /**
+     * Returns the url to resource in the console (web frontend) for this (server) connection.
+     * 
+     * @param monitor
+     * @return
+     */
+	<R extends IResource> String getConsoleURL(R resource, IProgressMonitor monitor);
 
 	/**
 	 * Map of extended properties for
