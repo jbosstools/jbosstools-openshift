@@ -47,7 +47,6 @@ import org.jboss.ide.eclipse.as.wtp.core.server.launch.AbstractStartJavaServerLa
 import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.CDKCoreActivator;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.AbstractCDKPoller;
-import org.jboss.tools.openshift.internal.cdk.server.core.adapter.CDKServer;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.AbstractCDKLaunchController;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.CDKLaunchUtility;
 import org.jboss.tools.openshift.internal.cdk.server.core.adapter.controllers.IExternalLaunchConstants;
@@ -111,8 +110,9 @@ public class CRC100LaunchController extends AbstractCDKLaunchController
 	}
 
 	protected CRC100Server getCRCServer(IServer server) {
-		return (CRC100Server)server.loadAdapter(CRC100Server.class, new NullProgressMonitor());
+		return (CRC100Server) server.loadAdapter(CRC100Server.class, new NullProgressMonitor());
 	}
+
 	protected String getCRCHome(IServer server) {
 		CRC100Server s1 = getCRCServer(server);
 		return s1 == null ? null : s1.getCRCHome(server);
@@ -234,7 +234,6 @@ public class CRC100LaunchController extends AbstractCDKLaunchController
 		IProcess process = addProcessToLaunch(p, launch, s, false, minishiftLoc);
 		beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, process);
 	}
-
 
 	@Override
 	protected void processTerminatedDelay() {

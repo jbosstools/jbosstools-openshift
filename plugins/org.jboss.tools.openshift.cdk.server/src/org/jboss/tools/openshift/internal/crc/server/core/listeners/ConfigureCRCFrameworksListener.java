@@ -35,7 +35,7 @@ import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
 public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 
-	private static final String CRC_HOST = "https://api.crc.testing";
+	private static final String CRC_HOST_URL = "https://api.crc.testing";
 	private static final int CRC_HOST_PORT = 6443;
 	private static final String CRC_DEV_USERNAME = "developer";
 	private static final String CRC_DEV_PASSWORD = "developer";
@@ -81,7 +81,7 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 	}
 
 	private void configureOpenshift(IServer server) {
-		String host = CRC_HOST;
+		String host = CRC_HOST_URL;
 		String user = CRC_DEV_USERNAME;
 		String pass = CRC_DEV_PASSWORD;
 		File oc = findOcBin(server);

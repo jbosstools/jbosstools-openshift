@@ -49,6 +49,7 @@ import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.authorization.IAuthorizationContext;
 import com.openshift.restclient.authorization.UnauthorizedException;
 import com.openshift.restclient.capability.ICapability;
+import com.openshift.restclient.capability.server.IConsole;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IResourceBuilder;
 
@@ -358,6 +359,16 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	public boolean isDefaultHost() {
 		// TODO: implement
 		return false;
+	}
+
+	@Override
+	public String getConsoleURL(IProgressMonitor monitor) {
+		return client.adapt(IConsole.class).getConsoleUrl();
+	}
+
+	@Override
+	public <R extends IResource> String getConsoleURL(R resource, IProgressMonitor monitor) {
+		return client.adapt(IConsole.class).getConsoleUrl(resource);
 	}
 
 	@Override
