@@ -39,6 +39,7 @@ public class OpenShiftResources {
 	 * the template that creates a basic nodejs service
 	 */
 	public static final String NODEJS_TEMPLATE = "https://raw.githubusercontent.com/sclorg/nodejs-ex/master/openshift/templates/nodejs.json";
+	public static final String NODEJS_TEMPLATE_OS4 = "resources/os4templates/nodejs.json";
 	public static final String NODEJS_SERVICE = "nodejs-example";
 	public static final String NODEJS_APP_REPLICATION_CONTROLLER = "nodejs-example-1";
 	public static final String NODEJS_APP_DEPLOYMENT_CONFIG = "nodejs-example";
