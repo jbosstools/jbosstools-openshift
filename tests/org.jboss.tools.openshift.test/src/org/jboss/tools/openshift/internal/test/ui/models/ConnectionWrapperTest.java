@@ -12,10 +12,8 @@ import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.core.WatchManager;
 import org.jboss.tools.openshift.internal.core.WatchManager.WatchListener;
 import org.jboss.tools.openshift.internal.ui.models.ConnectionWrapper;
-import org.jboss.tools.openshift.internal.ui.models.IExceptionHandler;
 import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
 import org.jboss.tools.openshift.internal.ui.models.ProjectWrapper;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,8 +56,8 @@ public class ConnectionWrapperTest {
 		when(this.resource.getNamespaceName()).thenReturn(NAMESPACE);
 		when(this.resource.getProject()).thenReturn(project);
 
-		this.watchListener = new WatchListenerTestable(WatchManager.getInstance(), project, connection, ResourceKind.BUILD_CONFIG, 0,
-				0);
+		this.watchListener = new WatchListenerTestable(
+				WatchManager.getInstance(), project, connection, ResourceKind.BUILD_CONFIG, 0, 0);
 
 		watchListener.setState("CONNECTED");
 	}

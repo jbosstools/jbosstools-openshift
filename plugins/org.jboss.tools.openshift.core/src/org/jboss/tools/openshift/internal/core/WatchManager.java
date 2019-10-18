@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -39,13 +39,23 @@ import com.openshift.restclient.model.IResource;
 
 public class WatchManager {
 
+	public static final String[] KINDS = new String[] { 
+			ResourceKind.BUILD,
+			ResourceKind.BUILD_CONFIG,
+			ResourceKind.DEPLOYMENT_CONFIG,
+			ResourceKind.EVENT,
+			ResourceKind.IMAGE_STREAM,
+			ResourceKind.POD,
+			ResourceKind.REPLICATION_CONTROLLER,
+			ResourceKind.ROUTE,
+			ResourceKind.PVC,
+			ResourceKind.SERVICE,
+			ResourceKind.TEMPLATE,
+			ResourceKind.PROJECT };
+
 	private static final int[] FIBONACCI = new int[] { 0, 1, 1, 2, 3, 5, 8, 13, 21 };
 	private static final long BACKOFF_MILLIS = 5000;
 	private static final long BACKOFF_RESET = FIBONACCI[FIBONACCI.length - 1] * BACKOFF_MILLIS * 2;
-	public static final String[] KINDS = new String[] { ResourceKind.BUILD, ResourceKind.BUILD_CONFIG,
-			ResourceKind.DEPLOYMENT_CONFIG, ResourceKind.EVENT, ResourceKind.IMAGE_STREAM, ResourceKind.POD,
-			ResourceKind.REPLICATION_CONTROLLER, ResourceKind.ROUTE, ResourceKind.PVC, ResourceKind.SERVICE,
-			ResourceKind.TEMPLATE, ResourceKind.PROJECT };
 
 	/**
 	 * A map storing relation between Openshift projects and related watcher.
@@ -81,18 +91,18 @@ public class WatchManager {
 		for (String kind : KINDS) {
 			if (watches.putIfAbsent(new WatchKey(connection, project, kind), watcherRef) == null) {
 				WatchListener listener = new WatchListener(project, connection, kind, 0, 0);
-				startWatch(project, 0, 0, listener);
+				startWatch(0, 0, listener);
 			}
 		}
 	}
 
-	private void startWatch(final IProject project, int backoff, long lastConnect, WatchListener listener) {
+	private void startWatch(int backoff, long lastConnect, WatchListener listener) {
 		if (listener == null)
 			return;
 		listener.start(backoff, lastConnect);
 	}
 
-	protected static enum State {
+	protected enum State {
 		STARTING, CONNECTED, DISCONNECTED, STOPPING
 	}
 
@@ -135,18 +145,21 @@ public class WatchManager {
 			if (connection == null) {
 				if (other.connection != null)
 					return false;
-			} else if (!connection.equals(other.connection))
+			} else if (!connection.equals(other.connection)) {
 				return false;
+			}
 			if (project == null) {
 				if (other.project != null)
 					return false;
-			} else if (!project.equals(other.project))
+			} else if (!project.equals(other.project)) {
 				return false;
+			}
 			if (kind == null) {
 				if (other.kind != null)
 					return false;
-			} else if (!kind.equals(other.kind))
+			} else if (!kind.equals(other.kind)) {
 				return false;
+			}
 			return true;
 		}
 	}
@@ -216,12 +229,12 @@ public class WatchManager {
 			try {
 				// TODO enhance fix to only check project once
 				conn.refresh(project);
-				Trace.debug("WatchManager Rescheduling watch job for project {0} and kind {1}", project.getName(),
-						kind);
-				startWatch(project, backoff, lastConnect, this);
-			} catch (Exception e) {
-				Trace.debug("WatchManager Unable to rescheduling watch job for project {0} and kind {1}", e,
+				Trace.debug("WatchManager Rescheduling watch job for project {0} and kind {1}", 
 						project.getName(), kind);
+				startWatch(backoff, lastConnect, this);
+			} catch (Exception e) {
+				Trace.debug("WatchManager Unable to rescheduling watch job for project {0} and kind {1}", 
+						e, project.getName(), kind);
 				stopWatch(project, conn);
 			}
 		}
@@ -244,48 +257,48 @@ public class WatchManager {
 					if (backoff >= FIBONACCI.length) {
 						Trace.info("Exceeded backoff attempts trying to reconnect watch for {0} and kind {1}",
 								project.getName(), kind);
-						watches.remove(project);
+						WatchKey key = new WatchKey(conn, project, kind);
+						watches.remove(key);
 						state.set(State.DISCONNECTED);
 						return Status.OK_STATUS;
 					}
 					final long delay = FIBONACCI[backoff] * BACKOFF_MILLIS;
-					Trace.debug("Delaying watch restart by {0}ms for project {1} and kinds {2} ", delay,
+					Trace.debug("Delaying watch restart by {0}ms for project {1} and kind {2} ", delay,
 							project.getName(), kind);
 					new RestartWatchJob(client).schedule(delay);
 				}
 				return Status.OK_STATUS;
 			}
 
+			private void connect(IClient client) {
+				WatchKey key = new WatchKey(conn, project, kind);
+				if (watches.containsKey(key)) {
+					AtomicReference<IWatcher> watcherRef = watches.get(key);
+					watcherRef.set(client.watch(project.getName(), WatchListener.this, kind));
+					state.set(State.CONNECTED);
+					lastConnect = System.currentTimeMillis();
+				}
+			}
 		}
 
 		public void start(int backoff, long lastConnect) {
-			if (state.getAndSet(State.STARTING) == State.STARTING) {
-				Trace.debug("In the process of starting watch already.  Returning early");
+			if (State.STARTING == state.getAndSet(State.STARTING)) {
+				Trace.debug("In the process of starting watch already. Returning early.");
 				return;
 			}
 			this.backoff = backoff;
 			this.lastConnect = lastConnect;
-			Trace.info("Starting watch on project {0} for kind {1}", project.getName(), kind);
+			Trace.info("Starting watch on project {0} for kind(s) {1}.", project.getName(), kind);
 			IClient client = getClientFor(project);
 			if (client != null) {
 				new RestartWatchJob(client).schedule();
 			}
 		}
 
-		private void connect(IClient client) {
-			WatchKey key = new WatchKey(conn, project, kind);
-			if (watches.containsKey(key)) {
-				AtomicReference<IWatcher> watcherRef = watches.get(key);
-				watcherRef.set(client.watch(project.getName(), this, kind));
-				state.set(State.CONNECTED);
-				lastConnect = System.currentTimeMillis();
-			}
-		}
-
 		private IClient getClientFor(IProject project) {
 			IClient client = ResourceUtils.getClient(project);
 			if (client == null) {
-				Trace.warn("Unable to start watch.  Project {0} does not support IClientCapability", null,
+				Trace.warn("Unable to start watch. Project {0} does not support IClientCapability", null,
 						project.getName());
 			}
 			return client;
@@ -294,25 +307,26 @@ public class WatchManager {
 		@Override
 		public void received(IResource resource, ChangeType change) {
 			Trace.debug("Watch received change in {0} state\n{1}", state, resource.toJson(false));
-			if (State.CONNECTED == state.get()) {
-				IResource newItem = null;
-				IResource oldItem = null;
-				int index = resources.indexOf(resource);
-				if (ChangeType.ADDED.equals(change)) {
-					resources.add(resource);
-					newItem = resource;
-				} else if (ChangeType.DELETED.equals(change)) {
-					oldItem = index > NOT_FOUND ? resources.remove(index) : resource;
-				} else if (ChangeType.MODIFIED.equals(change)) {
-					if (index > NOT_FOUND) {
-						oldItem = resources.remove(index);
-					}
-					resources.add(resource);
-					newItem = resource;
-				}
-				ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn,
-						ConnectionProperties.PROPERTY_RESOURCE, oldItem, newItem);
+			if (State.CONNECTED != state.get()) {
+				return;
 			}
+			IResource newItem = null;
+			IResource oldItem = null;
+			int index = resources.indexOf(resource);
+			if (ChangeType.ADDED.equals(change)) {
+				resources.add(resource);
+				newItem = resource;
+			} else if (ChangeType.DELETED.equals(change)) {
+				oldItem = index > NOT_FOUND ? resources.remove(index) : resource;
+			} else if (ChangeType.MODIFIED.equals(change)) {
+				if (index > NOT_FOUND) {
+					oldItem = resources.remove(index);
+				}
+				resources.add(resource);
+				newItem = resource;
+			}
+			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn,
+					ConnectionProperties.PROPERTY_RESOURCE, oldItem, newItem);
 		}
 
 	}
@@ -326,8 +340,10 @@ public class WatchManager {
 			}
 			Connection conn = (Connection) connection;
 			synchronized (watches) {
-				watches.keySet().stream().filter(k -> k.connection.equals(conn)).collect(Collectors.toList())
-						.forEach(k -> stopWatch(k.project, k.connection));
+				watches.keySet().stream()
+				.filter(k -> k.connection.equals(conn))
+				.collect(Collectors.toList())
+				.forEach(k -> stopWatch(k.project, k.connection));
 			}
 		}
 
@@ -336,7 +352,7 @@ public class WatchManager {
 	/**
 	 * Use it for test purposes only
 	 */
-	public Map<?,?> _getWatches() {
+	public Map<WatchKey, AtomicReference<IWatcher>>_getWatches() {
 	    return this.watches;
 	}
 }
