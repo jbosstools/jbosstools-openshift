@@ -42,11 +42,11 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 	private boolean enabled = true;
 
 	public void enable() {
-		enabled = true;
+		this.enabled = true;
 	}
 
 	public void disable() {
-		enabled = false;
+		this.enabled = false;
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 	}
 
 	protected void configureFrameworks(IServer server) {
-		configureOpenshift(server);
+		configureOpenShiftConnection(server);
 	}
 
 	@Override
@@ -80,19 +80,17 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 		return valid.contains(server.getServerType().getId());
 	}
 
-	private void configureOpenshift(IServer server) {
+	private void configureOpenShiftConnection(IServer server) {
 		String host = CRC_HOST_URL;
 		String user = CRC_DEV_USERNAME;
 		String pass = CRC_DEV_PASSWORD;
-		File oc = findOcBin(server);
-		String ocLoc = oc == null ? null : oc.getAbsolutePath();
+		String ocLoc = getOcLocation(server);
 
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
-		IConnection con = util.findExistingOpenshiftConnection(server, host, CRC_HOST_PORT);
+		IConnection con = util.findExistingOpenshiftConnection(host, CRC_HOST_PORT);
 		if (con == null) {
-			con = util.createOpenshiftConnection(server, host, CRC_HOST_PORT,
-					"Basic", user, pass, ocLoc, 
-					ConnectionsRegistrySingleton.getInstance());
+			con = util.createOpenshiftConnection(
+					host, CRC_HOST_PORT, "Basic", user, pass, ocLoc, ConnectionsRegistrySingleton.getInstance());
 		} else {
 			con.setUsername(user);
 			con.setPassword(pass);
@@ -101,6 +99,11 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 		if (con != null) {
 			con.connect();
 		}
+	}
+
+	private String getOcLocation(IServer server) {
+		File oc = findOcBin(server);
+		return oc == null ? null : oc.getAbsolutePath();
 	}
 	
 	private File findOcBin(IServer server) {

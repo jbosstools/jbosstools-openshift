@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2016-2018 Red Hat, Inc.
+ * Copyright (c) 2016-2019 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -50,14 +50,13 @@ public class CDKOpenshiftUtility {
 	 * @return
 	 */
 	public IConnection findExistingOpenshiftConnection(IServer server, ServiceManagerEnvironment adb) {
-		return findExistingOpenshiftConnection(server, adb.openshiftHost, adb.openshiftPort);
+		return findExistingOpenshiftConnection(adb.openshiftHost, adb.openshiftPort);
 	}
 
-	public IConnection findExistingOpenshiftConnection(IServer server,
-			String host, int port) {
+	public IConnection findExistingOpenshiftConnection(String host, int port) {
 		Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
 		for (IConnection c : connections) {
-			if (serverMatchesConnection(server, c, host, port)) {
+			if (serverMatchesConnection(c, host, port)) {
 				return c;
 			}
 		}
@@ -80,19 +79,18 @@ public class CDKOpenshiftUtility {
 		Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
 		ArrayList<IConnection> ret = new ArrayList<>();
 		for (IConnection c : connections) {
-			if (serverMatchesConnection(server, c, host, port)) {
+			if (serverMatchesConnection(c, host, port)) {
 				ret.add(c);
 			}
 		}
 		return ret.toArray(new IConnection[ret.size()]);
 	}
 
-	public boolean serverMatchesConnection(IServer server, IConnection c, ServiceManagerEnvironment adb) {
-		return serverMatchesConnection(server, c, adb.openshiftHost, adb.openshiftPort);
+	public boolean serverMatchesConnection(IConnection c, ServiceManagerEnvironment adb) {
+		return serverMatchesConnection(c, adb.openshiftHost, adb.openshiftPort);
 	}
 	
-	public boolean serverMatchesConnection(IServer server, IConnection c, 
-			String host, int port) {
+	public boolean serverMatchesConnection(IConnection c, String host, int port) {
 		String soughtHost = host + ":" + port;
 		if (c.getType() == ConnectionType.Kubernetes) {
 			String cHost = c.getHost();
@@ -132,13 +130,13 @@ public class CDKOpenshiftUtility {
 		String authType = env.getAuthorizationScheme();
 		String username = env.getUsername();
 		String password = env.getPassword();
-		IConnection con = createOpenshiftConnection(server, host, port, 
+		IConnection con = createOpenshiftConnection(host, port, 
 				authType, username, password, ocLocation, registry);
 		setDockerRegistry(env, con, false);
 		return con;
 	}
-	public IConnection createOpenshiftConnection(IServer server, 
-			String host, int port, String authType, 
+
+	public IConnection createOpenshiftConnection(String host, int port, String authType, 
 			String username, String password, 
 			String ocLocation, ConnectionsRegistry registry) {
 
@@ -171,7 +169,7 @@ public class CDKOpenshiftUtility {
 		if( suggestedAuthType == null || suggestedAuthType.isEmpty() || suggestedAuthType.length() <= 1) {
 			return "Basic";
 		}
-		return new String("" + suggestedAuthType.charAt(0)).toUpperCase() + suggestedAuthType.substring(1);
+		return Character.toUpperCase(suggestedAuthType.charAt(0)) + suggestedAuthType.substring(1);
 	}
 	
 	private String getOcLocation(ServiceManagerEnvironment env, IServer server) {
