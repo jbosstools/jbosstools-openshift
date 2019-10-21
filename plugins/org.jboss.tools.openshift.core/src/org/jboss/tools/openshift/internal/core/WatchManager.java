@@ -43,14 +43,14 @@ public class WatchManager {
 			ResourceKind.BUILD,
 			ResourceKind.BUILD_CONFIG,
 			ResourceKind.DEPLOYMENT_CONFIG,
-			ResourceKind.EVENT,
+			//ResourceKind.EVENT,
 			ResourceKind.IMAGE_STREAM,
 			ResourceKind.POD,
 			ResourceKind.REPLICATION_CONTROLLER,
 			ResourceKind.ROUTE,
-			ResourceKind.PVC,
+			//ResourceKind.PVC,
 			ResourceKind.SERVICE,
-			ResourceKind.TEMPLATE,
+			//ResourceKind.TEMPLATE,
 			ResourceKind.PROJECT };
 
 	private static final int[] FIBONACCI = new int[] { 0, 1, 1, 2, 3, 5, 8, 13, 21 };
