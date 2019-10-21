@@ -1,3 +1,13 @@
+/******************************************************************************* 
+ * Copyright (c) 2017-2019 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.cdk.server.core.registry;
 
 import org.eclipse.core.runtime.IStatus;
@@ -15,7 +25,8 @@ import org.jboss.tools.openshift.internal.cdk.server.core.listeners.ServiceManag
 import org.jboss.tools.openshift.internal.cdk.server.core.listeners.ServiceManagerEnvironmentLoader.NullEnvironmentLoader;
 
 public class CDKRegistryProvider implements IConnectionRegistryProvider {
-	private class Pair {
+
+	private static class Pair {
 		private MultiStatus ms;
 		private IServer s;
 
@@ -54,7 +65,7 @@ public class CDKRegistryProvider implements IConnectionRegistryProvider {
 				continue;
 			}
 
-			if (!util.serverMatchesConnection(all[i], connection, env)) {
+			if (!util.serverMatchesConnection(connection, env)) {
 				ms.add(util.serverConnectionMatchError(all[i], connection, env));
 				continue;
 			}
