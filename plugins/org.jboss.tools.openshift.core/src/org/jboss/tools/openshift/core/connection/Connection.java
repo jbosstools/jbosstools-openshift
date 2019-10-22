@@ -47,6 +47,8 @@ import com.openshift.restclient.ISSLCertificateCallback;
 import com.openshift.restclient.NotFoundException;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.authorization.IAuthorizationContext;
+import com.openshift.restclient.authorization.IAuthorizationDetails;
+import com.openshift.restclient.authorization.ResourceForbiddenException;
 import com.openshift.restclient.authorization.UnauthorizedException;
 import com.openshift.restclient.capability.ICapability;
 import com.openshift.restclient.capability.server.IConsole;
@@ -235,19 +237,27 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	protected boolean authorize() {
 		try {
 			IAuthorizationContext context = loadAuthorizationContext();
-			if (!context.isAuthorized() && credentialsPrompter != null && promptCredentialsEnabled) {
+			if (!context.isAuthorized() && isEnablePromptCredentials() && credentialsPrompter != null) {
 				credentialsPrompter.promptAndAuthenticate(this, null);
 			} else {
 				updateCredentials(context);
 			}
-		} catch (UnauthorizedException e) {
+		} catch (UnauthorizedException | ResourceForbiddenException e) {
 			if (isEnablePromptCredentials() && credentialsPrompter != null) {
-				credentialsPrompter.promptAndAuthenticate(this, e.getAuthorizationDetails());
+				credentialsPrompter.promptAndAuthenticate(this, getAuthorizationDetails(e));
 			} else {
 				throw e;
 			}
 		}
 		return getToken() != null;
+	}
+
+	private IAuthorizationDetails getAuthorizationDetails(OpenShiftException e) {
+		IAuthorizationDetails authDetails = null;
+		if (e instanceof UnauthorizedException) {
+			authDetails = ((UnauthorizedException) e).getAuthorizationDetails();
+		}
+		return authDetails;
 	}
 
 	private IAuthorizationContext loadAuthorizationContext() {
@@ -269,8 +279,8 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		// not using getters here because for save there should be no reason
 		// to trigger a load from storage.
 		if (IAuthorizationContext.AUTHSCHEME_BASIC.equals(getAuthScheme())) {
-			boolean success = saveOrClear(SECURE_STORAGE_PASSWORD_KEY, client.getAuthorizationContext().getPassword(),
-					isRememberPassword());
+			boolean success = saveOrClear(
+					SECURE_STORAGE_PASSWORD_KEY, client.getAuthorizationContext().getPassword(), isRememberPassword());
 			if (success) {
 				//Avoid second secure storage prompt.
 				// Password is stored, token should be cleared.

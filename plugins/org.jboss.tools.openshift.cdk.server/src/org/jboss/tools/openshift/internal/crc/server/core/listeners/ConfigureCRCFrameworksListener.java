@@ -33,12 +33,15 @@ import org.jboss.tools.openshift.internal.cdk.server.core.listeners.CDKOpenshift
 import org.jboss.tools.openshift.internal.core.ocbinary.OCBinary;
 import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
+import com.openshift.restclient.authorization.IAuthorizationContext;
+
 public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 
 	private static final String CRC_HOST_URL = "https://api.crc.testing";
 	private static final int CRC_HOST_PORT = 6443;
 	private static final String CRC_DEV_USERNAME = "developer";
 	private static final String CRC_DEV_PASSWORD = "developer";
+
 	private boolean enabled = true;
 
 	public void enable() {
@@ -81,24 +84,23 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 	}
 
 	private void configureOpenShiftConnection(IServer server) {
-		String host = CRC_HOST_URL;
-		String user = CRC_DEV_USERNAME;
-		String pass = CRC_DEV_PASSWORD;
-		String ocLoc = getOcLocation(server);
+		String ocLocation = getOcLocation(server);
 
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
-		IConnection con = util.findExistingOpenshiftConnection(host, CRC_HOST_PORT);
-		if (con == null) {
-			con = util.createOpenshiftConnection(
-					host, CRC_HOST_PORT, "Basic", user, pass, ocLoc, ConnectionsRegistrySingleton.getInstance());
-		} else {
-			con.setUsername(user);
-			con.setPassword(pass);
-			ConnectionsRegistrySingleton.getInstance().update(con, con);
+		IConnection connection = util.findExistingOpenshiftConnection(CRC_HOST_URL, CRC_HOST_PORT);
+		if (connection != null) {
+			ConnectionsRegistrySingleton.getInstance().remove(connection);
 		}
-		if (con != null) {
-			con.connect();
-		}
+		connection = util.createOpenshiftConnection(
+				CRC_HOST_URL,
+				CRC_HOST_PORT,
+				IAuthorizationContext.AUTHSCHEME_BASIC, 
+				CRC_DEV_USERNAME,
+				CRC_DEV_PASSWORD,
+				ocLocation,
+				ConnectionsRegistrySingleton.getInstance());
+		connection.enablePromptCredentials(false);
+		connection.connect();
 	}
 
 	private String getOcLocation(IServer server) {
