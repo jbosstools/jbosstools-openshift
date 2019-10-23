@@ -106,7 +106,7 @@ public class CDKServer extends DefaultServer {
 		// decide if we wait for SSL acceptance dialog
 		if ((actualState == ServerState.STOPPING || actualState == ServerState.STOPPED) 
 				&& !getCertificatedAccepted()) {
-			new WaitUntil(waitConditions, TimePeriod.getCustom(900));
+			new WaitUntil(waitConditions, TimePeriod.getCustom(1200));
 		}
 		new WaitUntil(new ServerHasState(this, resultState), timeout);
 		waitForProblemDialog(waitConditions, menuItem, TimePeriod.DEFAULT);

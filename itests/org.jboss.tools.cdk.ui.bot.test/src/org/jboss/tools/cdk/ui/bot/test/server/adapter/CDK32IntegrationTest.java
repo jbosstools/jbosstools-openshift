@@ -63,7 +63,7 @@ public class CDK32IntegrationTest extends CDKServerAdapterAbstractTest {
 	public void testCDK32ServerAdapter() {
 		serverRequirement.configureCDKServerAdapter(false);
 		// cdk start verification
-		startServerAdapter(getCDKServer(), () -> {}, false);
+		startServerAdapter(getCDKServer(), () -> addParamsToCDKLaunchConfig(getCDKServer(), MINISHIFT_CONFIG_OPTIMAL), false);
 		// cdk inner rhel image was registered during starting of server adapter
 		CDKTestUtils.verifyConsoleContainsRegEx("\\bRegistering.*subscription-manager\\b"); 
 		// commented out due to https://issues.jboss.org/browse/CDK-270

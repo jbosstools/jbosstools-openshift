@@ -15,8 +15,10 @@ import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.core.server.ServerAdapter;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
+import org.jboss.tools.cdk.reddeer.requirements.DisableSecureStorageRequirement.DisableSecureStorage;
 import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
 
+@DisableSecureStorage
 @RemoveCDKServers
 @ContainerRuntimeServer(
 		version = CDKVersion.CDK3100,
