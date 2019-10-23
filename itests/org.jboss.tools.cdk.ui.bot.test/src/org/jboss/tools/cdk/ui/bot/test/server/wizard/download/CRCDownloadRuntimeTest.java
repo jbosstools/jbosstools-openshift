@@ -40,7 +40,7 @@ public class CRCDownloadRuntimeTest extends DownloadContainerRuntimeAbstractTest
 
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_CRC_RD;
+		return SERVER_ADAPTER_CRC;
 	}
 
 	@Test

@@ -45,12 +45,12 @@ public class CRCServerWizardTest extends CDKServerWizardAbstractTest {
 	
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_CRC_RD;
+		return SERVER_ADAPTER_CRC;
 	}
 	
 	@Test
 	public void testCRCServerType() {
-		assertServerType(CDKLabel.Server.CRC_SERVER_NAME, SERVER_ADAPTER_CRC_RD);
+		assertServerType(CDKLabel.Server.CRC_SERVER_NAME, SERVER_ADAPTER_CRC);
 	}
 	
 	@Test

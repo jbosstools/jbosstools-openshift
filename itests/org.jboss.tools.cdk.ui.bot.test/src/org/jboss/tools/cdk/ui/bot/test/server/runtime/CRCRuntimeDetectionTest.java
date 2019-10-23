@@ -28,7 +28,7 @@ import org.jboss.tools.cdk.ui.bot.test.CDKAbstractTest;
 		version = CDKVersion.CRC100,
 		createServerAdapter=false,
 		useExistingBinaryInProperty="crc.binary",
-		adapterName = CDKAbstractTest.SERVER_ADAPTER_CRC_RD)
+		adapterName = CDKAbstractTest.SERVER_ADAPTER_CRC)
 public class CRCRuntimeDetectionTest extends CDKRuntimeDetectionTemplate {
 
 	@InjectRequirement
