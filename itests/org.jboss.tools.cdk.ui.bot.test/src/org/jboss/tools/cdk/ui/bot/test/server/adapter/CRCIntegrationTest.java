@@ -94,6 +94,7 @@ public class CRCIntegrationTest extends CDKServerAdapterAbstractTest {
 		}
 		connection.select();
 		handleSSLDialog();
+		connection.refresh(TimePeriod.getCustom(120));
 		CDKTestUtils.testOpenshiftConnection(connection);
 		// should be addad after crc ga
 		//restartServerAdapter(getCDKServer());

@@ -113,7 +113,7 @@ public class CDKTestUtils {
 		log.info("Performing test of OS 3 connection: " + connection.getTreeItem().getText());
 		// usually, when server adapter is not started, openshift connection after refresh should cause 
 		// problem occurred dialog
-		connection.refresh();
+		connection.refresh(TimePeriod.getCustom(120));
 		try {
 			new WaitUntil(new ShellIsAvailable(CDKLabel.Shell.PROBLEM_DIALOG), TimePeriod.getCustom(30)); 
 			CDKUtils.captureScreenshot("CDKServerAdapterAbstractTest#testOpenshiftConnection"); 
