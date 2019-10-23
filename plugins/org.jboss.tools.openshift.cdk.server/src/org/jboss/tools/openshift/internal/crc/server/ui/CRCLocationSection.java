@@ -149,15 +149,7 @@ public class CRCLocationSection extends AbstractLocationSection {
 	}
 
 	protected String getPullSecretErrorString() {
-		String txt = pullSecretText.getText();
-		if( txt == null || txt.isEmpty()) {
-			return "Please select a valid pull secret file.";
-		}
-		File f = new File(txt);
-		if( !f.isFile()) {
-			return "Please select a valid pull secret file.";
-		}
-		return null;
+		return CRC100ServerWizardFragment.validatePullSecret(pullSecretText.getText());
 	}
 
 	public class SetPullSecretPropertyCommand
