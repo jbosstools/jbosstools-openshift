@@ -104,7 +104,7 @@ public class MinishiftVersionLoader {
 		}
 
 		public String getCRCVersion() {
-			String v = p.getProperty("version");
+			String v = p.getProperty("crc version");
 			return cleanVersion(v);
 		}
 		public boolean isValid() {
