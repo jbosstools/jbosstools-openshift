@@ -11,6 +11,10 @@
 package org.jboss.tools.openshift.internal.crc.server.ui;
 
 import java.io.File;
+import java.io.IOError;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,6 +42,7 @@ import org.jboss.tools.openshift.internal.cdk.server.ui.CDKServerWizardFragment;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 import org.jboss.tools.runtime.ui.wizard.DownloadRuntimesTaskWizard;
+import org.json.*;
 
 public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 	private String pullSecretFile;
@@ -159,12 +164,46 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 	}
 	
 	private String validatePullSecret() {
+		String msg = validatePullSecret(pullSecretFile);
+		togglePullSecretDecorator(msg);
+		return msg;
+
+	}
+	
+	public static String validatePullSecret(String pullSecretFile) {
 		String msg = null;
 		if(pullSecretFile == null || pullSecretFile.isEmpty() || !(new File(pullSecretFile)).isFile() ) {
 			msg = "Please select a valid Pull Secret file.\nSee https://cloud.redhat.com/openshift/install/crc/installer-provisioned for instructions."; 
+		} else if( !new File(pullSecretFile).canRead()) {
+			msg = "Pull Secret file is not readable."; 
+		} else {
+			try {
+				String content = new String(Files.readAllBytes(Paths.get(pullSecretFile)));
+				if( !isJSONValid(content)) {
+					msg = "Pull Secret file is not valid JSON.";
+				}
+			} catch(IOException ioe) {
+				msg = ioe.getMessage();
+			}
 		}
-		togglePullSecretDecorator(msg);
+		
 		return msg;
+	}
+	
+
+	private static boolean isJSONValid(String test) {
+	    try {
+	        new JSONObject(test);
+	    } catch (JSONException ex) {
+	        // edited, to include @Arthur's comment
+	        // e.g. in case JSONArray is valid as well...
+	        try {
+	            new JSONArray(test);
+	        } catch (JSONException ex1) {
+	            return false;
+	        }
+	    }
+	    return true;
 	}
 
 	protected class PullSecretBrowseListener implements SelectionListener {
