@@ -56,6 +56,9 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	protected static final String EXISTING_PATH = System.getProperty("user.dir"); 
 	protected static final String NON_EXISTING_PATH = EXISTING_PATH + separator + "some_random_filename"; 
 	protected static final String NON_EXECUTABLE_FILE = getProjectAbsolutePath("resources/non-executable"); 
+	protected static final String NON_READABLE_FILE = getProjectAbsolutePath("resources/non-readable");
+	protected static final String INVALID_JSON = getProjectAbsolutePath("resources/invalid.json");
+	protected static final String VALID_JSON = getProjectAbsolutePath("resources/valid.json");
 	protected static final String EXECUTABLE_FILE = getProjectAbsolutePath("resources/" + (CDKUtils.IS_WINDOWS ? "executable.bat" : "executable.sh"));		   
 	
 	private static Logger log = Logger.getLogger(CDKServerWizardAbstractTest.class);

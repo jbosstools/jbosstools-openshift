@@ -104,7 +104,7 @@ public class CDKLabel {
 		public static final String CDK_SERVER_NAME = "Red Hat Container Development Kit 2.x"; 
 		public static final String CDK3_SERVER_NAME = "Red Hat Container Development Kit 3"; 
 		public static final String CDK32_SERVER_NAME = "Red Hat Container Development Kit 3.2+";
-		public static final String CRC_SERVER_NAME = "Red Hat CodeReady Containers 1.0 (Tech Preview)"; 
+		public static final String CRC_SERVER_NAME = "Red Hat CodeReady Containers 1.0"; 
 		public static final String MINISHIFT_SERVER_NAME = "Minishift 1.7+"; 
 	}
 	
@@ -121,6 +121,8 @@ public class CDKLabel {
 		public static final String SERVER_ADAPTER_REPRESENTING = "server adapter representing";
 		public static final String SELECT_VALID_IMAGE = "Please select a valid Image";
 		public static final String SELECT_VALID_SECRET_FILE = "Please select a valid Pull Secret file.";
+		public static final String INVALID_SECRET_FILE_JSON = "Pull Secret file is not valid JSON";
+		public static final String NON_READABLE_SECRET_FILE = "Pull Secret file is not readable";
 	}
 	
 	public static class Others {

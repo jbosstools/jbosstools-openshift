@@ -96,11 +96,20 @@ public class CRCServerWizardTest extends CDKServerWizardAbstractTest {
 		assertSameMessage(dialog, CDKLabel.Messages.SELECT_VALID_SECRET_FILE);	
 		// validation of non executable file
 		// Will be covered by JBIDE-26878
-		//containerPage.setCRCPullServerFile(NON_EXECUTABLE_FILE);
-		//assertSameMessage(dialog, CDKLabel.Messages.SELECT_VALID_SECRET_FILE);
+		containerPage.setCRCPullServerFile(NON_EXECUTABLE_FILE);
+		assertSameMessage(dialog, CDKLabel.Messages.INVALID_SECRET_FILE_JSON);
+		// validation of non-readable
+		containerPage.setCRCPullServerFile(NON_READABLE_FILE);
+		assertSameMessage(dialog, CDKLabel.Messages.NON_READABLE_SECRET_FILE);
 		//validation of invalid secret file (not a json)
-		//containerPage.setCRCPullServerFile(EXECUTABLE_FILE);
-		//assertSameMessage(dialog, CDKLabel.Messages.SELECT_VALID_SECRET_FILE);		
+		containerPage.setCRCPullServerFile(EXECUTABLE_FILE);
+		assertSameMessage(dialog, CDKLabel.Messages.INVALID_SECRET_FILE_JSON);	
+		// invalid json
+		containerPage.setCRCPullServerFile(INVALID_JSON);
+		assertSameMessage(dialog, CDKLabel.Messages.INVALID_SECRET_FILE_JSON);
+		// valid json - but wrong pull secret
+		containerPage.setCRCPullServerFile(VALID_JSON);
+		assertSameMessage(dialog, CDKLabel.Messages.SERVER_ADAPTER_REPRESENTING);	
 		// valid secret file
 		containerPage.setCRCPullServerFile(CRC_SECRET_FILE);
 		assertSameMessage(dialog, CDKLabel.Messages.SERVER_ADAPTER_REPRESENTING);
