@@ -153,6 +153,16 @@ public class CDKServer extends DefaultServer {
 		}
 		CDKUtils.captureScreenshot("CDEServer#ProblemDialog#" + shellDialog.getText()); 
 		new OkButton(shellDialog).click();
+		/*
+		 *  Workaround for https://issues.jboss.org/browse/JBIDE-26915
+		 *  Suppress throwing the exception when error contains 
+		 *  Error contacting OpenShift
+		 *	The CDK VM is up and running, ...
+		 */
+		if (dialogText.contains("The CDK VM is up and running, but OpenShift is unreachable")) {
+			log.error("Suppressing error dialog that was caused by JBIDE-26915");
+			return;
+		}
 		throw new CDKServerException(excMessage + dialogText);
 	}
 	

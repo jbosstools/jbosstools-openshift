@@ -13,6 +13,8 @@ package org.jboss.tools.cdk.ui.bot.test.server.wizard;
 import static org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils.assertSameMessage;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
@@ -35,9 +37,9 @@ public class CRCServerWizardTest extends CDKServerWizardAbstractTest {
 	private static String CRC_PATH;
 	
 	@BeforeClass
-	public static void setupCDK3ServerEditorTest() {	
+	public static void setupCDK3ServerEditorTest() {
 		if (CRC_BINARY == null) {	
-			// nothing
+			// you can use mock crc in this branch
 		} else {	
 			CRC_PATH = CRC_BINARY;	
 		}
@@ -99,11 +101,13 @@ public class CRCServerWizardTest extends CDKServerWizardAbstractTest {
 		containerPage.setCRCPullServerFile(NON_EXECUTABLE_FILE);
 		assertSameMessage(dialog, CDKLabel.Messages.INVALID_SECRET_FILE_JSON);
 		// validation of non-readable
+		File non_readable = new File(NON_READABLE_FILE);
+		non_readable.setReadable(false);
 		containerPage.setCRCPullServerFile(NON_READABLE_FILE);
 		assertSameMessage(dialog, CDKLabel.Messages.NON_READABLE_SECRET_FILE);
 		//validation of invalid secret file (not a json)
 		containerPage.setCRCPullServerFile(EXECUTABLE_FILE);
-		assertSameMessage(dialog, CDKLabel.Messages.INVALID_SECRET_FILE_JSON);	
+		assertSameMessage(dialog, CDKLabel.Messages.INVALID_SECRET_FILE_JSON);
 		// invalid json
 		containerPage.setCRCPullServerFile(INVALID_JSON);
 		assertSameMessage(dialog, CDKLabel.Messages.INVALID_SECRET_FILE_JSON);

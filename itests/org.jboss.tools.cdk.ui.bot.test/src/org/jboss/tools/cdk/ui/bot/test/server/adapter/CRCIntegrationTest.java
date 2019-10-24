@@ -20,6 +20,7 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
+import org.eclipse.reddeer.requirements.securestorage.SecureStorageRequirement.DisableSecureStorage;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.CancelButton;
@@ -36,6 +37,7 @@ import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCRCServerWizardPage;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,6 +47,8 @@ import org.junit.Test;
  * @author odockal
  *
  */
+@DisableSecureStorage
+@CleanOpenShiftExplorer
 @RemoveCDKServers
 public class CRCIntegrationTest extends CDKServerAdapterAbstractTest {
 
@@ -95,10 +99,11 @@ public class CRCIntegrationTest extends CDKServerAdapterAbstractTest {
 		connection.select();
 		handleSSLDialog();
 		connection.refresh(TimePeriod.getCustom(120));
+		connection.expand();
 		CDKTestUtils.testOpenshiftConnection(connection);
 		// should be addad after crc ga
-		//restartServerAdapter(getCDKServer());
-		//CDKTestUtils.testOpenshiftConnection(null, OPENSHIFT_CONNECTION);
+		restartServerAdapter(getCDKServer());
+		CDKTestUtils.testOpenshiftConnection(null, OPENSHIFT_CONNECTION);
 		stopServerAdapter(getCDKServer());
 	}	
 	

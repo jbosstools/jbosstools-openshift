@@ -44,7 +44,7 @@ public class CRCServerEditorTest extends CDKServerEditorAbstractTest {
 	@BeforeClass
 	public static void setupCRCerverEditorTest() {
 		if (CRC_BINARY == null) {	
-			// nothing yet
+			// nothing yet - for mock crc
 		} else {	
 			CRC_PATH = CRC_BINARY;	
 		}
