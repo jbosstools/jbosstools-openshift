@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2018 Red Hat, Inc. 
+ * Copyright (c) 2019 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -15,24 +15,28 @@ import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.core.server.ServerAdapter;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
-import org.jboss.tools.cdk.reddeer.requirements.DisableSecureStorageRequirement.DisableSecureStorage;
 import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
+import org.jboss.tools.cdk.ui.bot.test.CDKAbstractTest;
 
-@DisableSecureStorage
+/**
+ * Test case covering CRC runtime detection.
+ * @author odockal
+ *
+ */
 @RemoveCDKServers
 @ContainerRuntimeServer(
-		version = CDKVersion.CDK3100,
-		usernameProperty="developers.username",
-		passwordProperty="developers.password",
+		version = CDKVersion.CRC100,
 		createServerAdapter=false,
-		useExistingBinaryInProperty="cdk32.minishift")
-public class CDK32RuntimeDetectionTest extends CDKRuntimeDetectionTemplate {
+		useExistingBinaryInProperty="crc.binary",
+		adapterName = CDKAbstractTest.SERVER_ADAPTER_CRC)
+public class CRCRuntimeDetectionTest extends CDKRuntimeDetectionTemplate {
 
 	@InjectRequirement
-	private static ContainerRuntimeServerRequirement serverRequirement;
+	private static ContainerRuntimeServerRequirement serverRequirement;	
 	
 	@Override
 	public ServerAdapter getServerAdapter() {
 		return serverRequirement.getServerAdapter();
 	}
+
 }

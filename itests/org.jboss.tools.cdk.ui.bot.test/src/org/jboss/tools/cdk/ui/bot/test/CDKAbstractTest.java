@@ -18,7 +18,6 @@ import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKHypervisor;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 public abstract class CDKAbstractTest {
 
@@ -27,12 +26,14 @@ public abstract class CDKAbstractTest {
 	public static final String SERVER_ADAPTER_3 = "Container Development Environment 3";
 	public static final String SERVER_ADAPTER_32 = "Container Development Environment 3.2+";
 	public static final String SERVER_ADAPTER_MINISHIFT = "Minishift 1.7+";
+	public static final String SERVER_ADAPTER_CRC = "CodeReady Containers 1.0";
 
 	// General parameters
 	public static final String FOLDER = CDKUtils.IS_LINUX ? "linux" : (CDKUtils.IS_WINDOWS ? "win" : "mac");
 	public static final String separator = System.getProperty("file.separator");
 	public static final String MINISHIFT_CONFIG_MINIMAL = " --disk-size 5GB --memory 2GB --cpus 1";
-	public static final String MINISHIFT_CONFIG_OPTIMAL = " --memory 4GB --cpus 2";
+	public static final String MINISHIFT_CONFIG_DEFAULT = " --memory 4GB --cpus 2";
+	public static final String MINISHIFT_CONFIG_OPTIMAL = " --memory 6GB --cpus 3";
 	public static final String SKIP_REGISTRATION = "--skip-registration";
 	public static final String RUNTIMES_DIRECTORY = System.getProperty("user.dir") + separator + "runtimes";
 
@@ -54,7 +55,10 @@ public abstract class CDKAbstractTest {
 	public static final String MINISHIFT;
 	public static final String CDK_MINISHIFT;
 	public static final String CDK32_MINISHIFT;
+	public static final String CRC_BINARY;
 	public static final String DEFAULT_MINISHIFT_HOME;
+	public static final String DEFAULT_CRC_HOME;
+	public static final String CRC_SECRET_FILE;
 
 	static {
 		USERNAME = CDKUtils.getSystemProperty("developers.username");
@@ -62,13 +66,16 @@ public abstract class CDKAbstractTest {
 		MINISHIFT = CDKUtils.getSystemProperty("minishift");
 		CDK_MINISHIFT = CDKUtils.getSystemProperty("cdk.minishift");
 		CDK32_MINISHIFT = CDKUtils.getSystemProperty("cdk32.minishift");
+		CRC_BINARY = CDKUtils.getSystemProperty("crc.binary");
 		MINISHIFT_HYPERVISOR = CDKUtils.getSystemProperty("hypervisor");
 		DEFAULT_MINISHIFT_HOME = System.getProperty("user.home") + separator + ".minishift";
+		DEFAULT_CRC_HOME = System.getProperty("user.home") + separator + ".crc";
+		CRC_SECRET_FILE = System.getProperty("crc.secret");
 	}
 
 	public static String assignMinishiftHypervisor() {
 		String prop = CDKUtils.getSystemProperty("hypervisor");
-		return StringUtils.isEmptyOrNull(prop) ? CDKHypervisor.getDefaultHypervisor().toString() : prop;
+		return prop == null || prop.isEmpty() ? CDKHypervisor.getDefaultHypervisor().toString() : prop;
 	}
 
 	public static void checkCDKParameters() {
@@ -86,6 +93,13 @@ public abstract class CDKAbstractTest {
 	public static void checkCDK32Parameters() {
 		Map<String, String> dict = new HashMap<>();
 		dict.put("CDK 3.2+ path", CDK32_MINISHIFT);
+		CDKTestUtils.checkParameterNotNull(dict);
+	}
+	
+	public static void checkCRCParameters() {
+		Map<String, String> dict = new HashMap<>();
+		dict.put("CDK 3.2+ path", CRC_BINARY);
+		dict.put("CDK 3.2+ path", CRC_SECRET_FILE);
 		CDKTestUtils.checkParameterNotNull(dict);
 	}
 

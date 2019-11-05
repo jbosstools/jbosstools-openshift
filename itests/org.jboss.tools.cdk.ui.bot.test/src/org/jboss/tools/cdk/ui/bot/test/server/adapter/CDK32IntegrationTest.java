@@ -10,8 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.ui.bot.test.server.adapter;
 
+import org.eclipse.linuxtools.docker.reddeer.requirements.CleanDockerExplorerRequirement.CleanDockerExplorer;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.securestorage.SecureStorageRequirement.DisableSecureStorage;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
@@ -28,10 +30,12 @@ import org.junit.runner.RunWith;
  * @author odockal
  *
  */
+@DisableSecureStorage
+@CleanDockerExplorer
 @CleanOpenShiftExplorer
 @RemoveCDKServers
 @ContainerRuntimeServer(
-		version = CDKVersion.CDK390,
+		version = CDKVersion.CDK3100,
 		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		usernameProperty="developers.username",
@@ -59,7 +63,7 @@ public class CDK32IntegrationTest extends CDKServerAdapterAbstractTest {
 	public void testCDK32ServerAdapter() {
 		serverRequirement.configureCDKServerAdapter(false);
 		// cdk start verification
-		startServerAdapter(getCDKServer(), () -> {}, false);
+		startServerAdapter(getCDKServer(), () -> addParamsToCDKLaunchConfig(getCDKServer(), MINISHIFT_CONFIG_OPTIMAL), false);
 		// cdk inner rhel image was registered during starting of server adapter
 		CDKTestUtils.verifyConsoleContainsRegEx("\\bRegistering.*subscription-manager\\b"); 
 		// commented out due to https://issues.jboss.org/browse/CDK-270

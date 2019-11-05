@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2018 Red Hat, Inc. 
+ * Copyright (c) 2019 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.editor;
 
+import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.swt.api.Button;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
@@ -17,32 +18,27 @@ import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 /**
- * Class representing CDK 2.x Server Editor page
+ * 
  * @author odockal
  *
  */
-public class CDK2ServerEditor extends MinishiftServerEditor implements CredentialsPart {
+public interface CRCPart {
 	
-	public CDK2ServerEditor(String title) {
-		super(title);
+	public DefaultSection getCDKDefaultSection();
+	
+	public default LabeledText getCRCBinary() {
+		return new LabeledText(getCDKDefaultSection(), CDKLabel.Labels.CRC_BINARY_EDITOR);
+	}	
+
+	public default LabeledText getCRCPullSecretFile() {
+		return new LabeledText(getCDKDefaultSection(), CDKLabel.Labels.CRC_PULL_SECRET_FILE_EDITOR);
 	}
 
-	public LabeledText getVagrantfileLocation() {
-		return new LabeledText(getCDKSection(), CDKLabel.Labels.VAGRANTFILE_LOCATION);
+	public default Button getCRCBinaryBrowseButton() {
+		return new PushButton(getCDKDefaultSection(), 0, new WithTextMatcher(CDKLabel.Buttons.BROWSE));
 	}
 	
-	public Button getVagrantfileBrowse() {
-		return new PushButton(getCDKSection(), CDKLabel.Buttons.BROWSE);
-	}
-
-	@Override
-	public DefaultSection getCredentialsSection() {
-		return new DefaultSection(CREDENTIALS);
-	}
-
-	@Override
-	public LabeledText getBinaryLabel() {
-		return getVagrantfileLocation();
-	}
-
+	public default Button getCRCPullSecretFileBrowseButton() {
+		return new PushButton(getCDKDefaultSection(), 1, new WithTextMatcher(CDKLabel.Buttons.BROWSE));
+	}	
 }

@@ -22,7 +22,9 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement;
+import org.jboss.tools.cdk.reddeer.requirements.CleanDockerExplorerRequirement.CleanDockerExplorer;
 import org.jboss.tools.cdk.reddeer.requirements.ContainerRuntimeServerRequirement.ContainerRuntimeServer;
+import org.jboss.tools.cdk.reddeer.requirements.DisableSecureStorageRequirement.DisableSecureStorage;
 import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
@@ -40,6 +42,8 @@ import org.junit.runner.RunWith;
  * @author odockal
  *
  */
+@DisableSecureStorage
+@CleanDockerExplorer
 @CleanOpenShiftExplorer
 @RemoveCDKServers
 @ContainerRuntimeServer(

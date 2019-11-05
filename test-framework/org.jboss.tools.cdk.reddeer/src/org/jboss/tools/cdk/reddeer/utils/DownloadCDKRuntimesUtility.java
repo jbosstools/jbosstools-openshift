@@ -123,7 +123,7 @@ public class DownloadCDKRuntimesUtility {
 			removeArtifacts = new CheckBox(downloadWizard, "Delete archive after installing").isChecked();
 		}
 		
-		downloadWizard.finish();
+		downloadWizard.finish(TimePeriod.getCustom(1500));
 		downloadWizard = null;
 	}
 

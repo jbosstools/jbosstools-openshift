@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.editor;
 
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
 
 /**
@@ -31,6 +32,11 @@ public class CDK3ServerEditor extends MinishiftServerEditor implements Credentia
 	@Override
 	public DefaultSection getCredentialsSection() {
 		return new DefaultSection(CREDENTIALS);
+	}
+
+	@Override
+	public LabeledText getBinaryLabel() {
+		return getMinishiftBinaryLabel();
 	}
 	
 }

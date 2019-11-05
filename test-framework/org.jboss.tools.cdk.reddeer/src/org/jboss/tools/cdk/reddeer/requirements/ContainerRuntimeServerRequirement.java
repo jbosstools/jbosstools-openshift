@@ -50,6 +50,7 @@ import org.jboss.tools.cdk.reddeer.server.ui.CDKServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerWizardPage;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCRCServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewMinishiftServerWizardPage;
 import org.jboss.tools.cdk.reddeer.ui.preferences.OpenShift3SSLCertificatePreferencePage;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
@@ -177,12 +178,22 @@ public class ContainerRuntimeServerRequirement implements Requirement<ContainerR
 		if (!isBinaryInProperty()) {
 			downloadContainerRuntime(wizardPage);
 		} else {
-			wizardPage.setMinishiftBinary(CDKUtils.getSystemProperty(config.useExistingBinaryInProperty()));
+			if (config.version().type() != CDKVersion.CRC100.type())
+				wizardPage.setMinishiftBinary(CDKUtils.getSystemProperty(config.useExistingBinaryInProperty()));
+			else {
+				((NewCRCServerWizardPage)wizardPage).setCRCBinary(CDKUtils.getSystemProperty(config.useExistingBinaryInProperty()));
+			}
 		}
-		adapter.setMinishiftBinary(Paths.get(wizardPage.getMinishiftBinaryLabeledText().getText()));
+		if (config.version().type() != CDKVersion.CRC100.type())
+			adapter.setMinishiftBinary(Paths.get(wizardPage.getMinishiftBinaryLabeledText().getText()));
+		else {
+			adapter.setMinishiftBinary(Paths.get(((NewCRCServerWizardPage)wizardPage).getCRCBinary().getText()));
+		}
 		adapter.setInstallationFolder(getServerAdapter().getMinishiftBinary().getParent());
 		// setup proper hypervisor
-		wizardPage.setHypervisor(getServerAdapter().getHypervisor());
+		if (config.version().type() != CDKVersion.CRC100.type()) {
+			wizardPage.setHypervisor(getServerAdapter().getHypervisor());
+		}
 		// CDK 3.2+ and Minishift 1.7+ required fields
 		if (wizardPage instanceof NewCDK32ServerWizardPage) {
 			getServerAdapter()

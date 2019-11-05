@@ -31,6 +31,7 @@ import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCRCServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewMinishiftServerWizardPage;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.reddeer.utils.DownloadCDKRuntimesUtility;
@@ -79,7 +80,7 @@ public class DownloadContainerRuntimeAbstractTest extends CDKServerWizardAbstrac
 			util = new DownloadCDKRuntimesUtility(installFolder, downloadFolder, removeArtifacts);
 		}
 		util.chooseRuntimeToDownload(version);
-		if (!(wizardPage instanceof NewMinishiftServerWizardPage)) {
+		if (!(wizardPage instanceof NewMinishiftServerWizardPage || wizardPage instanceof NewCRCServerWizardPage)) {
 			util.processCredentials(username, password);
 		}
 		util.acceptLicense();
@@ -88,14 +89,27 @@ public class DownloadContainerRuntimeAbstractTest extends CDKServerWizardAbstrac
 			new WaitUntil(new AbstractWaitCondition() {
 				@Override
 				public boolean test() {
-					return wizardPage.getMinishiftBinaryLabeledText().getText().contains(version.downloadName());
+					if (version.type() == CDKVersion.CRC100.type()) {
+						return ((NewCRCServerWizardPage)wizardPage).getCRCBinary().getText().contains(version.downloadName());
+					} else {
+						return wizardPage.getMinishiftBinaryLabeledText().getText().contains(version.downloadName());
+					}
 				}
 			}, TimePeriod.DEFAULT);
 			new WaitUntil(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
 		} catch (WaitTimeoutExpiredException waitExc) {
-			fail("Expected this path "  + wizardPage.getMinishiftBinaryLabeledText().getText() + " to contain value: " + version.downloadName());
+			String path = "";
+			if (version.type() == CDKVersion.CRC100.type()) {
+				path = ((NewCRCServerWizardPage)wizardPage).getCRCBinary().getText();
+			} else {
+				path = wizardPage.getMinishiftBinaryLabeledText().getText();
+			}
+			fail("Expected binary path " + path + " to contain value: " + version.downloadName());
 		}
 		// verify that generated binary is valid
+		if (version.type() == CDKVersion.CRC100.type()) {
+			((NewCRCServerWizardPage)wizardPage).setCRCPullServerFile(CRC_SECRET_FILE);
+		}
 		assertSameMessage((NewMenuWizard)dialog, CDKLabel.Messages.SERVER_ADAPTER_REPRESENTING);
 		// add test for downloaded artifacts - temporary
 		if (removeArtifacts || useDefaults) {

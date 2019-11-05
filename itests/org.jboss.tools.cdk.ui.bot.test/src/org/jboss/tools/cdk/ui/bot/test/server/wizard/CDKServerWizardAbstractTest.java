@@ -53,9 +53,12 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	
 	// possible dialog values passed by user
 	
-	protected static final String EXISTING_PATH = System.getProperty("user.dir");   
+	protected static final String EXISTING_PATH = System.getProperty("user.dir"); 
 	protected static final String NON_EXISTING_PATH = EXISTING_PATH + separator + "some_random_filename"; 
 	protected static final String NON_EXECUTABLE_FILE = getProjectAbsolutePath("resources/non-executable"); 
+	protected static final String NON_READABLE_FILE = getProjectAbsolutePath("resources/non-readable");
+	protected static final String INVALID_JSON = getProjectAbsolutePath("resources/invalid.json");
+	protected static final String VALID_JSON = getProjectAbsolutePath("resources/valid.json");
 	protected static final String EXECUTABLE_FILE = getProjectAbsolutePath("resources/" + (CDKUtils.IS_WINDOWS ? "executable.bat" : "executable.sh"));		   
 	
 	private static Logger log = Logger.getLogger(CDKServerWizardAbstractTest.class);
@@ -76,6 +79,10 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	}
 	
 	protected void assertServerType(final String serverType) {
+		assertServerType(serverType, getServerAdapter());
+	}
+	
+	protected void assertServerType(final String serverType, final String serverAdapter) {
 		NewCDKServerWizard wizard = (NewCDKServerWizard)CDKUtils.openNewServerWizardDialog();
 		try {
 			TreeItem item = new DefaultTreeItem(new String[] {CDKLabel.Server.SERVER_TYPE_GROUP}).getItem(serverType);
@@ -86,8 +93,8 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 			log.error(coreExp.getMessage());
 			fail("Server type " + serverType + " was not found in New Server Wizard");  
 		}
-		assertEquals(new LabeledText("Server's host name:").getText(), "localhost");  
-		assertEquals(new LabeledText("Server name:").getText(), getServerAdapter()); 
+		assertEquals(new LabeledText("Server's host name:").getText(), "localhost");
+		assertEquals(serverAdapter, new LabeledText("Server name:").getText());
 		new WaitUntil(new ControlIsEnabled(new NextButton()), TimePeriod.MEDIUM, false);
 		assertTrue("Dialog button Next is not enabled!", wizard.isNextEnabled()); 
 		try {
