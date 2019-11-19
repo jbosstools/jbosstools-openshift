@@ -89,7 +89,7 @@ public class CRCIntegrationTest extends CDKServerAdapterAbstractTest {
 	@Test
 	public void testCRCServerAdapter() {
 		startServerAdapter(getCDKServer(), () -> {}, false);
-		CDKTestUtils.verifyConsoleContainsRegEx("\\bThe OpenShift cluster is running\\b");
+		CDKTestUtils.verifyConsoleContainsRegEx("\\bStarted the OpenShift cluster\\b");
 		OpenShift3Connection connection = null;
 		try {
 			connection = CDKTestUtils.findOpenShiftConnection(null, OPENSHIFT_CONNECTION);
