@@ -205,6 +205,10 @@ public class TestUtils {
 			new DefaultShell(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
 			new YesButton().click();
 			new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE));
+			//Try it once again for OpenShift4
+			new DefaultShell(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
+			new YesButton().click();
+			new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE));
 		} catch (RedDeerException ex) {
 			// no dialog was presented
 		}

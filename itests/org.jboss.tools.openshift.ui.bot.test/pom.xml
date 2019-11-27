@@ -31,9 +31,9 @@
 		<oc.linux.1.1.64>${oc.link.base}/v1.1.0.1/openshift-origin-client-tools-v1.1.0.1-bf56e23-linux-64bit.tar.gz</oc.linux.1.1.64>
 		<oc.windows.1.1.64>${oc.link.base}/v1.1.0.1/openshift-origin-client-tools-v1.1.0.1-bf56e23-windows.zip</oc.windows.1.1.64>
 		<oc.mac.1.1.64>${oc.link.base}/v1.1.0.1/openshift-origin-client-tools-v1.1.0.1-bf56e23-mac.zip</oc.mac.1.1.64>
-		<oc.linux.latest>${oc.link.base}/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz</oc.linux.latest>
-		<oc.windows.latest>${oc.link.base}/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-windows.zip</oc.windows.latest>
-		<oc.mac.latest>${oc.link.base}/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-mac.zip</oc.mac.latest>
+		<oc.linux.latest>https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.2/linux/oc.tar.gz</oc.linux.latest>
+		<oc.windows.latest>https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.2/windows/oc.zip</oc.windows.latest>
+		<oc.mac.latest>https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.2/macosx/oc.tar.gz</oc.mac.latest>
 		
 	</properties>
 

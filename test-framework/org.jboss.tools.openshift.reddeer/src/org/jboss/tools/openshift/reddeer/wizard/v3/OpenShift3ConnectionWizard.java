@@ -253,6 +253,15 @@ public class OpenShift3ConnectionWizard {
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.LONG);
 
 		new FinishButton().click();
+		accceptCertificate(mustAcceptCert);
+		//OpenShift4 have 2 certificates
+		accceptCertificate(mustAcceptCert);
+
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_CONNECTION), TimePeriod.LONG);
+		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+	}
+	
+	private void accceptCertificate(boolean mustAcceptCert) {
 		ShellIsAvailable shellCert = new ShellIsAvailable(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
 		new WaitUntil(shellCert, TimePeriod.DEFAULT, false);
 		if (shellCert.getResult() != null) {
@@ -260,9 +269,6 @@ public class OpenShift3ConnectionWizard {
 		} else if (mustAcceptCert) {
 			throw new OpenShiftToolsException("Expected " + OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE + " dialog was not offered");
 		}
-
-		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_CONNECTION), TimePeriod.LONG);
-		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
 
 	public DefaultShell getShell() {
