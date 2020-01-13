@@ -113,12 +113,22 @@ public class EGitUtilsTest {
 
 	@After
 	public void tearDown() throws Exception {
-		testProject.dispose();
-		testProject2.dispose();
+		if (testProject != null) {
+			testProject.dispose();
+		}
+		if (testProject2 != null) {
+			testProject2.dispose();
+		}
 
-		testRepository.dispose();
-		testRepositoryClone.dispose();
-		testRepository2.dispose();
+		if (testRepository != null) {
+			testRepository.dispose();
+		}
+		if (testRepositoryClone != null) {
+			testRepositoryClone.dispose();
+		}
+		if (testRepository2 != null) {			
+			testRepository2.dispose();
+		}
 		Activator.getDefault().getRepositoryCache().clear();
 	}
 

@@ -117,6 +117,7 @@ public class TestRepository {
 		try (Git git = new Git(repository)) {
 			git.commit()
 				.setAll(true)
+				.setSign(false)
 				.setAuthor(RawParseUtils.parsePersonIdent(DEFAULT_USER))
 				.setCommitter(RawParseUtils.parsePersonIdent(DEFAULT_USER))
 				.setMessage("initial commit")
@@ -284,6 +285,7 @@ public class TestRepository {
 			throws UnmergedPathException, JGitInternalException, UnmergedPathsException, GitAPIException {
 		try (Git git = new Git(repository)) {
 			CommitCommand commitCommand = git.commit();
+			commitCommand.setSign(false);
 			commitCommand.setAuthor("J. Git", "j.git@egit.org");
 			commitCommand.setCommitter(commitCommand.getAuthor());
 			commitCommand.setMessage(message);
