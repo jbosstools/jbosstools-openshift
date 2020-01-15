@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2019 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2020 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -22,7 +22,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
-import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider.LoadingStub;
@@ -66,10 +65,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	 */
 	protected OpenShiftExplorerContentProvider(OpenshiftUIModel model) {
 		this.model = model;
-		listener = new IElementListener() {
-
-			@Override
-			public void elementChanged(IOpenshiftUIElement<?, ?> element) {
+		listener = (IOpenshiftUIElement<?, ?> element) -> {
 				if (element instanceof OpenshiftUIModel) {
 					refreshViewer(ConnectionsRegistrySingleton.getInstance());
 				} else {
@@ -78,8 +74,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 				if (element.getWrapped() instanceof IRoute) {
 					viewer.update(element.getParent(), null);
 				}
-			}
-		};
+			};
 		model.addListener(listener);
 	}
 
@@ -199,9 +194,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 				return stub.getChildren();
 			}
 		default:
-			project.load(e -> {
-				handleLoadingException(project, e);
-			});
+			project.load(e -> handleLoadingException(project, e));
 			return new Object[] { makeStub(project) };
 		}
 	}
@@ -209,9 +202,9 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	protected Object[] getContainerChildren(IResourceContainer<?, IOpenshiftUIElement<?, ?>> service) {
 		ArrayList<Object> result = new ArrayList<>();
 		service.getResourcesOfKind(ResourceKind.BUILD).stream().filter(b -> !isTerminatedBuild((IBuild) b.getWrapped()))
-				.forEach(r -> result.add(r));
+				.forEach(result::add);
 		service.getResourcesOfKind(ResourceKind.POD).stream()
-				.filter(p -> !ResourceUtils.isBuildPod((IPod) p.getWrapped())).forEach(r -> result.add(r));
+				.filter(p -> !ResourceUtils.isBuildPod((IPod) p.getWrapped())).forEach(result::add);
 		return result.toArray();
 	}
 
@@ -242,9 +235,12 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		if (element instanceof LoadingStub) {
 			return ((LoadingStub) element).hasChildren();
 		}
-		return element instanceof ConnectionsRegistry || element instanceof OpenshiftUIModel
-				|| element instanceof IConnectionWrapper || element instanceof IProjectWrapper
-				|| element instanceof IServiceWrapper || element instanceof IReplicationControllerWrapper;
+		return element instanceof ConnectionsRegistry
+				|| element instanceof OpenshiftUIModel
+				|| element instanceof IConnectionWrapper
+				|| element instanceof IProjectWrapper
+				|| element instanceof IServiceWrapper
+				|| element instanceof IReplicationControllerWrapper;
 	}
 
 }

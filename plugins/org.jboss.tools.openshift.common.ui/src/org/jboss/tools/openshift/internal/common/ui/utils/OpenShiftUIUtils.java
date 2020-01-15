@@ -261,12 +261,12 @@ public class OpenShiftUIUtils {
 		IPage page = propertySheet.getCurrentPage();
 		if (page instanceof TabbedPropertySheetPage) {
 			TabbedPropertySheetPage p = (TabbedPropertySheetPage) page;
-			if (p == null || p.getControl() == null || p.getControl().isDisposed())
+			if (p.getControl() == null || p.getControl().isDisposed())
 				return;
 			p.refresh();
 		} else if (page instanceof PropertySheetPage) {
 			PropertySheetPage p = (PropertySheetPage) page;
-			if (p == null || p.getControl() == null || p.getControl().isDisposed())
+			if (p.getControl() == null || p.getControl().isDisposed())
 				return;
 			p.refresh();
 		}
