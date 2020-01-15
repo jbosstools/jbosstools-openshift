@@ -113,7 +113,10 @@ public class CRCServerWizardTest extends CDKServerWizardAbstractTest {
 		assertSameMessage(dialog, CDKLabel.Messages.INVALID_SECRET_FILE_JSON);
 		// valid json - but wrong pull secret
 		containerPage.setCRCPullServerFile(VALID_JSON);
-		assertSameMessage(dialog, CDKLabel.Messages.SERVER_ADAPTER_REPRESENTING);	
+		assertSameMessage(dialog, CDKLabel.Messages.SERVER_ADAPTER_REPRESENTING);
+		// file bigger than 20 KB
+		containerPage.setCRCPullServerFile(CRC_PATH);
+		assertSameMessage(dialog, CDKLabel.Messages.BIGGER_20KB);
 		// valid secret file
 		containerPage.setCRCPullServerFile(CRC_SECRET_FILE);
 		assertSameMessage(dialog, CDKLabel.Messages.SERVER_ADAPTER_REPRESENTING);

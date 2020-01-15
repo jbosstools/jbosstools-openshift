@@ -299,6 +299,12 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	 */
 	public List<String> getDockerConnectionCreatedByCDK(DockerExplorerView view, String name) {
 		List<String> list = new ArrayList<>();
+		if (view == null) {
+			view = new DockerExplorerView();
+		}
+		if (!view.isOpen() || !view.isActive()) {
+			view.open();
+		}
 		for (String item : view.getDockerConnectionNames()) {
 			if (item.contains(name)) {
 				list.add(item);

@@ -46,7 +46,7 @@ import org.junit.runner.RunWith;
 @CleanDockerExplorer
 @CleanOpenShiftExplorer
 @ContainerRuntimeServer(
-		version = CDKVersion.MINISHIFT1320,
+		version = CDKVersion.MINISHIFT1342,
 		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		useExistingBinaryInProperty="minishift")
