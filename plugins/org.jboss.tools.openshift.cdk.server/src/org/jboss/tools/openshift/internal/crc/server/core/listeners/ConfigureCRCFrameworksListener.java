@@ -11,8 +11,6 @@
 package org.jboss.tools.openshift.internal.crc.server.core.listeners;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +21,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerEvent;
@@ -114,17 +111,24 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 		try {
 			while (!connected 
 					&& runs++ <= CONNECT_TRIES) {
-				try {
-					connected = connection.connect();
-				} catch (OpenShiftException ex) {
-					CDKCoreActivator.pluginLog().logError(ex);
-					Thread.sleep(RECONNECT_DELAY);
-				}
+		 		connected = safeConnect(connection);
 			}
 			warnUnconnected(connected);
 		} catch (InterruptedException ie) {
 			CDKCoreActivator.pluginLog().logError(ie);
+			Thread.currentThread().interrupt();
 		}
+	}
+
+	private boolean safeConnect(IConnection connection) throws InterruptedException {
+		boolean connected = false;
+		try {
+			connected = connection.connect();
+		} catch (OpenShiftException ex) {
+			CDKCoreActivator.pluginLog().logError(ex);
+			Thread.sleep(RECONNECT_DELAY);
+		}
+		return connected;
 	}
 
 	private void warnUnconnected(boolean connected) {
@@ -155,43 +159,8 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 		return Paths.get(home, "bin", ocBinaryName).toFile();
 	}
 
-	private String getAdminPassword(IServer server) {
-		File passwordFile = findAdminPasswordFile(server);
-		String passwordContent = null;
-		if (passwordFile != null) {
-			try {
-				passwordContent = new String(Files.readAllBytes(passwordFile.toPath())).trim();
-			} catch(IOException ioe) {
-				CDKCoreActivator.pluginLog().logError(NLS.bind(
-						"Could not load password file {0}", passwordFile.getAbsolutePath()),
-						ioe);
-			}
-		}
-		return passwordContent;
-	}
-
-	private File findAdminPasswordFile(IServer server) {
-		String home = getServerHome(server);
-		File cache = Paths.get(home, "cache").toFile();
-		return findFile(cache, "kubeadmin-password");
-	}
-
 	private String getServerHome(IServer server) {
 		CRC100Server crc = (CRC100Server)server.loadAdapter(CRC100Server.class, new NullProgressMonitor());
 		return crc.getCRCHome(server);
-	}
-
-	private File findFile(File root, String name) {
-		if( root == null || !root.exists())
-			return null;
-		if( root.isFile() ) 
-			return root.getName().equals(name) ? root : null;
-		File[] children = root.listFiles();
-		for( int i = 0; i < children.length; i++ ) {
-			File ret = findFile(children[i], name);
-			if( ret != null )
-				return ret;
-		}
-		return null;
 	}
 }
