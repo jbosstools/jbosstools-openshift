@@ -1271,6 +1271,27 @@ $            <command
                 </visibleWhen>
             </command>
         </menuContribution>
+        <!-- menu: New Service -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerViewPopup.new">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.service.new"
+                     style="push"
+                     tooltip="New service">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement" />
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
         
     </extension>
 
@@ -1435,6 +1456,10 @@ $            <command
         <handler
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.CreateComponentHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.new">
+        </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.CreateServiceHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.service.new">
         </handler>        
     </extension>
 
@@ -1636,6 +1661,10 @@ $            <command
         <command
                  id="org.jboss.tools.openshift.ui.command.applicationexplorer.component.new"
                  name="Component...">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.service.new"
+                 name="Service...">
         </command>
         
     </extension>

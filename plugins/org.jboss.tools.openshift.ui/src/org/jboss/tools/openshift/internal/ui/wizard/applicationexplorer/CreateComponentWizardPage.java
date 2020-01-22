@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
 import java.io.IOException;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
@@ -137,8 +138,10 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 				.to(BeanProperties.value(CreateComponentModel.PROPERTY_APPLICATION_NAME).observe(model))
 				.in(dbc);
 		ControlDecorationSupport.create(applicationNameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		if (StringUtils.isNotBlank(model.getApplicationName())) {
+			applicationNameText.setEnabled(false);
+		}
 
-	
 		Label pushAfterCreateLabel = new Label(parent, SWT.NONE);
 		pushAfterCreateLabel.setText("Push after create:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(pushAfterCreateLabel);
