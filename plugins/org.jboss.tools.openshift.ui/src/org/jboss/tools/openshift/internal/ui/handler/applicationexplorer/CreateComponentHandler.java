@@ -16,6 +16,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
@@ -40,7 +41,9 @@ public class CreateComponentHandler extends AbstractHandler {
 		try {
 			Odo odo = project.getParent().getOdo();
 			final IWizard createComponentWizard = new CreateComponentWizard(odo.getComponentTypes(), project.getWrapped().getMetadata().getName(), "", odo);
-			WizardUtils.openWizardDialog(createComponentWizard, HandlerUtil.getActiveShell(event));
+			if (WizardUtils.openWizardDialog(createComponentWizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
+				project.refresh();
+			}
 			return Status.OK_STATUS;
 		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);

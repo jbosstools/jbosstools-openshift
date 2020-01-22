@@ -11,23 +11,26 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
+import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.LoginModel;
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.LoginWizard;
 
 /**
  * @author Red Hat Developers
  */
-public class LoginHandler extends AbstractHandler {
+public class LoginHandler extends OdoHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -37,13 +40,22 @@ public class LoginHandler extends AbstractHandler {
 			return OpenShiftUIActivator.statusFactory().cancelStatus("No cluster selected"); //$NON-NLS-1$
 		}
 		try {
-			final IWizard loginWizard = new LoginWizard(cluster.getClient().getMasterUrl().toString(), cluster.getOdo());
-			WizardUtils.openWizardDialog(loginWizard, HandlerUtil.getActiveShell(event));
+			final LoginModel model = new LoginModel(cluster.getClient().getMasterUrl().toString(), cluster.getOdo());
+			final IWizard loginWizard = new LoginWizard(model);
+			if (WizardUtils.openWizardDialog(loginWizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
+				executeInJob("Login to Cluster", () -> execute(model));
+			}
 			return Status.OK_STATUS;
 		} catch (IOException e) {
 			throw new ExecutionException(e.getLocalizedMessage(), e);
 		}
 	}
-
-
+	
+	private void execute(LoginModel model) {
+		try {
+			model.getOdo().login(model.getUrl(), model.getUsername(), model.getPassword().toCharArray(), model.getToken());
+		} catch (IOException e) {
+			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(), "Login", "Can't login error message:" + e.getLocalizedMessage()));
+		}
+	}
 }

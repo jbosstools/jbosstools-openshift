@@ -19,17 +19,14 @@ import org.jboss.tools.openshift.core.odo.Odo;
  */
 public class LoginWizard extends Wizard {
 	
-	private LoginWizardPage page;
-	
-	public LoginWizard(String url, Odo odo) {
-		this.addPage(this.page = new LoginWizardPage(this, new LoginModel(url, odo)));
+	public LoginWizard(LoginModel model) {
+		this.addPage(new LoginWizardPage(this, model));
 		setNeedsProgressMonitor(true);
 		setWindowTitle("Login");
 	}
 
 	@Override
 	public boolean performFinish() {
-		return this.page.finish();
+		return true;
 	}
-
 }

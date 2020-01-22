@@ -92,6 +92,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.jboss.tools.common.util.DownloadHelper;
 import org.jboss.tools.openshift.core.OpenShiftCoreConstants;
 import org.jboss.tools.openshift.core.odo.Application;
 import org.jboss.tools.openshift.core.odo.Component;
@@ -122,7 +123,7 @@ public class OdoCli implements Odo {
    */
   public static final String PLUGIN_FOLDER = ".odo";
 
-  private String command = "C:\\apps\\odo\\1.0.3\\odo.exe";
+  private String command;
 
   private OdoCli() throws IOException {
     command = getCommand();
@@ -144,30 +145,9 @@ public class OdoCli implements Odo {
     return command;
   }
 
-  private String getOdoVersion(String tool, String command) {
-    String version = "";
-    try {
-      Pattern pattern = Pattern.compile(tool + " v(\\d+[\\.\\d+]*(-.*)?)\\s.*");
-      String output = ExecHelper.execute(command, false, "version");
-      try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
-        version = reader.lines().
-                map(line -> pattern.matcher(line)).
-                filter(matcher -> matcher.matches()).
-                map(matcher -> matcher.group(1)).
-                findFirst().orElse("");
-      }
-    } catch (IOException e) {}
-    return version;
-  }
-
   private String getOdoCommand() throws IOException {
-    return command;
+    return DownloadHelper.getInstance().downloadIfRequired("odo", OdoCli.class.getResource("/tools.json"));
   }
-
-  public static boolean isDownloadAllowed(String currentVersion, String requiredVersion) {
-    return Boolean.getBoolean(ODO_DOWNLOAD_FLAG) || MessageDialog.openQuestion(null, "Odo tool required", StringUtils.isEmpty(currentVersion)?"Odo not found , do you want to download odo " + requiredVersion + " ?":"Odo " + currentVersion + "found, required version is " + requiredVersion + ")(, do you want to download odo ?");
-  }
-
 
   @Override
   public List<Project> getProjects(OpenShiftClient client) {

@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
-import java.io.IOException;
-
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
@@ -42,10 +40,8 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 	private LoginModel model;
 
 	/**
-	 * @param title
-	 * @param description
-	 * @param pageName
-	 * @param wizard
+	 * @param wizard the parent wizard
+	 * @param model the model
 	 */
 	protected LoginWizardPage(IWizard wizard, LoginModel model) {
 		super("Sign in to OpenShift", "Please sign in to your OpenShift server.", "Server Connection", wizard);
@@ -55,64 +51,54 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
-		
+
 		Label urlLabel = new Label(parent, SWT.NONE);
 		urlLabel.setText("URL:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(urlLabel);
 		Text txtURL = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
-				.applyTo(txtURL);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(txtURL);
 
 		ISWTObservableValue<String> urlObservable = WidgetProperties.text(SWT.Modify).observe(txtURL);
 		Binding urlBinding = ValueBindingBuilder.bind(urlObservable)
-				.validatingAfterConvert(new URLValidator("url", true))
-				.converting(new TrimTrailingSlashConverter())
-				.to(BeanProperties.value(LoginModel.PROPERTY_URL).observe(model))
-				.in(dbc);
+		        .validatingAfterConvert(new URLValidator("url", true)).converting(new TrimTrailingSlashConverter())
+		        .to(BeanProperties.value(LoginModel.PROPERTY_URL).observe(model)).in(dbc);
 		ControlDecorationSupport.create(urlBinding, SWT.LEFT | SWT.TOP);
 
 		Label userLabel = new Label(parent, SWT.NONE);
 		userLabel.setText("Username:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(userLabel);
 		Text txtUsername = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
-				.applyTo(txtUsername);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(txtUsername);
 
 		ISWTObservableValue<String> userObservable = WidgetProperties.text(SWT.Modify).observe(txtUsername);
 		Binding userBinding = ValueBindingBuilder.bind(userObservable)
-				.to(BeanProperties.value(LoginModel.PROPERTY_USERNAME).observe(model))
-				.in(dbc);
+		        .to(BeanProperties.value(LoginModel.PROPERTY_USERNAME).observe(model)).in(dbc);
 		ControlDecorationSupport.create(userBinding, SWT.LEFT | SWT.TOP);
 
 		Label passwordLabel = new Label(parent, SWT.NONE);
 		passwordLabel.setText("Password:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(passwordLabel);
 		Text txtPassword = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
-				.applyTo(txtPassword);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(txtPassword);
 
 		ISWTObservableValue<String> passwordObservable = WidgetProperties.text(SWT.Modify).observe(txtPassword);
 		Binding passwordBinding = ValueBindingBuilder.bind(passwordObservable)
-				.to(BeanProperties.value(LoginModel.PROPERTY_PASSWORD).observe(model))
-				.in(dbc);
+		        .to(BeanProperties.value(LoginModel.PROPERTY_PASSWORD).observe(model)).in(dbc);
 		ControlDecorationSupport.create(passwordBinding, SWT.LEFT | SWT.TOP);
 
-	
 		Label tokenLabel = new Label(parent, SWT.NONE);
 		tokenLabel.setText("Token:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(tokenLabel);
 		Text txtToken = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
-				.applyTo(txtToken);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(txtToken);
 
 		ISWTObservableValue<String> tokenObservable = WidgetProperties.text(SWT.Modify).observe(txtToken);
 		Binding tokenBinding = ValueBindingBuilder.bind(tokenObservable)
-				.to(BeanProperties.value(LoginModel.PROPERTY_TOKEN).observe(model))
-				.in(dbc);
+		        .to(BeanProperties.value(LoginModel.PROPERTY_TOKEN).observe(model)).in(dbc);
 		ControlDecorationSupport.create(tokenBinding, SWT.LEFT | SWT.TOP);
-		
+
 		dbc.addValidationStatusProvider(new MultiValidator() {
-			
+
 			@Override
 			protected IStatus validate() {
 				String user = userObservable.getValue();
@@ -130,19 +116,5 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 				return ValidationStatus.ok();
 			}
 		});
-}
-
-	/**
-	 * @return
-	 */
-	public boolean finish() {
-		try {
-			model.getOdo().login(model.getUrl(), model.getUsername(), model.getPassword().toCharArray(), model.getToken());
-			return true;
-		} catch (IOException e) {
-			setErrorMessage(e.getLocalizedMessage());
-			return false;
-		}
 	}
-
 }
