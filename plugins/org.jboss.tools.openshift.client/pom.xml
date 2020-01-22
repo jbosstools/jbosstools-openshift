@@ -29,6 +29,9 @@
 		<commons-lang.version>2.6</commons-lang.version>
 		<commons-io.version>2.1</commons-io.version>
 		<enforcer.skip>true</enforcer.skip>
+		<openshift-client.version>4.7.0</openshift-client.version>
+		<jackson.version>2.9.10</jackson.version>
+		<snakeyaml.version>1.25</snakeyaml.version>
 	</properties>
 
 	<build>
@@ -121,6 +124,61 @@
 							<artifactId>commons-io</artifactId>
 							<version>${commons-io.version}</version>
 						</artifactItem>
+                        <artifactItem>
+                            <groupId>io.fabric8</groupId>
+                            <artifactId>openshift-client</artifactId>
+                            <version>${openshift-client.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>io.fabric8</groupId>
+                            <artifactId>kubernetes-client</artifactId>
+                            <version>${openshift-client.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>io.fabric8</groupId>
+                            <artifactId>kubernetes-model</artifactId>
+                            <version>${openshift-client.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>io.fabric8</groupId>
+                            <artifactId>servicecatalog-client</artifactId>
+                            <version>${openshift-client.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>io.fabric8</groupId>
+                            <artifactId>servicecatalog-model</artifactId>
+                            <version>${openshift-client.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-core</artifactId>
+                            <version>${jackson.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-annotations</artifactId>
+                            <version>${jackson.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-databind</artifactId>
+                            <version>${jackson.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>com.fasterxml.jackson.dataformat</groupId>
+                            <artifactId>jackson-dataformat-yaml</artifactId>
+                            <version>${jackson.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>org.yaml</groupId>
+                            <artifactId>snakeyaml</artifactId>
+                            <version>${snakeyaml.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                          <groupId>com.squareup.okhttp3</groupId>
+                          <artifactId>logging-interceptor</artifactId>
+                          <version>${ok-http.version}</version>
+                        </artifactItem>
 					</artifactItems>
 				</configuration>
 			</plugin>

@@ -18,7 +18,7 @@ import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
  * @author Thomas Mäder
  *
  */
-public interface IConnectionWrapper extends IOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel>,
+public interface IConnectionWrapper extends IOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel, OpenshiftUIModel>,
 		IResourceContainer<IOpenShiftConnection, OpenshiftUIModel> {
 	/**
 	 * @return the state the connection is in.

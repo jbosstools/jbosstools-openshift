@@ -12,6 +12,15 @@
                 </contentExtension>
             </includes>
         </viewerContentBinding>
+        <viewerContentBinding
+              viewerId="org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView">
+           <includes>
+              <contentExtension
+                    isRoot="true"
+                    pattern="org.jboss.tools.openshift.ui.applicationexplorer.navigatorContent">
+              </contentExtension>
+           </includes>
+        </viewerContentBinding>
     </extension>
     <extension
                point="org.eclipse.ui.navigator.navigatorContent">
@@ -37,6 +46,14 @@
                     </instanceof>
                 </or>
             </triggerPoints>
+        </navigatorContent>
+        <navigatorContent
+              contentProvider="org.jboss.tools.openshift.internal.ui.applicationexplorer.OpenShiftApplicationExplorerContentProvider"
+              id="org.jboss.tools.openshift.ui.applicationexplorer.navigatorContent"
+              labelProvider="org.jboss.tools.openshift.internal.ui.applicationexplorer.OpenShiftApplicationExplorerLabelProvider"
+              name="OpenShift Application Explorer Content">
+           <possibleChildren></possibleChildren>
+           <triggerPoints></triggerPoints>
         </navigatorContent>
     </extension>
     <extension
@@ -1127,6 +1144,134 @@ $            <command
                 </command>
             </menu>
         </menuContribution>
+        <!-- Application Explorer -->
+        <!-- menu: Login -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.login"
+                     style="push"
+                     tooltip="Login">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel" />
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
+        <!-- menu: List Catalog Components -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.listcomponents"
+                     style="push"
+                     tooltip="List Catalog Components">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel" />
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
+        <!-- menu: List Catalog Services -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.listservices"
+                     style="push"
+                     tooltip="List Catalog Services">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel" />
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
+        <!-- menu: About -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.about"
+                     style="push"
+                     tooltip="About">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel" />
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
+        <!-- menu: New Project -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerViewPopup.new">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.project.new"
+                     style="push"
+                     tooltip="New project">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel" />
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
+        <!-- menu: New Component -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerViewPopup.new">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.new"
+                     style="push"
+                     tooltip="New component">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement" />
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
+        
     </extension>
 
     <extension
@@ -1266,6 +1411,31 @@ $            <command
                  class="org.jboss.tools.openshift.internal.ui.handler.ManageEnvironmentVariablesHandler"
                  commandId="org.jboss.tools.openshift.ui.command.deployment.envvar">
         </handler>
+        <!-- Application Explorer -->
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.AboutHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.about">
+        </handler>
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.ListComponentsHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.listcomponents">
+        </handler>
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.ListServicesHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.listservices">
+        </handler>
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.LoginHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.login">
+        </handler>
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.NewProjectHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.project.new">
+        </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.CreateComponentHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.new">
+        </handler>        
     </extension>
 
     <!-- adapters -->
@@ -1442,6 +1612,32 @@ $            <command
                  id="org.jboss.tools.openshift.ui.command.deployment.envvar"
                  name="%openshift.command.editenvvars">
         </command>
+        <!-- Application Explorer -->
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.about"
+                 name="%openshift.command.about">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.project.new"
+                 name="Project...">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.listcomponents"
+                 name="List Catalog Components">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.listservices"
+                 name="List Catalog Services">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.login"
+                 name="Login">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.component.new"
+                 name="Component...">
+        </command>
+        
     </extension>
 
     <!-- editor for express connections -->

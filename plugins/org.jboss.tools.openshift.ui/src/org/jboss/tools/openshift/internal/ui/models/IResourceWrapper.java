@@ -16,6 +16,6 @@ import com.openshift.restclient.model.IResource;
  * Wrapper for resources
  * @author Thomas Mäder
  */
-public interface IResourceWrapper<R extends IResource, P extends IOpenshiftUIElement<?, ?>>
-		extends IOpenshiftUIElement<R, P> {
+public interface IResourceWrapper<R extends IResource, P extends IOpenshiftUIElement<?, ?, OpenshiftUIModel>>
+		extends IOpenshiftUIElement<R, P, OpenshiftUIModel> {
 }

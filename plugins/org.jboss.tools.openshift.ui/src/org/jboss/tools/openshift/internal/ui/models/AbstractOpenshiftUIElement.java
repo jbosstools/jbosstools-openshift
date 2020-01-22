@@ -19,8 +19,8 @@ import org.eclipse.core.runtime.IAdaptable;
  * @param <R> the wrapped element type
  * @param <P> the parent type
  */
-abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElement<?, ?>>
-		implements IAdaptable, IOpenshiftUIElement<R, P> {
+ public abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElement<?, ?, M>, M extends AbstractOpenshiftUIModel<?, ?>>
+		implements IAdaptable, IOpenshiftUIElement<R, P, M> {
 	private P parent;
 	private R wrapped;
 
@@ -37,7 +37,7 @@ abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElemen
 		return wrapped;
 	}
 
-	public OpenshiftUIModel getRoot() {
+	public M getRoot() {
 		return getParent().getRoot();
 	}
 
@@ -59,7 +59,7 @@ abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElemen
 		if (o == this) {
 			return true;
 		}
-		AbstractOpenshiftUIElement<?, ?> other = (AbstractOpenshiftUIElement<?, ?>) o;
+		AbstractOpenshiftUIElement<?, ?, M> other = (AbstractOpenshiftUIElement<?, ?, M>) o;
 		return wrapped.equals(other.getWrapped()) && (getParent() != null && getParent().equals(other.getParent())
 				|| getParent() == null && other.getParent() == null);
 	}
@@ -82,7 +82,7 @@ abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElemen
 		fireChanged(this);
 	}
 
-	protected void fireChanged(IOpenshiftUIElement<?, ?> source) {
+	protected void fireChanged(IOpenshiftUIElement<?, ?, M> source) {
 		getParent().fireChanged(source);
 	}
 

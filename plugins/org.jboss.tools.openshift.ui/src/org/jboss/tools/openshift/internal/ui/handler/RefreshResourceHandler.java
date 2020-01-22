@@ -36,20 +36,20 @@ public class RefreshResourceHandler extends AbstractHandler {
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		ISelection selection = UIUtils.getCurrentSelection(event);
-		IOpenshiftUIElement<?, ?> element = UIUtils.getFirstElement(selection, IOpenshiftUIElement.class);
+		IOpenshiftUIElement<?, ?, ?> element = UIUtils.getFirstElement(selection, IOpenshiftUIElement.class);
 		if (element != null) {
 			refresh(element);
 		}
 		return null;
 	}
 
-	private void refresh(IOpenshiftUIElement<?, ?> element) {
+	private void refresh(IOpenshiftUIElement<?, ?, ?> element) {
 		Job job = null;
 		job = createRefreshJob(element);
 		job.schedule();
 	}
 
-	private Job createRefreshJob(IOpenshiftUIElement<?, ?> element) {
+	private Job createRefreshJob(IOpenshiftUIElement<?, ?, ?> element) {
 		return new AbstractDelegatingMonitorJob(LOADING_OPEN_SHIFT_INFORMATIONS) {
 
 			@Override

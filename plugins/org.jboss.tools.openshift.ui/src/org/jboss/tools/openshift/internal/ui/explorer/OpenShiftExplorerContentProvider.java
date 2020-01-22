@@ -65,7 +65,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	 */
 	protected OpenShiftExplorerContentProvider(OpenshiftUIModel model) {
 		this.model = model;
-		listener = (IOpenshiftUIElement<?, ?> element) -> {
+		listener = (IOpenshiftUIElement<?, ?, ?> element) -> {
 				if (element instanceof OpenshiftUIModel) {
 					refreshViewer(ConnectionsRegistrySingleton.getInstance());
 				} else {
@@ -144,9 +144,9 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		} else if (parentElement instanceof IProjectWrapper) {
 			return getProjectChildren((IProjectWrapper) parentElement);
 		} else if (parentElement instanceof IServiceWrapper) {
-			return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?>>) parentElement);
+			return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?, OpenshiftUIModel>>) parentElement);
 		} else if (parentElement instanceof IReplicationControllerWrapper) {
-			return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?>>) parentElement);
+			return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?, OpenshiftUIModel>>) parentElement);
 		} else if (parentElement instanceof LoadingStub) {
 			return ((LoadingStub) parentElement).getChildren();
 		}
@@ -199,7 +199,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		}
 	}
 
-	protected Object[] getContainerChildren(IResourceContainer<?, IOpenshiftUIElement<?, ?>> service) {
+	protected Object[] getContainerChildren(IResourceContainer<?, IOpenshiftUIElement<?, ?, OpenshiftUIModel>> service) {
 		ArrayList<Object> result = new ArrayList<>();
 		service.getResourcesOfKind(ResourceKind.BUILD).stream().filter(b -> !isTerminatedBuild((IBuild) b.getWrapped()))
 				.forEach(result::add);
@@ -224,8 +224,8 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		if (element instanceof IConnectionWrapper) {
 			return ConnectionsRegistrySingleton.getInstance();
 		}
-		if (element instanceof IOpenshiftUIElement<?, ?>) {
-			return ((IOpenshiftUIElement<?, ?>) element).getParent();
+		if (element instanceof IOpenshiftUIElement<?, ?, ?>) {
+			return ((IOpenshiftUIElement<?, ?, ?>) element).getParent();
 		}
 		return null;
 	}

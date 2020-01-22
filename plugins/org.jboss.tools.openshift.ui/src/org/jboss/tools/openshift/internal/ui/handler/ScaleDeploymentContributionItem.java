@@ -31,6 +31,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IRunningPodHolder;
+import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
 import org.jboss.tools.openshift.internal.ui.utils.ResourceWrapperUtils;
 
 import com.openshift.restclient.model.IPod;
@@ -73,7 +74,7 @@ public class ScaleDeploymentContributionItem extends CompoundContributionItem im
 		if (podHolder == null) {
 			return false;
 		}
-		IOpenshiftUIElement<?, IOpenshiftUIElement<?, ?>> podUIElement = podHolder.getPodUIElement();
+		IOpenshiftUIElement<?, IOpenshiftUIElement<?, ?, OpenshiftUIModel>, ?> podUIElement = podHolder.getPodUIElement();
 		if (!(podUIElement instanceof IResourceWrapper)) {
 			return false;
 		}

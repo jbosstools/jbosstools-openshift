@@ -79,6 +79,14 @@
             icon="icons/openshift-logo-white-icon.png"
             name="OpenShift Explorer">
         </view>
+        <view
+              category="org.jboss.tools.common.model.ui.views"
+              class="org.jboss.tools.openshift.internal.common.ui.applicationexplorer.OpenShiftApplicationExplorerView"
+              icon="icons/openshift-logo-white-icon.png"
+              id="org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView"
+              name="OpenShift Application Explorer"
+              restorable="true">
+        </view>
     </extension>
     
 	<extension point="org.eclipse.ui.contexts">
@@ -136,6 +144,16 @@
 				</property>
 			</options>
 		</viewer>
+  <viewer
+        viewerId="org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView">
+     <popupMenu
+           allowsPlatformContributions="true"
+           id="org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                <insertionPoint
+                    name="group.new"
+                    separator="true"/>
+     </popupMenu>
+  </viewer>
 	</extension>
 
 	<!-- openshift explorer: "New" submenu -->
@@ -194,6 +212,19 @@
 				</command>
 		</menuContribution>
 	</extension>
+
+    <!-- Application Explorer -->
+    <!-- "New" submenu -->
+    <extension
+        point="org.eclipse.ui.menus">
+        <menuContribution
+            locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.new">
+            <menu
+               id="org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerViewPopup.new"
+               label="%openshift.menu.expressConsoleView.new">
+            </menu>
+        </menuContribution>
+    </extension>
 	
 	<!-- New Connection -->
 	<extension

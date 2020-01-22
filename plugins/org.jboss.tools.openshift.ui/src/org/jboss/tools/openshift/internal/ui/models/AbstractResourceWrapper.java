@@ -14,8 +14,8 @@ import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.model.IResource;
 
-abstract class AbstractResourceWrapper<R extends IResource, P extends AbstractOpenshiftUIElement<?, ?>>
-		extends AbstractOpenshiftUIElement<R, P> implements IResourceWrapper<R, P> {
+abstract class AbstractResourceWrapper<R extends IResource, P extends AbstractOpenshiftUIElement<?, ?, OpenshiftUIModel>>
+		extends AbstractOpenshiftUIElement<R, P, OpenshiftUIModel> implements IResourceWrapper<R, P> {
 
 	public AbstractResourceWrapper(P parent, R resource) {
 		super(parent, resource);

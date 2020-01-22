@@ -24,5 +24,5 @@ public interface IElementListener {
 	 * @param element
 	 *            the changed element.
 	 */
-	void elementChanged(IOpenshiftUIElement<?, ?> element);
+	void elementChanged(IOpenshiftUIElement<?, ?, ?> element);
 }

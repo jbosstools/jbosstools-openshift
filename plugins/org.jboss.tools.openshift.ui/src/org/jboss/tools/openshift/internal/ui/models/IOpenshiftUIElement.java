@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.IAdaptable;
  * @param <P> the parent type
  * @param <R> the type of the wrapped element
  */
-public interface IOpenshiftUIElement<R, P extends IOpenshiftUIElement<?, ?>> extends IAdaptable {
+public interface IOpenshiftUIElement<R, P extends IOpenshiftUIElement<?, ?, M>, M extends IOpenshiftUIModel<?,?>> extends IAdaptable {
 	/**
 	 * Get the container of this element. 
 	 * @return
@@ -43,5 +43,5 @@ public interface IOpenshiftUIElement<R, P extends IOpenshiftUIElement<?, ?>> ext
 	 */
 	void refresh();
 
-	public OpenshiftUIModel getRoot();
+	public M getRoot();
 }
