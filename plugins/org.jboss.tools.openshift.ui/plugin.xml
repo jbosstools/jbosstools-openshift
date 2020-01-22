@@ -1292,6 +1292,67 @@ $            <command
                 </visibleWhen>
             </command>
         </menuContribution>
+        <!-- menu: Push -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.push"
+                     style="push"
+                     tooltip="Push">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                      type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement">
+                                   <or>
+                                      <test
+                                            args="pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                                      <test
+                                            args="not pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                                   </or>
+                                </adapt>
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
+        <!-- menu: Watch -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.watch"
+                     style="push"
+                     tooltip="Watch">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                      type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement">
+                                      <test
+                                            args="pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                                </adapt>
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
         <!-- menu: Show log -->
         <menuContribution
                           allPopups="false"
@@ -1307,7 +1368,20 @@ $            <command
                                value="1" />
                         <iterate>
                                 <adapt
-                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement" />
+                                      type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement">
+                                   <or>
+                                      <test
+                                            args="pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                                      <test
+                                            args="no context"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                                   </or>
+                                </adapt>
                         </iterate>
                     </and>
                 </visibleWhen>
@@ -1329,6 +1403,18 @@ $            <command
                         <iterate>
                                 <adapt
                                        type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement" />
+                                   <or>
+                                      <test
+                                            args="pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                                      <test
+                                            args="no context"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                                   </or>
                         </iterate>
                     </and>
                 </visibleWhen>
@@ -1510,6 +1596,14 @@ $            <command
         <handler
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.FollowLogHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.follow">
+        </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.PushHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.push">
+        </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.WatchHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.watch">
         </handler>        
     </extension>
 
@@ -1723,6 +1817,14 @@ $            <command
         <command
                  id="org.jboss.tools.openshift.ui.command.applicationexplorer.component.follow"
                  name="Follow Log">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.component.push"
+                 name="Push">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.component.watch"
+                 name="Watch">
         </command>
         
     </extension>
@@ -2080,6 +2182,13 @@ $            <command
              namespace="org.jboss.tools.openshift.ui"
              properties="isServerAdapterAllowed"
              type="com.openshift.restclient.model.IResource">
+       </propertyTester>
+       <propertyTester
+             class="org.jboss.tools.openshift.internal.ui.propertytester.ComponentStatePropertyTester"
+             id="org.jboss.tools.openshift.ui.componentStatePropertyTester"
+             namespace="org.jboss.tools.openshift.ui"
+             properties="componentAllowedState"
+             type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement">
        </propertyTester>
     </extension>
 
