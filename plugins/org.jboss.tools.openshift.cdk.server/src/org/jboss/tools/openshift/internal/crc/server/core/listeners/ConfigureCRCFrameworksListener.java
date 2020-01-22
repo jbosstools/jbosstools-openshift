@@ -11,8 +11,6 @@
 package org.jboss.tools.openshift.internal.crc.server.core.listeners;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +20,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.osgi.util.NLS;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
@@ -33,10 +32,13 @@ import org.jboss.tools.openshift.internal.cdk.server.core.listeners.CDKOpenshift
 import org.jboss.tools.openshift.internal.core.ocbinary.OCBinary;
 import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.authorization.IAuthorizationContext;
 
 public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 
+	private static final int CONNECT_TRIES = 3;
+	private static final long RECONNECT_DELAY = 3 * 1000l;
 	private static final String CRC_HOST_URL = "https://api.crc.testing";
 	private static final int CRC_HOST_PORT = 6443;
 	private static final String CRC_DEV_USERNAME = "developer";
@@ -100,7 +102,50 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 				ocLocation,
 				ConnectionsRegistrySingleton.getInstance());
 		connection.enablePromptCredentials(false);
-		connection.connect();
+		connect(connection);
+	}
+
+	private void connect(IConnection connection) {
+		boolean connected = false;
+		int runs = 0;
+		try {
+			while (!connected 
+					&& runs++ <= CONNECT_TRIES) {
+		 		connected = safeConnect(connection);
+			}
+			warnUnconnected(connected);
+		} catch (InterruptedException ie) {
+			CDKCoreActivator.pluginLog().logError(ie);
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private boolean safeConnect(IConnection connection) throws InterruptedException {
+		boolean connected = false;
+		try {
+			connected = connection.connect();
+		} catch (OpenShiftException ex) {
+			CDKCoreActivator.pluginLog().logError(ex);
+			Thread.sleep(RECONNECT_DELAY);
+		}
+		return connected;
+	}
+
+	private void warnUnconnected(boolean connected) {
+		if (!connected) {
+			new UIJob("Warning: Wait and Refresh connection") {
+
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					MessageDialog.openWarning(getDisplay().getActiveShell(), 
+							"Wait and Refresh connection",
+							"Could not connect to the running CRC instance."
+							+ "\nIt may not fully up and running yet. Wait and try refreshing the connection.");
+					return Status.OK_STATUS;
+				}
+			}
+			.schedule();
+		}
 	}
 
 	private String getOcLocation(IServer server) {
@@ -114,43 +159,8 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 		return Paths.get(home, "bin", ocBinaryName).toFile();
 	}
 
-	private String getAdminPassword(IServer server) {
-		File passwordFile = findAdminPasswordFile(server);
-		String passwordContent = null;
-		if( passwordFile != null ) {
-			try {
-				passwordContent = new String(Files.readAllBytes(passwordFile.toPath())).trim();
-			} catch(IOException ioe) {
-				CDKCoreActivator.pluginLog().logError(NLS.bind(
-						"Could not load password file {0}", passwordFile.getAbsolutePath()),
-						ioe);
-			}
-		}
-		return passwordContent;
-	}
-	private File findAdminPasswordFile(IServer server) {
-		String home = getServerHome(server);
-		File cache = Paths.get(home, "cache").toFile();
-		File passwordFile = findFile(cache, "kubeadmin-password");
-		return passwordFile;
-	}
-
 	private String getServerHome(IServer server) {
 		CRC100Server crc = (CRC100Server)server.loadAdapter(CRC100Server.class, new NullProgressMonitor());
 		return crc.getCRCHome(server);
-	}
-
-	private File findFile(File root, String name) {
-		if( root == null || !root.exists())
-			return null;
-		if( root.isFile() ) 
-			return root.getName().equals(name) ? root : null;
-		File[] children = root.listFiles();
-		for( int i = 0; i < children.length; i++ ) {
-			File ret = findFile(children[i], name);
-			if( ret != null )
-				return ret;
-		}
-		return null;
 	}
 }

@@ -30,10 +30,11 @@ public class ConnectionPropertySource implements IPropertySource {
 
 	private static final String HOST = "host";
 	private static final String USERNAME = "username";
-	private static final String OPENSHIFT_MASTER_VERSION = "openshift-version";
-	private static final String KUBERNETES_MASTER_VERSION = "kubernetes-version";
+	public static final String OPENSHIFT_MASTER_VERSION = "openshift-version";
+	public static final String KUBERNETES_MASTER_VERSION = "kubernetes-version";
 	private static final String OC_CLIENT = "oc-client";
 	private IConnection connection;
+	private ConnectionProperties connectionProperties = ConnectionProperties.getInstance();;
 
 	private ConnectionListener listener = new ConnectionListener();
 
@@ -43,12 +44,7 @@ public class ConnectionPropertySource implements IPropertySource {
 		public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
 			if (connection.equals(ConnectionPropertySource.this.connection)
 					&& IOpenShiftConnection.PROPERTY_EXTENDED_PROPERTIES.equals(property)) {
-				Display.getDefault().asyncExec(() -> {
-						PropertySheet sh = OpenShiftUIUtils.getPropertySheet();
-						if (sh != null) {
-							OpenShiftUIUtils.refreshPropertySheetPage(sh);
-						}
-				});
+				refresh();
 			}
 		}
 	}
@@ -107,17 +103,16 @@ public class ConnectionPropertySource implements IPropertySource {
 		}
 		if (connection instanceof IOpenShiftConnection) {
 			IOpenShiftConnection openshiftConnection = (IOpenShiftConnection) this.connection;
-			if (OPENSHIFT_MASTER_VERSION.equals(id)) {
-				return openshiftConnection.getOpenShiftMasterVersion();
-			}
-			if (KUBERNETES_MASTER_VERSION.equals(id)) {
-				return openshiftConnection.getKubernetesMasterVersion();
-			}
-			if (OC_CLIENT.equals(id)) {
+			if (connectionProperties.supports(id)) {
+				return connectionProperties.getProperty(
+				        id, (IOpenShiftConnection) connection,
+				        propertyValue -> refresh());
+			} else if (OC_CLIENT.equals(id)) {
 				return OCBinary.getInstance().getPath(openshiftConnection);
+			} else {
+				Object result = openshiftConnection.getExtendedProperties().get(id);
+				return result != null ? result.toString() : "";
 			}
-			Object result = openshiftConnection.getExtendedProperties().get(id);
-			return result == null ? "" : result.toString();
 		}
 		return null;
 	}
@@ -135,6 +130,15 @@ public class ConnectionPropertySource implements IPropertySource {
 	@Override
 	public void setPropertyValue(Object id, Object value) {
 		// nothing to do
+	}
+
+	private void refresh() {
+		Display.getDefault().asyncExec(() -> {
+			PropertySheet sh = OpenShiftUIUtils.getPropertySheet();
+			if (sh != null) {
+				OpenShiftUIUtils.refreshPropertySheetPage(sh);
+			}
+		});
 	}
 
 	public void dispose() {

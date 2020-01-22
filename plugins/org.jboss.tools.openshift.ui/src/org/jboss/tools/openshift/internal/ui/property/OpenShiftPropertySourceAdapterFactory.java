@@ -33,41 +33,54 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
-		if (adapterType == IPropertySource.class) {
-			Connection connection = Adapters.adapt(adaptableObject, Connection.class);
-			if (connection != null) {
-				if (currentConnectionPropertySource != null) {
-					currentConnectionPropertySource.dispose();
-				}
-				return currentConnectionPropertySource = new ConnectionPropertySource(connection);
-			}
-			IResource resource = Adapters.adapt(adaptableObject, IResource.class);
-			if (resource != null) {
-				switch (resource.getKind()) {
-				case ResourceKind.BUILD:
-					return new BuildPropertySource((IBuild) resource);
-				case ResourceKind.BUILD_CONFIG:
-					return new BuildConfigPropertySource((IBuildConfig) resource);
-				case ResourceKind.EVENT:
-					return new EventPropertySource((IEvent) resource);
-				case ResourceKind.IMAGE_STREAM:
-					return new ImageStreamPropertySource((IImageStream) resource);
-				case ResourceKind.POD:
-					return new PodPropertySource((IPod) resource);
-				case ResourceKind.REPLICATION_CONTROLLER:
-					return new ReplicationControllerPropertySource((IReplicationController) resource);
-				case ResourceKind.ROUTE:
-					return new RoutePropertySource((IRoute) resource);
-				case ResourceKind.SERVICE:
-					return new ServicePropertySource((IService) resource);
-				case ResourceKind.PVC:
-					return new StoragePropertySource((IPersistentVolumeClaim) resource);
-				default:
-					return new ResourcePropertySource<>(resource);
-				}
-			}
+		if (adapterType != IPropertySource.class) {
+			return null;
 		}
-		return null;
+		IPropertySource propertySource = createConnectionPropertySource(adaptableObject);
+		if (propertySource == null) {
+			propertySource = createResourcePropertySource(adaptableObject);
+		}
+		return propertySource;
+	}
+
+	private ConnectionPropertySource createConnectionPropertySource(Object adaptableObject) {
+		Connection connection = Adapters.adapt(adaptableObject, Connection.class);
+		if (connection == null) {
+			return null;
+		}
+		if (currentConnectionPropertySource != null) {
+			currentConnectionPropertySource.dispose();
+		}
+		return currentConnectionPropertySource = new ConnectionPropertySource(connection);
+	}
+
+	private ResourcePropertySource<? extends IResource> createResourcePropertySource(Object adaptableObject) {
+		IResource resource = Adapters.adapt(adaptableObject, IResource.class);
+		if (resource == null) {
+			return null;
+		}
+		switch (resource.getKind()) {
+		case ResourceKind.BUILD:
+			return new BuildPropertySource((IBuild) resource);
+		case ResourceKind.BUILD_CONFIG:
+			return new BuildConfigPropertySource((IBuildConfig) resource);
+		case ResourceKind.EVENT:
+			return new EventPropertySource((IEvent) resource);
+		case ResourceKind.IMAGE_STREAM:
+			return new ImageStreamPropertySource((IImageStream) resource);
+		case ResourceKind.POD:
+			return new PodPropertySource((IPod) resource);
+		case ResourceKind.REPLICATION_CONTROLLER:
+			return new ReplicationControllerPropertySource((IReplicationController) resource);
+		case ResourceKind.ROUTE:
+			return new RoutePropertySource((IRoute) resource);
+		case ResourceKind.SERVICE:
+			return new ServicePropertySource((IService) resource);
+		case ResourceKind.PVC:
+			return new StoragePropertySource((IPersistentVolumeClaim) resource);
+		default:
+			return new ResourcePropertySource<>(resource);
+		}
 	}
 
 	@Override
