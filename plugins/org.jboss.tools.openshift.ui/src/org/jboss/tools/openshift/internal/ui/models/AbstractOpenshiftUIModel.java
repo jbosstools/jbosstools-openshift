@@ -67,5 +67,12 @@ abstract public class AbstractOpenshiftUIModel<R, T extends AbstractOpenshiftUIM
 		}
 		copy.forEach(l -> l.elementChanged(source));
 	}
+	
+	@Override
+	public T getRoot() {
+		return (T) this;
+	}
+
+
 
 }

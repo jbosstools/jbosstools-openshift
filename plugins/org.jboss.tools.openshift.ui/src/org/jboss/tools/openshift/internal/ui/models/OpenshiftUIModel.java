@@ -99,11 +99,6 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIModel<ConnectionsRegist
 		}
 	}
 
-	@Override
-	public OpenshiftUIModel getRoot() {
-		return this;
-	}
-
 	public Collection<ConnectionWrapper> getConnections() {
 		synchronized (connections) {
 			return new ArrayList<ConnectionWrapper>(connections.values());
