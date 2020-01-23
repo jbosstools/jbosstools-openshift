@@ -51,7 +51,12 @@ Require-Bundle: org.jboss.tools.openshift.common.ui;bundle-version="[3.0.0,4.0.0
  org.eclipse.core.expressions;bundle-version="3.5.0",
  org.eclipse.jst.server.core,
  org.eclipse.swt;bundle-version="3.104.1",
- org.eclipse.core.databinding.observable
+ org.eclipse.core.databinding.observable,
+ org.apache.commons.exec,
+ com.fasterxml.jackson.core.jackson-core,
+ com.fasterxml.jackson.core.jackson-databind,
+ com.fasterxml.jackson.core.jackson-annotations,
+ org.jboss.tools.common
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",

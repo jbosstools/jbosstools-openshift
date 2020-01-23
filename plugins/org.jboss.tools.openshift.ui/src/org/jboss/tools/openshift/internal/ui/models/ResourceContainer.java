@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 import com.openshift.restclient.model.IResource;
 
-abstract class ResourceContainer<R extends IResource, P extends AbstractOpenshiftUIElement<?, ?>>
+abstract class ResourceContainer<R extends IResource, P extends AbstractOpenshiftUIElement<?, ?, OpenshiftUIModel>>
 		extends AbstractResourceWrapper<R, P> implements IResourceContainer<R, P> {
 	private Map<IResource, AbstractResourceWrapper<?, ?>> containedResources = new HashMap<>();
 	private Object childrenLock = new Object();

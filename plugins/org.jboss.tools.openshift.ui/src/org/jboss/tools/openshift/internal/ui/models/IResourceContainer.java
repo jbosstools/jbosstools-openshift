@@ -16,7 +16,7 @@ import java.util.Collection;
  * A container for resources.
  * @author Thomas Mäder
  */
-public interface IResourceContainer<R, P extends IOpenshiftUIElement<?, ?>> extends IOpenshiftUIElement<R, P> {
+public interface IResourceContainer<R, P extends IOpenshiftUIElement<?, ?, OpenshiftUIModel>> extends IOpenshiftUIElement<R, P, OpenshiftUIModel> {
 	Collection<IResourceWrapper<?, ?>> getResourcesOfKind(String kind);
 
 	<T extends IResourceWrapper<?, ?>> Collection<T> getResourcesOfType(Class<T> clazz);

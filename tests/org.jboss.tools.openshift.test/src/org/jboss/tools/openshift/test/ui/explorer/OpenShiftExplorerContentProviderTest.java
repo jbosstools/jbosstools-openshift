@@ -158,7 +158,7 @@ public class OpenShiftExplorerContentProviderTest {
 	public class VoidElementListener implements IElementListener {
 
 		@Override
-		public void elementChanged(IOpenshiftUIElement<?, ?> element) {
+		public void elementChanged(IOpenshiftUIElement<?, ?, ?> element) {
 		}
 	}
 

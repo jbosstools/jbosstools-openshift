@@ -12,9 +12,9 @@ package org.jboss.tools.openshift.internal.ui.models;
 
 import com.openshift.restclient.model.IResource;
 
-class ResourceWrapper extends AbstractResourceWrapper<IResource, AbstractOpenshiftUIElement<?, ?>> {
+class ResourceWrapper extends AbstractResourceWrapper<IResource, AbstractOpenshiftUIElement<?, ?, OpenshiftUIModel>> {
 
-	public ResourceWrapper(AbstractOpenshiftUIElement<?, ?> parent, IResource resource) {
+	public ResourceWrapper(AbstractOpenshiftUIElement<?, ?, OpenshiftUIModel> parent, IResource resource) {
 		super(parent, resource);
 	}
 

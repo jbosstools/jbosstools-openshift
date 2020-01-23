@@ -24,7 +24,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryList
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 
-public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegistry, OpenshiftUIModel> {
+public class OpenshiftUIModel extends AbstractOpenshiftUIModel<ConnectionsRegistry, OpenshiftUIModel> {
 
 	protected static class OpenshiftUIModelSingletonHolder {
 		public static final OpenshiftUIModel INSTANCE = new OpenshiftUIModel(
@@ -36,7 +36,6 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegi
 	}
 
 	private Map<IOpenShiftConnection, ConnectionWrapper> connections = new HashMap<>();
-	private List<IElementListener> listeners = new ArrayList<IElementListener>();
 
 	private IConnectionsRegistryListener listener;
 
@@ -98,49 +97,6 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegi
 		synchronized (connections) {
 			connections.remove(connection);
 		}
-	}
-
-	@Override
-	protected void fireChanged(IOpenshiftUIElement<?, ?> source) {
-		if (Display.getCurrent() != null) {
-			dispatchChange(source);
-		} else {
-			Display.getDefault().asyncExec(new Runnable() {
-
-				@Override
-				public void run() {
-					dispatchChange(source);
-				}
-			});
-		}
-	}
-
-	private void dispatchChange(IOpenshiftUIElement<?, ?> source) {
-		Collection<IElementListener> copy = new ArrayList<>();
-		synchronized (listeners) {
-			copy.addAll(listeners);
-		}
-		copy.forEach(l -> l.elementChanged(source));
-	}
-
-	public void addListener(IElementListener l) {
-		synchronized (listeners) {
-			listeners.add(l);
-		}
-	}
-
-	public void removeListener(IElementListener l) {
-		synchronized (listeners) {
-			int lastIndex = listeners.lastIndexOf(l);
-			if (lastIndex >= 0) {
-				listeners.remove(lastIndex);
-			}
-		}
-	}
-
-	@Override
-	public OpenshiftUIModel getRoot() {
-		return this;
 	}
 
 	public Collection<ConnectionWrapper> getConnections() {

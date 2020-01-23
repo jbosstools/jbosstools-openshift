@@ -19,7 +19,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.navigator.IDescriptionProvider;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
@@ -48,26 +47,7 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Andre Dietisheim
  * @author Jeff Maury
  */
-public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider implements IDescriptionProvider {
-	//Limit for label length = baseText.length + qualifiedText.length
-	private static final int DEFAULT_LABEL_LIMIT = 60;
-
-	private int labelLimit;
-
-	public OpenShiftExplorerLabelProvider() {
-		setLabelLimit(DEFAULT_LABEL_LIMIT);
-	}
-
-	/**
-	 * Set limit of label length in characters. 
-	 * @param limit
-	 */
-	public void setLabelLimit(int limit) {
-		if (limit <= 0) {
-			throw new IllegalArgumentException("Label limit cannot be less than 1: " + limit);
-		}
-		labelLimit = limit;
-	}
+public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 
 	@Override
 	public String getText(Object element) {
@@ -76,7 +56,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 			String name = project.getName();
 			if (org.apache.commons.lang.StringUtils.isNotEmpty(project.getDisplayName())) {
 				String[] parts = new String[] { project.getDisplayName(), name };
-				applyEllipses(parts);
+				applyEllipses(parts, labelLimit);
 				name = parts[0] + " (" + parts[1] + ")";
 			}
 			return name;
@@ -137,47 +117,47 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 	}
 
 	@Override
-	public StyledString getStyledText(Object element) {
+	public StyledString getStyledText(Object element, int limit) {
 		if (element instanceof IServiceWrapper) {
 			IServiceWrapper d = (IServiceWrapper) element;
-			return style(d.getWrapped().getName(), formatRoute(d.getResourcesOfKind(ResourceKind.ROUTE)));
+			return style(d.getWrapped().getName(), formatRoute(d.getResourcesOfKind(ResourceKind.ROUTE)), limit);
 		}
 		element = getAdaptedElement(element);
 		if (element instanceof NewProjectLinkNode) {
-			return getStyledText((NewProjectLinkNode) element);
+			return getStyledText((NewProjectLinkNode) element, limit);
 		} else if (element instanceof IApplicationSource) {
-			return getStyledText((IApplicationSource) element);
+			return getStyledText((IApplicationSource) element, limit);
 		}
 		if (element instanceof IResource) {
 			IResource resource = (IResource) element;
 			switch (resource.getKind()) {
 			case ResourceKind.BUILD:
-				return getStyledText((IBuild) resource);
+				return getStyledText((IBuild) resource, limit);
 			case ResourceKind.BUILD_CONFIG:
-				return getStyledText((IBuildConfig) resource);
+				return getStyledText((IBuildConfig) resource, limit);
 			case ResourceKind.DEPLOYMENT_CONFIG:
-				return getStyledText((IDeploymentConfig) resource);
+				return getStyledText((IDeploymentConfig) resource, limit);
 			case ResourceKind.IMAGE_STREAM:
-				return getStyledText((IImageStream) resource);
+				return getStyledText((IImageStream) resource, limit);
 			case ResourceKind.POD:
-				return getStyledText((IPod) resource);
+				return getStyledText((IPod) resource, limit);
 			case ResourceKind.PROJECT:
-				return getStyledText((IProject) resource);
+				return getStyledText((IProject) resource, limit);
 			case ResourceKind.ROUTE:
-				return getStyledText((IRoute) resource);
+				return getStyledText((IRoute) resource, limit);
 			case ResourceKind.REPLICATION_CONTROLLER:
-				return getStyledText((IReplicationController) resource);
+				return getStyledText((IReplicationController) resource, limit);
 			case ResourceKind.SERVICE:
 				IService service = (IService) resource;
-				return getStyledText(service);
+				return getStyledText(service, limit);
 			default:
 				break;
 			}
 		}
 		if (element instanceof Connection) {
-			return getStyledText((Connection) element);
+			return getStyledText((Connection) element, limit);
 		}
-		return super.getStyledText(element);
+		return super.getStyledText(element, limit);
 	}
 
 	private String formatRoute(Collection<IResourceWrapper<?, ?>> routes) {
@@ -189,51 +169,51 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 		return "";
 	}
 
-	private StyledString getStyledText(IService service) {
+	private StyledString getStyledText(IService service, int limit) {
 		String serviceQualifiedText = String.format("selector: %s", StringUtils.serialize(service.getSelector()));
-		return style(service.getName(), serviceQualifiedText);
+		return style(service.getName(), serviceQualifiedText, limit);
 	}
 
-	private StyledString getStyledText(IReplicationController replicationController) {
+	private StyledString getStyledText(IReplicationController replicationController, int limit) {
 		return style(replicationController.getName(),
-				String.format("selector: %s", StringUtils.serialize(replicationController.getReplicaSelector())));
+				String.format("selector: %s", StringUtils.serialize(replicationController.getReplicaSelector())), limit);
 	}
 
-	private StyledString getStyledText(IRoute route) {
-		return style(route.getName(), String.format("%s%s", route.getHost(), route.getPath()));
+	private StyledString getStyledText(IRoute route, int limit) {
+		return style(route.getName(), String.format("%s%s", route.getHost(), route.getPath()), limit);
 	}
 
-	private StyledString getStyledText(IBuild build) {
+	private StyledString getStyledText(IBuild build, int limit) {
 		return style(build.getName(),
-				build.getStatus() == null ? "Build" : String.format("%s %s", "Build", build.getStatus()));
+				build.getStatus() == null ? "Build" : String.format("%s %s", "Build", build.getStatus()), limit);
 	}
 
-	private StyledString getStyledText(IBuildConfig config) {
-		return style(config.getName(), config.getSourceURI());
+	private StyledString getStyledText(IBuildConfig config, int limit) {
+		return style(config.getName(), config.getSourceURI(), limit);
 	}
 
-	private StyledString getStyledText(IDeploymentConfig config) {
+	private StyledString getStyledText(IDeploymentConfig config, int limit) {
 		return style(config.getName(),
-				String.format("selector: %s", StringUtils.serialize(config.getReplicaSelector())));
+				String.format("selector: %s", StringUtils.serialize(config.getReplicaSelector())), limit);
 	}
 
-	private StyledString getStyledText(IPod pod) {
-		return style(pod.getName(), pod.getStatus() == null ? "Pod" : String.format("%s %s", "Pod", pod.getStatus()));
+	private StyledString getStyledText(IPod pod, int limit) {
+		return style(pod.getName(), pod.getStatus() == null ? "Pod" : String.format("%s %s", "Pod", pod.getStatus()), limit);
 	}
 
-	private StyledString getStyledText(IImageStream repo) {
-		return style(repo.getName(), repo.getDockerImageRepository().toString());
+	private StyledString getStyledText(IImageStream repo, int limit) {
+		return style(repo.getName(), repo.getDockerImageRepository().toString(), limit);
 	}
 
-	private StyledString getStyledText(Connection conn) {
+	private StyledString getStyledText(Connection conn, int limit) {
 		String prefix = org.apache.commons.lang.StringUtils.defaultIfBlank(conn.getUsername(), "<unknown user>");
 		if (prefix == null) {
 			prefix = "<unknown user>";
 		}
-		return style(prefix, conn.toString());
+		return style(prefix, conn.toString(), limit);
 	}
 
-	private StyledString getStyledText(IApplicationSource source) {
+	private StyledString getStyledText(IApplicationSource source, int limit) {
 		String tags = NLS.bind("({0})", org.apache.commons.lang.StringUtils.join(source.getTags(), ", "));
 		StringBuilder qualifier = new StringBuilder();
 		if (!StringUtils.isEmpty(tags)) {
@@ -242,34 +222,17 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 		if (!StringUtils.isEmpty(source.getNamespace())) {
 			qualifier.append(" - ").append(source.getNamespace());
 		}
-		return style(source.getName(), qualifier.toString());
+		return style(source.getName(), qualifier.toString(), limit);
 	}
 
-	private StyledString getStyledText(IProject project) {
+	private StyledString getStyledText(IProject project, int limit) {
 		if (org.apache.commons.lang.StringUtils.isNotBlank(project.getDisplayName())) {
-			return style(project.getDisplayName(), project.getName());
+			return style(project.getDisplayName(), project.getName(), limit);
 		}
-		return style(project.getName(), "");
+		return style(project.getName(), "", limit);
 	}
 
-	private StyledString style(String baseText, String qualifiedText) {
-		String[] parts = new String[] { baseText, qualifiedText };
-		applyEllipses(parts);
-		baseText = parts[0];
-		qualifiedText = parts[1];
-		StyledString value = new StyledString(baseText);
-		if (org.apache.commons.lang.StringUtils.isNotBlank(qualifiedText)) {
-			value.append(" ").append(qualifiedText, StyledString.QUALIFIER_STYLER);
-
-		}
-		return value;
-	}
-
-	private void applyEllipses(String[] parts) {
-		StringUtils.shorten(parts, labelLimit);
-	}
-
-	private StyledString getStyledText(NewProjectLinkNode node) {
+	private StyledString getStyledText(NewProjectLinkNode node, int limit) {
 		StyledString value = new StyledString();
 		value.append(node.toString(), new StyledString.Styler() {
 
@@ -281,21 +244,5 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 
 		});
 		return value;
-	}
-
-	//Status line has with CLabel its own ellipses adjusting string to available space.
-	//We could set Integer.MAX_VALUE as limit, but performance will be too low for really long texts.
-	private static final int STATUS_LINE_LABEL_LIMIT = 512;
-
-	private static final OpenShiftExplorerLabelProvider instanceForDescription;
-
-	static {
-		instanceForDescription = new OpenShiftExplorerLabelProvider();
-		instanceForDescription.setLabelLimit(STATUS_LINE_LABEL_LIMIT);
-	}
-
-	@Override
-	public String getDescription(Object anElement) {
-		return instanceForDescription.getStyledText(anElement).getString();
 	}
 }
