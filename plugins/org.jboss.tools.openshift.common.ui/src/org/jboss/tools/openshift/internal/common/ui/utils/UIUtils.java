@@ -456,7 +456,7 @@ public class UIUtils {
 	private static int convertHorizontalDLUsToPixels(Control control, int dlus) {
 		GC gc = new GC(control);
 		gc.setFont(control.getFont());
-		int averageWidth = gc.getFontMetrics().getAverageCharWidth();
+		double averageWidth = gc.getFontMetrics().getAverageCharacterWidth();
 		gc.dispose();
 
 		double horizontalDialogUnitSize = averageWidth * 0.25;

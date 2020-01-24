@@ -1351,6 +1351,48 @@ $            <command
                 </visibleWhen>
             </command>
         </menuContribution>
+        <!-- menu: Describe -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.describe"
+                     style="push"
+                     tooltip="Describe">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                            <or>
+                                <adapt
+                                      type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement">
+                                      <or>
+                                        <test
+                                            args="pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                        </test>
+                                        <test
+                                            args="no context"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                        </test>
+                                      </or>
+                                </adapt>
+                                <adapt
+                                      type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceElement">
+                                </adapt>
+                                <adapt
+                                      type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement">
+                                </adapt>
+                              </or>
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
         <!-- menu: Push -->
         <menuContribution
                           allPopups="false"
@@ -1672,6 +1714,10 @@ $            <command
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.CreateStorageHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.storage.new">
         </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.DescribeHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.describe">
+        </handler>        
     </extension>
 
     <!-- adapters -->
@@ -1900,6 +1946,10 @@ $            <command
         <command
                  id="org.jboss.tools.openshift.ui.command.applicationexplorer.storage.new"
                  name="Storage">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.describe"
+                 name="Describe">
         </command>
         
     </extension>
