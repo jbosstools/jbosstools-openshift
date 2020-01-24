@@ -122,7 +122,7 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
 	private ApplicationExplorerUIModel() {
 		super(null, new ClusterInfo());
 		loadProjects();
-		watcherJob = Job.create("Watching kubeconfig", this::startWatcher);
+		watcherJob = Job.createSystem("Watching kubeconfig", this::startWatcher);
 		watcherJob.schedule();
 		this.config = loadConfig();
 	}

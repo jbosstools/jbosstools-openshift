@@ -11,28 +11,19 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
-import java.util.List;
-
-import org.apache.commons.io.IOUtils;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceElement;
-import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateURLModel;
-import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateURLWizard;
-
 import io.fabric8.openshift.client.OpenShiftClient;
 
 /**
