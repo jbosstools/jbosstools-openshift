@@ -1318,6 +1318,39 @@ $            <command
                 </visibleWhen>
             </command>
         </menuContribution>
+        <!-- menu: New Storage -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerViewPopup.new">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.storage.new"
+                     style="push"
+                     tooltip="New Storage">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement" />
+                                  <or>
+                                      <test
+                                            args="pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                                      <test
+                                            args="not pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                                  </or>
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
         <!-- menu: Push -->
         <menuContribution
                           allPopups="false"
@@ -1635,6 +1668,10 @@ $            <command
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.CreateURLHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.url.new">
         </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.CreateStorageHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.storage.new">
+        </handler>        
     </extension>
 
     <!-- adapters -->
@@ -1859,6 +1896,10 @@ $            <command
         <command
                  id="org.jboss.tools.openshift.ui.command.applicationexplorer.url.new"
                  name="URL">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.storage.new"
+                 name="Storage">
         </command>
         
     </extension>

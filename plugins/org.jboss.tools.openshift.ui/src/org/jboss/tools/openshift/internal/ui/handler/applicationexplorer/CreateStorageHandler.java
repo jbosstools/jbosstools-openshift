@@ -11,8 +11,6 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
-import java.util.List;
-
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
@@ -24,16 +22,17 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.odo.Odo;
+import org.jboss.tools.openshift.core.odo.Storage;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
-import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateURLModel;
-import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateURLWizard;
+import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateStorageModel;
+import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateStorageWizard;
 
 /**
  * @author Red Hat Developers
  */
-public class CreateURLHandler extends OdoHandler {
+public class CreateStorageHandler extends OdoHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -46,28 +45,21 @@ public class CreateURLHandler extends OdoHandler {
 			Odo odo = component.getRoot().getOdo();
 			String projectName = component.getParent().getParent().getWrapped().getMetadata().getName();
 			String applicationName = component.getParent().getWrapped().getName();
-			List<Integer> ports = odo.getServicePorts(component.getRoot().getClient(), projectName, applicationName,
-			        component.getWrapped().getName());
-			if (ports.isEmpty()) {
-				MessageDialog.openWarning(HandlerUtil.getActiveShell(event), "Create url",
-				        "No ports defined for this components to bind to.");
-			} else {
-				final CreateURLModel model = new CreateURLModel(odo, projectName, applicationName,
-				        component.getWrapped().getName(), ports);
-				final IWizard createURLWizard = new CreateURLWizard(model);
-				if (WizardUtils.openWizardDialog(createURLWizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
-					executeInJob("Create url", () -> execute(model, component));
+				final CreateStorageModel model = new CreateStorageModel(odo, projectName, applicationName,
+				        component.getWrapped().getName(), Storage.getSizes());
+				final IWizard createStorageWizard = new CreateStorageWizard(model);
+				if (WizardUtils.openWizardDialog(createStorageWizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
+					executeInJob("Create storage", () -> execute(model, component));
 				}
-			}
 			return Status.OK_STATUS;
 		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 	}
 	
-	private void execute(CreateURLModel model, ComponentElement component) {
+	private void execute(CreateStorageModel model, ComponentElement component) {
 		try {
-			model.getOdo().createURL(model.getProjectName(), model.getApplicationName(), component.getWrapped().getPath(), model.getComponentName(), model.getURLName(), model.getPort());
+			model.getOdo().createStorage(model.getProjectName(), model.getApplicationName(), component.getWrapped().getPath(), model.getComponentName(), model.getStorageName(), model.getMountPath(), model.getSize());
 			component.refresh();
 		} catch (IOException e) {
 			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(), "Create url", "Can't create url error message:" + e.getLocalizedMessage()));
