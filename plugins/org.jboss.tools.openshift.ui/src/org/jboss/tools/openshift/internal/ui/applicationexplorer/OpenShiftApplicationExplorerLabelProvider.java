@@ -11,8 +11,11 @@
 package org.jboss.tools.openshift.internal.ui.applicationexplorer;
 
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.swt.graphics.Image;
 import org.jboss.tools.openshift.core.odo.KubernetesLabels;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
+import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
@@ -53,6 +56,26 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 			return style(KubernetesLabels.getComponentName(((ServiceElement)element).getWrapped()), "", limit);
 		}
 		return super.getStyledText(element, limit);
+	}
+
+	@Override
+	public Image getImage(Object element) {
+		if (element instanceof ApplicationExplorerUIModel) {
+			return OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
+		} else if (element instanceof ProjectElement) {
+			return OpenShiftImages.PROJECT_IMG;
+		} else if (element instanceof ApplicationElement) {
+			return OpenShiftImages.APPLICATION_IMG;
+		} else if (element instanceof ComponentElement) {
+			return OpenShiftImages.COMPONENT_IMG;
+		} else if (element instanceof ServiceElement) {
+			return OpenShiftImages.SERVICE_IMG;
+		} else if (element instanceof URLElement) {
+			return OpenShiftImages.ROUTE_IMG;
+		} else if (element instanceof StorageElement) {
+			return OpenShiftImages.STORAGE_IMG;
+		}
+		return super.getImage(element);
 	}
 	
 	

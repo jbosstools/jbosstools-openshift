@@ -63,6 +63,16 @@ public class OpenShiftImages {
 
 	public static final ImageDescriptor OPENSHIFT_LOGO_DESC = repo.create("openshift-logo-white-icon.png"); //$NON-NLS-1$
 	public static final Image OPENSHIFT_LOGO_IMG = repo.getImage("openshift-logo-white-icon.png"); //$NON-NLS-1$
+	
+	/*
+	 * Application Explorer
+	 */
+	public static final ImageDescriptor APPLICATION = repo.create("application.png"); //$NON-NLS-1$
+	public static final Image APPLICATION_IMG = repo.getImage("application.png"); //$NON-NLS-1$
+	public static final ImageDescriptor COMPONENT = repo.create("component.png"); //$NON-NLS-1$
+	public static final Image COMPONENT_IMG = repo.getImage("component.png"); //$NON-NLS-1$
+	public static final ImageDescriptor STORAGE = repo.create("storage.png"); //$NON-NLS-1$
+	public static final Image STORAGE_IMG = repo.getImage("storage.png"); //$NON-NLS-1$
 
 	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<>();
 
