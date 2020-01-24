@@ -45,6 +45,7 @@ public abstract class OdoHandler extends AbstractHandler {
 				}
 			});
 		}
+		job.schedule();
 	}
 	
 	protected void executeInJob(String name, Runnable action) {

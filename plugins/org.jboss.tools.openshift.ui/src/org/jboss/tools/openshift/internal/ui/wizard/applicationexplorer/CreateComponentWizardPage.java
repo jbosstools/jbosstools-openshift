@@ -73,7 +73,7 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 		ISWTObservableValue<String> componentNameObservable = WidgetProperties.text(SWT.Modify).observe(componentNameText);
 		Binding componentNameBinding = ValueBindingBuilder.bind(componentNameObservable)
 				.validatingAfterGet(new MandatoryStringValidator("Please specify a name"))
-				.to(BeanProperties.value(CreateComponentModel.PROPERTY_COMPONENT_NAME).observe(model))
+				.to(BeanProperties.value(ComponentModel.PROPERTY_COMPONENT_NAME).observe(model))
 				.in(dbc);
 		ControlDecorationSupport.create(componentNameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 

@@ -1292,6 +1292,32 @@ $            <command
                 </visibleWhen>
             </command>
         </menuContribution>
+        <!-- menu: New URL -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerViewPopup.new">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.url.new"
+                     style="push"
+                     tooltip="New URL">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement" />
+                                      <test
+                                            args="pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
         <!-- menu: Push -->
         <menuContribution
                           allPopups="false"
@@ -1605,6 +1631,10 @@ $            <command
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.WatchHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.watch">
         </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.CreateURLHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.url.new">
+        </handler>        
     </extension>
 
     <!-- adapters -->
@@ -1825,6 +1855,10 @@ $            <command
         <command
                  id="org.jboss.tools.openshift.ui.command.applicationexplorer.component.watch"
                  name="Watch">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.url.new"
+                 name="URL">
         </command>
         
     </extension>
