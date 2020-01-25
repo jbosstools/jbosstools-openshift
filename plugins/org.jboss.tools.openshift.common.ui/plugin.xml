@@ -152,6 +152,9 @@
                 <insertionPoint
                     name="group.new"
                     separator="true"/>
+                <insertionPoint
+                    name="group.delete"
+                    separator="true"/>
      </popupMenu>
   </viewer>
 	</extension>

@@ -1547,6 +1547,39 @@ $            <command
                 </visibleWhen>
             </command>
         </menuContribution>
+        <!-- menu: Delete -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.delete">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.delete"
+                     style="push"
+                     tooltip="Delete">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                            <or>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement" />
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement" />
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement" />
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceElement" />
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.URLElement" />
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.StorageElement" />
+                              </or>
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
         
     </extension>
 
@@ -1747,6 +1780,10 @@ $            <command
         <handler
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.UndeployHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.undeploy">
+        </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.DeleteHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.delete">
         </handler>        
     </extension>
 
@@ -1984,6 +2021,10 @@ $            <command
         <command
                  id="org.jboss.tools.openshift.ui.command.applicationexplorer.component.undeploy"
                  name="Undeploy">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.delete"
+                 name="Delete">
         </command>
         
     </extension>
