@@ -22,7 +22,6 @@ import java.net.URL;
 import org.apache.commons.io.FileUtils;
 import org.jboss.tools.common.util.DownloadHelper;
 import org.jboss.tools.openshift.internal.test.OpenShiftTestActivator;
-import org.jboss.tools.usage.internal.preferences.UsageReportPreferences;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,8 +33,6 @@ public class OdoDownloadHelperTest {
 	@BeforeClass
 	public static void setup() throws IOException {
 		FileUtils.deleteDirectory(new File(ODO_CACHE_DIR));
-		UsageReportPreferences.setEnabled(false);
-		UsageReportPreferences.setAskUser(false);
 	}
 
 	@AfterClass
