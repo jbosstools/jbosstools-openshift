@@ -12,9 +12,8 @@ package org.jboss.tools.openshift.test.common.ui.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +22,6 @@ import java.net.URL;
 import org.apache.commons.io.FileUtils;
 import org.jboss.tools.common.util.DownloadHelper;
 import org.jboss.tools.openshift.internal.test.OpenShiftTestActivator;
-import org.jboss.tools.usage.event.UsageReporter;
 import org.jboss.tools.usage.internal.preferences.UsageReportPreferences;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
