@@ -56,6 +56,5 @@ public class OdoDownloadHelperTest {
 		assertNotNull(cmd);
 		assertEquals(ODO_CACHE_DIR + File.separatorChar + "cache" + File.separatorChar + "1.0.2" + File.separatorChar
 				+ "odo", cmd);
-		System.out.println("--------end");
 	}
 }
