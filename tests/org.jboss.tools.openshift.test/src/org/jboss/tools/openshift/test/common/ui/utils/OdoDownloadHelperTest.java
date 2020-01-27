@@ -29,7 +29,7 @@ import org.junit.Test;
 
 public class OdoDownloadHelperTest {
 
-	public final static String ODO_CACHE_DIR = System.getProperty("user.home") + File.separatorChar + ".odo-tests"; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String ODO_CACHE_DIR = System.getProperty("user.home") + File.separatorChar + ".odo-tests"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	@BeforeClass
 	public static void setup() throws IOException {
