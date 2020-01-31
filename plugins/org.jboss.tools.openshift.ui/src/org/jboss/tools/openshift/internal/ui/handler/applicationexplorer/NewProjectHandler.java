@@ -11,10 +11,10 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
@@ -26,7 +26,7 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.Applicat
 /**
  * @author Red Hat Developers
  */
-public class NewProjectHandler extends AbstractHandler {
+public class NewProjectHandler extends OdoHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -37,16 +37,29 @@ public class NewProjectHandler extends AbstractHandler {
 		}
 		Shell shell = HandlerUtil.getActiveShell(event);
 		InputDialog dialog = new InputDialog(shell, "New project", "Project name:", null, null);
-		try {
-			if (dialog.open() == Window.OK) {
-				cluster.getOdo().createProject(dialog.getValue());
-				cluster.refresh();
-			}
-		} catch (IOException e) {
-			throw new ExecutionException(e.getLocalizedMessage(), e);
+		if (dialog.open() == Window.OK) {
+			executeInJob("Create project", () -> execute(shell, cluster, dialog.getValue()));
 		}
 		return null;
 	}
 
+	/**
+	 * @param cluster
+	 * @param value
+	 * @return
+	 */
+	private void execute(Shell shell, ApplicationExplorerUIModel cluster, String project) {
+		Notification notification = openNotification(shell, "Creating project " + project);
+		try {
+			cluster.getOdo().createProject(project);
+			cluster.refresh();
+			openNotification(notification, shell, "Project " + project + " created");
+		} catch (IOException e) {
+			shell.getDisplay().asyncExec(() -> {
+				notification.close();
+				MessageDialog.openError(shell, "Create project", "Error creating project " + project);
+			});
+		}
+	}
 
 }

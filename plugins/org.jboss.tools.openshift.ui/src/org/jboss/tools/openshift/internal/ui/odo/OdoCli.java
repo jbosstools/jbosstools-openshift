@@ -289,7 +289,7 @@ public class OdoCli implements Odo {
 
   private <T> List<T> loadList(String output, Function<String[], T> mapper) throws IOException {
     try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
-      return reader.lines().skip(1).map(s -> s.replaceAll("\\s{1,}", "|"))
+      return reader.lines().skip(1).filter(s -> !s.trim().isEmpty()).map(s -> s.replaceAll("\\s{1,}", "|"))
         .map(s -> s.split("\\|"))
         .map(mapper)
         .collect(Collectors.toList());

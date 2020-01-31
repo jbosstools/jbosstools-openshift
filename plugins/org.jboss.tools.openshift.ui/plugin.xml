@@ -1521,6 +1521,58 @@ $            <command
                 </visibleWhen>
             </command>
         </menuContribution>
+        <!-- menu: Link Service -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.link.service"
+                     style="push"
+                     tooltip="Link Service">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement" />
+                                      <test
+                                            args="pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
+        <!-- menu: Link Component -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.link.component"
+                     style="push"
+                     tooltip="Link Component">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement" />
+                                      <test
+                                            args="pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
         <!-- menu: Undeploy -->
         <menuContribution
                           allPopups="false"
@@ -1785,6 +1837,14 @@ $            <command
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.DeleteHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.delete">
         </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.LinkServiceHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.link.service">
+        </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.LinkComponentHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.link.component">
+        </handler>        
     </extension>
 
     <!-- adapters -->
@@ -2025,6 +2085,14 @@ $            <command
         <command
                  id="org.jboss.tools.openshift.ui.command.applicationexplorer.delete"
                  name="Delete">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.component.link.service"
+                 name="Link Service">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.component.link.component"
+                 name="Link Component">
         </command>
         
     </extension>

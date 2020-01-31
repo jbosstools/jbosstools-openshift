@@ -34,6 +34,7 @@ public class PushHandler extends AbstractHandler {
 		}
 		try {
 			component.getRoot().getOdo().push(component.getParent().getParent().getWrapped().getMetadata().getName(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
+			component.refresh();
 		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}

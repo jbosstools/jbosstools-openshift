@@ -80,7 +80,7 @@ public class CreateStorageModel extends ComponentModel {
 	}
 
 	/**
-	 * @return the ports
+	 * @return the sizes
 	 */
 	public List<String> getSizes() {
 		return sizes;
