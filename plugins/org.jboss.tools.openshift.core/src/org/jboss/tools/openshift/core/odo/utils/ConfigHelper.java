@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class ConfigHelper {
+	private ConfigHelper() {}
+	
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
     public static String getKubeConfigPath() {

@@ -10,13 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
-import java.util.List;
-
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
