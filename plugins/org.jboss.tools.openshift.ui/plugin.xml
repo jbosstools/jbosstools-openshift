@@ -1264,8 +1264,12 @@ $            <command
                         <count
                                value="1" />
                         <iterate>
+                          <or>
                                 <adapt
                                        type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement" />
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement" />
+                          </or>
                         </iterate>
                     </and>
                 </visibleWhen>
@@ -1285,8 +1289,12 @@ $            <command
                         <count
                                value="1" />
                         <iterate>
+                          <or>
                                 <adapt
                                        type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement" />
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement" />
+                          </or>
                         </iterate>
                     </and>
                 </visibleWhen>

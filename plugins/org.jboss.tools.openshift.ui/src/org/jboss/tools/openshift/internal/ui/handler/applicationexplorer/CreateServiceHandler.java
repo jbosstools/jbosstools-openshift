@@ -22,6 +22,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement;
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateServiceWizard;
 
@@ -33,13 +34,18 @@ public class CreateServiceHandler extends AbstractHandler {
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		ApplicationElement application = null;
 		ProjectElement project = UIUtils.getFirstElement(selection, ProjectElement.class);
 		if (project == null) {
-			return OpenShiftUIActivator.statusFactory().cancelStatus("No project selected"); //$NON-NLS-1$
+			application = UIUtils.getFirstElement(selection, ApplicationElement.class);
+			if (application == null) {
+				return OpenShiftUIActivator.statusFactory().cancelStatus("No project or application selected"); //$NON-NLS-1$
+			}
+			project = application.getParent();
 		}
 		try {
 			Odo odo = project.getParent().getOdo();
-			final IWizard createServiceWizard = new CreateServiceWizard(odo.getServiceTemplates(), project.getWrapped().getMetadata().getName(), "", odo);
+			final IWizard createServiceWizard = new CreateServiceWizard(odo.getServiceTemplates(), project.getWrapped().getMetadata().getName(), application==null?"":application.getWrapped().getName(), odo);
 			WizardUtils.openWizardDialog(createServiceWizard, HandlerUtil.getActiveShell(event));
 			return Status.OK_STATUS;
 		} catch (IOException e) {
