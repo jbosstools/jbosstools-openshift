@@ -16,6 +16,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.openshift.core.odo.ComponentState;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
@@ -34,6 +35,7 @@ public class PushHandler extends AbstractHandler {
 		}
 		try {
 			component.getRoot().getOdo().push(component.getParent().getParent().getWrapped().getMetadata().getName(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
+			component.getWrapped().setState(ComponentState.PUSHED);
 			component.refresh();
 		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
