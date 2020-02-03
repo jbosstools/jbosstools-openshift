@@ -70,6 +70,13 @@ public class ExecHelper {
 		IConsole odoConsole = new OdoConsole(p, command);
 		ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] { odoConsole });
 		ConsolePlugin.getDefault().getConsoleManager().showConsoleView(odoConsole);
+		if (waitForProcessToExit) {
+			try {
+				p.waitFor();
+			} catch (InterruptedException e) {
+				throw new IOException(e);
+			}
+		}
 	}
 
     public static void executeWithTerminal(File workingDirectory, String... command) throws IOException {

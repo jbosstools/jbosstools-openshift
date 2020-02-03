@@ -19,11 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.jboss.tools.openshift.core.odo.LocalConfig;
 import org.jboss.tools.openshift.core.odo.Odo;
@@ -163,16 +161,29 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
         }
     }
 
-    private void addContext(IProject project) {
+    public void addContext(IProject project) {
         try {
-            IFile file = project.getFile(new Path(ODO_CONFIG_YAML));
-            if (file != null && file.isAccessible()) {
-                LocalConfig config = LocalConfig.load(file.getLocationURI().toURL());
-                addContextToSettings(project.getLocation().toOSString(), config.getComponentSettings());
+            File file = new File(project.getLocation().toOSString(),  ODO_CONFIG_YAML);
+            if (file.exists()) {
+            	System.out.println("File " + file + " exists");
+                LocalConfig odoConfig = LocalConfig.load(file.toURI().toURL());
+                addContextToSettings(project.getLocation().toOSString(), odoConfig.getComponentSettings());
+            } else {
+            	System.out.println("File " + file + " does not exists");
             }
-        } catch (IOException e) { }
+            	
+        } catch (IOException e) {
+        	e.printStackTrace();
+        }
     }
 
+	/**
+	 * @param path
+	 */
+	public void removeContext(String path) {
+		components.remove(path);
+	}
+	
 	/**
 	 * 
 	 */
@@ -184,7 +195,6 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
 	
 	private void startWatcher(IProgressMonitor monitor) {
 		new ConfigWatcher(Paths.get(ConfigHelper.getKubeConfigPath()), this).run();
-		
 	}
 
 
@@ -225,4 +235,6 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
         String currentToken = KubeConfigUtils.getUserToken(currentConfig, currentContext);
         return !StringUtils.equals(newToken, currentToken);
   }
+
+
 }

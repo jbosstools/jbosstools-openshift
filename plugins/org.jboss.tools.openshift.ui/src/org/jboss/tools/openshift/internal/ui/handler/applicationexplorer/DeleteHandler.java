@@ -89,12 +89,16 @@ public class DeleteHandler extends OdoHandler {
 				        ((ApplicationElement) element).getParent().getWrapped().getMetadata().getName(),
 				        ((ApplicationElement) element).getWrapped().getName());
 			} else if (element instanceof ComponentElement) {
+				ComponentElement component = (ComponentElement) element;
 				odo.deleteComponent(
-				        ((ComponentElement) element).getParent().getParent().getWrapped().getMetadata().getName(),
-				        ((ComponentElement) element).getParent().getWrapped().getName(),
-				        ((ComponentElement) element).getWrapped().getPath(),
-				        ((ComponentElement) element).getWrapped().getName(),
-				        ((ComponentElement) element).getWrapped().getState() != ComponentState.NOT_PUSHED);
+				        component.getParent().getParent().getWrapped().getMetadata().getName(),
+				        component.getParent().getWrapped().getName(),
+				        component.getWrapped().getPath(),
+				        component.getWrapped().getName(),
+				        component.getWrapped().getState() != ComponentState.NOT_PUSHED);
+				if (component.getWrapped().hasContext()) {
+					component.getRoot().removeContext(component.getWrapped().getPath());
+				}
 			} else if (element instanceof ServiceElement) {
 				odo.deleteService(
 				        ((ServiceElement) element).getParent().getParent().getWrapped().getMetadata().getName(),
