@@ -165,16 +165,10 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
         try {
             File file = new File(project.getLocation().toOSString(),  ODO_CONFIG_YAML);
             if (file.exists()) {
-            	System.out.println("File " + file + " exists");
                 LocalConfig odoConfig = LocalConfig.load(file.toURI().toURL());
                 addContextToSettings(project.getLocation().toOSString(), odoConfig.getComponentSettings());
-            } else {
-            	System.out.println("File " + file + " does not exists");
-            }
-            	
-        } catch (IOException e) {
-        	e.printStackTrace();
-        }
+            }	
+        } catch (IOException e) {}
     }
 
 	/**
