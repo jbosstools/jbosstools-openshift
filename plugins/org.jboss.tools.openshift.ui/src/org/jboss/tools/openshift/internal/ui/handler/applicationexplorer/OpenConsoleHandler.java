@@ -16,6 +16,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
@@ -23,7 +24,7 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.Applicat
 /**
  * @author Red Hat Developers
  */
-public class AboutHandler extends AbstractHandler {
+public class OpenConsoleHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -33,7 +34,8 @@ public class AboutHandler extends AbstractHandler {
 			return OpenShiftUIActivator.statusFactory().cancelStatus("No cluster selected"); //$NON-NLS-1$
 		}
 		try {
-			cluster.getOdo().about();
+			String url = cluster.getOdo().consoleURL(cluster.getClient());
+			new BrowserUtility().checkedCreateInternalBrowser(url, url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());;
 		} catch (IOException e) {
 			throw new ExecutionException(e.getLocalizedMessage(), e);
 		}

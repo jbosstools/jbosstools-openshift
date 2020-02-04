@@ -1208,6 +1208,27 @@ $            <command
                 </visibleWhen>
             </command>
         </menuContribution>
+        <!-- menu: Open Console -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.openconsole"
+                     style="push"
+                     tooltip="Open Console">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel" />
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
         <!-- menu: About -->
         <menuContribution
                           allPopups="false"
@@ -1853,6 +1874,10 @@ $            <command
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.LinkComponentHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.link.component">
         </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.OpenConsoleHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.openconsole">
+        </handler>        
     </extension>
 
     <!-- adapters -->
@@ -2101,6 +2126,10 @@ $            <command
         <command
                  id="org.jboss.tools.openshift.ui.command.applicationexplorer.component.link.component"
                  name="Link Component">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.openconsole"
+                 name="Open Console">
         </command>
         
     </extension>
