@@ -23,13 +23,14 @@ import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.MessageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.StorageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.URLElement;
 
 /**
- * @author Jeff MAURY
+ * @author Red Hat Developers
  *
  */
 public class OpenShiftApplicationExplorerContentProvider implements ITreeContentProvider, IElementListener {
@@ -97,8 +98,8 @@ public class OpenShiftApplicationExplorerContentProvider implements ITreeContent
 			List<ProjectElement> childs = new ArrayList<>();
 			parentElement.getOdo().getProjects(parentElement.getClient()).forEach(project -> childs.add(new ProjectElement(project, parentElement)));
 			return childs.toArray();
-		} catch (IOException e) {
-			return new Object[] { "Login to cluster, can't connect" };
+		} catch (Exception e) {
+			return new Object[] { new MessageElement("Can't connect to cluster. Click to login.", parentElement) };
 		}
 	}
 

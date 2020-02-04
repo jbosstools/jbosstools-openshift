@@ -71,7 +71,7 @@ public abstract class OdoHandler extends AbstractHandler {
 		return openNotification(null, shell, text);
 	}
 
-	protected void executeInJob(String name, Runnable action) {
+	protected static void executeInJob(String name, Runnable action) {
 		Job job = Job.create(name, monitor -> {
 			try {
 				action.run();
