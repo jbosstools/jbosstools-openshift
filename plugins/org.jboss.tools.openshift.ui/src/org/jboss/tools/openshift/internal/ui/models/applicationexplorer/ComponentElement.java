@@ -14,7 +14,7 @@ import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
 
 /**
- * @author Jeff MAURY
+ * @author Red Hat Developers
  *
  */
 public class ComponentElement extends AbstractOpenshiftUIElement<Component, ApplicationElement, ApplicationExplorerUIModel> {

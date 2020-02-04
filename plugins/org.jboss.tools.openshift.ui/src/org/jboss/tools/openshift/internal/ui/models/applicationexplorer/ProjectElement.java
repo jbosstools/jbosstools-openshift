@@ -14,7 +14,7 @@ import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
 import io.fabric8.openshift.api.model.Project;
 
 /**
- * @author Jeff MAURY
+ * @author Red Hat Developers
  *
  */
 public class ProjectElement extends AbstractOpenshiftUIElement<Project, ApplicationExplorerUIModel, ApplicationExplorerUIModel> {

@@ -14,7 +14,7 @@ import org.jboss.tools.openshift.core.odo.Storage;
 import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
 
 /**
- * @author Jeff MAURY
+ * @author Red Hat Developers
  *
  */
 public class StorageElement extends AbstractOpenshiftUIElement<Storage, ComponentElement, ApplicationExplorerUIModel> {
