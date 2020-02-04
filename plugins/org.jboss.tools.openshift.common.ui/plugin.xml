@@ -153,6 +153,9 @@
                     name="group.new"
                     separator="true"/>
                 <insertionPoint
+                    name="group.login"
+                    separator="true"/>
+                <insertionPoint
                     name="group.common"
                     separator="true"/>
                 <insertionPoint
