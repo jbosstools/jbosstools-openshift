@@ -153,7 +153,19 @@
                     name="group.new"
                     separator="true"/>
                 <insertionPoint
+                    name="group.common"
+                    separator="true"/>
+                <insertionPoint
+                    name="group.link"
+                    separator="true"/>
+                <insertionPoint
+                    name="group.component"
+                    separator="true"/>
+                <insertionPoint
                     name="group.delete"
+                    separator="true"/>
+                <insertionPoint
+                    name="group.about"
                     separator="true"/>
      </popupMenu>
   </viewer>

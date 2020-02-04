@@ -1148,7 +1148,7 @@ $            <command
         <!-- menu: Login -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.login">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.login"
                      style="push"
@@ -1169,7 +1169,7 @@ $            <command
         <!-- menu: List Catalog Components -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.common">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.listcomponents"
                      style="push"
@@ -1190,7 +1190,7 @@ $            <command
         <!-- menu: List Catalog Services -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.common">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.listservices"
                      style="push"
@@ -1211,7 +1211,7 @@ $            <command
         <!-- menu: Open Console -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.common">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.openconsole"
                      style="push"
@@ -1232,7 +1232,7 @@ $            <command
         <!-- menu: About -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.about">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.about"
                      style="push"
@@ -1383,7 +1383,7 @@ $            <command
         <!-- menu: Describe -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.common">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.describe"
                      style="push"
@@ -1425,7 +1425,7 @@ $            <command
         <!-- menu: Push -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.component">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.push"
                      style="push"
@@ -1459,7 +1459,7 @@ $            <command
         <!-- menu: Watch -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.component">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.watch"
                      style="push"
@@ -1486,7 +1486,7 @@ $            <command
         <!-- menu: Show log -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.common">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.show"
                      style="push"
@@ -1520,7 +1520,7 @@ $            <command
         <!-- menu: Follow log -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.common">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.follow"
                      style="push"
@@ -1553,7 +1553,7 @@ $            <command
         <!-- menu: Link Service -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.link">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.link.service"
                      style="push"
@@ -1579,7 +1579,7 @@ $            <command
         <!-- menu: Link Component -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.link">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.link.component"
                      style="push"
@@ -1605,7 +1605,7 @@ $            <command
         <!-- menu: Undeploy -->
         <menuContribution
                           allPopups="false"
-                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.component">
             <command
                      commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.undeploy"
                      style="push"
