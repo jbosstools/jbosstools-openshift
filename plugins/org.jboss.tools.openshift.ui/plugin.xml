@@ -1628,6 +1628,34 @@ $            <command
                 </visibleWhen>
             </command>
         </menuContribution>
+        <!-- menu: Open In Browser -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.common">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.url.openinbrowser"
+                     style="push"
+                     tooltip="Open in Browser">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.URLElement" />
+                                   <not>
+                                      <test
+                                            args="not pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                                   </not>
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
         <!-- menu: Delete -->
         <menuContribution
                           allPopups="false"
@@ -1877,6 +1905,10 @@ $            <command
         <handler
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.OpenConsoleHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.openconsole">
+        </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.OpenInBrowserHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.url.openinbrowser">
         </handler>        
     </extension>
 
@@ -2130,6 +2162,10 @@ $            <command
         <command
                  id="org.jboss.tools.openshift.ui.command.applicationexplorer.openconsole"
                  name="Open Console">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.url.openinbrowser"
+                 name="Open in Browser">
         </command>
         
     </extension>
@@ -2493,7 +2529,7 @@ $            <command
              id="org.jboss.tools.openshift.ui.componentStatePropertyTester"
              namespace="org.jboss.tools.openshift.ui"
              properties="componentAllowedState"
-             type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement">
+             type="org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement">
        </propertyTester>
     </extension>
 
