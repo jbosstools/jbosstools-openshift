@@ -11,19 +11,16 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.Storage;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateStorageModel;
@@ -32,15 +29,10 @@ import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateSt
 /**
  * @author Red Hat Developers
  */
-public class CreateStorageHandler extends OdoHandler {
+public class CreateStorageHandler extends ComponentHandler {
 
 	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		ComponentElement component = UIUtils.getFirstElement(selection, ComponentElement.class);
-		if (component == null) {
-			return OpenShiftUIActivator.statusFactory().cancelStatus("No component selected"); //$NON-NLS-1$
-		}
+	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
 			Odo odo = component.getRoot().getOdo();
 			String projectName = component.getParent().getParent().getWrapped().getMetadata().getName();
@@ -48,7 +40,7 @@ public class CreateStorageHandler extends OdoHandler {
 				final CreateStorageModel model = new CreateStorageModel(odo, projectName, applicationName,
 				        component.getWrapped().getName(), Storage.getSizes());
 				final IWizard createStorageWizard = new CreateStorageWizard(model);
-				if (WizardUtils.openWizardDialog(createStorageWizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
+				if (WizardUtils.openWizardDialog(createStorageWizard, shell) == Window.OK) {
 					executeInJob("Create storage", () -> execute(model, component));
 				}
 			return Status.OK_STATUS;

@@ -14,20 +14,16 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.odo.KubernetesLabels;
 import org.jboss.tools.openshift.core.odo.Odo;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.LinkModel;
@@ -38,15 +34,10 @@ import io.fabric8.openshift.client.OpenShiftClient;
 /**
  * @author Red Hat Developers
  */
-public class LinkServiceHandler extends OdoHandler {
+public class LinkServiceHandler extends ComponentHandler {
 
 	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		ComponentElement component = UIUtils.getFirstElement(selection, ComponentElement.class);
-		if (component == null) {
-			return OpenShiftUIActivator.statusFactory().cancelStatus("No component selected"); //$NON-NLS-1$
-		}
+	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
 			Odo odo = component.getRoot().getOdo();
 			OpenShiftClient client = component.getRoot().getClient();
@@ -57,8 +48,8 @@ public class LinkServiceHandler extends OdoHandler {
 			final LinkModel<String> model = new LinkModel<>(odo, projectName, applicationName,
 			        component.getWrapped().getName(), serviceNames);
 			final IWizard linkServiceWizard = new LinkServiceWizard(model);
-			if (WizardUtils.openWizardDialog(linkServiceWizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
-				executeInJob("Link service", () -> execute(HandlerUtil.getActiveShell(event), model, component));
+			if (WizardUtils.openWizardDialog(linkServiceWizard, shell) == Window.OK) {
+				executeInJob("Link service", () -> execute(shell, model, component));
 			}
 			return Status.OK_STATUS;
 		} catch (IOException e) {
