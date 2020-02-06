@@ -77,8 +77,8 @@ public class BaseOpenShiftExplorerView extends CommonNavigator {
 
 		ILink getLink(MouseEvent e) {
 			if (e.getSource() instanceof Tree) {
-				Tree tree = (Tree) e.getSource();
-				TreeItem t = tree.getItem(new Point(e.x, e.y));
+				Tree sourceTree = (Tree) e.getSource();
+				TreeItem t = sourceTree.getItem(new Point(e.x, e.y));
 				Object o = t == null ? null : t.getData();
 				return o instanceof ILink ? (ILink) o : null;
 			}

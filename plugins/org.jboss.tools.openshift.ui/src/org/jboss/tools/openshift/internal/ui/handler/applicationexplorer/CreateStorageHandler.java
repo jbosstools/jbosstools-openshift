@@ -57,6 +57,4 @@ public class CreateStorageHandler extends ComponentHandler {
 			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(), "Create storage", "Can't create storage error message:" + e.getLocalizedMessage()));
 		}
 	}
-
-
 }

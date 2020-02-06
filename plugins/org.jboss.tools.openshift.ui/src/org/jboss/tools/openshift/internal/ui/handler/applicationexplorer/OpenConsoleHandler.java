@@ -35,7 +35,7 @@ public class OpenConsoleHandler extends AbstractHandler {
 		}
 		try {
 			String url = cluster.getOdo().consoleURL(cluster.getClient());
-			new BrowserUtility().checkedCreateInternalBrowser(url, url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());;
+			new BrowserUtility().checkedCreateInternalBrowser(url, url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 		} catch (IOException e) {
 			throw new ExecutionException(e.getLocalizedMessage(), e);
 		}
