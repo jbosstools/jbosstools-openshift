@@ -1628,6 +1628,32 @@ $            <command
                 </visibleWhen>
             </command>
         </menuContribution>
+        <!-- menu: Debug -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.component">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.debug"
+                     style="push"
+                     tooltip="Debug">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement" />
+                                      <test
+                                            args="pushed"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
         <!-- menu: Open In Browser -->
         <menuContribution
                           allPopups="false"
@@ -1910,6 +1936,10 @@ $            <command
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.OpenInBrowserHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.url.openinbrowser">
         </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.DebugHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.debug">
+        </handler>        
     </extension>
 
     <!-- adapters -->
@@ -2166,6 +2196,10 @@ $            <command
         <command
                  id="org.jboss.tools.openshift.ui.command.applicationexplorer.url.openinbrowser"
                  name="Open in Browser">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.component.debug"
+                 name="Debug">
         </command>
         
     </extension>
