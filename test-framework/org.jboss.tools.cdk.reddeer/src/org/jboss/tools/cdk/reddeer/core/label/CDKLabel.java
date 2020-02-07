@@ -104,7 +104,7 @@ public class CDKLabel {
 		public static final String CDK_SERVER_NAME = "Red Hat Container Development Kit 2.x"; 
 		public static final String CDK3_SERVER_NAME = "Red Hat Container Development Kit 3"; 
 		public static final String CDK32_SERVER_NAME = "Red Hat Container Development Kit 3.2+";
-		public static final String CRC_SERVER_NAME = "Red Hat CodeReady Containers 1.0"; 
+		public static final String CRC_SERVER_NAME = "Red Hat CodeReady Containers 1.0+"; 
 		public static final String MINISHIFT_SERVER_NAME = "Minishift 1.7+"; 
 	}
 	
