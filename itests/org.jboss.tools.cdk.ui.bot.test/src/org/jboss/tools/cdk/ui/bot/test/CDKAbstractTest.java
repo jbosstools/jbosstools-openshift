@@ -26,7 +26,7 @@ public abstract class CDKAbstractTest {
 	public static final String SERVER_ADAPTER_3 = "Container Development Environment 3";
 	public static final String SERVER_ADAPTER_32 = "Container Development Environment 3.2+";
 	public static final String SERVER_ADAPTER_MINISHIFT = "Minishift 1.7+";
-	public static final String SERVER_ADAPTER_CRC = "CodeReady Containers 1.0";
+	public static final String SERVER_ADAPTER_CRC = "CodeReady Containers 1.0+";
 
 	// General parameters
 	public static final String FOLDER = CDKUtils.IS_LINUX ? "linux" : (CDKUtils.IS_WINDOWS ? "win" : "mac");
