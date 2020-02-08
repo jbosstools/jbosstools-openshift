@@ -52,7 +52,7 @@ public class LoginHandler extends OdoHandler {
 		final LoginModel model = new LoginModel(cluster.getClient().getMasterUrl().toString(), cluster.getOdo());
 		final IWizard loginWizard = new LoginWizard(model);
 		if (WizardUtils.openWizardDialog(loginWizard, shell) == Window.OK) {
-			executeInJob("Login to Cluster", () -> execute(model));
+			executeInJob("Login to Cluster", monitor -> execute(model));
 		}
 	}
 	

@@ -41,7 +41,7 @@ public class CreateStorageHandler extends ComponentHandler {
 				        component.getWrapped().getName(), Storage.getSizes());
 				final IWizard createStorageWizard = new CreateStorageWizard(model);
 				if (WizardUtils.openWizardDialog(createStorageWizard, shell) == Window.OK) {
-					executeInJob("Create storage", () -> execute(model, component));
+					executeInJob("Create storage", monitor -> execute(model, component));
 				}
 			return Status.OK_STATUS;
 		} catch (IOException e) {

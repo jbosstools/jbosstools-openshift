@@ -11,11 +11,8 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -59,7 +56,7 @@ public class CreateComponentHandler extends OdoHandler {
 			final IWizard createComponentWizard = new CreateComponentWizard(model);
 			if (WizardUtils.openWizardDialog(createComponentWizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
 				AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel> element = application==null?project:application;
-				executeInJob("Creating component", () -> execute(HandlerUtil.getActiveShell(event), model, element));
+				executeInJob("Creating component", monitor -> execute(HandlerUtil.getActiveShell(event), model, element));
 			}
 			return Status.OK_STATUS;
 		} catch (IOException e) {

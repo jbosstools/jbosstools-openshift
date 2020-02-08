@@ -51,7 +51,7 @@ public class LinkComponentHandler extends ComponentHandler {
 				model.setTargets(targetComponents);
 				final IWizard linkComponentWizard = new LinkComponentWizard(model);
 				if (WizardUtils.openWizardDialog(linkComponentWizard, shell) == Window.OK) {
-					executeInJob("Link component", () -> execute(shell, model, component));
+					executeInJob("Link component", monitor -> execute(shell, model, component));
 				}
 			}
 			return Status.OK_STATUS;

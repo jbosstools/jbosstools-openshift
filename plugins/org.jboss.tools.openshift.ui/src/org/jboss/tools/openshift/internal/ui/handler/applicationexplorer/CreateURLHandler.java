@@ -48,7 +48,7 @@ public class CreateURLHandler extends ComponentHandler {
 				        component.getWrapped().getName(), ports);
 				final IWizard createURLWizard = new CreateURLWizard(model);
 				if (WizardUtils.openWizardDialog(createURLWizard, shell) == Window.OK) {
-					executeInJob("Create url", () -> execute(model, component));
+					executeInJob("Create url", monitor -> execute(model, component));
 				}
 			}
 			return Status.OK_STATUS;
@@ -65,6 +65,4 @@ public class CreateURLHandler extends ComponentHandler {
 			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(), "Create url", "Can't create url error message:" + e.getLocalizedMessage()));
 		}
 	}
-
-
 }

@@ -52,7 +52,7 @@ public class DescribeHandler extends OdoHandler {
 			OpenShiftClient client = component!=null?component.getRoot().getClient():service!=null?service.getRoot().getClient():application.getRoot().getClient();
 			final ServiceElement fService = service;
 			final ApplicationElement fApplication = application;
-			executeInJob("Describe", () -> execute(odo, client, component, fService, fApplication));
+			executeInJob("Describe", monitor -> execute(odo, client, component, fService, fApplication));
 			return Status.OK_STATUS;
 		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
@@ -66,7 +66,6 @@ public class DescribeHandler extends OdoHandler {
 			} else if (service != null) {
 				String template = odo.getServiceTemplate(client, service.getParent().getParent().getWrapped().getMetadata().getName(), service.getParent().getWrapped().getName(), service.getWrapped().getMetadata().getName());
 				odo.describeServiceTemplate(template);
-				
 			} else {
 				odo.describeApplication(application.getParent().getWrapped().getMetadata().getName(), application.getWrapped().getName());
 			}
@@ -75,5 +74,4 @@ public class DescribeHandler extends OdoHandler {
 			        "Describe", "Describe error message:" + e.getLocalizedMessage()));
 		}
 	}
-
 }

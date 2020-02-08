@@ -30,7 +30,7 @@ public class UndeployHandler extends ComponentHandler {
 	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
 			Odo odo = component.getRoot().getOdo();
-			executeInJob("Undeploy", () -> execute(odo, component));
+			executeInJob("Undeploy", monitor -> execute(odo, component));
 			return Status.OK_STATUS;
 		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);

@@ -10,30 +10,23 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
-import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION;
-
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.core.odo.ComponentInfo;
 import org.jboss.tools.openshift.core.odo.Odo;
+import org.jboss.tools.openshift.core.stack.RemoteStackDebugger;
+import org.jboss.tools.openshift.core.stack.RemoteStackProviderRegistry;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 
@@ -52,15 +45,16 @@ public class DebugHandler extends ComponentHandler {
 			String project = component.getParent().getParent().getWrapped().getMetadata().getName();
 			String application = component.getParent().getWrapped().getName();
 			ComponentInfo info = odo.getComponentInfo(client, project, application, component.getWrapped().getName());
-			if (isDebuggable(info.getComponentTypeName())) {
+			RemoteStackDebugger remoteDebugger = RemoteStackProviderRegistry.getInstance().findBytype(info.getComponentTypeName());
+			if (remoteDebugger != null) {
 				int port = allocateLocalPort();
-				executeInJob("Debug", () -> startDebug(odo, project, application, component, port));
-				createAndLaunchConfig(component.getWrapped().getPath(), port);
+				executeInJob("Debug", monitor -> startDebug(odo, project, application, component, port));
+				executeInJob("Attach debugger", monitor -> createAndLaunchConfig(component.getWrapped().getPath(), port, remoteDebugger, monitor, shell));
 			} else {
 				MessageDialog.openError(shell, "Debug", "Debugging is not supported for this type of component");
 			}
 			return Status.OK_STATUS;
-		} catch (IOException | CoreException e) {
+		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 	}
@@ -70,32 +64,16 @@ public class DebugHandler extends ComponentHandler {
 	 * @param port the port to connect to
 	 * @throws CoreException 
 	 */
-	private void createAndLaunchConfig(String path, int port) throws CoreException {
-		IPath projectPath = new Path(path);
-		IContainer project = ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(projectPath);
-		if (project instanceof IProject) {
-			String name = "OpenShift remote " + project.getName();
-			ILaunchConfigurationType launchConfigurationType = DebugPlugin.getDefault().getLaunchManager()
-					.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);
-			ILaunchConfigurationWorkingCopy launchConfiguration = launchConfigurationType.newInstance(null, name);
-			launchConfiguration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_ALLOW_TERMINATE, false);
-			launchConfiguration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR,
-					IJavaLaunchConfigurationConstants.ID_SOCKET_ATTACH_VM_CONNECTOR);
-			Map<String, String> connectMap = new HashMap<>(2);
-			connectMap.put("port", String.valueOf(port)); //$NON-NLS-1$
-			connectMap.put("hostname", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
-			launchConfiguration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, connectMap);
-				launchConfiguration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getName());
-			launchConfiguration.launch("debug", new NullProgressMonitor());
+	private void createAndLaunchConfig(String path, int port, RemoteStackDebugger remoteDebugger, IProgressMonitor monitor, Shell shell) {
+		try {
+			IPath projectPath = new Path(path);
+			IContainer project = ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(projectPath);
+			if (project instanceof IProject) {
+				remoteDebugger.startRemoteDebugger((IProject) project, port, monitor);
+			}
+		} catch (CoreException e) {
+			shell.getDisplay().asyncExec(() -> MessageDialog.openError(shell, "Debug", "Error while connecting the debugger"));
 		}
-	}
-
-	/**
-	 * @param componentTypeName
-	 * @return
-	 */
-	private boolean isDebuggable(String componentTypeName) {
-		return "java".equals(componentTypeName);
 	}
 
 	/**

@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 import java.util.function.Consumer;
 
 import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -71,10 +72,10 @@ public abstract class OdoHandler extends AbstractHandler {
 		return openNotification(null, shell, text);
 	}
 
-	protected static void executeInJob(String name, Runnable action) {
+	protected static void executeInJob(String name, Consumer<IProgressMonitor> action) {
 		Job job = Job.create(name, monitor -> {
 			try {
-				action.run();
+				action.accept(monitor);
 				return Status.OK_STATUS;
 			}
 			catch (Exception e) {

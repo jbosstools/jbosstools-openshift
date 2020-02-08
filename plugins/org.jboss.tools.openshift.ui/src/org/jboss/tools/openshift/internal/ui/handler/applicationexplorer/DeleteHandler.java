@@ -51,7 +51,7 @@ public class DeleteHandler extends OdoHandler {
 			if (MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), String.join(" ", "Delete", label), String.join(" ", "Are you sure to delete", label, "?"))) {
 				Odo odo = ((ApplicationExplorerUIModel)element.getRoot()).getOdo();
 				OpenShiftClient client = ((ApplicationExplorerUIModel)element.getRoot()).getClient();
-				executeInJob("Delete", () -> execute(odo, client, element));
+				executeInJob("Delete", monitor -> execute(odo, client, element));
 			}
 			return Status.OK_STATUS;
 		} catch (IOException e) {
@@ -126,5 +126,4 @@ public class DeleteHandler extends OdoHandler {
 			        "Delete", "Delete error:" + e.getLocalizedMessage()));
 		}
 	}
-
 }
