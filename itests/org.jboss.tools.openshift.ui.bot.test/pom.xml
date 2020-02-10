@@ -115,7 +115,7 @@
 		<!-- needed for com.basistech.m2e.code.quality.checkstyle -->
 			<id>m2e-code-quality-plugins</id>
 			<layout>p2</layout>
-			<url>http://m2e-code-quality.github.io/m2e-code-quality/site/latest/</url>
+			<url>http://m2e-code-quality.github.io/m2e-code-quality-p2-site/snapshot/</url>
 		</repository>
 	</repositories>
 </project>
