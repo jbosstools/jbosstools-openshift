@@ -18,7 +18,6 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -32,12 +31,12 @@ import org.jboss.tools.openshift.core.stack.RemoteStackDebugger;
 public class JavaRemoteStackDebugger implements RemoteStackDebugger {
 
 	@Override
-	public boolean isValid(String stackType) {
+	public boolean isValid(String stackType, String stackVersion) {
 		return "java".equals(stackType);
 	}
 
 	@Override
-	public void startRemoteDebugger(IProject project, int port, IProgressMonitor monitor) throws CoreException {
+	public void startRemoteDebugger(IProject project, String stackType, String stackVersion, int port, IProgressMonitor monitor) throws CoreException {
 		String name = "OpenShift remote (Java) " + project.getName();
 		ILaunchConfigurationType launchConfigurationType = DebugPlugin.getDefault().getLaunchManager()
 				.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);

@@ -45,11 +45,11 @@ public class DebugHandler extends ComponentHandler {
 			String project = component.getParent().getParent().getWrapped().getMetadata().getName();
 			String application = component.getParent().getWrapped().getName();
 			ComponentInfo info = odo.getComponentInfo(client, project, application, component.getWrapped().getName());
-			RemoteStackDebugger remoteDebugger = RemoteStackProviderRegistry.getInstance().findBytype(info.getComponentTypeName());
+			RemoteStackDebugger remoteDebugger = RemoteStackProviderRegistry.getInstance().findBytype(info.getComponentTypeName(), info.getComponentTypeVersion());
 			if (remoteDebugger != null) {
 				int port = allocateLocalPort();
 				executeInJob("Debug", monitor -> startDebug(odo, project, application, component, port));
-				executeInJob("Attach debugger", monitor -> createAndLaunchConfig(component.getWrapped().getPath(), port, remoteDebugger, monitor, shell));
+				executeInJob("Attach debugger", monitor -> createAndLaunchConfig(component.getWrapped().getPath(), info.getComponentTypeName(), info.getComponentTypeVersion(), port, remoteDebugger, monitor, shell));
 			} else {
 				MessageDialog.openError(shell, "Debug", "Debugging is not supported for this type of component");
 			}
@@ -61,15 +61,20 @@ public class DebugHandler extends ComponentHandler {
 
 	/**
 	 * @param path the project path
+	 * @param stackType the stack type
+	 * @param stackVersion the stack version
 	 * @param port the port to connect to
+	 * @param remoteDebugger the debugger provider for the stack
+	 * @param monitor the progress monitor
+	 * @param shell the shell to use for UI
 	 * @throws CoreException 
 	 */
-	private void createAndLaunchConfig(String path, int port, RemoteStackDebugger remoteDebugger, IProgressMonitor monitor, Shell shell) {
+	private void createAndLaunchConfig(String path, String stackType, String stackVersion, int port, RemoteStackDebugger remoteDebugger, IProgressMonitor monitor, Shell shell) {
 		try {
 			IPath projectPath = new Path(path);
 			IContainer project = ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(projectPath);
 			if (project instanceof IProject) {
-				remoteDebugger.startRemoteDebugger((IProject) project, port, monitor);
+				remoteDebugger.startRemoteDebugger((IProject) project, stackType, stackVersion, port, monitor);
 			}
 		} catch (CoreException e) {
 			shell.getDisplay().asyncExec(() -> MessageDialog.openError(shell, "Debug", "Error while connecting the debugger"));

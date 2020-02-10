@@ -102,9 +102,10 @@ public class RemoteStackProviderRegistry implements IRegistryChangeListener {
 	 * Return the first avaliable implementation for a specific stack type or null if none match.
 	 * 
 	 * @param stackType the stack type to match
+	 * @param stackVersion the stack version to match
 	 * @return the first that matched or null if none matches
 	 */
-	public RemoteStackDebugger findBytype(String stackType) {
-		return remoteStackDebuggers.stream().filter(item -> item.isValid(stackType)).findFirst().orElse(null);
+	public RemoteStackDebugger findBytype(String stackType, String stackVersion) {
+		return remoteStackDebuggers.stream().filter(item -> item.isValid(stackType, stackVersion)).findFirst().orElse(null);
 	}
 }

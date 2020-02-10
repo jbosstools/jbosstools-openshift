@@ -27,12 +27,12 @@ public class NodeRemoteStackDebugger implements RemoteStackDebugger {
 	private static final String ID_REMOTE_NODE_APPLICATION = "org.eclipse.wildwebdeveloper.launchConfiguration.nodeDebugAttach";
 
 	@Override
-	public boolean isValid(String stackType) {
+	public boolean isValid(String stackType, String stackVersion) {
 		return "nodejs".equals(stackType);
 	}
 
 	@Override
-	public void startRemoteDebugger(IProject project, int port, IProgressMonitor monitor) throws CoreException {
+	public void startRemoteDebugger(IProject project, String stackType, String stackVersion, int port, IProgressMonitor monitor) throws CoreException {
 		String name = "OpenShift remote (Node) " + project.getName();
 		ILaunchConfigurationType launchConfigurationType = DebugPlugin.getDefault().getLaunchManager()
 				.getLaunchConfigurationType(ID_REMOTE_NODE_APPLICATION);
