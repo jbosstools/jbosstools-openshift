@@ -361,11 +361,9 @@
     <provider
           class="org.jboss.tools.openshift.internal.core.stack.JavaRemoteStackDebugger">
     </provider>
-     <!-- commented as DAP or LSP4E-Debug does not handle breakpoints properly
     <provider
           class="org.jboss.tools.openshift.internal.core.stack.NodeRemoteStackDebugger">
     </provider>
-    -->
  </extension>
  
 </plugin>
