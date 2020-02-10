@@ -74,6 +74,7 @@ public class ExecHelper {
 			try {
 				p.waitFor();
 			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 				throw new IOException(e);
 			}
 		}
