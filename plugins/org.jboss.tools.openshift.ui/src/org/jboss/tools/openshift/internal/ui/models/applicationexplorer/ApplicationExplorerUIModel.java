@@ -20,14 +20,22 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.jboss.tools.openshift.core.odo.LocalConfig;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.utils.ConfigHelper;
 import org.jboss.tools.openshift.core.odo.utils.ConfigWatcher;
 import org.jboss.tools.openshift.core.odo.utils.ConfigWatcher.Listener;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIModel;
 import org.jboss.tools.openshift.internal.ui.odo.OdoCli;
 
@@ -42,7 +50,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
  * @author Red Hat Developers
  *
  */
-public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<ApplicationExplorerUIModel.ClusterInfo, ApplicationExplorerUIModel> implements Listener {
+public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<ApplicationExplorerUIModel.ClusterInfo, ApplicationExplorerUIModel> implements Listener, IResourceChangeListener, IResourceDeltaVisitor {
 
 	private static ApplicationExplorerUIModel INSTANCE;
 	
@@ -123,6 +131,7 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
 		watcherJob = Job.createSystem("Watching kubeconfig", this::startWatcher);
 		watcherJob.schedule();
 		this.config = loadConfig();
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
 	}
 
 
@@ -175,7 +184,9 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
 	 * @param path
 	 */
 	public void removeContext(String path) {
-		components.remove(path);
+		if (components.remove(path) != null) {
+			refresh();
+		}
 	}
 	
 	/**
@@ -214,21 +225,52 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
                 || !StringUtils.equals(currentContext.getUser(), newContext.getUser());
     }
 
-    private boolean hasNewToken(Context newContext, Config newConfig, Context currentContext, Config currentConfig) {
-        if (newContext == null) {
-            return false;
-        }
-        if (currentContext == null) {
-            return true;
-        }
-        String newToken = KubeConfigUtils.getUserToken(newConfig, newContext);
-        if (newToken == null) {
-            // logout, do not refresh, LogoutAction already refreshes
-            return false;
-        }
-        String currentToken = KubeConfigUtils.getUserToken(currentConfig, currentContext);
-        return !StringUtils.equals(newToken, currentToken);
-  }
+	private boolean hasNewToken(Context newContext, Config newConfig, Context currentContext, Config currentConfig) {
+		if (newContext == null) {
+			return false;
+		}
+		if (currentContext == null) {
+			return true;
+		}
+		String newToken = KubeConfigUtils.getUserToken(newConfig, newContext);
+		if (newToken == null) {
+			// logout, do not refresh, LogoutAction already refreshes
+			return false;
+		}
+		String currentToken = KubeConfigUtils.getUserToken(currentConfig, currentContext);
+		return !StringUtils.equals(newToken, currentToken);
+	}
 
+	@Override
+	public void resourceChanged(IResourceChangeEvent event) {
+		try {
+			event.getDelta().accept(this, IResource.NONE);
+		} catch (CoreException e) {
+			OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+		}
+	}
 
+	@Override
+	public boolean visit(IResourceDelta delta) throws CoreException {
+		IResource resource = delta.getResource();
+		if (resource == null) {
+			return false;
+		}
+		if (resource.getType() == IResource.ROOT) {
+			return true;
+		} else if (resource.getType() == IResource.PROJECT) {
+			if (delta.getKind() == IResourceDelta.ADDED) {
+				addContext((IProject) resource);
+			} else if (delta.getKind() == IResourceDelta.REMOVED) {
+				removeContext(resource.getLocation().toOSString());
+			} else if (delta.getKind() == IResourceDelta.CHANGED) {
+				if (resource.isAccessible()) {
+					addContext((IProject) resource);
+				} else {
+					removeContext(resource.getLocation().toOSString());
+				}
+			}
+		}
+		return false;
+	}
 }
