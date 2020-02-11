@@ -13,15 +13,17 @@ package org.jboss.tools.openshift.internal.cdk.server.core.detection;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Properties;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.dmr.ModelNode;
@@ -58,7 +60,18 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	public static final String PROP_SERVER_TYPE = "minishift.definition.servertype";
 	
 	public static final String OVERRIDE_BINARY_LOCATION = "OVERRIDE_BINARY_LOCATION";
-	private static final Pattern WHITELIST_PATTERN = Pattern.compile("(crc|cdk-[0-9][.][0-9].*-minishift-(linux|darwin|windows)-amd64)(.exe)?");
+
+	// minishift.exe
+	// minishift
+	private static final Pattern PATTERN_MINISHIFT_BINARY = Pattern.compile("minishift(\\.exe)?");
+	// cdk-3.8.0-1-minishift-darwin-amd64
+	// cdk-3.5.0-alpha.1-minishift-darwin-amd64
+	// cdk-3.8.0-beta.1-1-minishift-windows-amd64.exe
+	private static final Pattern PATTERN_CDK_BINARY = Pattern.compile("cdk-[0-9][\\.][0-9].*-minishift-(linux|darwin|windows)-amd64(\\.exe)?");
+	// crc
+	// crc.exe
+	private static final Pattern PATTERN_CRC_BINARY = Pattern.compile("crc(\\.exe)?");
+	
 	
 	@Override
 	public RuntimeDefinition getRuntimeDefinition(File root, IProgressMonitor monitor) {
@@ -140,7 +153,7 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 		File ms = new File(root, MINISHIFT);
 		if( ms.exists()) 
 			return ms;
-		return folderWhiteListBin(root);
+		return findBinary(root);
 		
 	}
 	
@@ -149,20 +162,23 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 		return bin != null && bin.exists() && bin.isFile();
 	}
 	
-	private File folderWhiteListBin(File folder) {
-		String[] children = folder.list();
-		if( children == null )
+	private File findBinary(File folder) {
+		try(Stream<Path> paths = Files.list(folder.toPath())) {
+			return paths.filter(file -> {
+				String filename = file.getFileName().toString();
+				return PATTERN_MINISHIFT_BINARY.matcher(filename).matches()
+						|| PATTERN_CDK_BINARY.matcher(filename).matches()
+						|| PATTERN_CRC_BINARY.matcher(filename).matches();
+			})
+			.findFirst()
+			.map(Path::toFile)
+			.orElse(null);
+		} catch (IOException e) {
+			CDKCoreActivator.pluginLog().logError(
+					NLS.bind("Could not detect cdk/minishift/crc binary in folder {0}", folder), e);
 			return null;
-
-		for( int i = 0; i < children.length; i++ ) {
-		     Matcher m = WHITELIST_PATTERN.matcher(children[i]);
-		     if( m.matches()) {
-		    	 return new File(folder, children[i]);
-		     }
-		}
-		return null;
+		}		
 	}
-
 	
 	private boolean isValidMinishiftHome(File f) {
 		return hasChildFiles(f, getRequiredMinishiftHomeChildren());
