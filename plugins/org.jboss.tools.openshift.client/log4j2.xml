@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" packages="">
+    <Properties>
+        <Property name="log-path">log</Property>
+    </Properties>
+    <Appenders>
+        <EclipseTraceAppender name="eclipse-trace" maxLines="100">
+            <PatternLayout>
+                <pattern>[%-5p] %d %c - %m%n</pattern>
+            </PatternLayout>
+        </EclipseTraceAppender>
+    </Appenders>
+    <Loggers>
+        <Logger name="Client Logger" level="debug" additivity="false">
+            <appender-ref ref="eclipse-trace" level="debug"/>
+        </Logger>
+        <Root level="info" additivity="false">
+            <AppenderRef ref="eclipse-trace"/>
+        </Root>
+    </Loggers>
+</Configuration>

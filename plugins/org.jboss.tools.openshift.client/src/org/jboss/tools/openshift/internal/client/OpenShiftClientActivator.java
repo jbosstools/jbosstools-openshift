@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2016-2020 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -13,9 +13,15 @@ import org.osgi.framework.BundleContext;
 
 public class OpenShiftClientActivator extends Plugin {
 
+	public static final String PLUGIN_ID = "org.jboss.tools.openshift.client";
+	
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		setCurrentThreadClassloader();
+	}
+
+	private void setCurrentThreadClassloader() {
 		//Eclipse finds multiple SLF4J bindings in its classpath and we can't control the Jetty logging behavior then.
 		//Particularly, WebSockets pollutes the Eclipse log really badly (JBIDE-21596)
 		//Until we find a proper way to fix the problem, we take the fugly approach.
