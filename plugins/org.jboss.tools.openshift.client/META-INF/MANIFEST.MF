@@ -6,7 +6,8 @@ Bundle-Version: 3.9.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
-Bundle-ClassPath: lib/openshift-restclient-java-8.1.1-SNAPSHOT.jar,
+Bundle-ClassPath: .,
+ lib/openshift-restclient-java-8.1.1-SNAPSHOT.jar,
  lib/okhttp-4.1.1.jar,
  lib/okio-2.4.0.jar,
  lib/kotlin-stdlib-1.3.50.jar,
@@ -17,10 +18,8 @@ Bundle-ClassPath: lib/openshift-restclient-java-8.1.1-SNAPSHOT.jar,
  lib/commons-lang-2.6.jar,
  lib/log4j-api-2.13.0.jar,
  lib/log4j-core-2.13.0.jar,
- lib/log4j-1.2-api-2.13.0.jar,
+ lib/log4j-slf4j18-impl-2.13.0.jar,
  lib/slf4j-api-2.0.0-alpha1.jar,
- lib/slf4j-log4j12-2.0.0-alpha1.jar,
- .,
  lib/kubernetes-client-4.7.0.jar,
  lib/kubernetes-model-4.7.0.jar,
  lib/openshift-client-4.7.0.jar,
@@ -116,11 +115,11 @@ Export-Package: com.openshift.internal.restclient;x-friends:="org.jboss.tools.op
  io.fabric8.servicecatalog.client.handlers,
  io.fabric8.servicecatalog.client.internal,
  io.fabric8.servicecatalog.client.util
-Import-Package: org.apache.commons.logging,
- org.eclipse.core.runtime,
+Import-Package: org.eclipse.core.runtime,
  org.eclipse.debug.internal.core,
  org.eclipse.osgi.service.debug;version="1.2.0",
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.jboss.tools.openshift.internal.client.OpenShiftClientActivator
+Require-Bundle: org.eclipse.osgi;bundle-version="3.15.100"

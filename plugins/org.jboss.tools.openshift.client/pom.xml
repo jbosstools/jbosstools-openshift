@@ -23,8 +23,7 @@
 		<jboss-dmr.version>1.3.0.Final</jboss-dmr.version>
 		<commons-compress.version>1.19</commons-compress.version>
 		<log4j.version>2.13.0</log4j.version>
-		<slf4j-api.version>2.0.0-alpha1</slf4j-api.version>
-		<slf4j-log4j12.version>2.0.0-alpha1</slf4j-log4j12.version>
+		<slf4j.version>2.0.0-alpha1</slf4j.version>
 		<commons-codec.version>1.6</commons-codec.version>
 		<commons-lang.version>2.6</commons-lang.version>
 		<commons-io.version>2.1</commons-io.version>
@@ -94,25 +93,20 @@
 							<artifactId>log4j-api</artifactId>
 							<version>${log4j.version}</version>
 						</artifactItem>
-						<dependency>
+						<artifactItem>
 							<groupId>org.apache.logging.log4j</groupId>
 							<artifactId>log4j-core</artifactId>
 							<version>${log4j.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.logging.log4j</groupId>
-							<artifactId>log4j-1.2-api</artifactId>
-							<version>${log4j.version}</version>
-						</dependency>
+						</artifactItem>
 						<artifactItem>
-							<groupId>org.slf4j</groupId>
-							<artifactId>slf4j-api</artifactId>
-							<version>${slf4j-api.version}</version>
+							<groupId>org.apache.logging.log4j</groupId>
+							<artifactId>log4j-slf4j18-impl</artifactId>
+							<version>${log4j.version}</version>
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.slf4j</groupId>
-							<artifactId>slf4j-log4j12</artifactId>
-							<version>${slf4j-log4j12.version}</version>
+							<artifactId>slf4j-api</artifactId>
+							<version>${slf4j.version}</version>
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.apache.commons</groupId>
@@ -275,18 +269,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-1.2-api</artifactId>
+			<artifactId>log4j-slf4j18-impl</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j-api.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>${slf4j-log4j12.version}</version>
+			<version>${slf4j.version}</version>
 		</dependency>
         <dependency>
             <groupId>commons-codec</groupId>

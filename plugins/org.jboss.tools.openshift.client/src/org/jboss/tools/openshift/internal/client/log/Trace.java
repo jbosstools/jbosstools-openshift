@@ -25,9 +25,9 @@ public class Trace {
 	private static final boolean DEFAULT_DEBUG = false;
 
 	private String pluginId;
-	private DebugOptions options;
+	private DebugOptions debugOptions;
 	private ServiceTracker<DebugOptions, DebugOptions> tracker;
-	private DebugTrace trace;
+	private DebugTrace debugTrace;
 
 	public Trace(String pluginId) {
 		this.pluginId = pluginId;
@@ -58,37 +58,49 @@ public class Trace {
 			return DEFAULT_DEBUG;
 		}
 
-		DebugOptions debugOptions = getDebugOptions();
-		if (debugOptions == null) {
+		DebugOptions options = getDebugOptions();
+		if (options == null) {
 			return DEFAULT_DEBUG;
 		}
 
-		if (!debugOptions.isDebugEnabled()) {
+		if (!options.isDebugEnabled()) {
 			return false;
 		}
 
-		if (!debugOptions.getBooleanOption(pluginId + GLOBAL_DEBUG_KEY, DEFAULT_DEBUG)) {
+		if (!options.getBooleanOption(pluginId + GLOBAL_DEBUG_KEY, DEFAULT_DEBUG)) {
 			return false;
 		}
 
-		return debugOptions.getBooleanOption(pluginId + CLIENT_DEBUG_KEY, DEFAULT_DEBUG);
+		return options.getBooleanOption(pluginId + CLIENT_DEBUG_KEY, DEFAULT_DEBUG);
 	}
 
 	private DebugTrace getDebugTrace() {
-		if (trace == null) {
-			this.trace = getDebugOptions().newDebugTrace(pluginId);
+		if (debugTrace == null) {
+			this.debugTrace = createTrace();
+		}
+		return debugTrace;
+	}
+
+	private DebugTrace createTrace() {
+		DebugTrace trace = null;
+	    DebugOptions options = getDebugOptions();
+		if (options != null) {
+		    trace = options.newDebugTrace(pluginId);
 		}
 		return trace;
 	}
 
 	public void trace(String option, String message) {
-		getDebugTrace().trace(GLOBAL_DEBUG_KEY + option, message);
+		DebugTrace trace = getDebugTrace();
+		if (trace != null) {		    
+			trace.trace(GLOBAL_DEBUG_KEY + option, message);
+		}
 	}
 
 	private DebugOptions getDebugOptions() {
-		if (options == null) {
-			this.options = createDebugOptions();
+		if (debugOptions == null) {
+			this.debugOptions = createDebugOptions();
 		}
-		return this.options;
+		return this.debugOptions;
 	}
 }
