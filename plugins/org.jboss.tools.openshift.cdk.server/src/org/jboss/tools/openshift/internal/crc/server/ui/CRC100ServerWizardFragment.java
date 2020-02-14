@@ -159,6 +159,8 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 						handle.setMessage(error, IMessageProvider.ERROR);
 					}
 				});
+		// dont complete until job validated pull secret
+		setComplete(false);
 		togglePullSecretDecorator(errorMessage);
 		return errorMessage;
 	}

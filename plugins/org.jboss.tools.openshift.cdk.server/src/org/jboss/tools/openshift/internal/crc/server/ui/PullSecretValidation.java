@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.crc.server.ui;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -95,6 +96,8 @@ public class PullSecretValidation {
 				if (!isValidJson(readPullSecretFile(filename))) {
 					msg = NLS.bind("Pull Secret file {0} is invalid. Make sure it is valid JSON.", filename);
 				}
+			} catch (MalformedInputException e) {
+				msg = NLS.bind("Pull Secret file {0} is not a text file.", filename);
 			} catch (IOException | UncheckedIOException e) {
 				msg = NLS.bind("Pull Secret file {0} is invalid. Make sure it is valid JSON: {1}", filename, e.getLocalizedMessage());
 			}
