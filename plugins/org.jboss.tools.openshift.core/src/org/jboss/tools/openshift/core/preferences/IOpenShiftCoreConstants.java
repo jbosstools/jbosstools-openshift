@@ -18,9 +18,14 @@ public interface IOpenShiftCoreConstants {
 	static final String OPENSHIFT_CLI_LOC = "openshift.cli.location";
 
 	/**
-	 * URL of the web page for OpenShift download instructions.
+	 * URL of the web page for OpenShift downloads.
 	 */
-	public static final String DOWNLOAD_INSTRUCTIONS_URL = "https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github";
+	public static final String DOWNLOAD_URL = "https://www.okd.io/download.html";
+
+	/**
+	 * URL of the web page with OpenShift instructions.
+	 */
+	public static final String INSTALLATION_INSTRUCTIONS_URL = "https://docs.okd.io/latest/cli_reference/get_started_cli.html";
 
 	/**
 	 * Identifier of the OpenShift preference page.

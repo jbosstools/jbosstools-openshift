@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.server;
 
-import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.DOWNLOAD_INSTRUCTIONS_URL;
+import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.DOWNLOAD_URL;
 import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.OPEN_SHIFT_PREFERENCE_PAGE_ID;
 
 import java.io.File;
@@ -340,7 +340,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (OpenShiftCoreMessages.OCBinaryDownloadDeactivatedLink.equals(e.text)) {
-					new BrowserUtility().checkedCreateExternalBrowser(DOWNLOAD_INSTRUCTIONS_URL,
+					new BrowserUtility().checkedCreateExternalBrowser(DOWNLOAD_URL,
 							OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 				} else {
 					int rc = PreferencesUtil.createPreferenceDialogOn(getShell(), OPEN_SHIFT_PREFERENCE_PAGE_ID,

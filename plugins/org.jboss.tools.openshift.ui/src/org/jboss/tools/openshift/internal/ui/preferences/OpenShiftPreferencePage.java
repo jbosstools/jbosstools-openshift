@@ -10,7 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.preferences;
 
-import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.DOWNLOAD_INSTRUCTIONS_URL;
+import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.DOWNLOAD_URL;
+import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.INSTALLATION_INSTRUCTIONS_URL;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -29,6 +30,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -51,6 +53,9 @@ import org.osgi.framework.Version;
  */
 public class OpenShiftPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
+	private static final String LINK_TEXT_DOWNLOAD = "download";
+	private static final String LINK_TEXT_INSTRUCTIONS = "instructions";
+
 	private CliFileEditor cliLocationEditor;
 	private OCBinary ocBinary;
 	private Label ocVersionLabel;
@@ -68,19 +73,14 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		Link link = new Link(getFieldEditorParent(), SWT.WRAP);
 		link.setText(
 				"The OpenShift client binary (oc) is required for features such as Port Forwarding or Log Streaming. "
-						+ "You can find more information about how to install it from <a>here</a>.");
+						+ "Please <a>" + LINK_TEXT_DOWNLOAD + "</a> it"
+						+ " and read the <a>" + LINK_TEXT_INSTRUCTIONS + "</a> on how to install it.");
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.FILL).hint(1, 60).applyTo(link);
-		link.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				onDownloadLinkClicked();
-			}
-		});
+		link.addSelectionListener(onLinksClicked());
 		this.cliLocationEditor = new CliFileEditor();
 		cliLocationEditor.setFilterPath(SystemUtils.getUserHome());
 		cliLocationEditor.setFileExtensions(createFilters(ocBinary.getExtensions()));
-		cliLocationEditor.setValidateStrategy(FileFieldEditor.VALIDATE_ON_KEY_STROKE);
+		cliLocationEditor.setValidateStrategy(StringFieldEditor.VALIDATE_ON_KEY_STROKE);
 		addField(cliLocationEditor);
 
 		ocVersionLabel = new Label(getFieldEditorParent(), SWT.WRAP);
@@ -105,17 +105,35 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(true, false).indent(0, 10)
 			.applyTo(ocMessageLabel);
-		ocMessageLabel.addListener(SWT.Selection, event -> {
-			if (event.text.startsWith("download")) {
-				onDownloadLinkClicked();
-			}
-		});		
+		ocMessageLabel.addSelectionListener(onLinksClicked());
 		ocMessageComposite.setVisible(false);
 	}
 
-	private void onDownloadLinkClicked() {
-		new BrowserUtility().checkedCreateExternalBrowser(DOWNLOAD_INSTRUCTIONS_URL,
-				OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+	private SelectionListener onLinksClicked() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				String url = getUrl(event.text);
+				if (url != null) {
+					new BrowserUtility().checkedCreateExternalBrowser(url, OpenShiftUIActivator.PLUGIN_ID,
+							OpenShiftUIActivator.getDefault().getLog());
+				}
+			}
+
+			private String getUrl(String text) {
+				if (StringUtils.isEmpty(text)) {
+					return null;
+				}
+				String url = null;
+				if (text.startsWith(LINK_TEXT_INSTRUCTIONS)) {
+					url = INSTALLATION_INSTRUCTIONS_URL;
+				} else if (text.startsWith(LINK_TEXT_DOWNLOAD)) {
+					url = DOWNLOAD_URL;
+				}
+				return url;
+			}
+		};
 	}
 
 	private String[] createFilters(String[] suffixes) {
@@ -220,8 +238,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 			}
 
 			private String getOcVersionMessage() {
-				if (version == null
-						|| Version.emptyVersion.equals(version)) {
+				if (version == null || Version.emptyVersion.equals(version)) {
 					return "Could not determine your OpenShift client version.";
 				} else {
 					return NLS.bind("Your OpenShift client version is {0}.{1}.{2}",
@@ -252,7 +269,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 				ocMessageComposite.setVisible(false);
 				validateLocation(newCheckedValue);
 				this.lastCheckedValue = newCheckedValue;
-			} 
+			}
 			// always have page valid so that user can always leave the page
 			return true;
 		}
