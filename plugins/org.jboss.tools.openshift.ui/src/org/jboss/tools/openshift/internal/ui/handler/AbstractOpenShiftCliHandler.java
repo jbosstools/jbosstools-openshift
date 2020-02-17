@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.handler;
 
-import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.DOWNLOAD_INSTRUCTIONS_URL;
+import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.DOWNLOAD_URL;
 import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.OPEN_SHIFT_PREFERENCE_PAGE_ID;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -136,7 +136,7 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 		}
 
 		private void onDownloadClicked() {
-			new BrowserUtility().checkedCreateExternalBrowser(DOWNLOAD_INSTRUCTIONS_URL,
+			new BrowserUtility().checkedCreateExternalBrowser(DOWNLOAD_URL,
 					OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 		}
 
