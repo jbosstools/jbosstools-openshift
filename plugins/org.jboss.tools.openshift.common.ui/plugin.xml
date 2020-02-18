@@ -97,7 +97,7 @@
 		<perspectiveExtension targetID="org.jboss.tools.common.ui.JBossPerspective">
 			<view relative="org.eclipse.ui.views.ProblemView"
 				relationship="stack"
-				id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+				id="org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView">
 			</view>
       	</perspectiveExtension> 
 	</extension>
