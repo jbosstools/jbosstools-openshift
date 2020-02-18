@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2019 Red Hat, Inc. 
+ * Copyright (c) 2019-2020 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -32,15 +32,15 @@ import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 
 public class CRCLocationSection extends AbstractLocationSection {
 
-	private static String SECTION_TITLE = "CRC Details";
-	private static String LABEL_STRING = "crc binary file: ";
-	private static String COMMAND_NAME = "Modify crc binary Location";
-	private static String LOC_ATTR = CRC100Server.PROPERTY_BINARY_FILE;
+	private static final String SECTION_TITLE = "CRC Details";
+	private static final String LABEL_STRING = "CRC Binary: ";
+	private static final String COMMAND_NAME = "Modify crc binary Location";
+	private static final String LOC_ATTR = CRC100Server.PROPERTY_BINARY_FILE;
 	private Text pullSecretText;
 	private Button pullSecretBrowse;
 	private ControlDecoration pullSecretDecor;
-	private SelectionAdapter pullSecretSelListener;
 	private ModifyListener pullSecretModListener;
+	private final PullSecretValidation pullSecretValidation = new PullSecretValidation();
 
 	public CRCLocationSection() {
 		super(SECTION_TITLE, LABEL_STRING, COMMAND_NAME, LOC_ATTR);
@@ -84,30 +84,23 @@ public class CRCLocationSection extends AbstractLocationSection {
 	@Override
 	protected void addListeners() {
 		super.addListeners();
-		pullSecretSelListener = new SelectionAdapter() {
+		pullSecretBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				browseClicked(pullSecretText, FILE);
 				validate();
 			}
-		};
-		pullSecretBrowse.addSelectionListener(pullSecretSelListener);
-
-		pullSecretModListener = new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				execute(new SetPullSecretPropertyCommand(server));
-			}
-		};
-		pullSecretText.addModifyListener(pullSecretModListener);
-		pullSecretText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				validate();
-			}
 		});
+
+		pullSecretModListener = (ModifyEvent e) -> 
+			execute(new SetPullSecretPropertyCommand(server));
+		pullSecretText.addModifyListener(pullSecretModListener);
+		pullSecretText.addModifyListener((ModifyEvent e) -> 
+			validate());
 
 	}
 
+	@Override
 	protected void validate() {
 		validateBinary();
 		validatePullSecret();
@@ -120,16 +113,6 @@ public class CRCLocationSection extends AbstractLocationSection {
 		} else {
 			txtDecorator.setDescriptionText(s);
 			txtDecorator.show();
-		}
-	}
-
-	protected void validatePullSecret() {
-		String s = getPullSecretErrorString();
-		if (s == null) {
-			pullSecretDecor.hide();
-		} else {
-			pullSecretDecor.setDescriptionText(s);
-			pullSecretDecor.show();
 		}
 	}
 
@@ -148,8 +131,14 @@ public class CRCLocationSection extends AbstractLocationSection {
 		return null;
 	}
 
-	protected String getPullSecretErrorString() {
-		return CRC100ServerWizardFragment.validatePullSecret(pullSecretText.getText());
+	protected void validatePullSecret() {
+		pullSecretDecor.hide();
+		String errorMessage = pullSecretValidation.validate(pullSecretText.getText(), 
+				(String error) -> validate());
+		if (errorMessage != null) {
+			pullSecretDecor.setDescriptionText(errorMessage);
+			pullSecretDecor.show();
+		}
 	}
 
 	public class SetPullSecretPropertyCommand
