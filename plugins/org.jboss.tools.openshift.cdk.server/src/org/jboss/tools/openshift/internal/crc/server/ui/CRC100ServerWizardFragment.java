@@ -154,13 +154,10 @@ public class CRC100ServerWizardFragment extends CDKServerWizardFragment {
 		String errorMessage = pullSecretValidation.validate(pullSecretFile, 
 				(String error) -> {
 					togglePullSecretDecorator(error);
-					setComplete(error != null);
 					if (error != null) {
 						handle.setMessage(error, IMessageProvider.ERROR);
 					}
 				});
-		// dont complete until job validated pull secret
-		setComplete(false);
 		togglePullSecretDecorator(errorMessage);
 		return errorMessage;
 	}
