@@ -65,7 +65,7 @@ public class CDKLabel {
 		public static final String CRC_PULL_SECRET_FILE = "CRC Pull Secret File: ";
 		public static final String CRC_BINARY = "CRC Binary: ";
 		public static final String CRC_PULL_SECRET_FILE_EDITOR = "Pull Secret File:";
-		public static final String CRC_BINARY_EDITOR = "crc binary file:";
+		public static final String CRC_BINARY_EDITOR = "CRC Binary: ";
 	}
 	
 	public static class Links {
@@ -121,8 +121,9 @@ public class CDKLabel {
 		public static final String SERVER_ADAPTER_REPRESENTING = "server adapter representing";
 		public static final String SELECT_VALID_IMAGE = "Please select a valid Image";
 		public static final String SELECT_VALID_SECRET_FILE = "Please select a valid Pull Secret file.";
-		public static final String INVALID_SECRET_FILE_JSON = "Pull Secret file is not valid JSON";
+		public static final String INVALID_SECRET_FILE_JSON = "it is valid JSON";
 		public static final String NON_READABLE_SECRET_FILE = "Pull Secret file is not readable";
+		public static final String BIGGER_20KB = "20KB";
 	}
 	
 	public static class Others {
