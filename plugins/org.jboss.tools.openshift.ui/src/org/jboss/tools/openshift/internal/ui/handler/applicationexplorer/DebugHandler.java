@@ -11,7 +11,10 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.ServerSocket;
+import java.net.Socket;
+
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -19,6 +22,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -71,6 +75,7 @@ public class DebugHandler extends ComponentHandler {
 	 */
 	private void createAndLaunchConfig(String path, String stackType, String stackVersion, int port, RemoteStackDebugger remoteDebugger, IProgressMonitor monitor, Shell shell) {
 		try {
+			waitForPortAvailable(port, monitor);
 			IPath projectPath = new Path(path);
 			IContainer project = ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(projectPath);
 			if (project instanceof IProject) {
@@ -101,5 +106,25 @@ public class DebugHandler extends ComponentHandler {
 		try (ServerSocket socket = new ServerSocket(0)) {
 			return socket.getLocalPort();
 		}
+	}
+	
+	private void waitForPortAvailable(int port, IProgressMonitor monitor) throws CoreException {
+		long start = System.currentTimeMillis();
+		while (System.currentTimeMillis() - start < 60_000 && !monitor.isCanceled()) {
+			try (Socket socket = new Socket("localhost", port)) {
+				return;
+			} catch (ConnectException e) {
+				try {
+					Thread.sleep(1000L);
+				} catch (InterruptedException e1) {
+					throw new CoreException(
+							new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage()));
+				}
+			} catch (IOException e) {
+				throw new CoreException(
+						new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage()));
+			}
+		}
+		throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Can't connect to JVM"));
 	}
 }
