@@ -29,6 +29,8 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceE
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.StorageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.URLElement;
 
+import io.fabric8.kubernetes.client.KubernetesClientException;
+
 /**
  * @author Red Hat Developers
  *
@@ -114,16 +116,18 @@ public class OpenShiftApplicationExplorerContentProvider implements ITreeContent
 	}
 
 	private Object[] getChildren(ApplicationElement parentElement) {
+		List<Object> childs = new ArrayList<>();
 		try {
-			List<Object> childs = new ArrayList<>();
 			ProjectElement project = parentElement.getParent();
 			ApplicationExplorerUIModel cluster = project.getParent();
 			cluster.getOdo().getComponents(cluster.getClient(), project.getWrapped().getMetadata().getName(), parentElement.getWrapped().getName()).forEach(comp -> childs.add(new ComponentElement(comp,  parentElement)));
 			cluster.getOdo().getServices(cluster.getClient(), project.getWrapped().getMetadata().getName(), parentElement.getWrapped().getName()).forEach(service -> childs.add(new ServiceElement(service, parentElement)));
-			return childs.toArray();
-		} catch (IOException e) {
-			return new Object[] { "Can't list components" };
+		} catch (IOException|KubernetesClientException e) {
+			if (childs.isEmpty()) {
+				return new Object[] { "Can't list components" };
+			}
 		}
+		return childs.toArray();
 	}
 
 	private Object[] getChildren(ComponentElement parentElement) {
