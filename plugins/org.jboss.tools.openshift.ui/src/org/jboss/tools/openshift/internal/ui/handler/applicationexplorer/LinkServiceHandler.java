@@ -49,7 +49,8 @@ public class LinkServiceHandler extends ComponentHandler {
 			        component.getWrapped().getName(), serviceNames);
 			final IWizard linkServiceWizard = new LinkServiceWizard(model);
 			if (WizardUtils.openWizardDialog(linkServiceWizard, shell) == Window.OK) {
-				executeInJob("Link service", monitor -> execute(Display.getDefault().getActiveShell(), model, component));
+				Shell parent = Display.getDefault().getActiveShell();
+				executeInJob("Link service", monitor -> execute(parent, model, component));
 			}
 			return Status.OK_STATUS;
 		} catch (IOException e) {
