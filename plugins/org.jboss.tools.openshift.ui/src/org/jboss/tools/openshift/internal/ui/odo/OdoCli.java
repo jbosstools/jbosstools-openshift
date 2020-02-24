@@ -192,7 +192,7 @@ public class OdoCli implements Odo {
 
   @Override
   public void watch(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "watch");
+    ExecHelper.executeWithTerminal(new File(context), false, command, "watch");
   }
 
   @Override
