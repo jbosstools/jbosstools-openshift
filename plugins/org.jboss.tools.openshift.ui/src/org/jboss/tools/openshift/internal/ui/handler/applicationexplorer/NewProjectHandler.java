@@ -17,6 +17,7 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -38,7 +39,7 @@ public class NewProjectHandler extends OdoHandler {
 		Shell shell = HandlerUtil.getActiveShell(event);
 		InputDialog dialog = new InputDialog(shell, "New project", "Project name:", null, null);
 		if (dialog.open() == Window.OK) {
-			executeInJob("Create project", monitor -> execute(shell, cluster, dialog.getValue()));
+			executeInJob("Create project", monitor -> execute(Display.getDefault().getActiveShell(), cluster, dialog.getValue()));
 		}
 		return null;
 	}
