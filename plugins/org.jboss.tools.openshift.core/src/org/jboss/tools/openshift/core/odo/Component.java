@@ -11,8 +11,7 @@
 package org.jboss.tools.openshift.core.odo;
 
 import java.io.File;
-
-import org.jboss.tools.openshift.core.OpenShiftCoreConstants;
+import java.util.Objects;
 
 import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.ODO_CONFIG_YAML;
 
@@ -61,6 +60,23 @@ public interface Component {
     public void setPath(String path) {
       this.path = path;
     }
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof ComponentImpl)) {
+			return false;
+		}
+		ComponentImpl other = (ComponentImpl) obj;
+		return Objects.equals(name, other.name);
+	}
   }
 
   static Component of(String name) {

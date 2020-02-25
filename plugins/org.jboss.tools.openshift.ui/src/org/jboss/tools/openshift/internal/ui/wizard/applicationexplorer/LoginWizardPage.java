@@ -79,6 +79,7 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 		passwordLabel.setText("Password:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(passwordLabel);
 		Text txtPassword = new Text(parent, SWT.BORDER);
+		txtPassword.setEchoChar('*');
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(txtPassword);
 
 		ISWTObservableValue<String> passwordObservable = WidgetProperties.text(SWT.Modify).observe(txtPassword);
@@ -90,6 +91,7 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 		tokenLabel.setText("Token:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(tokenLabel);
 		Text txtToken = new Text(parent, SWT.BORDER);
+		txtToken.setEchoChar('*');
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(txtToken);
 
 		ISWTObservableValue<String> tokenObservable = WidgetProperties.text(SWT.Modify).observe(txtToken);

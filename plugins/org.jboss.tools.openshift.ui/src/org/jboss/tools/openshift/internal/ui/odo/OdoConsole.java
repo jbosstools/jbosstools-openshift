@@ -22,7 +22,7 @@ import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 /**
- * @author Jeff MAURY
+ * @author Red Hat Developers
  *
  */
 public class OdoConsole extends IOConsole {

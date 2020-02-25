@@ -1,12 +1,11 @@
 package org.jboss.tools.openshift.internal.ui.propertytester;
 
 import org.eclipse.core.expressions.PropertyTester;
+import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 
 public class ComponentStatePropertyTester extends PropertyTester {
 
-	private final static String PROPERTY_COMPONENT_ALLOWED_STATE = "componentAllowedState";
-	
 	private static final String VALUE_PUSHED = "pushed";
 	
 	private static final String VALUE_NOT_PUSHED = "not pushed";
@@ -15,6 +14,7 @@ public class ComponentStatePropertyTester extends PropertyTester {
 	
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
+		receiver = getComponentElement(receiver);
 		if (!(receiver instanceof ComponentElement) || !(expectedValue instanceof Boolean) || args == null
 		        || args.length != 1 || !(args[0] instanceof String)) {
 			return false;
@@ -29,6 +29,19 @@ public class ComponentStatePropertyTester extends PropertyTester {
 			return expectedValue.equals(args[0].equals(VALUE_NO_CONTEXT));
 		}
 		return false;
+	}
+
+	/**
+	 * @param receiver the receiver
+	 * @return the receiver adapter to ComponentElement or null if not found
+	 */
+	private Object getComponentElement(Object receiver) {
+		if (receiver instanceof AbstractOpenshiftUIElement<?, ?, ?>) {
+			while (!(receiver instanceof ComponentElement)) {
+				receiver = ((AbstractOpenshiftUIElement<?, AbstractOpenshiftUIElement<?,?,?>, ?>)receiver).getParent();
+			}
+		}
+		return receiver;
 	}
 
 }

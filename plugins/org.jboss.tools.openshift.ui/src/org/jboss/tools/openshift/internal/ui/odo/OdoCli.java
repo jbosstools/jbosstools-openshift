@@ -70,30 +70,20 @@ import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.OCP4_CONSOLE
 import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.OCP4_CONSOLE_URL_KEY_NAME;
 import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.ODO_CONFIG_YAML;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.jboss.tools.common.util.DownloadHelper;
-import org.jboss.tools.openshift.core.OpenShiftCoreConstants;
 import org.jboss.tools.openshift.core.odo.Application;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.ComponentInfo;
@@ -105,7 +95,6 @@ import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 import org.jboss.tools.openshift.core.odo.Storage;
 import org.jboss.tools.openshift.core.odo.URL;
-import org.jboss.tools.openshift.core.odo.ComponentInfo.Builder;
 
 public class OdoCli implements Odo {
   public static final String ODO_DOWNLOAD_FLAG = OdoCli.class.getName() + ".download";
@@ -188,7 +177,7 @@ public class OdoCli implements Odo {
 
   @Override
   public void push(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "push");
+    ExecHelper.executeWithTerminal(new File(context), false, command, "push");
   }
 
   @Override
@@ -203,7 +192,7 @@ public class OdoCli implements Odo {
 
   @Override
   public void watch(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "watch");
+    ExecHelper.executeWithTerminal(new File(context), false, command, "watch");
   }
 
   @Override
@@ -289,7 +278,7 @@ public class OdoCli implements Odo {
 
   private <T> List<T> loadList(String output, Function<String[], T> mapper) throws IOException {
     try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
-      return reader.lines().skip(1).map(s -> s.replaceAll("\\s{1,}", "|"))
+      return reader.lines().skip(1).filter(s -> !s.trim().isEmpty()).map(s -> s.replaceAll("\\s{1,}", "|"))
         .map(s -> s.split("\\|"))
         .map(mapper)
         .collect(Collectors.toList());
@@ -409,7 +398,7 @@ public class OdoCli implements Odo {
 
   @Override
   public void follow(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "log", "-f");
+    ExecHelper.executeWithTerminal(new File(context), false, command, "log", "-f");
   }
 
   @Override

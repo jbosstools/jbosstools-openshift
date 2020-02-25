@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
+import java.util.Arrays;
+import java.util.List;
+
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 
 public interface Storage {
@@ -46,4 +49,11 @@ public interface Storage {
         }
         return res;
     }
+
+    /**
+	 * @return the list of available sizes
+	 */
+	public static List<String> getSizes() {
+		return Arrays.asList("1Gi", "1.5Gi", "2Gi");
+	}
 }

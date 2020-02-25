@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -40,18 +41,22 @@ public class LoginHandler extends OdoHandler {
 			return OpenShiftUIActivator.statusFactory().cancelStatus("No cluster selected"); //$NON-NLS-1$
 		}
 		try {
-			final LoginModel model = new LoginModel(cluster.getClient().getMasterUrl().toString(), cluster.getOdo());
-			final IWizard loginWizard = new LoginWizard(model);
-			if (WizardUtils.openWizardDialog(loginWizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
-				executeInJob("Login to Cluster", () -> execute(model));
-			}
+			openDialog(HandlerUtil.getActiveShell(event), cluster);
 			return Status.OK_STATUS;
 		} catch (IOException e) {
 			throw new ExecutionException(e.getLocalizedMessage(), e);
 		}
 	}
+
+	public static void openDialog(final Shell shell, ApplicationExplorerUIModel cluster) throws IOException {
+		final LoginModel model = new LoginModel(cluster.getClient().getMasterUrl().toString(), cluster.getOdo());
+		final IWizard loginWizard = new LoginWizard(model);
+		if (WizardUtils.openWizardDialog(loginWizard, shell) == Window.OK) {
+			executeInJob("Login to Cluster", monitor -> execute(model));
+		}
+	}
 	
-	private void execute(LoginModel model) {
+	private static void execute(LoginModel model) {
 		try {
 			model.getOdo().login(model.getUrl(), model.getUsername(), model.getPassword().toCharArray(), model.getToken());
 		} catch (IOException e) {

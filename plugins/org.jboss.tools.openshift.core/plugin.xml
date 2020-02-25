@@ -119,6 +119,7 @@
 		name="registryprovider"
 		schema="schema/org.jboss.tools.openshift.core.connection.registryprovider.exsd"/>
     <extension-point id="org.jboss.tools.openshift.core.dialogProvider" name="dialogProvider" schema="schema/org.jboss.tools.openshift.core.dialogProvider.exsd"/>
+    <extension-point id="remoteStackDebugger" name="Remote Stack Debugger" schema="schema/remoteStackDebugger.exsd"/>
 
 	<extension
  		point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
@@ -355,5 +356,14 @@
           </adapter>
        </factory>
     </extension>
-
+ <extension
+       point="org.jboss.tools.openshift.core.remoteStackDebugger">
+    <provider
+          class="org.jboss.tools.openshift.internal.core.stack.JavaRemoteStackDebugger">
+    </provider>
+    <provider
+          class="org.jboss.tools.openshift.internal.core.stack.NodeRemoteStackDebugger">
+    </provider>
+ </extension>
+ 
 </plugin>

@@ -26,6 +26,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
+import org.jboss.tools.openshift.core.stack.RemoteStackProviderRegistry;
 import org.jboss.tools.openshift.internal.core.server.resources.ResourceChangePublisher;
 import org.osgi.framework.BundleContext;
 
@@ -106,7 +107,7 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 		resourceChangeListener = new ResourceChangePublisher();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
 				IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
-
+		RemoteStackProviderRegistry.getInstance().initialize();
 	}
 
 	@Override
@@ -114,6 +115,7 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 		saveAllConnections();
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 		ServerCore.removeServerLifecycleListener(getServerListener());
+		RemoteStackProviderRegistry.getInstance().destroy();
 		super.stop(context);
 	}
 

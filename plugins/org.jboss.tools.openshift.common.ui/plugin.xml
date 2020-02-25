@@ -97,7 +97,7 @@
 		<perspectiveExtension targetID="org.jboss.tools.common.ui.JBossPerspective">
 			<view relative="org.eclipse.ui.views.ProblemView"
 				relationship="stack"
-				id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleView">
+				id="org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView">
 			</view>
       	</perspectiveExtension> 
 	</extension>
@@ -151,6 +151,24 @@
            id="org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup">
                 <insertionPoint
                     name="group.new"
+                    separator="true"/>
+                <insertionPoint
+                    name="group.login"
+                    separator="true"/>
+                <insertionPoint
+                    name="group.common"
+                    separator="true"/>
+                <insertionPoint
+                    name="group.link"
+                    separator="true"/>
+                <insertionPoint
+                    name="group.component"
+                    separator="true"/>
+                <insertionPoint
+                    name="group.delete"
+                    separator="true"/>
+                <insertionPoint
+                    name="group.about"
                     separator="true"/>
      </popupMenu>
   </viewer>

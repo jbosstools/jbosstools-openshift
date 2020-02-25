@@ -10,11 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
-import java.util.List;
-
 import org.eclipse.jface.wizard.Wizard;
-import org.jboss.tools.openshift.core.odo.ComponentType;
-import org.jboss.tools.openshift.core.odo.Odo;
 
 /**
  * @author Red Hat Developers
@@ -22,17 +18,14 @@ import org.jboss.tools.openshift.core.odo.Odo;
  */
 public class CreateComponentWizard extends Wizard {
 	
-	private CreateComponentWizardPage page;
-	
-	public CreateComponentWizard(List<ComponentType> componentTypes, String project, String application, Odo odo) {
-		this.addPage(this.page = new CreateComponentWizardPage(this, new CreateComponentModel(odo, componentTypes, project, application)));
+	public CreateComponentWizard(CreateComponentModel model) {
+		this.addPage(new CreateComponentWizardPage(this, model));
 		setNeedsProgressMonitor(true);
 		setWindowTitle("Create component");
 	}
 
 	@Override
 	public boolean performFinish() {
-		return this.page.finish();
+		return true;
 	}
-
 }

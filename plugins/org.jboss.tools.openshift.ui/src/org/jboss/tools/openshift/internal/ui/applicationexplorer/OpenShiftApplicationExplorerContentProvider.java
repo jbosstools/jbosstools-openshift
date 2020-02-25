@@ -23,13 +23,16 @@ import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.MessageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.StorageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.URLElement;
 
+import io.fabric8.kubernetes.client.KubernetesClientException;
+
 /**
- * @author Jeff MAURY
+ * @author Red Hat Developers
  *
  */
 public class OpenShiftApplicationExplorerContentProvider implements ITreeContentProvider, IElementListener {
@@ -97,8 +100,8 @@ public class OpenShiftApplicationExplorerContentProvider implements ITreeContent
 			List<ProjectElement> childs = new ArrayList<>();
 			parentElement.getOdo().getProjects(parentElement.getClient()).forEach(project -> childs.add(new ProjectElement(project, parentElement)));
 			return childs.toArray();
-		} catch (IOException e) {
-			return new Object[] { "Login to cluster, can't connect" };
+		} catch (Exception e) {
+			return new Object[] { new MessageElement("Can't connect to cluster. Click to login.", parentElement) };
 		}
 	}
 
@@ -113,16 +116,18 @@ public class OpenShiftApplicationExplorerContentProvider implements ITreeContent
 	}
 
 	private Object[] getChildren(ApplicationElement parentElement) {
+		List<Object> childs = new ArrayList<>();
 		try {
-			List<Object> childs = new ArrayList<>();
 			ProjectElement project = parentElement.getParent();
 			ApplicationExplorerUIModel cluster = project.getParent();
 			cluster.getOdo().getComponents(cluster.getClient(), project.getWrapped().getMetadata().getName(), parentElement.getWrapped().getName()).forEach(comp -> childs.add(new ComponentElement(comp,  parentElement)));
 			cluster.getOdo().getServices(cluster.getClient(), project.getWrapped().getMetadata().getName(), parentElement.getWrapped().getName()).forEach(service -> childs.add(new ServiceElement(service, parentElement)));
-			return childs.toArray();
-		} catch (IOException e) {
-			return new Object[] { "Can't list components" };
+		} catch (IOException|KubernetesClientException e) {
+			if (childs.isEmpty()) {
+				return new Object[] { "Can't list components" };
+			}
 		}
+		return childs.toArray();
 	}
 
 	private Object[] getChildren(ComponentElement parentElement) {

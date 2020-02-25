@@ -3,11 +3,11 @@
  */
 package org.jboss.tools.openshift.internal.common.ui.applicationexplorer;
 
-import org.eclipse.ui.navigator.CommonNavigator;
+import org.jboss.tools.openshift.internal.common.ui.explorer.BaseOpenShiftExplorerView;
 
 /**
  * @author Red Hat Developers
  *
  */
-public class OpenShiftApplicationExplorerView extends CommonNavigator {
+public class OpenShiftApplicationExplorerView extends BaseOpenShiftExplorerView {
 }

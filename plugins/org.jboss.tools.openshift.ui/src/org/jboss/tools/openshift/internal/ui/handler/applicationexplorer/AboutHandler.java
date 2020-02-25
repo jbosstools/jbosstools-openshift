@@ -21,7 +21,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
 
 /**
- * @author Fred Bricon
+ * @author Red Hat Developers
  */
 public class AboutHandler extends AbstractHandler {
 

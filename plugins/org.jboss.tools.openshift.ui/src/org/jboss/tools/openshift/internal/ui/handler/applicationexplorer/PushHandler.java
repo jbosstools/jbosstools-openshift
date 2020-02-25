@@ -11,34 +11,26 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.eclipse.swt.widgets.Shell;
+import org.jboss.tools.openshift.core.odo.ComponentState;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 
 /**
  * @author Red Hat Developer
  */
-public class PushHandler extends AbstractHandler {
+public class PushHandler extends ComponentHandler {
 
 	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		ComponentElement component = UIUtils.getFirstElement(selection, ComponentElement.class);
-		if (component == null) {
-			return OpenShiftUIActivator.statusFactory().cancelStatus("No component selected"); //$NON-NLS-1$
-		}
+	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
 			component.getRoot().getOdo().push(component.getParent().getParent().getWrapped().getMetadata().getName(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
+			component.getWrapped().setState(ComponentState.PUSHED);
+			component.refresh();
 		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 		return null;
 	}
-
-
 }

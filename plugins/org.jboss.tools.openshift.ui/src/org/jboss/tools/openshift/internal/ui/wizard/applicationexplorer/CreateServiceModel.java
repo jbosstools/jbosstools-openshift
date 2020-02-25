@@ -19,17 +19,12 @@ import org.jboss.tools.openshift.core.odo.ServiceTemplate;
  * @author Red Hat Developers
  *
  */
-public class CreateServiceModel extends OdoModel {
+public class CreateServiceModel extends ApplicationModel {
 	public static final String PROPERTY_SERVICE_NAME = "serviceName";
-	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
 	public static final String PROPERTY_SELECTED_SERVICE_TEMPLATE = "selectedServiceTemplate";
 	
 
 	private String serviceName = "";
-	
-	private String applicationName = "";
-	
-	private String projectName;
 	
 	private final List<ServiceTemplate> serviceTemplates;
 	
@@ -38,16 +33,13 @@ public class CreateServiceModel extends OdoModel {
 	/**
 	 * @param odo
 	 */
-	public CreateServiceModel(Odo odo, List<ServiceTemplate> serviceTemplates, String project, String applicationName) {
-		super(odo);
+	public CreateServiceModel(Odo odo, List<ServiceTemplate> serviceTemplates, String projectName, String applicationName) {
+		super(odo, projectName, applicationName);
 		this.serviceTemplates = serviceTemplates;
-		this.projectName = project;
-		this.applicationName = applicationName;
 		if (!serviceTemplates.isEmpty()) {
 			setSelectedServiceTemplate(serviceTemplates.get(0));
 		}
 	}
-
 
 	/**
 	 * @return the serviceName
@@ -56,30 +48,12 @@ public class CreateServiceModel extends OdoModel {
 		return serviceName;
 	}
 
-
 	/**
 	 * @param serviceName the serviceName to set
 	 */
 	public void setServiceName(String serviceName) {
 		firePropertyChange(PROPERTY_SERVICE_NAME, this.serviceName, this.serviceName = serviceName);
 	}
-
-
-	/**
-	 * @return the applicationName
-	 */
-	public String getApplicationName() {
-		return applicationName;
-	}
-
-
-	/**
-	 * @param applicationName the applicationName to set
-	 */
-	public void setApplicationName(String applicationName) {
-		firePropertyChange(PROPERTY_APPLICATION_NAME, this.applicationName, this.applicationName = applicationName);
-	}
-
 
 	/**
 	 * @return the selectedServiceTemplate
@@ -88,7 +62,6 @@ public class CreateServiceModel extends OdoModel {
 		return selectedServiceTemplate;
 	}
 
-
 	/**
 	 * @param selectedServiceTemplate the selectedServiceTemplate to set
 	 */
@@ -96,20 +69,10 @@ public class CreateServiceModel extends OdoModel {
 		firePropertyChange(PROPERTY_SELECTED_SERVICE_TEMPLATE, this.selectedServiceTemplate, this.selectedServiceTemplate = selectedServiceTemplate);
 	}
 
-
 	/**
 	 * @return the serviceTemplates
 	 */
 	public List<ServiceTemplate> getServiceTemplates() {
 		return serviceTemplates;
 	}
-
-
-	/**
-	 * @return the project name
-	 */
-	public String getProjectName() {
-		return projectName;
-	}
-
 }

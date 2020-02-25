@@ -11,11 +11,18 @@
 package org.jboss.tools.openshift.internal.ui.applicationexplorer;
 
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.TextStyle;
 import org.jboss.tools.openshift.core.odo.KubernetesLabels;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
+import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.MessageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.StorageElement;
@@ -48,11 +55,46 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 		} else if (element instanceof StorageElement) {
 			return style(((StorageElement)element).getWrapped().getName(), "", limit);
 		} else if (element instanceof URLElement) {
-			return style(((URLElement)element).getWrapped().getName(),((URLElement)element).getWrapped().getPort(), limit);
+			return style(((URLElement)element).getWrapped().getName(),String.join(" ", ((URLElement)element).getWrapped().getPort(), ((URLElement)element).getWrapped().getState().toString()), limit);
 		} else if (element instanceof ServiceElement) {
 			return style(KubernetesLabels.getComponentName(((ServiceElement)element).getWrapped()), "", limit);
+		} else if (element instanceof MessageElement) {
+			return getStyledText((MessageElement) element);
 		}
 		return super.getStyledText(element, limit);
+	}
+	
+	private StyledString getStyledText(MessageElement messageElement) {
+		StyledString styledString = new StyledString();
+		styledString.append(messageElement.getWrapped(), new Styler() {
+			
+			@Override
+			public void applyStyles(TextStyle textStyle) {
+				textStyle.underline = true;
+				textStyle.underlineStyle = SWT.UNDERLINE_LINK;
+			}
+		});
+		return styledString;
+	}
+
+	@Override
+	public Image getImage(Object element) {
+		if (element instanceof ApplicationExplorerUIModel) {
+			return OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
+		} else if (element instanceof ProjectElement) {
+			return OpenShiftImages.PROJECT_IMG;
+		} else if (element instanceof ApplicationElement) {
+			return OpenShiftImages.APPLICATION_IMG;
+		} else if (element instanceof ComponentElement) {
+			return OpenShiftImages.COMPONENT_IMG;
+		} else if (element instanceof ServiceElement) {
+			return OpenShiftImages.SERVICE_IMG;
+		} else if (element instanceof URLElement) {
+			return OpenShiftImages.ROUTE_IMG;
+		} else if (element instanceof StorageElement) {
+			return OpenShiftImages.STORAGE_IMG;
+		}
+		return super.getImage(element);
 	}
 	
 	

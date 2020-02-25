@@ -20,22 +20,14 @@ import org.jboss.tools.openshift.core.odo.Odo;
  * @author Red Hat Developers
  *
  */
-public class CreateComponentModel extends OdoModel {
-	public static final String PROPERTY_COMPONENT_NAME = "componentName";
+public class CreateComponentModel extends ComponentModel {
 	public static final String PROPERTY_ECLIPSE_PROJECT = "eclipseProject";
-	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
 	public static final String PROPERTY_SELECTED_COMPONENT_TYPE = "selectedComponentType";
 	public static final String PROPERTY_SELECTED_COMPONENT_VERSION = "selectedComponentVersion";
 	public static final String PROPERTY_PUSH_AFTER_CREATE = "pushAfterCreate";
 	
 
-	private String componentName = "";
-	
 	private IProject eclipseProject;
-	
-	private String applicationName = "";
-	
-	private String projectName;
 	
 	private final List<ComponentType> componentTypes;
 	
@@ -49,32 +41,13 @@ public class CreateComponentModel extends OdoModel {
 	/**
 	 * @param odo
 	 */
-	public CreateComponentModel(Odo odo, List<ComponentType> componentTypes, String project, String applicationName) {
-		super(odo);
+	public CreateComponentModel(Odo odo, List<ComponentType> componentTypes, String projectName, String applicationName) {
+		super(odo, projectName, applicationName, null);
 		this.componentTypes = componentTypes;
-		this.projectName = project;
-		this.applicationName = applicationName;
 		if (!componentTypes.isEmpty()) {
 			setSelectedComponentType(componentTypes.get(0));
 		}
 	}
-
-
-	/**
-	 * @return the componentName
-	 */
-	public String getComponentName() {
-		return componentName;
-	}
-
-
-	/**
-	 * @param componentName the componentName to set
-	 */
-	public void setComponentName(String componentName) {
-		firePropertyChange(PROPERTY_COMPONENT_NAME, this.componentName, this.componentName = componentName);
-	}
-
 
 	/**
 	 * @return the Eclipse project
@@ -83,7 +56,6 @@ public class CreateComponentModel extends OdoModel {
 		return eclipseProject;
 	}
 
-
 	/**
 	 * @param project the Eclipse project to set
 	 */
@@ -91,30 +63,12 @@ public class CreateComponentModel extends OdoModel {
 		firePropertyChange(PROPERTY_ECLIPSE_PROJECT, this.eclipseProject, this.eclipseProject = project);
 	}
 
-
-	/**
-	 * @return the applicationName
-	 */
-	public String getApplicationName() {
-		return applicationName;
-	}
-
-
-	/**
-	 * @param applicationName the applicationName to set
-	 */
-	public void setApplicationName(String applicationName) {
-		firePropertyChange(PROPERTY_APPLICATION_NAME, this.applicationName, this.applicationName = applicationName);
-	}
-
-
 	/**
 	 * @return the selectedComponentType
 	 */
 	public ComponentType getSelectedComponentType() {
 		return selectedComponentType;
 	}
-
 
 	/**
 	 * @param selectedComponentType the selectedComponentType to set
@@ -126,14 +80,12 @@ public class CreateComponentModel extends OdoModel {
 		}
 	}
 
-
 	/**
 	 * @return the selectedComponentVersion
 	 */
 	public String getSelectedComponentVersion() {
 		return selectedComponentVersion;
 	}
-
 
 	/**
 	 * @param selectedComponentVersion the selectedComponentVersion to set
@@ -142,14 +94,12 @@ public class CreateComponentModel extends OdoModel {
 		firePropertyChange(PROPERTY_SELECTED_COMPONENT_VERSION, this.selectedComponentVersion, this.selectedComponentVersion = selectedComponentVersion);
 	}
 
-
 	/**
 	 * @return the pushAfterCreate
 	 */
 	public boolean isPushAfterCreate() {
 		return pushAfterCreate;
 	}
-
 
 	/**
 	 * @param pushAfterCreate the pushAfterCreate to set
@@ -158,20 +108,10 @@ public class CreateComponentModel extends OdoModel {
 		firePropertyChange(PROPERTY_PUSH_AFTER_CREATE, this.pushAfterCreate, this.pushAfterCreate = pushAfterCreate);
 	}
 
-
 	/**
 	 * @return the componentTypes
 	 */
 	public List<ComponentType> getComponentTypes() {
 		return componentTypes;
 	}
-
-
-	/**
-	 * @return the project name
-	 */
-	public String getProjectName() {
-		return projectName;
-	}
-
 }

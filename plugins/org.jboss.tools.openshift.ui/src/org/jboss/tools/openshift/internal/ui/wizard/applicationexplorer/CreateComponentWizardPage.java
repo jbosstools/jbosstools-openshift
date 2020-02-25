@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
-import java.io.IOException;
-
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -73,7 +71,7 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 		ISWTObservableValue<String> componentNameObservable = WidgetProperties.text(SWT.Modify).observe(componentNameText);
 		Binding componentNameBinding = ValueBindingBuilder.bind(componentNameObservable)
 				.validatingAfterGet(new MandatoryStringValidator("Please specify a name"))
-				.to(BeanProperties.value(CreateComponentModel.PROPERTY_COMPONENT_NAME).observe(model))
+				.to(BeanProperties.value(ComponentModel.PROPERTY_COMPONENT_NAME).observe(model))
 				.in(dbc);
 		ControlDecorationSupport.create(componentNameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 
@@ -159,19 +157,6 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 		dialog.setInitialSelections(model.getEclipseProject());
 		if (dialog.open() == Dialog.OK) {
 			model.setEclipseProject(dialog.getSelectedProject());
-		}
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean finish() {
-		try {
-			model.getOdo().createComponentLocal(model.getProjectName(), model.getApplicationName(), model.getSelectedComponentType().getName(), model.getSelectedComponentVersion(), model.getComponentName(), model.getEclipseProject().getLocation().toOSString(), model.isPushAfterCreate());
-			return true;
-		} catch (IOException e) {
-			setErrorMessage(e.getLocalizedMessage());
-			return false;
 		}
 	}
 }
