@@ -398,7 +398,7 @@ public class OdoCli implements Odo {
 
   @Override
   public void follow(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "log", "-f");
+    ExecHelper.executeWithTerminal(new File(context), false, command, "log", "-f");
   }
 
   @Override
