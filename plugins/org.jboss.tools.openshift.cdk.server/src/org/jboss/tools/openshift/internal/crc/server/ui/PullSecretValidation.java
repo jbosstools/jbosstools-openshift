@@ -36,7 +36,7 @@ public class PullSecretValidation {
 	private static final int MAX_FILE_SIZE = 20 * 1024; // 20k
 
 	private final AtomicReference<String> error = new AtomicReference<>();
-	private final AtomicReference<String> file = new AtomicReference<>();
+	private final AtomicReference<String> file = new AtomicReference<>("");
 
 	public String validate(final String filename, final Consumer<String> listener) {
 		if (!hasChanged(filename)) {
