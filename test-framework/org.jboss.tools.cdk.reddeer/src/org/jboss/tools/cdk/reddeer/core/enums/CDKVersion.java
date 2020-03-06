@@ -11,7 +11,6 @@
 package org.jboss.tools.cdk.reddeer.core.enums;
 
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
-import org.jboss.tools.cdk.reddeer.core.enums.CDKServerAdapterType;
 
 /**
  * Enum holding information for CDK/Minshift container runtimes
@@ -33,7 +32,8 @@ public enum CDKVersion {
 	CDK380 	(CDKServerAdapterType.CDK32, "3.8.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.8.0-2-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
 	CDK390 	(CDKServerAdapterType.CDK32, "3.9.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.9.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
 	CDK3100 (CDKServerAdapterType.CDK32, "3.10.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.10.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
-	CDK3110 (CDKServerAdapterType.CDK32, "3.11.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.11.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
+	CDK3110 (CDKServerAdapterType.CDK32, "3.11.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.11.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),	
+	CDK3120 (CDKServerAdapterType.CDK32, "3.12.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.12.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
 	MINISHIFT1140 (CDKServerAdapterType.MINISHIFT17, "1.14.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.14.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
 	MINISHIFT1151 (CDKServerAdapterType.MINISHIFT17, "1.15.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.15.1-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
 	MINISHIFT1161 (CDKServerAdapterType.MINISHIFT17, "1.16.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.16.1-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
@@ -62,7 +62,10 @@ public enum CDKVersion {
 	CRC130 (CDKServerAdapterType.CRC, "1.3.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.3.0" + getArch()),
 	CRC140 (CDKServerAdapterType.CRC, "1.4.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.4.0" + getArch()),
 	CRC150 (CDKServerAdapterType.CRC, "1.5.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.5.0" + getArch()),
-	CRC160 (CDKServerAdapterType.CRC, "1.6.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.6.0" + getArch());
+	CRC160 (CDKServerAdapterType.CRC, "1.6.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.6.0" + getArch()),	
+	CRC170 (CDKServerAdapterType.CRC, "1.7.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.7.0" + getArch()),
+	CRC180 (CDKServerAdapterType.CRC, "1.8.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.8.0" + getArch());
+
 	
 	private final CDKServerAdapterType type;
 	private final String version;
