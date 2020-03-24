@@ -60,7 +60,8 @@ public class HumanReadableX509CertificateTest {
 		assertThat(getValue(LABEL_PRINCIPAL_STATE, issuedTo)).isEqualTo("North Carolina");
 		assertThat(getValue(LABEL_PRINCIPAL_LOCALITY, issuedTo)).isEqualTo("Raleigh");
 		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATION, issuedTo)).isEqualTo("Red Hat, Inc.");
-		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATIONAL_UNIT, issuedTo)).isEqualTo("IT");
+		// not present in current certificate for redhat.com
+		// assertThat(getValue(LABEL_PRINCIPAL_ORGANISATIONAL_UNIT, issuedTo)).isEqualTo("IT");
 		assertThat(getValue(LABEL_PRINCIPAL_COMMON_NAME, issuedTo)).isEqualTo("www.redhat.com");
 	}
 
@@ -91,15 +92,15 @@ public class HumanReadableX509CertificateTest {
 		// when
 		String fingerprint = certificate.getFingerprint();
 		// then
-		assertThat(fingerprint).isEqualTo("9C9E80E9E2D6E6BE8A851A95408C86B781A3604C");
+		assertThat(fingerprint).isEqualTo("3B20918BE121B4B09AB94791D1887993D6C4DEB9");
 	}
 
 	@Test
 	public void shouldReportValidity() throws CertificateException, ParseException {
 		// given
 		SimpleDateFormat dateParser = new SimpleDateFormat(DATE_FORMAT, Locale.US);
-		Calendar expectedIssuedOn = getCalendar(dateParser.parse("Wed, 21 Mar 2018 01:00:00 CET"));
-		Calendar expectedExpiresOn = getCalendar(dateParser.parse("Fri, 20 Mar 2020 13:00:00 CET"));
+		Calendar expectedIssuedOn = getCalendar(dateParser.parse("Wed, 24 Feb 2020 01:00:00 CET"));
+		Calendar expectedExpiresOn = getCalendar(dateParser.parse("Fri, 24 May 2022 13:00:00 CET"));
 		// when
 		String validity = certificate.getValidity();
 		// then
