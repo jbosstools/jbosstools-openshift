@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2017-2020 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.openshift.test.util;
 
 import java.security.cert.CertificateException;
@@ -7,49 +17,55 @@ import org.jboss.tools.openshift.internal.ui.utils.SSLCertificateUtils;
 
 public class SSLCertificateMocks {
 
-	public static final String CERTIFICATE_REDHAT_COM = "-----BEGIN CERTIFICATE-----\n" 
-			+ "	MIIHTjCCBjagAwIBAgIQCKHZUQafG1ivUnpN3nJUzzANBgkqhkiG9w0BAQsFADB1\n"
-			+ "	MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\n"
-			+ "	d3cuZGlnaWNlcnQuY29tMTQwMgYDVQQDEytEaWdpQ2VydCBTSEEyIEV4dGVuZGVk\n"
-			+ "	IFZhbGlkYXRpb24gU2VydmVyIENBMB4XDTE4MDMyMTAwMDAwMFoXDTIwMDMyMDEy\n"
-			+ "	MDAwMFowgdcxHTAbBgNVBA8MFFByaXZhdGUgT3JnYW5pemF0aW9uMRMwEQYLKwYB\n"
-			+ "	BAGCNzwCAQMTAlVTMRkwFwYLKwYBBAGCNzwCAQITCERlbGF3YXJlMRAwDgYDVQQF\n"
-			+ "	EwcyOTQ1NDM2MQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xpbmEx\n"
-			+ "	EDAOBgNVBAcTB1JhbGVpZ2gxFjAUBgNVBAoTDVJlZCBIYXQsIEluYy4xCzAJBgNV\n"
-			+ "	BAsTAklUMRcwFQYDVQQDEw53d3cucmVkaGF0LmNvbTCCASIwDQYJKoZIhvcNAQEB\n"
-			+ "	BQADggEPADCCAQoCggEBAKmnYSl351xFp3sh0JbGJZRh+8yQDLSdDtUEOmUnaFGD\n"
-			+ "	ds2CVyoTNmlv85AK28yhV4en9Q32YzFx/SVbidhl7P19uBvP/QAHoe2Yk7ZZ9lBl\n"
-			+ "	T+9Gy2zeZOMMYAPu/uG+wNDFVEAG3/gifF97IM26W3WOOlyqa3lfFgmbPOlBv6sD\n"
-			+ "	VWMoZ+Zap0I9pbniIpboJMjHNUpVMvPKChk3oXhDMsSK3mf/pPyWFFtscha8Nbd3\n"
-			+ "	kjOnHwr5wu2DlubtUerr4pxCzoklvkUkoZ64z/Ea4Gk0GFUUmZyUivDRsEONzcc+\n"
-			+ "	wvKx5EOl39JHoApK8jgKh3j5qL7+Pjubuar8IbDa3fsCAwEAAaOCA3UwggNxMB8G\n"
-			+ "	A1UdIwQYMBaAFD3TUKXWoK3u80pgCmXTIdT4+NYPMB0GA1UdDgQWBBRfBicRZhUO\n"
-			+ "	oiLVJNQ6IqBRozoNJDAlBgNVHREEHjAcgg53d3cucmVkaGF0LmNvbYIKcmVkaGF0\n"
-			+ "	LmNvbTAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUF\n"
-			+ "	BwMCMHUGA1UdHwRuMGwwNKAyoDCGLmh0dHA6Ly9jcmwzLmRpZ2ljZXJ0LmNvbS9z\n"
-			+ "	aGEyLWV2LXNlcnZlci1nMi5jcmwwNKAyoDCGLmh0dHA6Ly9jcmw0LmRpZ2ljZXJ0\n"
-			+ "	LmNvbS9zaGEyLWV2LXNlcnZlci1nMi5jcmwwSwYDVR0gBEQwQjA3BglghkgBhv1s\n"
-			+ "	AgEwKjAoBggrBgEFBQcCARYcaHR0cHM6Ly93d3cuZGlnaWNlcnQuY29tL0NQUzAH\n"
-			+ "	BgVngQwBATCBiAYIKwYBBQUHAQEEfDB6MCQGCCsGAQUFBzABhhhodHRwOi8vb2Nz\n"
-			+ "	cC5kaWdpY2VydC5jb20wUgYIKwYBBQUHMAKGRmh0dHA6Ly9jYWNlcnRzLmRpZ2lj\n"
-			+ "	ZXJ0LmNvbS9EaWdpQ2VydFNIQTJFeHRlbmRlZFZhbGlkYXRpb25TZXJ2ZXJDQS5j\n"
-			+ "	cnQwCQYDVR0TBAIwADCCAX0GCisGAQQB1nkCBAIEggFtBIIBaQFnAHUApLkJkLQY\n"
-			+ "	WBSHuxOizGdwCjw1mAT5G9+443fNDsgN3BAAAAFiSiRZgQAABAMARjBEAiBFtAW0\n"
-			+ "	yUii4dprdZGvOgU4Dxe5dqETR5iUf4MVaR6w3QIgLEEi7qm6tLilae275hXsVnwx\n"
-			+ "	owze9FlYwSun5sjx3JoAdgBWFAaaL9fC7NP14b1Esj7HRna5vJkRXMDvlJhV1onQ\n"
-			+ "	3QAAAWJKJFqqAAAEAwBHMEUCIQDUtJC9QC/DsCwrni0hIV+TZKUAMaMnA7PBt97n\n"
-			+ "	GL9kgwIgWyPdnUs5a8lRHxAzNjNseLbVP09Pi3kBbkCjU+zI/EAAdgC72d+8H4px\n"
-			+ "	tZOUI5eqkntHOFeVCqtS6BqQlmQ2jh7RhQAAAWJKJFpQAAAEAwBHMEUCICFK7q0I\n"
-			+ "	Z6/8Qc1borjKBNNyuZc9vQ2ReLEgTIypKL32AiEAr/W/UIEgy3ajbXphfq9uL9pK\n"
-			+ "	Bxd43BzQhc2pQhWbdYMwDQYJKoZIhvcNAQELBQADggEBAKmQ5YNnKz7EIABTWGoR\n"
-			+ "	H7Yg0nNDmjYnYyOIl/zsbPaVntQOGBzjK+IgrLL7nvpwUD4kDjzA34zzSQ/utYV4\n"
-			+ "	omjXAMxruXZ1e174qNVkUla2vvO0+KzJXeAAOoXn8gFQCu6nUN29Yu+ZQQFPjqKV\n"
-			+ "	0JMqj0tL3nko7VE+JB+lnK6vuMDNFQ6f6zXjBBhODsvMBgEbtN0qWLu/ptCP2DFQ\n"
-			+ "	NBJLSU6P4SRXxd1LPWaSHyJXU4C48ORsMONGneRJ9GeZmx++qZ5H0apVTnciGOVy\n"
-			+ "	ub+KhI6GgJ47G3qvo1kbz+HdaFick77oeJ0g6xCYBnUzfolVqYx07Y3RCw0vVmAc\n"
-			+ "	Gyo=\n"
-			+ "	-----END CERTIFICATE-----";
+	
+	/**
+	 * howto update: export the certificate via browser
+	 */
+	public static final String CERTIFICATE_REDHAT_COM = "-----BEGIN CERTIFICATE-----\n" + 
+			"MIIHQzCCBiugAwIBAgIQD/6sGP0JaKSf+MqKXUhAHDANBgkqhkiG9w0BAQsFADB1\n" + 
+			"MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\n" + 
+			"d3cuZGlnaWNlcnQuY29tMTQwMgYDVQQDEytEaWdpQ2VydCBTSEEyIEV4dGVuZGVk\n" + 
+			"IFZhbGlkYXRpb24gU2VydmVyIENBMB4XDTIwMDIyNDAwMDAwMFoXDTIyMDUyNDEy\n" + 
+			"MDAwMFowgcoxHTAbBgNVBA8MFFByaXZhdGUgT3JnYW5pemF0aW9uMRMwEQYLKwYB\n" + 
+			"BAGCNzwCAQMTAlVTMRkwFwYLKwYBBAGCNzwCAQITCERlbGF3YXJlMRAwDgYDVQQF\n" + 
+			"EwcyOTQ1NDM2MQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xpbmEx\n" + 
+			"EDAOBgNVBAcTB1JhbGVpZ2gxFjAUBgNVBAoTDVJlZCBIYXQsIEluYy4xFzAVBgNV\n" + 
+			"BAMTDnd3dy5yZWRoYXQuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\n" + 
+			"AQEAqWU6YgkZLN9eCbsuU31th2OwLGk/KCGtkvtetv644VEmxPf/clw7EK1H9MNd\n" + 
+			"1JVmYp5B/X/3T7+B4McgycjrrGZBW6fHulJdCR8dGFuPYm1py+ZN7zqJtTxhDGOb\n" + 
+			"AnCDKo7Xitdh55+isAdri0fhZejABzSZ0wBIYAR6fEtAdzcRS0iH5fjI4bQ70wcE\n" + 
+			"HuDptsEmJh+eQHmVduCT7QYjNZInnNZGWz2QCiAsQbvMCWQ+IbQt82gw/W7xUb/8\n" + 
+			"RW275k80g1oJwb42lrbhT8hqhIUIoqca7lzg5MOtbRSt8wXw/xllmXfFuSGxeUaY\n" + 
+			"n3XTV2m0BRGRokX4Rdp+FxHw8QIDAQABo4IDdzCCA3MwHwYDVR0jBBgwFoAUPdNQ\n" + 
+			"pdagre7zSmAKZdMh1Pj41g8wHQYDVR0OBBYEFDSlDoFwwcqiYTiHdaTOiVMOasYi\n" + 
+			"MCUGA1UdEQQeMByCDnd3dy5yZWRoYXQuY29tggpyZWRoYXQuY29tMA4GA1UdDwEB\n" + 
+			"/wQEAwIFoDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwdQYDVR0fBG4w\n" + 
+			"bDA0oDKgMIYuaHR0cDovL2NybDMuZGlnaWNlcnQuY29tL3NoYTItZXYtc2VydmVy\n" + 
+			"LWcyLmNybDA0oDKgMIYuaHR0cDovL2NybDQuZGlnaWNlcnQuY29tL3NoYTItZXYt\n" + 
+			"c2VydmVyLWcyLmNybDBLBgNVHSAERDBCMDcGCWCGSAGG/WwCATAqMCgGCCsGAQUF\n" + 
+			"BwIBFhxodHRwczovL3d3dy5kaWdpY2VydC5jb20vQ1BTMAcGBWeBDAEBMIGIBggr\n" + 
+			"BgEFBQcBAQR8MHowJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmRpZ2ljZXJ0LmNv\n" + 
+			"bTBSBggrBgEFBQcwAoZGaHR0cDovL2NhY2VydHMuZGlnaWNlcnQuY29tL0RpZ2lD\n" + 
+			"ZXJ0U0hBMkV4dGVuZGVkVmFsaWRhdGlvblNlcnZlckNBLmNydDAJBgNVHRMEAjAA\n" + 
+			"MIIBfwYKKwYBBAHWeQIEAgSCAW8EggFrAWkAdQDuS723dc5guuFCaR+r4Z5mow9+\n" + 
+			"X7By2IMAxHuJeqj9ywAAAXB5jkHBAAAEAwBGMEQCIAgo9H+z90WeM84Uu4cdPa1Q\n" + 
+			"C5XEPWo4llrBlXxIURQeAiA9Ct+g31WKBc0B2YDmk9RmD7EDr/XVntyDL//pZM2F\n" + 
+			"IwB3AFYUBpov18Ls0/XhvUSyPsdGdrm8mRFcwO+UmFXWidDdAAABcHmOQcgAAAQD\n" + 
+			"AEgwRgIhALUEYTKBQ7FI4p1VkJNHgOzyBTaNfX05yMD92UuhUCeqAiEA2K7rO3x7\n" + 
+			"1Nyd99JnbR4l6il5blhMS3CTcgfI5c9ge1wAdwC72d+8H4pxtZOUI5eqkntHOFeV\n" + 
+			"CqtS6BqQlmQ2jh7RhQAAAXB5jkFTAAAEAwBIMEYCIQCaH+9uNZyThqXpy04dLY/o\n" + 
+			"T6LDZSyiIXQPE32kpLCcGgIhAPKyg2kGNIZeiU4dN3lbeV92eQD15gOCyEwJ5Th+\n" + 
+			"2PpWMA0GCSqGSIb3DQEBCwUAA4IBAQBHM4RpyD4kyK+9QvU63rtDUFud6iCWhhJQ\n" + 
+			"0YKnBulu44RyNBiAkfMMonkxeHcHK25nogx1JCYImdpL2e5Hd4AUPhVwJyI06dYC\n" + 
+			"BzeAQh2i77T5cjElRyXX6ZZrgJ/3/lCmcM7vydLsid3PXicgL6ezkDRx1U4EPa7f\n" + 
+			"ZtPpTJalOW3yz1mNrjFKoH4mVU5wQ7jMxh18F28sRY41npKiRosmsGqCOf0wbHmA\n" + 
+			"hHTzWtTKeWmGIjOCgFbi+fBCDqp/4h5Ix8vqWWp9lXpnVxsSTUDQzKOatbez6d1I\n" + 
+			"xcJx7bJMvF/D/fh3M0+MbBCSQkcIsadx3jvy8Yjirfqgkepouhzm\n" + 
+			"-----END CERTIFICATE-----";
 
+	/**
+	 * howto update: export the certificate via browser
+	 */
 	public static final String CERTIFICATE_OPEN_PAAS_REDHAT_COM = "-----BEGIN CERTIFICATE-----\n"
 			+ "MIIF1zCCBL+gAwIBAgICBVswDQYJKoZIhvcNAQELBQAwQTEQMA4GA1UECgwHUmVk\n"
 			+ "IEhhdDENMAsGA1UECwwEcHJvZDEeMBwGA1UEAwwVQ2VydGlmaWNhdGUgQXV0aG9y\n"

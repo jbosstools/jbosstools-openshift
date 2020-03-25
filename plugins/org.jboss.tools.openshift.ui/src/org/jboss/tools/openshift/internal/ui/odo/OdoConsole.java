@@ -39,7 +39,7 @@ public class OdoConsole extends IOConsole {
 	 * 
 	 */
 	private void connectStreams() {
-		StreamsProxy streamsProxy = new StreamsProxy(process, getEncoding());
+		StreamsProxy streamsProxy = new StreamsProxy(process, getCharset());
 		IStreamMonitor monitor = streamsProxy.getOutputStreamMonitor();
 		if (monitor != null) {
 			new StreamListener(newOutputStream(), monitor);
