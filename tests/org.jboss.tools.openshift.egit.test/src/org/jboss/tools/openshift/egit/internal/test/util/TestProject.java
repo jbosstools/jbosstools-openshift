@@ -85,7 +85,7 @@ public class TestProject {
 		else {
 			File f = new File(location);
 			if (f.exists())
-				FileUtils.delete(f, FileUtils.RECURSIVE | FileUtils.RETRY);
+				FileUtils.delete(f, FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.SKIP_MISSING);
 		}
 	}
 
