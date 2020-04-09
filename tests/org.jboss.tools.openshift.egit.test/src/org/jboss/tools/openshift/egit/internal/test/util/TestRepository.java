@@ -538,7 +538,7 @@ public class TestRepository {
 		File repositoryDirectory = repository.getDirectory();
 		File repositoryParent = repositoryDirectory.getParentFile();
 		if (repositoryParent.exists()) {
-			FileUtils.delete(repositoryParent, FileUtils.RECURSIVE | FileUtils.RETRY);
+			FileUtils.delete(repositoryParent, FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.SKIP_MISSING);
 		}
 	}
 
