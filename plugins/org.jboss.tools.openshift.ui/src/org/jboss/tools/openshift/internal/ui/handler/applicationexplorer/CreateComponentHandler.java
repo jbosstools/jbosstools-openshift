@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.notification.LabelNotification;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -73,13 +74,13 @@ public class CreateComponentHandler extends OdoHandler {
 	 */
 	private void execute(Shell shell, CreateComponentModel model,
 	        AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel> element) {
-		Notification notification = openNotification(shell, "Creating component " + model.getComponentName());
+		LabelNotification notification = LabelNotification.openNotification(shell, "Creating component " + model.getComponentName());
 		try {
 			model.getOdo().createComponentLocal(model.getProjectName(), model.getApplicationName(),
 			        model.getSelectedComponentType().getName(), model.getSelectedComponentVersion(),
 			        model.getComponentName(), model.getEclipseProject().getLocation().toOSString(),
 			        model.isPushAfterCreate());
-			openNotification(notification, shell, "Component " + model.getComponentName() + " created");
+			LabelNotification.openNotification(notification, shell, "Component " + model.getComponentName() + " created");
 			element.getRoot().addContext(model.getEclipseProject());
 			element.refresh();
 		} catch (IOException e) {

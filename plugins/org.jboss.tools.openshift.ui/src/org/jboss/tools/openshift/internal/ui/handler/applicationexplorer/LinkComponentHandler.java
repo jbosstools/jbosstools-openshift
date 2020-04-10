@@ -23,6 +23,7 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.notification.LabelNotification;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -63,11 +64,11 @@ public class LinkComponentHandler extends ComponentHandler {
 	}
 
 	private void execute(Shell shell, LinkComponentModel model, ComponentElement component) {
-		Notification notification = openNotification(shell, "Linking component " + model.getComponentName() + " to " + model.getTarget().getName());
+		LabelNotification notification = LabelNotification.openNotification(shell, "Linking component " + model.getComponentName() + " to " + model.getTarget().getName());
 		try {
 			model.getOdo().link(model.getProjectName(), model.getApplicationName(), component.getWrapped().getName(),
 			        component.getWrapped().getPath(), model.getTarget().getName(), model.getPort());
-			openNotification(notification, shell, "Component " + model.getComponentName() + " linked to " + model.getTarget().getName());
+			LabelNotification.openNotification(notification, shell, "Component " + model.getComponentName() + " linked to " + model.getTarget().getName());
 		} catch (IOException e) {
 			shell.getDisplay().asyncExec(() -> {
 				notification.close();

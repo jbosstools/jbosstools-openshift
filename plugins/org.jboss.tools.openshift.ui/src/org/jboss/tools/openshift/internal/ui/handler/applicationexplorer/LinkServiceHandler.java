@@ -22,6 +22,7 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.notification.LabelNotification;
 import org.jboss.tools.openshift.core.odo.KubernetesLabels;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -59,12 +60,12 @@ public class LinkServiceHandler extends ComponentHandler {
 	}
 
 	private void execute(Shell shell, LinkModel<String> model, ComponentElement component) {
-		Notification notification = openNotification(shell,
+		LabelNotification notification = LabelNotification.openNotification(shell,
 		        "Linking component " + model.getComponentName() + " to service " + model.getTarget());
 		try {
 			model.getOdo().link(model.getProjectName(), model.getApplicationName(), component.getWrapped().getName(),
 			        component.getWrapped().getPath(), model.getTarget(), null);
-			openNotification(notification, shell,
+			LabelNotification.openNotification(notification, shell,
 			        "Component " + model.getComponentName() + " linked to service " + model.getTarget());
 		} catch (IOException e) {
 			shell.getDisplay().asyncExec(() -> {
