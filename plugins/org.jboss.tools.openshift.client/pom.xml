@@ -16,7 +16,7 @@
 			https://repository.jboss.org/nexus/content/repositories/snapshots/com/openshift/openshift-restclient-java/8.1.1.Final/
 			https://repository.jboss.org/nexus/service/local/repositories/releases/content/com/openshift/openshift-restclient-java/8.1.1.Final/openshift-restclient-java-8.1.1.Final.jar
 		-->
-		<openshift-restclient-java.version>8.1.1.Final</openshift-restclient-java.version>
+		<openshift-restclient-java.version>8.1.2.Final</openshift-restclient-java.version>
 		<ok-http.version>4.1.1</ok-http.version>
 		<ok-io.version>2.4.0</ok-io.version>
 		<kotlin-stdlib.version>1.3.50</kotlin-stdlib.version>
