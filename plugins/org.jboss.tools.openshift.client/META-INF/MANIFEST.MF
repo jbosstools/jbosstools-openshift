@@ -7,7 +7,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
 Bundle-ClassPath: .,
- lib/openshift-restclient-java-8.1.2.Final.jar,
+ lib/openshift-restclient-java-9.0.0.Final.jar,
  lib/okhttp-4.1.1.jar,
  lib/okio-2.4.0.jar,
  lib/kotlin-stdlib-1.3.50.jar,
