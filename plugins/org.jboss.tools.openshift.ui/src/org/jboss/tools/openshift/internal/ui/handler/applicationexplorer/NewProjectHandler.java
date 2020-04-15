@@ -20,6 +20,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.common.ui.notification.LabelNotification;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
@@ -51,11 +52,11 @@ public class NewProjectHandler extends OdoHandler {
 	 * @return
 	 */
 	private void execute(Shell shell, ApplicationExplorerUIModel cluster, String project) {
-		Notification notification = openNotification(shell, "Creating project " + project);
+		LabelNotification notification = LabelNotification.openNotification(shell, "Creating project " + project);
 		try {
 			cluster.getOdo().createProject(project);
 			cluster.refresh();
-			openNotification(notification, shell, "Project " + project + " created");
+			LabelNotification.openNotification(notification, shell, "Project " + project + " created");
 		} catch (IOException e) {
 			shell.getDisplay().asyncExec(() -> {
 				notification.close();
