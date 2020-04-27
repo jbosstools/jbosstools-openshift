@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.odo;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -79,7 +80,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -93,6 +93,7 @@ import org.jboss.tools.openshift.core.odo.ComponentTypesDeserializer;
 import org.jboss.tools.openshift.core.odo.KubernetesLabels;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.ServiceTemplate;
+import org.jboss.tools.openshift.core.odo.ServiceTemplatesDeserializer;
 import org.jboss.tools.openshift.core.odo.Storage;
 import org.jboss.tools.openshift.core.odo.URL;
 
@@ -100,12 +101,6 @@ public class OdoCli implements Odo {
   public static final String ODO_DOWNLOAD_FLAG = OdoCli.class.getName() + ".download";
 
   private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
-
-  static {
-    SimpleModule module = new SimpleModule();
-    module.addDeserializer(List.class, new ComponentTypesDeserializer());
-    JSON_MAPPER.registerModule(module);
-  }
 
   /**
    * Home sub folder for the plugin
@@ -136,6 +131,12 @@ public class OdoCli implements Odo {
 
   private String getOdoCommand() throws IOException {
     return DownloadHelper.getInstance().downloadIfRequired("odo", OdoCli.class.getResource("/tools.json"));
+  }
+  
+  private ObjectMapper configureObjectMapper(final JsonDeserializer deserializer) {
+    final SimpleModule module = new SimpleModule();
+    module.addDeserializer(List.class, deserializer);
+    return JSON_MAPPER.registerModule(module);
   }
 
   @Override
@@ -273,35 +274,17 @@ public class OdoCli implements Odo {
 
   @Override
   public List<ComponentType> getComponentTypes() throws IOException {
-    return JSON_MAPPER.readValue(execute(command, "catalog", "list", "components", "-o", "json"), new TypeReference<List<ComponentType>>() {});
-  }
-
-  private <T> List<T> loadList(String output, Function<String[], T> mapper) throws IOException {
-    try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
-      return reader.lines().skip(1).filter(s -> !s.trim().isEmpty()).map(s -> s.replaceAll("\\s{1,}", "|"))
-        .map(s -> s.split("\\|"))
-        .map(mapper)
-        .collect(Collectors.toList());
-    }
-  }
-
-  private ServiceTemplate toServiceTemplate(String[] line) {
-    return new ServiceTemplate() {
-      @Override
-      public String getName() {
-        return line[0];
-      }
-
-      @Override
-      public String getPlan() {
-        return line[1];
-      }
-    };
+      return configureObjectMapper(new ComponentTypesDeserializer()).readValue(
+              execute(command, "catalog", "list", "components", "-o", "json"),
+              new TypeReference<List<ComponentType>>() {});
   }
 
   @Override
   public List<ServiceTemplate> getServiceTemplates() throws IOException {
-    return loadList(execute(command, "catalog", "list", "services"), this::toServiceTemplate);
+    return configureObjectMapper(new ServiceTemplatesDeserializer()).readValue(
+            execute(command, "catalog", "list", "services", "-o", "json"),
+            new TypeReference<List<ServiceTemplate>>() {
+            });
   }
 
   @Override
