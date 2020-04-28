@@ -109,7 +109,7 @@ public final class CDKUtils {
 	}
 	
 	public static boolean isCDKServerType(String type) {
-		return Arrays.stream(CDKServerAdapterType.values()).filter(e -> e.serverTypeName() == "CDK").anyMatch(e -> e.serverType().equals(type));
+		return Arrays.stream(CDKServerAdapterType.values()).filter(e -> e.serverTypeName() == "Red Hat CDK").anyMatch(e -> e.serverType().equals(type));
 	}
 	
 	public static boolean isServerOfType(Server server, String type) {
