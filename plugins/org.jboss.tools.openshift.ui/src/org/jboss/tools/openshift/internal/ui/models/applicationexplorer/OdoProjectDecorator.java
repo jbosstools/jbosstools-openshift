@@ -163,8 +163,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createURL(String project, String application, String context, String component, String name, Integer port) throws IOException {
-        delegate.createURL(project, application, context, component, name, port);
+    public void createURL(String project, String application, String context, String component, String name, Integer port, boolean secure) throws IOException {
+        delegate.createURL(project, application, context, component, name, port, secure);
     }
 
     @Override
