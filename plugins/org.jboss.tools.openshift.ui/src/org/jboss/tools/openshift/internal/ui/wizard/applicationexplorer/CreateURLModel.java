@@ -45,8 +45,7 @@ public class CreateURLModel extends ComponentModel {
 	}
 
 	/**
-	 * @param urlName
-	 *            the urlName to set
+	 * @param urlName the urlName to set
 	 */
 	public void setURLName(String urlName) {
 		firePropertyChange(PROPERTY_URL_NAME, this.urlName, this.urlName = urlName);
@@ -60,8 +59,7 @@ public class CreateURLModel extends ComponentModel {
 	}
 
 	/**
-	 * @param port
-	 *            the port to set
+	 * @param port the port to set
 	 */
 	public void setPort(int port) {
 		firePropertyChange(PROPERTY_PORT, this.port, this.port = port);
@@ -73,11 +71,11 @@ public class CreateURLModel extends ComponentModel {
 	public List<Integer> getPorts() {
 		return ports;
 	}
-	
+
 	public boolean isSecure() {
 		return secure;
 	}
-	
+
 	public void setSecure(boolean secure) {
 		firePropertyChange(PROPERTY_SECURE, this.secure, this.secure = secure);
 	}
