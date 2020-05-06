@@ -47,7 +47,9 @@ public interface URL {
 
   State getState();
 
-  static URL of(String name, String protocol, String host, String port, String state) {
+  boolean isSecure();
+
+  static URL of(String name, String protocol, String host, String port, String state, boolean secure) {
     return new URL() {
       @Override
       public String getName() {
@@ -73,6 +75,12 @@ public interface URL {
       public State getState() {
         return State.from(state);
       }
+
+      @Override
+      public boolean isSecure() {
+        return secure;
+      }
+
     };
   }
 }

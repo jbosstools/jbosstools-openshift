@@ -76,6 +76,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -303,7 +304,15 @@ public class OdoCli implements Odo {
     List<URL> result = new ArrayList<>();
     try {
       JsonNode root = JSON_MAPPER.readTree(json);
-      root.get("items").forEach(item -> result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").has("protocol")?item.get("spec").get("protocol").asText():"", item.get("spec").has("host")?item.get("spec").get("host").asText():"", item.get("spec").get("port").asText(), item.get("status").get("state").asText())));
+      JsonNode items = root.get("items");
+      if (items != null) {
+        items.forEach(item -> {
+          //odo incorrecly reports urls created with the web ui without names
+          if (item.get("metadata").has("name")) {
+            result.add(URL.of(item.get("metadata").get("name").asText(), item.get("spec").has("protocol") ? item.get("spec").get("protocol").asText() : "", item.get("spec").has("host") ? item.get("spec").get("host").asText() : "", item.get("spec").has("port")?item.get("spec").get("port").asText():"0", item.get("status").get("state").asText(),item.get("spec").get("secure").asBoolean()));
+          }
+        });
+      }
     } catch (IOException e) {
     }
     return result;
@@ -311,19 +320,11 @@ public class OdoCli implements Odo {
 
   @Override
   public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
-    String output;
-    try {
-      if (context != null) {
-        output = execute(new File(context), command, "url", "list", "-o", "json");
-      } else {
-        ensureDefaultOdoConfigFileExists();
-        output = execute(command, "url", "list", "--project", project, "--app", application, "--component", component, "-o", "json");
-      }
-
-    } catch (IOException e) {
-      output = "";
+    if (context != null) {
+      return parseURLs(execute(new File(context), command, "url", "list", "-o", "json"));
+    } else {
+      return Collections.emptyList();
     }
-    return parseURLs(output);
   }
 
   @Override

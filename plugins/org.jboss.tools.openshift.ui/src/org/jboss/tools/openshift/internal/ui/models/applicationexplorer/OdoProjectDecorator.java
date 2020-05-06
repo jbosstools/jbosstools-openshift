@@ -150,7 +150,7 @@ public class OdoProjectDecorator implements Odo {
         if (settings != null) {
             settings.getUrls().forEach(url -> {
                 if (urls.stream().noneMatch(url1 -> url1.getName().equals(url.getName()))) {
-                    urls.add(URL.of(url.getName(), null, null, url.getPort(), ""));
+                    urls.add(URL.of(url.getName(), null, null, url.getPort(), "", false));
                 }
             });
         }
