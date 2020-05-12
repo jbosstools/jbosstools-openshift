@@ -37,7 +37,7 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 	@Override
 	public String getText(Object element) {
 		if (element instanceof ApplicationExplorerUIModel) {
-			return ((ApplicationExplorerUIModel)element).getClient().getMasterUrl().toString();
+			return ((ApplicationExplorerUIModel) element).getClient().getMasterUrl().toString();
 		}
 		return super.getText(element);
 	}
@@ -45,29 +45,33 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 	@Override
 	public StyledString getStyledText(Object element, int limit) {
 		if (element instanceof ApplicationExplorerUIModel) {
-			return style(((ApplicationExplorerUIModel)element).getClient().getMasterUrl().toString(), "", limit);
+			return style(((ApplicationExplorerUIModel) element).getClient().getMasterUrl().toString(), "", limit);
 		} else if (element instanceof ProjectElement) {
-			return style(((ProjectElement)element).getWrapped().getMetadata().getName(), "", limit);
+			return style(((ProjectElement) element).getWrapped().getMetadata().getName(), "", limit);
 		} else if (element instanceof ApplicationElement) {
-			return style(((ApplicationElement)element).getWrapped().getName(), "", limit);
+			return style(((ApplicationElement) element).getWrapped().getName(), "", limit);
 		} else if (element instanceof ComponentElement) {
-			return style(((ComponentElement)element).getWrapped().getName(), ((ComponentElement)element).getWrapped().getState().toString(), limit);
+			return style(((ComponentElement) element).getWrapped().getName(),
+					((ComponentElement) element).getWrapped().getState().toString(), limit);
 		} else if (element instanceof StorageElement) {
-			return style(((StorageElement)element).getWrapped().getName(), "", limit);
+			return style(((StorageElement) element).getWrapped().getName(), "", limit);
 		} else if (element instanceof URLElement) {
-			return style(((URLElement)element).getWrapped().getName(),String.join(" ", ((URLElement)element).getWrapped().getPort(), ((URLElement)element).getWrapped().getState().toString()), limit);
+			return style(((URLElement) element).getWrapped().getName(),
+					String.join(" ", ((URLElement) element).getWrapped().getPort(),
+							((URLElement) element).getWrapped().getState().toString()),
+					limit);
 		} else if (element instanceof ServiceElement) {
-			return style(KubernetesLabels.getComponentName(((ServiceElement)element).getWrapped()), "", limit);
+			return style(KubernetesLabels.getComponentName(((ServiceElement) element).getWrapped()), "", limit);
 		} else if (element instanceof MessageElement) {
 			return getStyledText((MessageElement) element);
 		}
 		return super.getStyledText(element, limit);
 	}
-	
+
 	private StyledString getStyledText(MessageElement messageElement) {
 		StyledString styledString = new StyledString();
 		styledString.append(messageElement.getWrapped(), new Styler() {
-			
+
 			@Override
 			public void applyStyles(TextStyle textStyle) {
 				textStyle.underline = true;
@@ -90,15 +94,13 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 		} else if (element instanceof ServiceElement) {
 			return OpenShiftImages.SERVICE_IMG;
 		} else if (element instanceof URLElement) {
-			return OpenShiftImages.ROUTE_IMG;
+			if (((URLElement)element).getWrapped().isSecure()){
+				return OpenShiftImages.URL_SECURE_IMG;
+			}return OpenShiftImages.URL_IMG;
 		} else if (element instanceof StorageElement) {
 			return OpenShiftImages.STORAGE_IMG;
 		}
 		return super.getImage(element);
 	}
-	
-	
-	
-	
 
 }

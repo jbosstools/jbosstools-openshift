@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -59,7 +59,7 @@ public interface Odo {
 
     ComponentInfo getComponentInfo(OpenShiftClient client, String project, String application, String component) throws IOException;
 
-    void createURL(String project, String application, String context, String component, String name, Integer port) throws IOException;
+    void createURL(String project, String application, String context, String component, String name, Integer port, boolean secure) throws IOException;
 
     void deleteURL(String project, String application, String context, String component, String name) throws IOException;
 

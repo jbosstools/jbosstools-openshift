@@ -39,13 +39,12 @@ public class CreateURLHandler extends ComponentHandler {
 			String projectName = component.getParent().getParent().getWrapped().getMetadata().getName();
 			String applicationName = component.getParent().getWrapped().getName();
 			List<Integer> ports = odo.getServicePorts(component.getRoot().getClient(), projectName, applicationName,
-			        component.getWrapped().getName());
+					component.getWrapped().getName());
 			if (ports.isEmpty()) {
-				MessageDialog.openWarning(shell, "Create url",
-				        "No ports defined for this components to bind to.");
+				MessageDialog.openWarning(shell, "Create url", "No ports defined for this components to bind to.");
 			} else {
 				final CreateURLModel model = new CreateURLModel(odo, projectName, applicationName,
-				        component.getWrapped().getName(), ports);
+						component.getWrapped().getName(), ports);
 				final IWizard createURLWizard = new CreateURLWizard(model);
 				if (WizardUtils.openWizardDialog(createURLWizard, shell) == Window.OK) {
 					executeInJob("Create url", monitor -> execute(model, component));
@@ -56,13 +55,16 @@ public class CreateURLHandler extends ComponentHandler {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 	}
-	
+
 	private void execute(CreateURLModel model, ComponentElement component) {
 		try {
-			model.getOdo().createURL(model.getProjectName(), model.getApplicationName(), component.getWrapped().getPath(), model.getComponentName(), model.getURLName(), model.getPort());
+			model.getOdo().createURL(model.getProjectName(), model.getApplicationName(),
+					component.getWrapped().getPath(), model.getComponentName(), model.getURLName(), model.getPort(),
+					model.isSecure());
 			component.refresh();
 		} catch (IOException e) {
-			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(), "Create url", "Can't create url error message:" + e.getLocalizedMessage()));
+			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(),
+					"Create url", "Can't create url error message:" + e.getLocalizedMessage()));
 		}
 	}
 }

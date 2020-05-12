@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2018 Red Hat Inc..
+ * Copyright (c) 2015-2020 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,7 +73,10 @@ public class OpenShiftImages {
 	public static final Image COMPONENT_IMG = repo.getImage("component.png"); //$NON-NLS-1$
 	public static final ImageDescriptor STORAGE = repo.create("storage.png"); //$NON-NLS-1$
 	public static final Image STORAGE_IMG = repo.getImage("storage.png"); //$NON-NLS-1$
-
+	public static final ImageDescriptor URL = repo.create("url-node.png"); //$NON-NLS-1$
+	public static final Image URL_IMG = repo.getImage("url-node.png"); //$NON-NLS-1$
+	public static final ImageDescriptor URL_SECURE = repo.create("url-node-secure.png"); //$NON-NLS-1$
+	public static final Image URL_SECURE_IMG = repo.getImage("url-node-secure.png"); //$NON-NLS-1$
 	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<>();
 
 	/**

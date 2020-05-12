@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -43,7 +44,7 @@ public class CreateURLWizardPage extends AbstractOpenShiftWizardPage {
 	private CreateURLModel model;
 
 	protected CreateURLWizardPage(IWizard wizard, CreateURLModel model) {
-		super("Create url", "Specify a name for the url and choose a port to bind to.", "Create url", wizard);
+		super("Create url", "Specify a name for the url, choose a port to bind to and select a secure (https) scheme or not.", "Create url", wizard);
 		this.model = model;
 	}
 
@@ -83,5 +84,18 @@ public class CreateURLWizardPage extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 		ControlDecorationSupport.create(portBinding, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater());
+		
+		Label secureLabel = new Label(parent, SWT.NONE);
+		secureLabel.setText("Secure:");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(secureLabel);
+		Button secureButton = new Button(parent, SWT.CHECK);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
+				.applyTo(secureButton);
+
+		ISWTObservableValue<Boolean> secureObservable = WidgetProperties.buttonSelection().observe(secureButton);
+		Binding secureBinding = ValueBindingBuilder.bind(secureObservable)
+				.to(BeanProperties.value(CreateURLModel.PROPERTY_SECURE).observe(model))
+				.in(dbc);
+		ControlDecorationSupport.create(secureBinding, SWT.LEFT | SWT.TOP);
 		}
 }

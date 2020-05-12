@@ -21,19 +21,22 @@ import org.jboss.tools.openshift.core.odo.Odo;
 public class CreateURLModel extends ComponentModel {
 	public static final String PROPERTY_URL_NAME = "URLName";
 	public static final String PROPERTY_PORT = "port";
-	
+	public static final String PROPERTY_SECURE = "secure";
+
 	private String urlName;
 	private int port;
 	private List<Integer> ports;
-	
-	public CreateURLModel(Odo odo, String projectName, String applicationName, String componentName, List<Integer> ports) {
+	private boolean secure;
+
+	public CreateURLModel(Odo odo, String projectName, String applicationName, String componentName,
+			List<Integer> ports) {
 		super(odo, projectName, applicationName, componentName);
 		this.ports = ports;
 		if (!ports.isEmpty()) {
 			setPort(ports.get(0));
 		}
 	}
-	
+
 	/**
 	 * @return the urlName
 	 */
@@ -47,7 +50,6 @@ public class CreateURLModel extends ComponentModel {
 	public void setURLName(String urlName) {
 		firePropertyChange(PROPERTY_URL_NAME, this.urlName, this.urlName = urlName);
 	}
-
 
 	/**
 	 * @return the port
@@ -68,5 +70,13 @@ public class CreateURLModel extends ComponentModel {
 	 */
 	public List<Integer> getPorts() {
 		return ports;
+	}
+
+	public boolean isSecure() {
+		return secure;
+	}
+
+	public void setSecure(boolean secure) {
+		firePropertyChange(PROPERTY_SECURE, this.secure, this.secure = secure);
 	}
 }

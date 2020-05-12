@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2020 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -150,7 +150,7 @@ public class OdoProjectDecorator implements Odo {
         if (settings != null) {
             settings.getUrls().forEach(url -> {
                 if (urls.stream().noneMatch(url1 -> url1.getName().equals(url.getName()))) {
-                    urls.add(URL.of(url.getName(), null, null, url.getPort(), ""));
+                    urls.add(URL.of(url.getName(), null, null, url.getPort(), "", false));
                 }
             });
         }
@@ -163,8 +163,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public void createURL(String project, String application, String context, String component, String name, Integer port) throws IOException {
-        delegate.createURL(project, application, context, component, name, port);
+    public void createURL(String project, String application, String context, String component, String name, Integer port, boolean secure) throws IOException {
+        delegate.createURL(project, application, context, component, name, port, secure);
     }
 
     @Override
