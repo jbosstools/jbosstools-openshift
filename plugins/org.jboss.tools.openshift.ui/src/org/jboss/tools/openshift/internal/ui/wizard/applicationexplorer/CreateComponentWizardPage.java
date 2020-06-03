@@ -53,7 +53,7 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 	private CreateComponentModel model;
 
 	protected CreateComponentWizardPage(IWizard wizard, CreateComponentModel model) {
-		super("Sign in to OpenShift", "Please sign in to your OpenShift server.", "Server Connection", wizard);
+		super("Create component", "Specify component parameters.", "Create component", wizard);
 		this.model = model;
 	}
 
