@@ -8,12 +8,12 @@ Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Red Hat
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit,
- org.eclipse.reddeer.go,
+ org.eclipse.reddeer.go;bundle-version="3.0.0",
  org.eclipse.ui.forms,
  org.eclipse.wst.server.core,
  org.eclipse.linuxtools.docker.reddeer,
  org.jboss.tools.runtime.reddeer,
- org.eclipse.reddeer.junit
+ org.eclipse.reddeer.junit;bundle-version="3.0.0"
 Export-Package: org.jboss.tools.cdk.reddeer.core.certificate,
  org.jboss.tools.cdk.reddeer.core.condition,
  org.jboss.tools.cdk.reddeer.core.enums,
