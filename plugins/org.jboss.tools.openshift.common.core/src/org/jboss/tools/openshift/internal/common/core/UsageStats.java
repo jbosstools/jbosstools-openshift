@@ -19,6 +19,9 @@ public class UsageStats {
 	private static final int SUCCESS = 1;
 	private static final int FAILURE = 0;
 	private static final String HOSTTYPE_OTHER = "other";
+	
+	private static final String SECURE = "secure";
+	private static final String UNSECURE = "not secure";
 
 	private static UsageStats INSTANCE = null;
 
@@ -28,6 +31,18 @@ public class UsageStats {
 	private UsageEventType newConnectionV3;
 	private UsageEventType newApplicationV3;
 	private UsageEventType importApplicationV3;
+	
+	private UsageEventType odoCli;
+	private UsageEventType odoCreateComponent;
+	private UsageEventType odoCreateService;
+	private UsageEventType odoCreateStorage;
+	private UsageEventType odoCreateUrl;
+	private UsageEventType odoLogin;
+  private UsageEventType odoLogout;
+	private UsageEventType odoPush;
+	private UsageEventType odoWatch;
+	private UsageEventType odoLink;
+	private UsageEventType odoDebug;
 
 	public static UsageStats getInstance() {
 		if (INSTANCE == null) {
@@ -55,6 +70,18 @@ public class UsageStats {
 		this.importApplicationV3 = createEventType("import_app_v3", // actionName
 				"host type: redhat/other", // labelDescription
 				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		
+		this.odoCli = createEventType("odo_command", "odo command", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoCreateComponent = createEventType("odo_create_component", "component type", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoCreateService = createEventType("odo_create_service", "service type", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoCreateStorage = createEventType("odo_create_storage", "storage size", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoCreateUrl = createEventType("odo_create_url", "secure/not secure", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoLogin = createEventType("odo_login", null, null);
+    this.odoLogout = createEventType("odo_logout", null, null);
+		this.odoPush = createEventType("odo_push", null, null);
+		this.odoWatch = createEventType("odo_watch", null, null);
+		this.odoDebug = createEventType("odo_debug", null, null);
+		this.odoLink = createEventType("odo_link", null, null);
 	}
 
 	private UsageEventType createEventType(String actionName, String labelDescription, String valueDescription) {
@@ -89,6 +116,50 @@ public class UsageStats {
 	public void importV3Application(String host, boolean success) {
 		UsageReporter.getInstance()
 				.trackEvent(importApplicationV3.event(getHostType(host), success ? SUCCESS : FAILURE));
+	}
+	
+	public void odoCommand(String command, boolean success) {
+		UsageReporter.getInstance().trackEvent(odoCli.event(command, success ? SUCCESS : FAILURE));
+	}
+	
+	public void createComponent(String componentType, boolean success) {
+		UsageReporter.getInstance().trackEvent(odoCreateComponent.event(componentType, success ? SUCCESS : FAILURE));
+	}
+
+	public void createService(String serviceType, boolean success) {
+		UsageReporter.getInstance().trackEvent(odoCreateService.event(serviceType, success ? SUCCESS : FAILURE));
+	}
+
+	public void createStorage(String size, boolean success) {
+		UsageReporter.getInstance().trackEvent(odoCreateStorage.event(size, success ? SUCCESS : FAILURE));
+	}
+
+	public void createURL(boolean secure, boolean success) {
+		UsageReporter.getInstance().trackEvent(odoCreateUrl.event(secure ? SECURE : UNSECURE, success ? SUCCESS : FAILURE));
+	}
+	
+	public void login() {
+		UsageReporter.getInstance().countEvent(odoLogin.event());
+	}
+
+  public void logout() {
+    UsageReporter.getInstance().countEvent(odoLogout.event());
+  }
+
+  public void push() {
+		UsageReporter.getInstance().countEvent(odoPush.event());
+	}
+
+	public void watch() {
+		UsageReporter.getInstance().countEvent(odoWatch.event());
+	}
+
+	public void debug() {
+		UsageReporter.getInstance().countEvent(odoDebug.event());
+	}
+
+	public void link() {
+		UsageReporter.getInstance().countEvent(odoLink.event());
 	}
 
 	private static String getHostType(String host) {
