@@ -97,6 +97,7 @@ import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 import org.jboss.tools.openshift.core.odo.ServiceTemplatesDeserializer;
 import org.jboss.tools.openshift.core.odo.Storage;
 import org.jboss.tools.openshift.core.odo.URL;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 
 public class OdoCli implements Odo {
   public static final String ODO_DOWNLOAD_FLAG = OdoCli.class.getName() + ".download";
@@ -169,74 +170,129 @@ public class OdoCli implements Odo {
 
   @Override
   public void describeApplication(String project, String application) throws IOException {
-    ExecHelper.executeWithTerminal(command, "app", "describe", application, "--project", project);
+    try {
+      ExecHelper.executeWithTerminal(command, "app", "describe", application, "--project", project);
+      UsageStats.getInstance().odoCommand("app describe", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("app describe", false);
+      throw e;
+    }
   }
 
   @Override
   public void deleteApplication(OpenShiftClient client, String project, String application) throws IOException {
-    execute(command, "app", "delete", application, "-f", "--project", project);
+    try {
+      execute(command, "app", "delete", application, "-f", "--project", project);
+      UsageStats.getInstance().odoCommand("app delete", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("app delete", false);
+      throw e;
+    }
   }
 
   @Override
   public void push(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), false, command, "push");
+    UsageStats.getInstance().push();
+    try {
+      ExecHelper.executeWithTerminal(new File(context), false, command, "push");
+      UsageStats.getInstance().odoCommand("push", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("push", false);
+      throw e;
+    }
   }
 
   @Override
   public void describeComponent(String project, String application, String context, String component) throws IOException {
-    if (context != null) {
-      ExecHelper.executeWithTerminal(new File(context), command, "describe");
-    } else {
-      ExecHelper.executeWithTerminal(command, "describe", "--project", project, "--app", application, component);
+    try {
+      if (context != null) {
+        ExecHelper.executeWithTerminal(new File(context), command, "describe");
+      } else {
+        ExecHelper.executeWithTerminal(command, "describe", "--project", project, "--app", application, component);
+      }
+      UsageStats.getInstance().odoCommand("describe", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("describe", false);
+      throw e;
     }
-
   }
 
   @Override
   public void watch(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), false, command, "watch");
+    UsageStats.getInstance().watch();
+    try {
+      ExecHelper.executeWithTerminal(new File(context), false, command, "watch");
+      UsageStats.getInstance().odoCommand("watch", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("watch", false);
+      throw e;
+    }
   }
 
   @Override
   public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
-    if (push) {
-      ExecHelper.executeWithTerminal(new File(source), command, "create", componentType + ':' + componentVersion, component,
-              "--project", project, "--app", application, "--now");
-    } else {
-      ExecHelper.executeWithTerminal(new File(source), command, "create", componentType + ':' + componentVersion, component,
-              "--project", project, "--app", application);
+    try {
+      if (push) {
+        ExecHelper.executeWithTerminal(new File(source), command, "create", componentType + ':' + componentVersion, component,
+                "--project", project, "--app", application, "--now");
+      } else {
+        ExecHelper.executeWithTerminal(new File(source), command, "create", componentType + ':' + componentVersion, component,
+                "--project", project, "--app", application);
+      }
+      UsageStats.getInstance().odoCommand("create", true);
+      UsageStats.getInstance().createComponent(componentType, true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("create", false);
+      UsageStats.getInstance().createComponent(componentType, false);
+      throw e;
     }
   }
 
   @Override
   public void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source, String reference, boolean push) throws IOException {
-    if (StringUtils.isNotBlank(reference)) {
-      if (push) {
-        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
-                "--git", source, "--ref", reference, "--project", project, "--app", application, "--now");
+    try {
+      if (StringUtils.isNotBlank(reference)) {
+        if (push) {
+          ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+                  "--git", source, "--ref", reference, "--project", project, "--app", application, "--now");
+        } else {
+          ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+                  "--git", source, "--ref", reference, "--project", project, "--app", application);
+        }
       } else {
-        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
-                "--git", source, "--ref", reference, "--project", project, "--app", application);
+        if (push) {
+          ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+                  "--git", source, "--project", project, "--app", application, "--now");
+        } else {
+          ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+                  "--git", source, "--project", project, "--app", application);
+        }
       }
-    } else {
-      if (push) {
-        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
-                "--git", source, "--project", project, "--app", application, "--now");
-      } else {
-        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
-                "--git", source, "--project", project, "--app", application);
-      }
+      UsageStats.getInstance().odoCommand("create", true);
+      UsageStats.getInstance().createComponent(componentType, true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("create", false);
+      UsageStats.getInstance().createComponent(componentType, false);
+      throw e;
     }
   }
 
   @Override
   public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
-    if (push) {
-      ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
-              "--binary", source, "--project", project, "--app", application, "--now");
-    } else {
-      ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
-              "--binary", source, "--project", project, "--app", application);
+    try {
+      if (push) {
+        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+                "--binary", source, "--project", project, "--app", application, "--now");
+      } else {
+        ExecHelper.executeWithTerminal(new File(context), command, "create", componentType + ':' + componentVersion, component,
+                "--binary", source, "--project", project, "--app", application);
+      }
+      UsageStats.getInstance().odoCommand("create", true);
+      UsageStats.getInstance().createComponent(componentType, true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("create", false);
+      UsageStats.getInstance().createComponent(componentType, false);
+      throw e;
     }
   }
 
@@ -257,8 +313,16 @@ public class OdoCli implements Odo {
 
   @Override
   public void createService(String project, String application, String serviceTemplate, String servicePlan, String service) throws IOException {
-    ensureDefaultOdoConfigFileExists();
-    ExecHelper.executeWithTerminal(new File(HOME_FOLDER), command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project);
+    try {
+      ensureDefaultOdoConfigFileExists();
+      ExecHelper.executeWithTerminal(new File(HOME_FOLDER), command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project);
+      UsageStats.getInstance().odoCommand("service create", true);
+      UsageStats.getInstance().createService(serviceTemplate, true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("service create", false);
+      UsageStats.getInstance().createService(serviceTemplate, false);
+      throw e;
+    }
   }
 
 
@@ -270,28 +334,54 @@ public class OdoCli implements Odo {
 
   @Override
   public void deleteService(String project, String application, String service) throws IOException {
-    execute(command, "service", "delete", "--project", project, "--app", application, service, "-f");
+    try {
+      execute(command, "service", "delete", "--project", project, "--app", application, service, "-f");
+      UsageStats.getInstance().odoCommand("service delete", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("service delete", false);
+      throw e;
+    }
   }
 
   @Override
   public List<ComponentType> getComponentTypes() throws IOException {
-      return configureObjectMapper(new ComponentTypesDeserializer()).readValue(
-              execute(command, "catalog", "list", "components", "-o", "json"),
-              new TypeReference<List<ComponentType>>() {});
+      try {
+        List<ComponentType> componentTypes = configureObjectMapper(new ComponentTypesDeserializer()).readValue(
+                execute(command, "catalog", "list", "components", "-o", "json"),
+                new TypeReference<List<ComponentType>>() {});
+        UsageStats.getInstance().odoCommand("catalog list components", true);
+        return componentTypes;
+      } catch (IOException e) {
+        UsageStats.getInstance().odoCommand("catalog list components", false);
+        throw e;
+      }
   }
 
   @Override
   public List<ServiceTemplate> getServiceTemplates() throws IOException {
-    return configureObjectMapper(new ServiceTemplatesDeserializer()).readValue(
-            execute(command, "catalog", "list", "services", "-o", "json"),
-            new TypeReference<List<ServiceTemplate>>() {
-            });
+    try {
+      List<ServiceTemplate> serviceTemplates = configureObjectMapper(new ServiceTemplatesDeserializer()).readValue(
+              execute(command, "catalog", "list", "services", "-o", "json"),
+              new TypeReference<List<ServiceTemplate>>() {
+              });
+      UsageStats.getInstance().odoCommand("catalog list services", true);
+      return serviceTemplates;
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("catalog list services", false);
+      throw e;
+    }
   }
 
   @Override
   public void describeServiceTemplate(String template) throws IOException {
-    ensureDefaultOdoConfigFileExists();
-    ExecHelper.executeWithTerminal(command, "catalog", "describe", "service", template);
+    try {
+      ensureDefaultOdoConfigFileExists();
+      ExecHelper.executeWithTerminal(command, "catalog", "describe", "service", template);
+      UsageStats.getInstance().odoCommand("catalog describe service", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("catalog describe service", false);
+      throw e;
+    }
   }
 
   @Override
@@ -320,10 +410,17 @@ public class OdoCli implements Odo {
 
   @Override
   public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
-    if (context != null) {
-      return parseURLs(execute(new File(context), command, "url", "list", "-o", "json"));
-    } else {
-      return Collections.emptyList();
+    try {
+      if (context != null) {
+        List<URL> urls = parseURLs(execute(new File(context), command, "url", "list", "-o", "json"));
+        UsageStats.getInstance().odoCommand("url list", true);
+        return urls;
+      } else {
+        return Collections.emptyList();
+      }
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("url list", false);
+      throw e;
     }
   }
 
@@ -350,32 +447,52 @@ public class OdoCli implements Odo {
   @Override
   public void createURL(String project, String application, String context, String component, String name,
       Integer port, boolean secure) throws IOException {
-    List<String> args = new ArrayList<>();
-    args.add(command);
-    args.add("url");
-    args.add("create");
-    if (StringUtils.isNotEmpty(name)) {
-      args.add(name);
+    try {
+      List<String> args = new ArrayList<>();
+      args.add(command);
+      args.add("url");
+      args.add("create");
+      if (StringUtils.isNotEmpty(name)) {
+        args.add(name);
+      }
+      args.add("--port");
+      args.add(port.toString());
+      if (secure) {
+        args.add("--secure");
+      }
+      ExecHelper.executeWithTerminal(new File(context), args.toArray(new String[args.size()]));
+      UsageStats.getInstance().odoCommand("url create", true);
+      UsageStats.getInstance().createURL(secure, true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("url create", false);
+      UsageStats.getInstance().createURL(secure, false);
+      throw e;
     }
-    args.add("--port");
-    args.add(port.toString());
-    if (secure) {
-      args.add("--secure");
-    }
-    ExecHelper.executeWithTerminal(new File(context), args.toArray(new String[args.size()]));
   }
 
   @Override
   public void deleteURL(String project, String application, String context, String component, String name) throws IOException {
-    execute(new File(context), command, "url", "delete", "-f", name);
+    try {
+      execute(new File(context), command, "url", "delete", "-f", name);
+      UsageStats.getInstance().odoCommand("url delete", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("url delete", false);
+      throw e;
+    }
   }
 
   @Override
   public void undeployComponent(String project, String application, String context, String component) throws IOException {
-      if (context != null) {
-          execute(new File(context), command, "delete", "-f");
-      } else {
-          execute(command, "delete", "-f", "--project", project, "--app", application, component);
+      try {
+        if (context != null) {
+            execute(new File(context), command, "delete", "-f");
+        } else {
+            execute(command, "delete", "-f", "--project", project, "--app", application, component);
+        }
+        UsageStats.getInstance().odoCommand("delete", true);
+      } catch (IOException e) {
+        UsageStats.getInstance().odoCommand("delete", false);
+        throw e;
       }
   }
 
@@ -391,36 +508,74 @@ public class OdoCli implements Odo {
 
   @Override
   public void follow(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), false, command, "log", "-f");
+    try {
+      ExecHelper.executeWithTerminal(new File(context), false, command, "log", "-f");
+      UsageStats.getInstance().odoCommand("log", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("log", false);
+      throw e;
+    }
   }
 
   @Override
   public void log(String project, String application, String context, String component) throws IOException {
-    ExecHelper.executeWithTerminal(new File(context), command, "log");
+    try {
+      ExecHelper.executeWithTerminal(new File(context), command, "log");
+      UsageStats.getInstance().odoCommand("log", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("log", false);
+      throw e;
+    }
   }
 
   @Override
   public void createProject(String project) throws IOException {
-    execute(command, "project", "create", "-w", project);
+    try {
+      execute(command, "project", "create", "-w", project);
+      UsageStats.getInstance().odoCommand("project create", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("project create", false);
+      throw e;
+    }
   }
 
   @Override
   public void deleteProject(String project) throws IOException {
-    execute(command, "project", "delete", project, "-f");
+    try {
+      execute(command, "project", "delete", project, "-f");
+      UsageStats.getInstance().odoCommand("project delete", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("project delete", false);
+      throw e;
+    }
   }
 
   @Override
   public void login(String url, String userName, char[] password, String token) throws IOException {
-    if (token == null || token.isEmpty()) {
-      execute(command, "login", url, "-u", userName, "-p", String.valueOf(password), " --insecure-skip-tls-verify");
-    } else {
-      execute(command, "login", url, "-t", token, " --insecure-skip-tls-verify");
+    UsageStats.getInstance().login();
+    try {
+      if (token == null || token.isEmpty()) {
+        execute(command, "login", url, "-u", userName, "-p", String.valueOf(password), " --insecure-skip-tls-verify");
+      } else {
+        execute(command, "login", url, "-t", token, " --insecure-skip-tls-verify");
+      }
+      UsageStats.getInstance().odoCommand("login", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("login", false);
+      throw e;
     }
   }
 
   @Override
   public void logout() throws IOException {
-    execute(command, "logout");
+    UsageStats.getInstance().logout();
+    try {
+      execute(command, "logout");
+      UsageStats.getInstance().odoCommand("logout", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("logout", false);
+      throw e;
+    }
   }
 
   private static List<Application> parseApplications(String json) {
@@ -434,7 +589,14 @@ public class OdoCli implements Odo {
 
   @Override
   public List<Application> getApplications(String project) throws IOException {
-    return parseApplications(execute(command, "app", "list", "--project", project, "-o", "json"));
+    try {
+      List<Application> applications = parseApplications(execute(command, "app", "list", "--project", project, "-o", "json"));
+      UsageStats.getInstance().odoCommand("app list", true);
+      return applications;
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("app list", false);
+      throw e;
+    }
   }
 
   @Override
@@ -464,41 +626,87 @@ public class OdoCli implements Odo {
 
   @Override
   public void listComponents() throws IOException {
-    ExecHelper.executeWithTerminal(command, "catalog", "list", "components");
+    try {
+      ExecHelper.executeWithTerminal(command, "catalog", "list", "components");
+      UsageStats.getInstance().odoCommand("catalog list components", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("catalog list components", false);
+      throw e;
+    }
   }
 
   @Override
   public void listServices() throws IOException {
-    ExecHelper.executeWithTerminal(command, "catalog", "list", "services");
+    try {
+      ExecHelper.executeWithTerminal(command, "catalog", "list", "services");
+      UsageStats.getInstance().odoCommand("catalog list services", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("catalog list services", false);
+      throw e;
+    }
   }
 
   @Override
   public void about() throws IOException {
-    ExecHelper.executeWithTerminal(command, "version");
+    try {
+      ExecHelper.executeWithTerminal(command, "version");
+      UsageStats.getInstance().odoCommand("version", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("version", false);
+      throw e;
+    }
   }
 
   @Override
   public void createStorage(String project, String application, String context, String component, String name, String mountPath, String storageSize) throws IOException {
-    execute(new File(context), command, "storage", "create", name, "--path", mountPath, "--size", storageSize);
+    try {
+      execute(new File(context), command, "storage", "create", name, "--path", mountPath, "--size", storageSize);
+      UsageStats.getInstance().odoCommand("storage create", true);
+      UsageStats.getInstance().createStorage(storageSize, true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("storage create", false);
+      UsageStats.getInstance().createStorage(storageSize, false);
+      throw e;
+    }
   }
 
   @Override
   public void deleteStorage(String project, String application, String context, String component, String storage) throws IOException {
-    execute(new File(context), command, "storage", "delete", storage, "-f");
+    try {
+      execute(new File(context), command, "storage", "delete", storage, "-f");
+      UsageStats.getInstance().odoCommand("storage delete", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("storage delete", false);
+      throw e;
+    }
   }
 
   @Override
   public void link(String project, String application, String component, String context, String source, Integer port) throws IOException {
-    if (port != null) {
-      execute(new File(context), command, "link", source, "--port", port.toString(), "--wait");
-    } else {
-      execute(new File(context), command, "link", source, "--wait");
+    UsageStats.getInstance().link();
+    try {
+      if (port != null) {
+        execute(new File(context), command, "link", source, "--port", port.toString(), "--wait");
+      } else {
+        execute(new File(context), command, "link", source, "--wait");
+      }
+      UsageStats.getInstance().odoCommand("link", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("link", false);
+      throw e;
     }
   }
 
   @Override
   public void debug(String project, String application, String context, String component, Integer port) throws IOException {
-    ExecHelper.executeWithTerminal(new File(component), false, command, "debug", "port-forward", "--local-port", port.toString());
+    UsageStats.getInstance().debug();
+    try {
+      ExecHelper.executeWithTerminal(new File(component), false, command, "debug", "port-forward", "--local-port", port.toString());
+      UsageStats.getInstance().odoCommand("debug port-forward", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("debug port-forward", false);
+      throw e;
+    }
   }
 
   @Override

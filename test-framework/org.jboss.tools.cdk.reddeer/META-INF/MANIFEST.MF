@@ -13,7 +13,7 @@ Require-Bundle: org.junit,
  org.eclipse.wst.server.core,
  org.eclipse.linuxtools.docker.reddeer,
  org.jboss.tools.runtime.reddeer,
- org.eclipse.reddeer.junit
+ org.eclipse.reddeer.junit;bundle-version="3.0.0"
 Export-Package: org.jboss.tools.cdk.reddeer.core.certificate,
  org.jboss.tools.cdk.reddeer.core.condition,
  org.jboss.tools.cdk.reddeer.core.enums,
