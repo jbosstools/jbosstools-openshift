@@ -91,6 +91,16 @@ public class OpenShiftLabel {
 		public static final String[] CONFIGURE_MARKERS = {"OpenShift", "Configure Markers..."};
 		public static final String[] GIT_ADD = {"Team", "Add to Index"};
 		public static final String[] GIT_COMMIT = {"Team", "Commit..."};
+		
+		// OpenShift Application Explorer related
+		public static final String LOGIN = "Login";
+		public static final String[] NEW_COMPONENT = {"New", "Component..."};
+		public static final String[] NEW_PROJECT = {"New", "Project..."};
+		public static final String[] NEW_SERVICE = {"New", "Service..."};
+		public static final String LIST_CATALOG_SERVICES = "List Catalog Services";
+		public static final String LIST_CATALOG_COMPONENTS = "List Catalog Components";
+		public static final String OPEN_CONSOLE = "Open Console";
+		public static final String ABOUT = "About";
 	}
 		
 	/**
@@ -189,6 +199,14 @@ public class OpenShiftLabel {
 		public static final String LOADING_CONNECTION_DETAILS = "Loading OpenShift 2 connection details";
 		public static final String SERVICE_PORTS = "Service Ports";
 		public static final String SERVER_ADAPTER_SETTINGS = "OpenShift Server Adapter Settings";
+		
+		// OpenShift Application Explorer related
+		public static final String CREATE_PROJECT = "Create project";
+		public static final String CREATE_COMPONENT = "Create component";
+		public static final String CREATE_SERVICE = "Create service";
+		public static final String LOGIN = "Login";
+		public static final String DELETE_PROJECT = "Delete project";
+		public static final String NEW_PROJECT = "New project";
 	}
 	
 	/**
@@ -306,6 +324,21 @@ public class OpenShiftLabel {
 		
 		//Delete related
 		public static final String LABEL_FILTER = "Label Filter:";
+		
+		// OpenShift Application Explorer related
+		public static final String APPLICATION = "Application:";
+		public static final String COMPONENT_TYPE = "Component type:";
+		public static final String COMPONENT_VERSION = "Component version:";
+		public static final String ECLIPSE_PROJECT = "Eclipse Project: ";
+		public static final String PUSH_AFTER_CREATE = "Push after create:";
+		public static final String URL = "URL:";
+		public static final String TOKEN_ODO = "Token:";
+	}
+	
+	public static class JobsLabels {			
+		// OpenShift Application Explorer related
+		public static final String CREATE_PROJECT = "Create Project";
+		public static final String DELETE_PROJECT = "Delete";
 	}
 	
 	/**
