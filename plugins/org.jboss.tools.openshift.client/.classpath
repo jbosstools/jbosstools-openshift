@@ -12,10 +12,10 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-compress-1.19.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-io-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang-2.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j-api-2.13.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j-core-2.13.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j-api-2.13.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j-core-2.13.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-2.0.0-alpha1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j-slf4j18-impl-2.13.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j-slf4j18-impl-2.13.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/kubernetes-client-4.7.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-4.7.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/openshift-client-4.7.0.jar"/>
