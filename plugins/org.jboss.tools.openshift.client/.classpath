@@ -21,10 +21,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/openshift-client-4.7.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/servicecatalog-client-4.7.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/servicecatalog-model-4.7.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jackson-annotations-2.9.10.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jackson-core-2.9.10.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jackson-databind-2.9.10.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jackson-dataformat-yaml-2.9.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-dataformat-yaml-2.10.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/snakeyaml-1.25.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/logging-interceptor-4.1.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
