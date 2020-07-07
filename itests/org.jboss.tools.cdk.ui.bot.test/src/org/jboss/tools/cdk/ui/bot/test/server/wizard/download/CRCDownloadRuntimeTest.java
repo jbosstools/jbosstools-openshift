@@ -27,7 +27,7 @@ import org.junit.runners.Parameterized.UseParametersRunnerFactory;
 @UseParametersRunnerFactory(ParameterizedRequirementsRunnerFactory.class)
 public class CRCDownloadRuntimeTest extends DownloadContainerRuntimeAbstractTest {
 
-	private CDKVersion version;	
+	private CDKVersion version;
 
 	public CRCDownloadRuntimeTest(CDKVersion version) {
 		this.version = version;
@@ -35,7 +35,7 @@ public class CRCDownloadRuntimeTest extends DownloadContainerRuntimeAbstractTest
 
 	@Parameters(name = "{0}")
 	public static Collection<CDKVersion> data() {
-		return Arrays.asList(CDKVersion.CRC180);
+		return Arrays.asList(CDKVersion.CRC1120);
 	}
 
 	@Override

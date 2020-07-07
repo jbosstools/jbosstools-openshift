@@ -34,6 +34,7 @@ public enum CDKVersion {
 	CDK3100 (CDKServerAdapterType.CDK32, "3.10.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.10.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
 	CDK3110 (CDKServerAdapterType.CDK32, "3.11.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.11.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),	
 	CDK3120 (CDKServerAdapterType.CDK32, "3.12.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.12.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
+	CDK3130 (CDKServerAdapterType.CDK32, "3.13.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.13.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch() + CDKRuntimeOS.get().getSuffix()),
 	MINISHIFT1140 (CDKServerAdapterType.MINISHIFT17, "1.14.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.14.0-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
 	MINISHIFT1151 (CDKServerAdapterType.MINISHIFT17, "1.15.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.15.1-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
 	MINISHIFT1161 (CDKServerAdapterType.MINISHIFT17, "1.16.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.16.1-" + CDKRuntimeOS.get().getRuntimeFullName() + getArch()),
@@ -64,7 +65,11 @@ public enum CDKVersion {
 	CRC150 (CDKServerAdapterType.CRC, "1.5.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.5.0" + getArch()),
 	CRC160 (CDKServerAdapterType.CRC, "1.6.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.6.0" + getArch()),	
 	CRC170 (CDKServerAdapterType.CRC, "1.7.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.7.0" + getArch()),
-	CRC180 (CDKServerAdapterType.CRC, "1.8.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.8.0" + getArch());
+	CRC180 (CDKServerAdapterType.CRC, "1.8.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.8.0" + getArch()),
+	CRC190 (CDKServerAdapterType.CRC, "1.9.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.9.0" + getArch()),	
+	CRC1100 (CDKServerAdapterType.CRC, "1.10.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.10.0" + getArch()),
+	CRC1110 (CDKServerAdapterType.CRC, "1.11.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.11.0" + getArch()),
+	CRC1120 (CDKServerAdapterType.CRC, "1.12.0", CDKLabel.Server.CRC_SERVER_NAME, "crc-" + CDKRuntimeOS.get().getRuntimeFullName() + "-1.12.0" + getArch());
 
 	
 	private final CDKServerAdapterType type;

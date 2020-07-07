@@ -69,7 +69,7 @@ import org.junit.runner.RunWith;
 @CleanDockerExplorer
 @RemoveCDKServers
 @ContainerRuntimeServer(
-		version = CDKVersion.CDK3120,
+		version = CDKVersion.CDK3130,
 		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		usernameProperty="developers.username",
