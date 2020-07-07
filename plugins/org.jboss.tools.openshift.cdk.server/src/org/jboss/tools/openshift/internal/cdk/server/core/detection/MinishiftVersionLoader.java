@@ -104,9 +104,16 @@ public class MinishiftVersionLoader {
 		}
 
 		public String getCRCVersion() {
-			String v = p.getProperty("crc version");
+			// there is another API change in CRC 1.12, from now on it is 
+			// CodeReady Containers version: 1.12.0+6710aff
+			String key = "crc version";
+			if (p.containsKey("CodeReady Containers version")) {
+				key = "CodeReady Containers version";
+			}
+			String v = p.getProperty(key);
 			return cleanVersion(v);
 		}
+		
 		public boolean isValid() {
 			return getMinishiftVersion() != null;
 		}
