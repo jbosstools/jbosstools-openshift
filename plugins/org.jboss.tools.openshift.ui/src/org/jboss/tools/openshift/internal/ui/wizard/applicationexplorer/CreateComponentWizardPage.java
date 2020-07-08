@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
@@ -111,7 +112,7 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 				.applyTo(componentVersionsCombo);
 		ComboViewer componentVersionsComboViewer = new ComboViewer(componentVersionsCombo);
 		componentVersionsComboViewer.setContentProvider(new ObservableListContentProvider<>());
-		componentVersionsComboViewer.setInput(BeanProperties.list("versions").observeDetail(componentTypeObservable));
+		componentVersionsComboViewer.setInput(PojoProperties.list("versions").observeDetail(componentTypeObservable));
 		Binding componentVersionsBinding = ValueBindingBuilder
 				.bind(ViewerProperties.singleSelection().observe(componentVersionsComboViewer))
 				.validatingAfterGet(new IsNotNullValidator(
