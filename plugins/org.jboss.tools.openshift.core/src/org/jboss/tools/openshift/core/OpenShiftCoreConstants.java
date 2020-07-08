@@ -21,4 +21,8 @@ public class OpenShiftCoreConstants {
 	public static final String OCP4_CONFIG_NAMESPACE = "openshift-config-managed";
 	public static final String OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME = "console-public";
 	public static final String OCP4_CONSOLE_URL_KEY_NAME = "consoleURL";
+
+	public static final String OCP3_CONFIG_NAMESPACE = "openshift-web-console";
+	public static final String OCP3_WEBCONSOLE_CONFIG_MAP_NAME = "webconsole-config";
+	public static final String OCP3_WEBCONSOLE_YAML_FILE_NAME = "webconsole-config.yaml";
 }
