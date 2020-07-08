@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
+import java.util.List;
+
 public interface ServiceTemplate {
   public String getName();
-  public String getPlan();
+  List<String> getPlans();
 }
