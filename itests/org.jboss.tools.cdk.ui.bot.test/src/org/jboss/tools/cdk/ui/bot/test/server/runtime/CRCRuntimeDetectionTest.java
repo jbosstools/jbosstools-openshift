@@ -25,7 +25,7 @@ import org.jboss.tools.cdk.ui.bot.test.CDKAbstractTest;
  */
 @RemoveCDKServers
 @ContainerRuntimeServer(
-		version = CDKVersion.CRC180,
+		version = CDKVersion.CRC1120,
 		createServerAdapter=false,
 		useExistingBinaryInProperty="crc.binary",
 		adapterName = CDKAbstractTest.SERVER_ADAPTER_CRC)

@@ -35,7 +35,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RemoveCDKServers
 @ContainerRuntimeServer(
-		version = CDKVersion.CDK3120,
+		version = CDKVersion.CDK3130,
 		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		usernameProperty="developers.username",
