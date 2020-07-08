@@ -28,7 +28,7 @@
 		<commons-lang.version>2.6</commons-lang.version>
 		<commons-io.version>2.1</commons-io.version>
 		<enforcer.skip>true</enforcer.skip>
-		<openshift-client.version>4.7.0</openshift-client.version>
+		<openshift-client.version>4.9.1</openshift-client.version>
 		<jackson.version>2.10.3</jackson.version>
 		<snakeyaml.version>1.25</snakeyaml.version>
 	</properties>

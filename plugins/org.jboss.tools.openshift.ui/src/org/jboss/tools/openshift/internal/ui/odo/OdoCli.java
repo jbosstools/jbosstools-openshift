@@ -34,6 +34,7 @@ import io.fabric8.kubernetes.api.model.ServiceFluent;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.VersionInfo;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
@@ -69,6 +70,9 @@ import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.HOME_FOLDER;
 import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.OCP4_CONFIG_NAMESPACE;
 import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME;
 import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.OCP4_CONSOLE_URL_KEY_NAME;
+import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.OCP3_CONFIG_NAMESPACE;
+import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.OCP3_WEBCONSOLE_CONFIG_MAP_NAME;
+import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.OCP3_WEBCONSOLE_YAML_FILE_NAME;
 import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.ODO_CONFIG_YAML;
 
 import java.io.BufferedReader;
@@ -905,10 +909,21 @@ public class OdoCli implements Odo {
   @Override
   public String consoleURL(OpenShiftClient client) throws IOException {
     try {
-      ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
-      return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
-    } catch (KubernetesClientException e) {
+      VersionInfo version = client.getVersion();
+      if (version == null || "4".equals(version.getMajor())) { // assuming null version is version 4
+        ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
+        if (configMap != null) {
+          return configMap.getData().get(OCP4_CONSOLE_URL_KEY_NAME);
+        }
+      } else if ("3".equals(version.getMajor())) {
+        ConfigMap configMap = client.configMaps().inNamespace(OCP3_CONFIG_NAMESPACE).withName(OCP3_WEBCONSOLE_CONFIG_MAP_NAME).get();
+        String yaml = configMap.getData().get(OCP3_WEBCONSOLE_YAML_FILE_NAME);
+        return JSON_MAPPER.readTree(yaml).path("clusterInfo").path("consolePublicURL").asText();
+      }
       return client.getMasterUrl() + "console";
+    } catch (KubernetesClientException e) {
+      return client.getMasterUrl().toExternalForm();
     }
   }
+
 }
