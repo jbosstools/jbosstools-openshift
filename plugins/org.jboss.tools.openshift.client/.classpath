@@ -24,5 +24,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/openshift-client-4.9.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/servicecatalog-client-4.9.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/servicecatalog-model-4.9.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-datatype-jsr310-2.10.3.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
