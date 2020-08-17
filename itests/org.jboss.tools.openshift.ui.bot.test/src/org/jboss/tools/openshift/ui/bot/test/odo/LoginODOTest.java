@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
+import org.jboss.tools.openshift.ui.bot.test.AbstractODOTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -24,7 +25,7 @@ import org.junit.runner.RunWith;
  * @author jkopriva@redhat.com
  */
 @RunWith(RedDeerSuite.class)
-public class LoginODOTest {
+public class LoginODOTest extends AbstractODOTest  {
 	String server = DatastoreOS3.SERVER;
 	String username = DatastoreOS3.USERNAME;
 	String password = DatastoreOS3.PASSWORD;
