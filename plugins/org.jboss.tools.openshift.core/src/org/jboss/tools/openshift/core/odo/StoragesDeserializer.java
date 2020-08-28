@@ -21,13 +21,26 @@ import java.util.Iterator;
 import java.util.List;
 
 public class StoragesDeserializer extends StdNodeBasedDeserializer<List<Storage>> {
-    public StoragesDeserializer() {
+    /**
+	 * 
+	 */
+	private static final String NAME_FIELD = "name";
+		/**
+	 * 
+	 */
+	private static final String METADATA_FIELD = "metadata";
+		/**
+	 * 
+	 */
+	private static final String ITEMS_FIELD = "items";
+
+		public StoragesDeserializer() {
         super(TypeFactory.defaultInstance().constructCollectionType(List.class, Storage.class));
     }
     @Override
     public List<Storage> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
         List<Storage> result = new ArrayList<>();
-        JsonNode items = root.get("items");
+        JsonNode items = root.get(ITEMS_FIELD);
         if (items != null) {
             for (Iterator<JsonNode> it = items.iterator(); it.hasNext(); ) {
                 JsonNode item = it.next();
@@ -38,8 +51,8 @@ public class StoragesDeserializer extends StdNodeBasedDeserializer<List<Storage>
     }
 
     private String getName(JsonNode item) {
-        if (item.has("metadata") && item.get("metadata").has("name")) {
-            return item.get("metadata").get("name").asText();
+        if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAME_FIELD)) {
+            return item.get(METADATA_FIELD).get(NAME_FIELD).asText();
         } else {
             return "";
         }
