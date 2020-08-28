@@ -16,10 +16,10 @@ import io.fabric8.servicecatalog.api.model.ServiceInstance;
 
 import org.jboss.tools.openshift.core.odo.Application;
 import org.jboss.tools.openshift.core.odo.Component;
+import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
 import org.jboss.tools.openshift.core.odo.ComponentInfo;
 import org.jboss.tools.openshift.core.odo.ComponentState;
 import org.jboss.tools.openshift.core.odo.ComponentType;
-import org.jboss.tools.openshift.core.odo.LocalConfig;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 import org.jboss.tools.openshift.core.odo.Storage;
@@ -33,19 +33,6 @@ import java.util.function.BiConsumer;
 public class OdoProjectDecorator implements Odo {
     private final Odo delegate;
     private final ApplicationExplorerUIModel model;
-
-    private LocalConfig.ComponentSettings findComponent(String project, String application, String component) {
-        Optional<ApplicationExplorerUIModel.ComponentDescriptor> comp = model.getComponents().values().stream().filter(c -> c.getProject().equals(project) && c.getApplication().equals(application) && c.getName().equals(component)).findFirst();
-        try {
-            if (comp.isPresent()) {
-                return comp.get().getSettings();
-            } else {
-                return null;
-            }
-        } catch (IOException e) {
-            return null;
-        }
-    }
 
     public OdoProjectDecorator(Odo delegate, ApplicationExplorerUIModel model) {
         this.delegate = delegate;
@@ -140,21 +127,22 @@ public class OdoProjectDecorator implements Odo {
 
     @Override
     public List<Integer> getServicePorts(OpenShiftClient client, String project, String application, String component) {
-        return delegate.getServicePorts(client, project, application, component);
+      List<Integer> ports = delegate.getServicePorts(client, project, application, component);
+      model.getComponents().forEach((path, comp) -> {
+          if (comp.getProject().equals(project) && comp.getApplication().equals(application) && comp.getName().equals(component)) {
+              comp.getPorts().forEach(port -> {
+                  if (!ports.contains(port)) {
+                      ports.add(port);
+                  }
+              });
+          }
+      });
+      return ports;
     }
 
     @Override
     public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
-        List<URL> urls = delegate.listURLs(project, application, context, component);
-        LocalConfig.ComponentSettings settings = findComponent(project, application, component);
-        if (settings != null) {
-            settings.getUrls().forEach(url -> {
-                if (urls.stream().noneMatch(url1 -> url1.getName().equals(url.getName()))) {
-                    urls.add(URL.of(url.getName(), null, null, url.getPort(), "", false));
-                }
-            });
-        }
-        return urls;
+      return delegate.listURLs(project, application, context, component);
     }
 
     @Override
@@ -246,17 +234,8 @@ public class OdoProjectDecorator implements Odo {
     }
 
     @Override
-    public List<Storage> getStorages(OpenShiftClient client, String project, String application, String component) {
-        List<Storage> storages = delegate.getStorages(client, project, application, component);
-        LocalConfig.ComponentSettings settings = findComponent(project, application, component);
-        if (settings != null) {
-            settings.getStorages().forEach(storage -> {
-                if (storages.stream().noneMatch(storage1 -> storage1.getName().equals(storage.getName()))) {
-                    storages.add(Storage.of(storage.getName()));
-                }
-            });
-        }
-        return storages;
+    public List<Storage> getStorages(OpenShiftClient client, String project, String application, String context, String component) throws IOException {
+      return delegate.getStorages(client, project, application, context, component);
     }
 
     @Override
@@ -308,4 +287,9 @@ public class OdoProjectDecorator implements Odo {
     public String consoleURL(OpenShiftClient client) throws IOException {
         return delegate.consoleURL(client);
     }
+
+		@Override
+		public List<ComponentDescriptor> discover(String path) throws IOException {
+			return delegate.discover(path);
+		}
 }

@@ -136,7 +136,7 @@ public class OpenShiftApplicationExplorerContentProvider implements ITreeContent
 			ApplicationElement application = parentElement.getParent();
 			ProjectElement project = application.getParent();
 			ApplicationExplorerUIModel cluster = project.getParent();
-			cluster.getOdo().getStorages(cluster.getClient(), project.getWrapped().getMetadata().getName(), application.getWrapped().getName(), parentElement.getWrapped().getName()).forEach(storage -> childs.add(new StorageElement(storage, parentElement)));
+			cluster.getOdo().getStorages(cluster.getClient(), project.getWrapped().getMetadata().getName(), application.getWrapped().getName(), parentElement.getWrapped().getPath(), parentElement.getWrapped().getName()).forEach(storage -> childs.add(new StorageElement(storage, parentElement)));
 			cluster.getOdo().listURLs(project.getWrapped().getMetadata().getName(), application.getWrapped().getName(), parentElement.getWrapped().getPath(),  parentElement.getWrapped().getName()).forEach(url -> childs.add(new URLElement(url, parentElement)));
 			return childs.toArray();
 		} catch (IOException e) {

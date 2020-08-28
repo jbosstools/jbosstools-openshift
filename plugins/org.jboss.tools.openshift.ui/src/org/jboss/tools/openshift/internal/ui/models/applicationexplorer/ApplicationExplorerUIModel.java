@@ -10,12 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models.applicationexplorer;
 
-import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.ODO_CONFIG_YAML;
-
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -30,7 +28,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
-import org.jboss.tools.openshift.core.odo.LocalConfig;
+import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.utils.ConfigHelper;
 import org.jboss.tools.openshift.core.odo.utils.ConfigWatcher;
@@ -87,36 +85,6 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
 		}
 	}
 	
-    public static class ComponentDescriptor {
-        private final String path;
-        private final String project;
-        private final String application;
-        private final String name;
-
-        ComponentDescriptor(String project, String application, String path, String name) {
-            this.project = project;
-            this.application = application;
-            this.path = path;
-            this.name = name;
-        }
-
-        public String getProject() {
-            return project;
-        }
-
-        public String getApplication() {
-            return application;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public LocalConfig.ComponentSettings getSettings() throws IOException {
-            return LocalConfig.load(new File(path, ODO_CONFIG_YAML).toURI().toURL()).getComponentSettings();
-        }
-    }
-
     private final Map<String, ComponentDescriptor> components = new HashMap<>();
 
     private Odo odo;
@@ -163,20 +131,17 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
 		return components;
 	}
 	
-    private void addContextToSettings(String path, LocalConfig.ComponentSettings componentSettings) {
+    private void addContextToSettings(String path, ComponentDescriptor descriptor) {
         if (!components.containsKey(path)) {
-            components.put(path, new ComponentDescriptor(componentSettings.getProject(), componentSettings.getApplication(), path, componentSettings.getName()));
+            components.put(path, descriptor);
             refresh();
         }
     }
 
     public void addContext(IProject project) {
         try {
-            File file = new File(project.getLocation().toOSString(),  ODO_CONFIG_YAML);
-            if (file.exists()) {
-                LocalConfig odoConfig = LocalConfig.load(file.toURI().toURL());
-                addContextToSettings(project.getLocation().toOSString(), odoConfig.getComponentSettings());
-            }	
+        	  List<ComponentDescriptor> descriptors = odo.discover(project.getLocation().toOSString());
+        	  descriptors.forEach(descriptor -> addContextToSettings(descriptor.getPath(), descriptor));
         } catch (IOException e) {}
     }
 

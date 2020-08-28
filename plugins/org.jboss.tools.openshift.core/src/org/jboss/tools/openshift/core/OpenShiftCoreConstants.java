@@ -15,7 +15,6 @@ package org.jboss.tools.openshift.core;
  *
  */
 public class OpenShiftCoreConstants {
-	public static final String ODO_CONFIG_YAML = ".odo/config.yaml";
 	public static final String HOME_FOLDER = System.getProperty("user.home");
 
 	public static final String OCP4_CONFIG_NAMESPACE = "openshift-config-managed";

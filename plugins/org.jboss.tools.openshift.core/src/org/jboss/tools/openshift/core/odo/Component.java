@@ -10,10 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
-import java.io.File;
 import java.util.Objects;
-
-import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.ODO_CONFIG_YAML;
 
 public interface Component {
   String getName();
@@ -89,9 +86,5 @@ public interface Component {
 
   static Component of(String name, ComponentState state, String path) {
     return new ComponentImpl(name, state, path);
-  }
-
-  public static boolean hasComponent(String path) {
-    return new File(path, ODO_CONFIG_YAML).exists();
   }
 }

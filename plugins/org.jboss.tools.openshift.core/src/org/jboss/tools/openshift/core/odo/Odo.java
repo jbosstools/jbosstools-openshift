@@ -85,7 +85,7 @@ public interface Odo {
 
     List<ServiceInstance> getServices(OpenShiftClient client, String project, String application);
 
-    List<Storage> getStorages(OpenShiftClient client, String project, String application, String component);
+    List<Storage> getStorages(OpenShiftClient client, String project, String application, String context, String component) throws IOException;
 
     void listComponents() throws IOException;
 
@@ -102,5 +102,7 @@ public interface Odo {
     String consoleURL(OpenShiftClient client) throws IOException;
 
     void debug(String project, String application, String context, String component, Integer port) throws IOException;
+    
+    List<ComponentDescriptor> discover(String path) throws IOException;
 
 }

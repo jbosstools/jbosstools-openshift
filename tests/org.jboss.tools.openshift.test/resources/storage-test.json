@@ -1,0 +1,20 @@
+{
+  "kind": "List",
+  "apiVersion": "odo.dev/v1alpha1",
+  "metadata": {},
+  "items": [
+    {
+      "kind": "storage",
+      "apiVersion": "odo.dev/v1alpha1",
+      "metadata": {
+        "name": "stor1",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "size": "1Gi",
+        "path": "/mnt"
+      },
+      "status": "Not Pushed"
+    }
+  ]
+}
