@@ -140,7 +140,7 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
 
     public void addContext(IProject project) {
         try {
-        	  List<ComponentDescriptor> descriptors = odo.discover(project.getLocation().toOSString());
+        	  List<ComponentDescriptor> descriptors = getOdo().discover(project.getLocation().toOSString());
         	  descriptors.forEach(descriptor -> addContextToSettings(descriptor.getPath(), descriptor));
         } catch (IOException e) {}
     }
