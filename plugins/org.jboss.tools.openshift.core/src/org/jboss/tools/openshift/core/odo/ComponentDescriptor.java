@@ -13,37 +13,37 @@ package org.jboss.tools.openshift.core.odo;
 import java.util.List;
 
 public class ComponentDescriptor {
-    private final String path;
-    private final String project;
-    private final String application;
-    private final String name;
-    private final List<Integer> ports;
+  private final String path;
+  private final String project;
+  private final String application;
+  private final String name;
+  private final List<Integer> ports;
 
-    ComponentDescriptor(String project, String application, String path, String name, List<Integer> ports) {
-        this.project = project;
-        this.application = application;
-        this.path = path;
-        this.name = name;
-        this.ports = ports;
-    }
+  ComponentDescriptor(String project, String application, String path, String name, List<Integer> ports) {
+    this.project = project;
+    this.application = application;
+    this.path = path;
+    this.name = name;
+    this.ports = ports;
+  }
 
-    public String getProject() {
-        return project;
-    }
+  public String getProject() {
+    return project;
+  }
 
-    public String getApplication() {
-        return application;
-    }
+  public String getApplication() {
+    return application;
+  }
 
-   	public String getPath() {
-        return path;
-		}
+  public String getPath() {
+    return path;
+  }
 
-		public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-		public List<Integer> getPorts() {
-			return ports;
-		}
+  public List<Integer> getPorts() {
+    return ports;
+  }
 }

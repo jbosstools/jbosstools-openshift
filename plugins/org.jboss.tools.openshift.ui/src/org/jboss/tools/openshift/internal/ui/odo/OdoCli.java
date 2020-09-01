@@ -503,7 +503,7 @@ public class OdoCli implements Odo {
 
   @Override
   public void undeployComponent(String project, String application, String context, String component) throws IOException {
-  	undeployComponent(project, application, context, component, false);
+    undeployComponent(project, application, context, component, false);
   }
 
   @Override

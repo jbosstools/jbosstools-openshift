@@ -25,105 +25,105 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  *
  */
 public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<List<ComponentDescriptor>> {
-	/**
-	 * 
-	 */
-	private static final String APP_FIELD = "app";
-	/**
-	 * 
-	 */
-	private static final String NAME_FIELD = "name";
-	/**
-	 * 
-	 */
-	private static final String CONTEXT_FIELD = "context";
-	/**
-	 * 
-	 */
-	private static final String ITEMS_FIELD = "items";
-	/**
-	 * 
-	 */
-	private static final String NAMESPACE_FIELD = "namespace";
-	/**
-	 * 
-	 */
-	private static final String PORTS_FIELD = "ports";
-	/**
-	 * 
-	 */
-	private static final String SPEC_FIELD = "spec";
-	/**
-	 * 
-	 */
-	private static final String STATUS_FIELD = "status";
-	/**
-	 * 
-	 */
-	private static final String METADATA_FIELD = "metadata";
+  /**
+   * 
+   */
+  private static final String APP_FIELD = "app";
+  /**
+   * 
+   */
+  private static final String NAME_FIELD = "name";
+  /**
+   * 
+   */
+  private static final String CONTEXT_FIELD = "context";
+  /**
+   * 
+   */
+  private static final String ITEMS_FIELD = "items";
+  /**
+   * 
+   */
+  private static final String NAMESPACE_FIELD = "namespace";
+  /**
+   * 
+   */
+  private static final String PORTS_FIELD = "ports";
+  /**
+   * 
+   */
+  private static final String SPEC_FIELD = "spec";
+  /**
+   * 
+   */
+  private static final String STATUS_FIELD = "status";
+  /**
+   * 
+   */
+  private static final String METADATA_FIELD = "metadata";
 
-	public ComponentDescriptorsDeserializer() {
-		super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentDescriptor.class));
-	}
+  public ComponentDescriptorsDeserializer() {
+    super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentDescriptor.class));
+  }
 
-	@Override
-	public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
-		List<ComponentDescriptor> result = new ArrayList<>();
-		JsonNode items = root.get(ITEMS_FIELD);
-		if (items != null) {
-			for (Iterator<JsonNode> it = items.iterator(); it.hasNext();) {
-				JsonNode item = it.next();
-				result.add(new ComponentDescriptor(getProject(item), getApplication(item), getPath(item), getName(item),
-				    getPorts(item)));
-			}
-		}
-		return result;
-	}
+  @Override
+  public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+    List<ComponentDescriptor> result = new ArrayList<>();
+    JsonNode items = root.get(ITEMS_FIELD);
+    if (items != null) {
+      for (Iterator<JsonNode> it = items.iterator(); it.hasNext();) {
+        JsonNode item = it.next();
+        result.add(new ComponentDescriptor(getProject(item), getApplication(item), getPath(item), getName(item),
+            getPorts(item)));
+      }
+    }
+    return result;
+  }
 
-	private List<Integer> getPorts(JsonNode item) {
-		List<Integer> ports = new ArrayList<>();
-		if (item.has(SPEC_FIELD) && item.get(SPEC_FIELD).has(PORTS_FIELD)) {
-			for (JsonNode portNode : item.get(SPEC_FIELD).get(PORTS_FIELD)) {
-				String port = portNode.asText();
-				if (port.endsWith("/TCP")) {
-					ports.add(Integer.parseInt(port.substring(0, port.length() - 4)));
-				} else {
-					ports.add(Integer.parseInt(port));
-				}
-			}
-		}
-		return ports;
-	}
+  private List<Integer> getPorts(JsonNode item) {
+    List<Integer> ports = new ArrayList<>();
+    if (item.has(SPEC_FIELD) && item.get(SPEC_FIELD).has(PORTS_FIELD)) {
+      for (JsonNode portNode : item.get(SPEC_FIELD).get(PORTS_FIELD)) {
+        String port = portNode.asText();
+        if (port.endsWith("/TCP")) {
+          ports.add(Integer.parseInt(port.substring(0, port.length() - 4)));
+        } else {
+          ports.add(Integer.parseInt(port));
+        }
+      }
+    }
+    return ports;
+  }
 
-	private String getProject(JsonNode item) {
-		if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAMESPACE_FIELD)) {
-			return item.get(METADATA_FIELD).get(NAMESPACE_FIELD).asText();
-		} else {
-			return "";
-		}
-	}
+  private String getProject(JsonNode item) {
+    if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAMESPACE_FIELD)) {
+      return item.get(METADATA_FIELD).get(NAMESPACE_FIELD).asText();
+    } else {
+      return "";
+    }
+  }
 
-	private String getApplication(JsonNode item) {
-		if (item.has(SPEC_FIELD) && item.get(SPEC_FIELD).has(APP_FIELD)) {
-			return item.get(SPEC_FIELD).get(APP_FIELD).asText();
-		} else {
-			return "";
-		}
-	}
+  private String getApplication(JsonNode item) {
+    if (item.has(SPEC_FIELD) && item.get(SPEC_FIELD).has(APP_FIELD)) {
+      return item.get(SPEC_FIELD).get(APP_FIELD).asText();
+    } else {
+      return "";
+    }
+  }
 
-	private String getPath(JsonNode item) {
-		if (item.has(STATUS_FIELD) && item.get(STATUS_FIELD).has(CONTEXT_FIELD)) {
-			return item.get(STATUS_FIELD).get(CONTEXT_FIELD).asText();
-		} else {
-			return "";
-		}
-	}
+  private String getPath(JsonNode item) {
+    if (item.has(STATUS_FIELD) && item.get(STATUS_FIELD).has(CONTEXT_FIELD)) {
+      return item.get(STATUS_FIELD).get(CONTEXT_FIELD).asText();
+    } else {
+      return "";
+    }
+  }
 
-	private String getName(JsonNode item) {
-		if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAME_FIELD)) {
-			return item.get(METADATA_FIELD).get(NAME_FIELD).asText();
-		} else {
-			return "";
-		}
-	}
+  private String getName(JsonNode item) {
+    if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAME_FIELD)) {
+      return item.get(METADATA_FIELD).get(NAME_FIELD).asText();
+    } else {
+      return "";
+    }
+  }
 }

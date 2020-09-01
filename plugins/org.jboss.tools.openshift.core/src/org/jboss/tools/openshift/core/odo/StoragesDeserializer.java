@@ -22,39 +22,40 @@ import java.util.List;
 
 public class StoragesDeserializer extends StdNodeBasedDeserializer<List<Storage>> {
     /**
-	 * 
-	 */
-	private static final String NAME_FIELD = "name";
-		/**
-	 * 
-	 */
-	private static final String METADATA_FIELD = "metadata";
-		/**
-	 * 
-	 */
-	private static final String ITEMS_FIELD = "items";
+   * 
+   */
+  private static final String NAME_FIELD = "name";
+    /**
+   * 
+   */
+  private static final String METADATA_FIELD = "metadata";
+    /**
+   * 
+   */
+  private static final String ITEMS_FIELD = "items";
 
-		public StoragesDeserializer() {
-        super(TypeFactory.defaultInstance().constructCollectionType(List.class, Storage.class));
-    }
-    @Override
-    public List<Storage> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
-        List<Storage> result = new ArrayList<>();
-        JsonNode items = root.get(ITEMS_FIELD);
-        if (items != null) {
-            for (Iterator<JsonNode> it = items.iterator(); it.hasNext(); ) {
-                JsonNode item = it.next();
-                result.add(Storage.of(getName(item)));
-            }
-        }
-        return result;
-    }
+  public StoragesDeserializer() {
+    super(TypeFactory.defaultInstance().constructCollectionType(List.class, Storage.class));
+  }
 
-    private String getName(JsonNode item) {
-        if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAME_FIELD)) {
-            return item.get(METADATA_FIELD).get(NAME_FIELD).asText();
-        } else {
-            return "";
-        }
+  @Override
+  public List<Storage> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+    List<Storage> result = new ArrayList<>();
+    JsonNode items = root.get(ITEMS_FIELD);
+    if (items != null) {
+      for (Iterator<JsonNode> it = items.iterator(); it.hasNext();) {
+        JsonNode item = it.next();
+        result.add(Storage.of(getName(item)));
+      }
     }
+    return result;
+  }
+
+  private String getName(JsonNode item) {
+    if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAME_FIELD)) {
+      return item.get(METADATA_FIELD).get(NAME_FIELD).asText();
+    } else {
+      return "";
+    }
+  }
 }

@@ -14,12 +14,17 @@ import java.util.Objects;
 
 public interface Component {
   String getName();
+
   ComponentState getState();
+
   void setState(ComponentState state);
+
   String getPath();
+
   void setPath(String path);
+
   default boolean hasContext() {
-      return getPath() != null;
+    return getPath() != null;
   }
 
   class ComponentImpl implements Component {
@@ -58,22 +63,22 @@ public interface Component {
       this.path = path;
     }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(name);
-	}
+    @Override
+    public int hashCode() {
+      return Objects.hash(name);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof ComponentImpl)) {
-			return false;
-		}
-		ComponentImpl other = (ComponentImpl) obj;
-		return Objects.equals(name, other.name);
-	}
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!(obj instanceof ComponentImpl)) {
+        return false;
+      }
+      ComponentImpl other = (ComponentImpl) obj;
+      return Objects.equals(name, other.name);
+    }
   }
 
   static Component of(String name) {
