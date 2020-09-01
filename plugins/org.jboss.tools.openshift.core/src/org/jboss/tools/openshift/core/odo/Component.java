@@ -10,19 +10,21 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
-import java.io.File;
 import java.util.Objects;
-
-import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.ODO_CONFIG_YAML;
 
 public interface Component {
   String getName();
+
   ComponentState getState();
+
   void setState(ComponentState state);
+
   String getPath();
+
   void setPath(String path);
+
   default boolean hasContext() {
-      return getPath() != null;
+    return getPath() != null;
   }
 
   class ComponentImpl implements Component {
@@ -61,22 +63,22 @@ public interface Component {
       this.path = path;
     }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(name);
-	}
+    @Override
+    public int hashCode() {
+      return Objects.hash(name);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof ComponentImpl)) {
-			return false;
-		}
-		ComponentImpl other = (ComponentImpl) obj;
-		return Objects.equals(name, other.name);
-	}
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!(obj instanceof ComponentImpl)) {
+        return false;
+      }
+      ComponentImpl other = (ComponentImpl) obj;
+      return Objects.equals(name, other.name);
+    }
   }
 
   static Component of(String name) {
@@ -89,9 +91,5 @@ public interface Component {
 
   static Component of(String name, ComponentState state, String path) {
     return new ComponentImpl(name, state, path);
-  }
-
-  public static boolean hasComponent(String path) {
-    return new File(path, ODO_CONFIG_YAML).exists();
   }
 }

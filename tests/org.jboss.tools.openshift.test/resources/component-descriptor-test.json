@@ -1,0 +1,30 @@
+{
+  "kind": "List",
+  "apiVersion": "odo.dev/v1alpha1",
+  "metadata": {},
+  "items": [
+  {
+    "kind": "Component",
+    "apiVersion": "odo.dev/v1alpha1",
+    "metadata": {
+      "name": "sbcomp",
+      "namespace": "testodo",
+      "creationTimestamp": null
+    },
+    "spec": {
+      "app": "sbapp",
+      "type": "java:8",
+      "sourceType": "local",
+      "ports": [
+        "8080/TCP",
+        "8443/TCP",
+        "8778/TCP"
+      ]
+    },
+    "status": {
+      "context": "C:\\work\\src\\tmp\\springboot-rest",
+      "state": "Not Pushed"
+    }
+  }
+  ]
+}                                                                                                                

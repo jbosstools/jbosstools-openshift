@@ -73,7 +73,6 @@ import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.OCP4_CONSOLE
 import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.OCP3_CONFIG_NAMESPACE;
 import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.OCP3_WEBCONSOLE_CONFIG_MAP_NAME;
 import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.OCP3_WEBCONSOLE_YAML_FILE_NAME;
-import static org.jboss.tools.openshift.core.OpenShiftCoreConstants.ODO_CONFIG_YAML;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -91,6 +90,8 @@ import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.common.util.DownloadHelper;
 import org.jboss.tools.openshift.core.odo.Application;
 import org.jboss.tools.openshift.core.odo.Component;
+import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
+import org.jboss.tools.openshift.core.odo.ComponentDescriptorsDeserializer;
 import org.jboss.tools.openshift.core.odo.ComponentInfo;
 import org.jboss.tools.openshift.core.odo.ComponentSourceType;
 import org.jboss.tools.openshift.core.odo.ComponentType;
@@ -100,6 +101,7 @@ import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 import org.jboss.tools.openshift.core.odo.ServiceTemplatesDeserializer;
 import org.jboss.tools.openshift.core.odo.Storage;
+import org.jboss.tools.openshift.core.odo.StoragesDeserializer;
 import org.jboss.tools.openshift.core.odo.URL;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 
@@ -391,7 +393,7 @@ public class OdoCli implements Odo {
   @Override
   public List<Integer> getServicePorts(OpenShiftClient client, String project, String application, String component) {
     Service service = client.services().inNamespace(project).withName(component + '-' + application).get();
-    return service.getSpec().getPorts().stream().map(ServicePort::getPort).collect(Collectors.toList());
+    return service!=null?service.getSpec().getPorts().stream().map(ServicePort::getPort).collect(Collectors.toList()):new ArrayList<>();
   }
 
   private static List<URL> parseURLs(String json) {
@@ -485,29 +487,28 @@ public class OdoCli implements Odo {
     }
   }
 
+  private void undeployComponent(String project, String application, String context, String component, boolean deleteConfig) throws IOException {
+    try {
+      if (context != null) {
+          execute(new File(context), command, "delete", "-f", deleteConfig?"-a":"");
+      } else {
+          execute(command, "delete", "-f", "--project", project, "--app", application, component, deleteConfig?"-a":"");
+      }
+      UsageStats.getInstance().odoCommand("delete", true);
+    } catch (IOException e) {
+      UsageStats.getInstance().odoCommand("delete", false);
+      throw e;
+    }
+}
+
   @Override
   public void undeployComponent(String project, String application, String context, String component) throws IOException {
-      try {
-        if (context != null) {
-            execute(new File(context), command, "delete", "-f");
-        } else {
-            execute(command, "delete", "-f", "--project", project, "--app", application, component);
-        }
-        UsageStats.getInstance().odoCommand("delete", true);
-      } catch (IOException e) {
-        UsageStats.getInstance().odoCommand("delete", false);
-        throw e;
-      }
+    undeployComponent(project, application, context, component, false);
   }
 
   @Override
   public void deleteComponent(String project, String application, String context, String component, boolean undeploy) throws IOException {
-    if (undeploy) {
-      undeployComponent(project, application, context, component);
-    }
-    if (context != null) {
-      new File(context, ODO_CONFIG_YAML).delete();
-    }
+    undeployComponent(project, application, context, component, true);
   }
 
   @Override
@@ -621,11 +622,15 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public List<Storage> getStorages(OpenShiftClient client, String project, String application, String component) {
-    return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems()
-            .stream().filter(pvc -> pvc.getMetadata().getLabels().containsKey(KubernetesLabels.STORAGE_NAME_LABEL)).
-                    map(pvc -> Storage.of(Storage.getStorageName(pvc))).collect(Collectors.toList());
-
+  public List<Storage> getStorages(OpenShiftClient client, String project, String application, String context, String component) throws IOException {
+    if (context != null) {
+      return configureObjectMapper(new StoragesDeserializer()).readValue(
+              execute(new File(context), command, "storage", "list", "-o", "json"),
+              new TypeReference<List<Storage>>() {});
+    } else {
+      return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems()
+                           .stream().filter(pvc -> pvc.getMetadata().getLabels().containsKey(KubernetesLabels.STORAGE_NAME_LABEL)).
+                                   map(pvc -> Storage.of(Storage.getStorageName(pvc))).collect(Collectors.toList());    }
   }
 
   @Override
@@ -925,5 +930,11 @@ public class OdoCli implements Odo {
       return client.getMasterUrl().toExternalForm();
     }
   }
-
+  
+  @Override
+  public List<ComponentDescriptor> discover(String path) throws IOException {
+    return configureObjectMapper(new ComponentDescriptorsDeserializer()).readValue(
+            execute(new File(path), command, "list", "--path", ".", "-o", "json"),
+            new TypeReference<List<ComponentDescriptor>>() {});
+  }
 }

@@ -20,15 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<ComponentType>> {
-    /**
-   * 
-   */
-  private static final String NON_HIDDEN_TAGS_FIELD = "nonHiddenTags";
-    /**
-   * 
-   */
-  private static final String SPEC_FIELD = "spec";
+public class StoragesDeserializer extends StdNodeBasedDeserializer<List<Storage>> {
     /**
    * 
    */
@@ -36,40 +28,34 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
     /**
    * 
    */
-  private static final String METADATA__FIELD = "metadata";
+  private static final String METADATA_FIELD = "metadata";
     /**
    * 
    */
   private static final String ITEMS_FIELD = "items";
-  
-  public ComponentTypesDeserializer() {
-    super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentType.class));
+
+  public StoragesDeserializer() {
+    super(TypeFactory.defaultInstance().constructCollectionType(List.class, Storage.class));
   }
 
   @Override
-  public List<ComponentType> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
-    List<ComponentType> result = new ArrayList<>();
+  public List<Storage> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+    List<Storage> result = new ArrayList<>();
     JsonNode items = root.get(ITEMS_FIELD);
     if (items != null) {
       for (Iterator<JsonNode> it = items.iterator(); it.hasNext();) {
         JsonNode item = it.next();
-        String name = item.get(METADATA__FIELD).get(NAME_FIELD).asText();
-        List<String> versions = new ArrayList<>();
-        item.get(SPEC_FIELD).get(NON_HIDDEN_TAGS_FIELD).forEach(node -> versions.add(node.textValue()));
-        result.add(new ComponentType() {
-
-          @Override
-          public String getName() {
-            return name;
-          }
-
-          @Override
-          public String[] getVersions() {
-            return versions.toArray(new String[versions.size()]);
-          }
-        });
+        result.add(Storage.of(getName(item)));
       }
     }
     return result;
+  }
+
+  private String getName(JsonNode item) {
+    if (item.has(METADATA_FIELD) && item.get(METADATA_FIELD).has(NAME_FIELD)) {
+      return item.get(METADATA_FIELD).get(NAME_FIELD).asText();
+    } else {
+      return "";
+    }
   }
 }
