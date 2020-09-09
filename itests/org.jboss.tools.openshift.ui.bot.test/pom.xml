@@ -103,6 +103,12 @@
 				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift4StableBotTests</test.class>
 			</properties>
 		</profile>
+		<profile>
+			<id>openshift-interop</id>
+			<properties>
+				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShiftInteropTests</test.class>
+			</properties>
+		</profile>
 	</profiles>
 	<repositories>
 		<!-- needed for org.jboss.tools.central -->
