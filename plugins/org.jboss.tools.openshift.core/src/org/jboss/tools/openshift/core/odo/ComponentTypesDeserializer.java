@@ -40,7 +40,7 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
     /**
    * 
    */
-  private static final String ITEMS_FIELD = "items";
+  private static final String ITEMS_FIELD = "s2iItems";
   
   public ComponentTypesDeserializer() {
     super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentType.class));
