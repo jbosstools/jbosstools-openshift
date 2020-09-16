@@ -90,6 +90,7 @@ public class OpenShiftODOProjectRequirement implements Requirement<RequiredODOPr
 			OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 			explorer.open();
 			OpenShiftODOConnection connection = explorer.getOpenShiftODOConnection();
+			connection.refreshConnection();
 			OpenShiftODOProject odoProject = connection.getProject(this.project.getName());
 			odoProject.delete();
 		}

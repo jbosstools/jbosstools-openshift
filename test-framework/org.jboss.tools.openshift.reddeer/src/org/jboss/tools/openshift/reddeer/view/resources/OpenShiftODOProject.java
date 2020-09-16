@@ -20,6 +20,7 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
+import org.jboss.tools.openshift.reddeer.condition.ODOProjectIsDeleted;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 /**
@@ -54,6 +55,7 @@ public class OpenShiftODOProject extends AbstractOpenShiftApplicationExplorerIte
 		
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.DELETE_OS_PROJECT), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(new Matcher[]{CoreMatchers.is(OpenShiftLabel.JobsLabels.DELETE_PROJECT)}), TimePeriod.LONG);
+		new WaitWhile(new ODOProjectIsDeleted(getName()), TimePeriod.getCustom(120));
 	}
 	
 	public void openCreateComponentWizard() {

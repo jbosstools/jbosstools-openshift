@@ -12,7 +12,9 @@ package org.jboss.tools.openshift.ui.bot.test.odo;
 
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.jboss.tools.openshift.reddeer.condition.ODOConnectionExists;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
 import org.jboss.tools.openshift.ui.bot.test.AbstractODOTest;
@@ -38,6 +40,7 @@ public class LoginODOTest extends AbstractODOTest  {
 
 		explorer.connectToOpenShiftODOBasic(server, username, password);
 
+		new WaitUntil(new ODOConnectionExists());
 		assertTrue("Connection does not exist in OpenShift Application Explorer view",
 				explorer.connectionExists());
 	}
@@ -49,6 +52,7 @@ public class LoginODOTest extends AbstractODOTest  {
 
 		explorer.connectToOpenShiftODOOAuth(server, token);
 
+		new WaitUntil(new ODOConnectionExists());
 		assertTrue("Connection does not exist in OpenShift Application Explorer view",
 				explorer.connectionExists());
 	}

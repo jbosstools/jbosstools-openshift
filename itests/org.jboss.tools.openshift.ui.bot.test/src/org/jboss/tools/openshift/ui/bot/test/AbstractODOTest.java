@@ -60,7 +60,7 @@ public abstract class AbstractODOTest {
 		componentWizardPage.setComponentName(eclipseProject);
 		componentWizardPage.setEclipseProject(eclipseProject);
 		componentWizardPage.selectComponentType("java");
-		componentWizardPage.selectComponentVersion("8");
+		componentWizardPage.selectComponentVersion("latest");
 		componentWizardPage.setApplication("myapp");
 		componentWizard.finish(TimePeriod.VERY_LONG);
 		
