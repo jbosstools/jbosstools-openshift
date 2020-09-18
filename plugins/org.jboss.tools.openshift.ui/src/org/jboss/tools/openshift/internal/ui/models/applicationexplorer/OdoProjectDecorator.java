@@ -318,5 +318,5 @@ public class OdoProjectDecorator implements Odo {
   @Override
   public boolean isServiceCatalogAvailable(OpenShiftClient client) {
     return delegate.isServiceCatalogAvailable(client);
-	}
+  }
 }
