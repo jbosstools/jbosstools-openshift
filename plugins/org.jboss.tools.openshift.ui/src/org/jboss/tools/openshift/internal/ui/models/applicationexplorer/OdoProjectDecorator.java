@@ -314,4 +314,8 @@ public class OdoProjectDecorator implements Odo {
   public List<ComponentDescriptor> discover(String path) throws IOException {
     return delegate.discover(path);
   }
+  @Override
+	public boolean isServiceCatalogAvailable(OpenShiftClient client) {
+		return delegate.isServiceCatalogAvailable(client);
+	}
 }
