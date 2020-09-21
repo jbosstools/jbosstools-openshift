@@ -105,4 +105,6 @@ public interface Odo {
     
     List<ComponentDescriptor> discover(String path) throws IOException;
 
+    boolean isServiceCatalogAvailable(OpenShiftClient client);
+
 }

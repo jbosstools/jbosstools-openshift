@@ -937,4 +937,9 @@ public class OdoCli implements Odo {
             execute(new File(path), command, "list", "--path", ".", "-o", "json"),
             new TypeReference<List<ComponentDescriptor>>() {});
   }
+  
+  @Override
+  public boolean isServiceCatalogAvailable(OpenShiftClient client) {
+    return client.isAdaptable(ServiceCatalogClient.class);
+  }
 }
