@@ -71,7 +71,12 @@ public class OCBinaryValidator {
 	 * </ul>
 	 */
 	private static final Pattern OC_VERSION_LINE_PATTERN = Pattern
-			.compile("(oc|Client\\sVersion:)[^v]*v(([0-9]{1,2})(\\.[0-9]{1,2})?(\\.[0-9]{1,2})?)([-\\.]([^+]*))?.*");
+			.compile("(oc|Client\\sVersion:)[^0-9]*("
+					+ "([0-9]{1,2})" // major
+					+ "(\\.[0-9]{1,2})?" // minor
+					+ "(\\.[0-9]{1,2})?)" // patch
+					+ "([-\\.]([^+|\\.]*)" // qualifier (group7)
+					+ ")?.*");
 
 	private String path;
 
