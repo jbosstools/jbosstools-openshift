@@ -63,6 +63,19 @@ public class OCBinaryValidatorTest {
 		assertTrue(validator.parseVersion("Client Version: v1.0-foo").isPresent());
 		assertTrue(validator.parseVersion("Client Version: v1.0-foo+fdf5432").isPresent());
 		assertTrue(validator.parseVersion("Client Version: v1.2.0-foo+fdf5432").isPresent());
+		assertTrue(validator.parseVersion("Client Version: v1.4.0-rc1+b4e0954").isPresent());
+		assertTrue(validator.parseVersion("Client Version: 4.3.0-0.okd-2019-11-15-182656").isPresent());
+		assertTrue(validator.parseVersion("Client Version: 4.4.6").isPresent());
+		assertTrue(validator.parseVersion("Client Version: 4.5.0-0.okd-2020-07-29-070316").isPresent());
+	}
+
+	@Test
+	public void shouldReportMajorMinorMicroQualifierOCP4() {
+		Version version = validator.parseVersion("Client Version: 4.3.0-0.okd-2019-11-15-182656").get();
+		assertTrue(Integer.valueOf(4).equals(version.getMajor()));
+		assertTrue(Integer.valueOf(3).equals(version.getMinor()));
+		assertTrue(Integer.valueOf(0).equals(version.getMicro()));
+		assertTrue("0".equals(version.getQualifier()));
 	}
 
 	@Test
@@ -81,6 +94,9 @@ public class OCBinaryValidatorTest {
 		assertSameVersion("1.2.0.foo", "Client Version: v1.2-foo");
 		assertSameVersion("1.0.0", "Client Version: v1");
 		assertSameVersion("1.4.0.rc1", "Client Version: v1.4.0-rc1+b4e0954");
+		assertSameVersion("4.3.0.0", "Client Version: 4.3.0-0.okd-2019-11-15-182656");
+		assertSameVersion("4.4.6", "Client Version: 4.4.6");
+		assertSameVersion("4.5.0.0", "Client Version: 4.5.0-0.okd-2020-07-29-070316");
 	}
 
 	@Test
@@ -91,6 +107,7 @@ public class OCBinaryValidatorTest {
 	@Test
 	public void testParseOCEnterpriseVersionOCP4() {
 		assertSameVersion("3.4.1.2", "Client Version: v3.4.1.2");
+		assertSameVersion("4.3.0.0", "Client Version: 4.3.0-0.okd-2019-11-15-182656");
 	}
 
 	@Test
