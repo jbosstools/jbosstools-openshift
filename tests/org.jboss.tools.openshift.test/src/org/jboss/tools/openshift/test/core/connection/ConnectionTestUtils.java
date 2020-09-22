@@ -129,6 +129,11 @@ public class ConnectionTestUtils {
 			return null;
 		}
 
+		@Override
+		public void invalidate() {
+			// user object is mocked, invalidation should be handled via mocking
+		}
+
 	}
 
 }
