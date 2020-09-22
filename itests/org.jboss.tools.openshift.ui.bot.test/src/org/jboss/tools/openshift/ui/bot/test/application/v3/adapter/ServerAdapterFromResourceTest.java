@@ -165,8 +165,6 @@ public class ServerAdapterFromResourceTest extends AbstractTest  {
 	
 	@Test
 	public void testAdapterFromCReplicationController() {
-		project.getOpenShiftResource(Resource.DEPLOYMENT_CONFIG, serviceReq.getService().getName()).delete();
-		
 		newAdapterFromResource(Resource.DEPLOYMENT, OpenShiftResources.NODEJS_APP_REPLICATION_CONTROLLER);
 		assertAdapterWorks();
 	}
@@ -190,12 +188,13 @@ public class ServerAdapterFromResourceTest extends AbstractTest  {
 		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);
 		
 		String resourceType = null;
+		if (name.equals("nodejs-example-1")){
+			name = "nodejs-example";
+		}
 		String selectors = name + " name=" + name;
 		
 		if(type.equals(Resource.DEPLOYMENT)) {
-			resourceType = "ReplicationController";
-			selectors = name + " deploymentconfig=" + serviceReq.getService().getName() + ", name="
-					+ serviceReq.getService().getName() + ", deployment=" + name;
+			resourceType = "DeploymentConfig";
 		} else {
 			resourceType = type.toString().replaceFirst(".$","").replaceAll(" ", "");
 		}		
