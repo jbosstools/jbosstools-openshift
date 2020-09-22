@@ -24,7 +24,7 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 
 public abstract class BaseExplorerLabelProvider implements IStyledLabelProvider, ILabelProvider, IDescriptionProvider {
 	//Limit for label length = baseText.length + qualifiedText.length
-	private static final int DEFAULT_LABEL_LIMIT = 60;
+	private static final int DEFAULT_LABEL_LIMIT = 100;
 	
 	//Status line has with CLabel its own ellipses adjusting string to available space.
 	//We could set Integer.MAX_VALUE as limit, but performance will be too low for really long texts.
