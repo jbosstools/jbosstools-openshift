@@ -103,7 +103,11 @@ public class CreateNewConnectionTest extends AbstractTest {
 		
 		explorer.openConnectionShell();
 		try {
-			explorer.connectToOpenShift(DatastoreOS3.SERVER, null, DatastoreOS3.TOKEN, false, false, AuthenticationMethod.OAUTH, true);
+			if (DatastoreOS3.TOKEN != null ) {
+				explorer.connectToOpenShift(DatastoreOS3.SERVER, null, DatastoreOS3.TOKEN, false, false, AuthenticationMethod.OAUTH, false);
+			} else {
+				explorer.connectToOpenShift(DatastoreOS3.SERVER, null, DatastoreOS3.TOKEN, false, false, AuthenticationMethod.OAUTH, true);
+			}
 		} catch (RedDeerException ex) {
 			fail("Creating an OpenShift v3 OAuth connection failed." + ex.getCause());
 		}	

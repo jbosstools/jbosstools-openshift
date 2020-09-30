@@ -98,6 +98,7 @@ public class OpenShiftODOConnection extends AbstractOpenShiftApplicationConnecti
 		
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_PROJECT), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(new Matcher[]{CoreMatchers.is(OpenShiftLabel.JobsLabels.CREATE_PROJECT)}), TimePeriod.LONG);
+		refreshConnection();
 		return getProject(projectName);
 	}
 	
@@ -106,6 +107,7 @@ public class OpenShiftODOConnection extends AbstractOpenShiftApplicationConnecti
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();
 		explorer.connectToOpenShiftODOBasic(DatastoreOS3.SERVER, DatastoreOS3.USERNAME, DatastoreOS3.PASSWORD);
+		explorer.getOpenShiftODOConnection().expand();
 	}
 
 	/**

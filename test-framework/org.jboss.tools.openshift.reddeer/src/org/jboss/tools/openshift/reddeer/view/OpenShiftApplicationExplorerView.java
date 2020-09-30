@@ -11,20 +11,30 @@
 package org.jboss.tools.openshift.reddeer.view;
 
 import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.util.Display;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.core.handler.CTabItemHandler;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.core.lookup.WorkbenchPartLookup;
+import org.eclipse.reddeer.workbench.handler.WorkbenchPartHandler;
 import org.eclipse.reddeer.workbench.impl.view.WorkbenchView;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Event;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.reddeer.condition.ODOIsDownloaded;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -71,7 +81,7 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 	 * Connects to OpenShift server. OpenShift connection shell has to be opened at
 	 * the moment of method invocation.
 	 * 
-	 * @param server           URL of a server
+	 * @param server   URL of a server
 	 * @param username
 	 * @param password
 	 */
@@ -83,7 +93,7 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 	 * Connects to OpenShift server. OpenShift connection shell has to be opened at
 	 * the moment of method invocation.
 	 * 
-	 * @param server           URL of a server
+	 * @param server URL of a server
 	 * @param token
 	 */
 	public void connectToOpenShiftODOOAuth(String server, String token) {
@@ -125,7 +135,7 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 	 * Finds out whether connection with specified username and server exists or
 	 * not.
 	 * 
-	 * @param server   server
+	 * @param server server
 	 * @return true if connection exists, false otherwise
 	 */
 	public boolean connectionExists() {
@@ -145,6 +155,44 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 	private TreeItem getConnectionItem() {
 		open();
 		return new DefaultTree().getItems().get(0);
+	}
+
+	@Override
+	public void activate() {
+		try {
+			checkOpen();
+		} catch (WaitTimeoutExpiredException ex) {
+			//try it once again
+			checkOpen();
+		}
+		log.info("Activate view " + getTitle());
+		if (!new ODOIsDownloaded().test()) {
+			CTabItemHandler handler = CTabItemHandler.getInstance();
+			Display.syncExec(new Runnable() {
+				public void run() {
+					cTabItem.getSWTWidget().getParent().setSelection(cTabItem.getSWTWidget());
+				}
+			});
+			Event event = handler.createEventForCTabItem(cTabItem.getSWTWidget(), SWT.Selection);
+			Display.asyncExec(new Runnable() {
+				public void run() {
+					cTabItem.getSWTWidget().getParent().notifyListeners(event.type, event);
+				}
+			});
+			WorkbenchPartHandler.getInstance()
+			.focusChildControl(WorkbenchPartLookup.getInstance().getActiveWorkbenchPart());
+			try {
+				DefaultShell shell = new DefaultShell("odo tool required");
+				new PushButton(shell, "Yes").click();
+				new WaitWhile(new ODOIsDownloaded(), TimePeriod.LONG);
+			} catch (CoreLayerException ex) {
+				// swallow exception dialog is not found
+			}
+		} else {
+			cTabItem.activate();
+			WorkbenchPartHandler.getInstance()
+			.focusChildControl(WorkbenchPartLookup.getInstance().getActiveWorkbenchPart());
+		}
 	}
 
 }
