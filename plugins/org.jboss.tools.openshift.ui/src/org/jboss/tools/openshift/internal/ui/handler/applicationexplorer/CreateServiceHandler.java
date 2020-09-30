@@ -68,6 +68,10 @@ public class CreateServiceHandler extends AbstractHandler {
 			return Status.OK_STATUS;
 
 		} catch (IOException e) {
+			String title = "Unable to create service";
+			String message = e.getMessage();
+			MessageDialog.open(MessageDialog.ERROR,
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), title, message, SWT.NONE);
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 	}
