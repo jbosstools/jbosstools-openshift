@@ -24,7 +24,7 @@ public class ODOIsDownloaded extends AbstractWaitCondition {
 
 	public static final String ODO_CACHE_DIR = System.getProperty("user.home") + File.separatorChar + ".odo"
 			+ File.separatorChar + "cache" + File.separatorChar + "1.2.6" + File.separatorChar + "odo";
-	public String odoPath = "";
+	protected String odoPath = "";
 
 	/**
 	 * Constructs OdoIsDownloaded wait condition. Condition is met when odo is
