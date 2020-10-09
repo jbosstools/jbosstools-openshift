@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.core;singleton:=true
-Bundle-Version: 3.12.0.qualifier
+Bundle-Version: 3.13.0.qualifier
 Bundle-Activator: org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
@@ -117,6 +117,4 @@ Export-Package: org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.test,
    org.jboss.tools.openshift.reddeer"
 Service-Component: META-INF/connectionFactory.xml
-Bundle-ClassPath: lib/jackson-dataformat-yaml-2.9.10.jar,
- .
-
+Bundle-ClassPath: .

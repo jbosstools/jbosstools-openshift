@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.client;singleton:=true
-Bundle-Version: 3.12.0.qualifier
+Bundle-Version: 3.13.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
@@ -29,7 +29,8 @@ Bundle-ClassPath: .,
  lib/openshift-client-4.9.1.jar,
  lib/servicecatalog-client-4.9.1.jar,
  lib/servicecatalog-model-4.9.1.jar
-Export-Package: com.openshift.internal.restclient;x-friends:="org.jboss.tools.openshift.test",
+Export-Package: com.fasterxml.jackson.dataformat.yaml,
+ com.openshift.internal.restclient;x-friends:="org.jboss.tools.openshift.test",
  com.openshift.restclient,
  com.openshift.restclient.api,
  com.openshift.restclient.api.capabilities,
