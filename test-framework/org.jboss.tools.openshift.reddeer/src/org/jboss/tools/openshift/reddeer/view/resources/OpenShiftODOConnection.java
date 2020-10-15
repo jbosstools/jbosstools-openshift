@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
@@ -22,6 +23,7 @@ import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
+import org.jboss.tools.openshift.reddeer.condition.OpenShiftODOProjectExists;
 import org.jboss.tools.openshift.reddeer.dialogs.InputDialog;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -49,11 +51,12 @@ public class OpenShiftODOConnection extends AbstractOpenShiftApplicationConnecti
 	 */
 	public OpenShiftODOProject getProject(String projectName) {
 		activateOpenShiftApplicationExplorerView();
+		refresh();
 		item.expand();
 		
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-		
 		return new OpenShiftODOProject(treeViewerHandler.getTreeItem(item, projectName));
+		
 	}
 
 	/**
@@ -76,6 +79,11 @@ public class OpenShiftODOConnection extends AbstractOpenShiftApplicationConnecti
 		item.select();
 		item.expand();
 		for (TreeItem treeItem: item.getItems()) {
+			if (treeItem.getText().contains("Click to login.")) {
+				OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
+				explorer.activate();
+				explorer.connectToOpenShiftODO();
+			}
 			projects.add(new OpenShiftODOProject(treeItem));
 		}
 		return projects;
@@ -98,16 +106,15 @@ public class OpenShiftODOConnection extends AbstractOpenShiftApplicationConnecti
 		
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_PROJECT), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(new Matcher[]{CoreMatchers.is(OpenShiftLabel.JobsLabels.CREATE_PROJECT)}), TimePeriod.LONG);
-		refreshConnection();
+		
+		new WaitUntil(new OpenShiftODOProjectExists(projectName), TimePeriod.LONG);
 		return getProject(projectName);
 	}
-	
-	public void refreshConnection() {
-		item.select();
-		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
-		explorer.open();
-		explorer.connectToOpenShiftODOBasic(DatastoreOS3.SERVER, DatastoreOS3.USERNAME, DatastoreOS3.PASSWORD);
-		explorer.getOpenShiftODOConnection().expand();
+
+	public void refresh() {
+		select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.REFRESH).select();
+		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
 
 	/**
@@ -143,5 +150,9 @@ public class OpenShiftODOConnection extends AbstractOpenShiftApplicationConnecti
 	public void about() {
 		select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.ABOUT).select();
+	}
+
+	public String getName() {
+		return item.getText();
 	}
 }

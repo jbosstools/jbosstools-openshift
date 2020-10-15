@@ -61,7 +61,14 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 		TreeItem connection = getConnectionItem();
 		connection.select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.LOGIN).select();
-		new DefaultShell(OpenShiftLabel.Shell.LOGIN);
+		try {
+			new DefaultShell(OpenShiftLabel.Shell.LOGIN);
+		} catch (CoreLayerException ex) {
+			new DefaultShell("odo tool required");
+			new PushButton("Yes").click();
+			new WaitWhile(new JobIsRunning(), TimePeriod.LONG, false);
+			new DefaultShell(OpenShiftLabel.Shell.LOGIN);
+		}
 	}
 
 	public void connectToOpenShiftODO() {
@@ -119,14 +126,18 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.LOGIN), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+		//new WaitWhile(new ODOConnectionExists(), TimePeriod.LONG);
 	}
 
 	public boolean connectionExistsAndWorking() {
 		try {
 			OpenShiftODOConnection connection = getOpenShiftODOConnection();
+			if (!connection.getName().contains(DatastoreOS3.SERVER)) {
+				return false;
+			}
 			connection.expand();
 			return true;
-		} catch (Exception ex) {
+		} catch (RedDeerException ex) {
 			return false;
 		}
 	}

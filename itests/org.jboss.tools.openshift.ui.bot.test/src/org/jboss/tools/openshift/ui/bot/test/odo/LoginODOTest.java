@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.ui.bot.test.odo;
 
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.openshift.reddeer.condition.ODOConnectionExists;
@@ -39,8 +41,13 @@ public class LoginODOTest extends AbstractODOTest  {
 		explorer.open();
 
 		explorer.connectToOpenShiftODOBasic(server, username, password);
-
-		new WaitUntil(new ODOConnectionExists());
+		try {
+			new WaitUntil(new ODOConnectionExists(), TimePeriod.LONG);
+		} catch (WaitTimeoutExpiredException ex) {
+			//try to connect once again
+			explorer.connectToOpenShiftODOBasic(server, username, password);
+			new WaitUntil(new ODOConnectionExists(), TimePeriod.LONG);
+		}
 		assertTrue("Connection does not exist in OpenShift Application Explorer view",
 				explorer.connectionExists());
 	}
@@ -52,7 +59,7 @@ public class LoginODOTest extends AbstractODOTest  {
 
 		explorer.connectToOpenShiftODOOAuth(server, token);
 
-		new WaitUntil(new ODOConnectionExists());
+		new WaitUntil(new ODOConnectionExists(), TimePeriod.LONG);
 		assertTrue("Connection does not exist in OpenShift Application Explorer view",
 				explorer.connectionExists());
 	}
