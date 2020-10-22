@@ -1229,6 +1229,27 @@ $            <command
                 </visibleWhen>
             </command>
         </menuContribution>
+        <!-- menu: Refresh -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerView.popup?after=group.common">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.refresh"
+                     style="push"
+                     tooltip="Refresh">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel" />
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
         <!-- menu: About -->
         <menuContribution
                           allPopups="false"
@@ -1940,6 +1961,10 @@ $            <command
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.DebugHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.debug">
         </handler>        
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.RefreshHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.refresh">
+        </handler>  
     </extension>
 
     <!-- adapters -->
@@ -2200,6 +2225,10 @@ $            <command
         <command
                  id="org.jboss.tools.openshift.ui.command.applicationexplorer.component.debug"
                  name="Debug">
+        </command>
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.refresh"
+                 name="Refresh">
         </command>
         
     </extension>
