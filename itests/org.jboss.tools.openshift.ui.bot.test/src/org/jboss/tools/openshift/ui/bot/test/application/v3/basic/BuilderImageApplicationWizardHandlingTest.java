@@ -20,7 +20,6 @@ import org.eclipse.reddeer.core.condition.WidgetIsFound;
 import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.api.TableItem;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
@@ -37,7 +36,6 @@ import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
-import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.TreeHasItem;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
@@ -54,7 +52,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection
 @RequiredProject(name="builderimagevalidationproject")
 @RunWith(RedDeerSuite.class)
@@ -194,6 +191,12 @@ public class BuilderImageApplicationWizardHandlingTest extends AbstractTest {
 	private void validateGitRepoURL(String url) {
 		new LabeledText(OpenShiftLabel.TextLabels.GIT_REPO_URL).setText(url);
 		
+		new WaitUntil(new ControlIsEnabled(new NextButton()) {
+			@Override
+			public boolean test() {
+				return !new ControlIsEnabled(new NextButton()).test();
+			}
+		});
 		assertFalse("Next button should be disabled if git repo URL is invalid",
 				new NextButton().isEnabled());
 		assertFalse("Finish button should be disabled if git repo URL is invalid",
