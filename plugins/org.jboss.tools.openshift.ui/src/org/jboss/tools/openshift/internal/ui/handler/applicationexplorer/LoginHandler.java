@@ -52,13 +52,14 @@ public class LoginHandler extends OdoHandler {
 		final LoginModel model = new LoginModel(cluster.getClient().getMasterUrl().toString(), cluster.getOdo());
 		final IWizard loginWizard = new LoginWizard(model);
 		if (WizardUtils.openWizardDialog(loginWizard, shell) == Window.OK) {
-			executeInJob("Login to Cluster", monitor -> execute(model));
+			executeInJob("Login to Cluster", monitor -> execute(model, cluster));
 		}
 	}
 	
-	private static void execute(LoginModel model) {
+	private static void execute(LoginModel model, ApplicationExplorerUIModel cluster) {
 		try {
 			model.getOdo().login(model.getUrl(), model.getUsername(), model.getPassword().toCharArray(), model.getToken());
+			cluster.refresh();
 		} catch (IOException e) {
 			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(), "Login", "Can't login error message:" + e.getLocalizedMessage()));
 		}
