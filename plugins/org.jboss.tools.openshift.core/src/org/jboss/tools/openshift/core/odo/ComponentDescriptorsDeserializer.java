@@ -40,7 +40,7 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
   /**
    * 
    */
-  private static final String ITEMS_FIELD = "items";
+  private static final String S2I_COMPONENTS_FIELD = "s2iComponents";
   /**
    * 
    */
@@ -69,7 +69,7 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
   @Override
   public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
     List<ComponentDescriptor> result = new ArrayList<>();
-    JsonNode items = root.get(ITEMS_FIELD);
+    JsonNode items = root.get(S2I_COMPONENTS_FIELD);
     if (items != null) {
       for (Iterator<JsonNode> it = items.iterator(); it.hasNext();) {
         JsonNode item = it.next();
