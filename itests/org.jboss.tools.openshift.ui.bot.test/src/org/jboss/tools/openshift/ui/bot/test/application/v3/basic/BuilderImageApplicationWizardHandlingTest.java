@@ -58,6 +58,7 @@ import org.junit.runner.RunWith;
 public class BuilderImageApplicationWizardHandlingTest extends AbstractTest {
 
 	public static final String BUILDER_IMAGE = "httpd:latest (builder, httpd) - openshift";
+	public static final String INVALID_GIT_URL = "invalid";
 	
 	@InjectRequirement
 	private static OpenShiftConnectionRequirement connectionReq;
@@ -153,7 +154,7 @@ public class BuilderImageApplicationWizardHandlingTest extends AbstractTest {
 		String defaultRef = gitReference.getText();
 		String defaultContextDir = contextDirectory.getText();
 		
-		validateGitRepoURL("invalid");
+		validateGitRepoURL(INVALID_GIT_URL);
 		validateGitRepoURL("");
 		
 		setDefaultValuesAndAssert(defaultRepo, defaultRef, defaultContextDir);
@@ -190,15 +191,11 @@ public class BuilderImageApplicationWizardHandlingTest extends AbstractTest {
 		
 	private void validateGitRepoURL(String url) {
 		new LabeledText(OpenShiftLabel.TextLabels.GIT_REPO_URL).setText(url);
+		NextButton nextButton = new NextButton();
 		
-		new WaitUntil(new ControlIsEnabled(new NextButton()) {
-			@Override
-			public boolean test() {
-				return !new ControlIsEnabled(new NextButton()).test();
-			}
-		});
+		new WaitWhile(new ControlIsEnabled(nextButton));
 		assertFalse("Next button should be disabled if git repo URL is invalid",
-				new NextButton().isEnabled());
+				nextButton.isEnabled());
 		assertFalse("Finish button should be disabled if git repo URL is invalid",
 				new FinishButton().isEnabled());
 	}
