@@ -240,10 +240,10 @@ public class OdoCli implements Odo {
     try {
       if (push) {
         ExecHelper.executeWithTerminal(new File(source), command, "create", componentType + ':' + componentVersion, component,
-                "--project", project, "--app", application, "--now");
+                "--project", project, "--app", application, "--now", "--s2i");
       } else {
         ExecHelper.executeWithTerminal(new File(source), command, "create", componentType + ':' + componentVersion, component,
-                "--project", project, "--app", application);
+                "--project", project, "--app", application, "--s2i");
       }
       UsageStats.getInstance().odoCommand("create", true);
       UsageStats.getInstance().createComponent(componentType, true);
@@ -490,9 +490,9 @@ public class OdoCli implements Odo {
   private void undeployComponent(String project, String application, String context, String component, boolean deleteConfig) throws IOException {
     try {
       if (context != null) {
-          execute(new File(context), command, "delete", "-f", deleteConfig?"-a":"");
+          execute(new File(context), command, "delete", "-f", deleteConfig?"-a":"", "--s2i");
       } else {
-          execute(command, "delete", "-f", "--project", project, "--app", application, component, deleteConfig?"-a":"");
+          execute(command, "delete", "-f", "--project", project, "--app", application, component, deleteConfig?"-a":"", "--s2i");
       }
       UsageStats.getInstance().odoCommand("delete", true);
     } catch (IOException e) {
