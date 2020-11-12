@@ -2,7 +2,7 @@
   "kind": "List",
   "apiVersion": "odo.dev/v1alpha1",
   "metadata": {},
-  "s2iItems": [
+  "s2iComponents": [
   {
     "kind": "Component",
     "apiVersion": "odo.dev/v1alpha1",
