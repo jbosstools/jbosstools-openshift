@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.core.odo;
 public abstract class AbstractComponentType implements ComponentType {
     private String name;
 
-    public AbstractComponentType(String name) {
+    protected AbstractComponentType(String name) {
         this.name = name;
     }
 
