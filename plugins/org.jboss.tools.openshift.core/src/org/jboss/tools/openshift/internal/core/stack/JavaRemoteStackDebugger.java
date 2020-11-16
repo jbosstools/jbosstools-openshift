@@ -32,7 +32,7 @@ public class JavaRemoteStackDebugger implements RemoteStackDebugger {
 
 	@Override
 	public boolean isValid(String stackType, String stackVersion) {
-		return "java".equals(stackType);
+		return stackType.contains("java");
 	}
 
 	@Override

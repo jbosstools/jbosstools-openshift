@@ -10,11 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.wizard.page;
 
+import org.eclipse.reddeer.core.matcher.WithLabelMatcher;
 import org.eclipse.reddeer.core.reference.ReferencedComposite;
 import org.eclipse.reddeer.jface.wizard.WizardPage;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 /**
@@ -46,8 +48,13 @@ public class CreateComponentWizadPage extends WizardPage {
 		return new LabeledText(OpenShiftLabel.TextLabels.ECLIPSE_PROJECT).getText();
 	}
 
-	public void selectComponentType(String componentType) {
-		new LabeledCombo(OpenShiftLabel.TextLabels.COMPONENT_TYPE).setSelection(componentType);
+	public void selectComponentType(String componentType, boolean devfile) {
+		DefaultTree tree = new DefaultTree(new WithLabelMatcher(OpenShiftLabel.TextLabels.COMPONENT_TYPE));
+		if (devfile) {
+		  tree.selectItems(tree.getItem(componentType));
+		} else {
+		  tree.selectItems(tree.getItem(OpenShiftLabel.TextLabels.S2I_NODE, componentType));
+		}
 	}
 
 	public String getSelectedComponentType() {

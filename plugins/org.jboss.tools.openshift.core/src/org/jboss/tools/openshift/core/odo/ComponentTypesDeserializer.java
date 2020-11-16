@@ -17,31 +17,23 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<ComponentType>> {
-    /**
-   * 
-   */
   private static final String NON_HIDDEN_TAGS_FIELD = "nonHiddenTags";
-    /**
-   * 
-   */
+
   private static final String SPEC_FIELD = "spec";
-    /**
-   * 
-   */
-  private static final String NAME_FIELD = "name";
-    /**
-   * 
-   */
-  private static final String METADATA__FIELD = "metadata";
-    /**
-   * 
-   */
-  private static final String ITEMS_FIELD = "s2iItems";
-  
+
+  private static final String S2I_NAME_FIELD = "name";
+
+  private static final String DEVFILE_NAME_FIELD = "Name";
+
+  private static final String METADATA_FIELD = "metadata";
+
+  private static final String S2I_ITEMS_FIELD = "s2iItems";
+
+  private static final String DEVFILE_ITEMS_FIELD = "devfileItems";
+
   public ComponentTypesDeserializer() {
     super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentType.class));
   }
@@ -49,27 +41,33 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
   @Override
   public List<ComponentType> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
     List<ComponentType> result = new ArrayList<>();
-    JsonNode items = root.get(ITEMS_FIELD);
+    result.addAll(parseDevfileItems(root.get(DEVFILE_ITEMS_FIELD)));
+    result.addAll(parseS2iItems(root.get(S2I_ITEMS_FIELD)));
+    return result;
+  }
+
+  private List<ComponentType> parseS2iItems(JsonNode items) {
+    List<ComponentType> result = new ArrayList<>();
     if (items != null) {
-      for (Iterator<JsonNode> it = items.iterator(); it.hasNext();) {
-        JsonNode item = it.next();
-        String name = item.get(METADATA__FIELD).get(NAME_FIELD).asText();
+      for (JsonNode item : items) {
+        String name = item.get(METADATA_FIELD).get(S2I_NAME_FIELD).asText();
         List<String> versions = new ArrayList<>();
         item.get(SPEC_FIELD).get(NON_HIDDEN_TAGS_FIELD).forEach(node -> versions.add(node.textValue()));
-        result.add(new ComponentType() {
-
-          @Override
-          public String getName() {
-            return name;
-          }
-
-          @Override
-          public String[] getVersions() {
-            return versions.toArray(new String[versions.size()]);
-          }
-        });
+        result.add(new S2iComponentType(name, versions));
       }
     }
     return result;
   }
+
+  private List<ComponentType> parseDevfileItems(JsonNode items) {
+    List<ComponentType> result = new ArrayList<>();
+    if (items != null) {
+      for (JsonNode item : items) {
+        String name = item.get(DEVFILE_NAME_FIELD).asText();
+        result.add(new DevfileComponentType(name));
+      }
+    }
+    return result;
+  }
+
 }

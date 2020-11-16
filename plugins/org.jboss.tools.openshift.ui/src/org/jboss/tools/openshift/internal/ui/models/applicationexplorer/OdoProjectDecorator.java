@@ -18,6 +18,7 @@ import org.jboss.tools.openshift.core.odo.Application;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
 import org.jboss.tools.openshift.core.odo.ComponentInfo;
+import org.jboss.tools.openshift.core.odo.ComponentKind;
 import org.jboss.tools.openshift.core.odo.ComponentState;
 import org.jboss.tools.openshift.core.odo.ComponentType;
 import org.jboss.tools.openshift.core.odo.Odo;
@@ -55,7 +56,7 @@ public class OdoProjectDecorator implements Odo {
     getComponents(client, project, application).forEach(component -> {
       try {
         deleteComponent(project, application, component.getPath(), component.getName(),
-            component.getState() != ComponentState.NOT_PUSHED);
+            component.getInfo().getComponentKind());
       } catch (IOException e) {
         exception[0] = e;
       }
@@ -104,8 +105,8 @@ public class OdoProjectDecorator implements Odo {
 
   @Override
   public void createService(String project, String application, String serviceTemplate, String servicePlan,
-      String service) throws IOException {
-    delegate.createService(project, application, serviceTemplate, servicePlan, service);
+      String service, boolean wait) throws IOException {
+    delegate.createService(project, application, serviceTemplate, servicePlan, service, wait);
   }
 
   @Override
@@ -155,9 +156,9 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public ComponentInfo getComponentInfo(OpenShiftClient client, String project, String application, String component)
+  public ComponentInfo getComponentInfo(OpenShiftClient client, String project, String application, String component, String path, ComponentKind kind)
       throws IOException {
-    return delegate.getComponentInfo(client, project, application, component);
+    return delegate.getComponentInfo(client, project, application, component, path, kind);
   }
 
   @Override
@@ -173,15 +174,15 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public void undeployComponent(String project, String application, String context, String component)
+  public void undeployComponent(String project, String application, String context, String component, ComponentKind kind)
       throws IOException {
-    delegate.undeployComponent(project, application, context, component);
+    delegate.undeployComponent(project, application, context, component, kind);
   }
 
   @Override
-  public void deleteComponent(String project, String application, String context, String component, boolean undeploy)
+  public void deleteComponent(String project, String application, String context, String component, ComponentKind kind)
       throws IOException {
-    delegate.deleteComponent(project, application, context, component, undeploy);
+    delegate.deleteComponent(project, application, context, component, kind);
   }
 
   @Override
@@ -227,7 +228,8 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public List<Component> getComponents(OpenShiftClient client, String project, String application) {
+  public List<Component> getComponents(OpenShiftClient client, String project, String application) throws IOException {
+    final IOException[] exceptions = { null };
     List<Component> components = delegate.getComponents(client, project, application);
     model.getComponents().forEach((path, comp) -> {
       if (comp.getProject().equals(project) && comp.getApplication().equals(application)) {
@@ -237,10 +239,17 @@ public class OdoProjectDecorator implements Odo {
           found.get().setState(ComponentState.PUSHED);
           found.get().setPath(path);
         } else {
-          components.add(Component.of(comp.getName(), ComponentState.NOT_PUSHED, path));
+          try {
+            components.add(Component.of(comp.getName(), getComponentInfo(client, project, application, comp.getName(), comp.getPath(), comp.getKind()), ComponentState.NOT_PUSHED, path));
+          } catch (IOException e) {
+            exceptions[0] = e;
+          }
         }
       }
     });
+    if (exceptions[0] != null) {
+      throw exceptions[0];
+    }
     return components;
   }
 

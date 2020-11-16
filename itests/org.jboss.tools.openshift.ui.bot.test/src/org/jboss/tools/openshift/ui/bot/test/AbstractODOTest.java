@@ -50,7 +50,7 @@ public abstract class AbstractODOTest {
 		wizard.finish(TimePeriod.getCustom(2500));
 	}
 	
-	protected static void createComponent(String projectName) {
+	protected static void createComponent(String projectName, String javaComponentType, boolean devfile) {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();
 		OpenShiftODOProject project = explorer.getOpenShiftODOConnection().getProject(projectName);
@@ -59,8 +59,10 @@ public abstract class AbstractODOTest {
 		CreateComponentWizadPage componentWizardPage = new CreateComponentWizadPage(componentWizard);
 		componentWizardPage.setComponentName(eclipseProject);
 		componentWizardPage.setEclipseProject(eclipseProject);
-		componentWizardPage.selectComponentType("java");
-		componentWizardPage.selectComponentVersion("latest");
+		componentWizardPage.selectComponentType(javaComponentType, devfile);
+		if (!devfile) {
+	    componentWizardPage.selectComponentVersion("latest");
+		}
 		componentWizardPage.setApplication("myapp");
 		componentWizard.finish(TimePeriod.VERY_LONG);
 		

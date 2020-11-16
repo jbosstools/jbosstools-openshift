@@ -10,10 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
+import java.text.DecimalFormat;
+
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.conversion.text.NumberToStringConverter;
+import org.eclipse.core.databinding.conversion.text.StringToNumberConverter;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
@@ -40,6 +46,26 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
  *
  */
 public class CreateURLWizardPage extends AbstractOpenShiftWizardPage {
+  
+  private static class PortValidator implements IValidator<String> {
+
+    @Override
+    public IStatus validate(String value) {
+      if (value == null || value.isBlank()) {
+        return ValidationStatus.cancel("Port cannot be empty");
+      }
+      try {
+        Integer port = Integer.parseInt(value);
+        if (port < 1024 || port > 65535) {
+          return ValidationStatus.cancel("Port must be in the 1024-65535 range");
+        }
+      } catch (NumberFormatException e) {
+        return ValidationStatus.cancel("Port must be a positive integer");
+      }
+      return ValidationStatus.ok();
+    }
+    
+  }
 
 	private CreateURLModel model;
 
@@ -69,21 +95,38 @@ public class CreateURLWizardPage extends AbstractOpenShiftWizardPage {
 		Label portLabel = new Label(parent, SWT.NONE);
 		portLabel.setText("Port:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(portLabel);
-		Combo portCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(portCombo);
-		ComboViewer portComboViewer = new ComboViewer(portCombo);
-		portComboViewer.setContentProvider(ArrayContentProvider.getInstance());
-		portComboViewer.setInput(model.getPorts());
-		Binding portBinding = ValueBindingBuilder
-				.bind(ViewerProperties.singleSelection().observe(portComboViewer))
-				.validatingAfterGet(new IsNotNullValidator(
-						ValidationStatus.cancel("You have to select a port.")))
-				.to(BeanProperties.value(CreateURLModel.PROPERTY_PORT)
-						.observe(model))
-				.in(dbc);
-		ControlDecorationSupport.create(portBinding, SWT.LEFT | SWT.TOP, null,
-				new RequiredControlDecorationUpdater());
+		
+		if (model.getPorts().isEmpty()) {
+		  Text portText = new Text(parent, SWT.SINGLE);
+      GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+      .applyTo(portText);
+      Binding portBinding = ValueBindingBuilder
+          .bind(WidgetProperties.text(SWT.Modify).observe(portText))
+          .validatingAfterGet(new PortValidator())
+          .to(BeanProperties.value(CreateURLModel.PROPERTY_PORT)
+              .observe(model))
+          .converting(NumberToStringConverter.fromInteger(new DecimalFormat("#"), true))
+          .in(dbc);
+      ControlDecorationSupport.create(portBinding, SWT.LEFT | SWT.TOP, null,
+          new RequiredControlDecorationUpdater());
+		  
+		} else {
+	    Combo portCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
+	    GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+	        .applyTo(portCombo);
+	    ComboViewer portComboViewer = new ComboViewer(portCombo);
+	    portComboViewer.setContentProvider(ArrayContentProvider.getInstance());
+	    portComboViewer.setInput(model.getPorts());
+	    Binding portBinding = ValueBindingBuilder
+	        .bind(ViewerProperties.singleSelection().observe(portComboViewer))
+	        .validatingAfterGet(new IsNotNullValidator(
+	            ValidationStatus.cancel("You have to select a port.")))
+	        .to(BeanProperties.value(CreateURLModel.PROPERTY_PORT)
+	            .observe(model))
+	        .in(dbc);
+	    ControlDecorationSupport.create(portBinding, SWT.LEFT | SWT.TOP, null,
+	        new RequiredControlDecorationUpdater());
+		}
 		
 		Label secureLabel = new Label(parent, SWT.NONE);
 		secureLabel.setText("Secure:");

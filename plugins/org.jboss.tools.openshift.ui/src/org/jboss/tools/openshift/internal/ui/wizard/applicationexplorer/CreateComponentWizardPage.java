@@ -17,6 +17,7 @@ import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
@@ -27,6 +28,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -36,8 +38,10 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tree;
 import org.jboss.tools.common.ui.databinding.MandatoryStringValidator;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.core.odo.ComponentKind;
 import org.jboss.tools.openshift.core.odo.ComponentType;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
@@ -50,6 +54,43 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
  *
  */
 public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
+  
+  private static class ComponentTypeValidator extends IsNotNullValidator {
+
+    /**
+     * @param invalidStatus
+     */
+    public ComponentTypeValidator(IStatus invalidStatus) {
+      super(invalidStatus);
+    }
+
+    @Override
+    public IStatus validate(Object value) {
+      IStatus status = super.validate(value);
+      if (status.isOK() && value instanceof String) {
+        status = super.validate(null);
+      }
+      return status;
+    }
+  }
+  
+  private class ComponentVersionValidator extends IsNotNullValidator {
+
+    /**
+     * @param invalidStatus
+     */
+    public ComponentVersionValidator(IStatus invalidStatus) {
+      super(invalidStatus);
+    }
+
+    @Override
+    public IStatus validate(Object value) {
+      if (model.getSelectedComponentType().getKind() == ComponentKind.S2I) {
+        return super.validate(value);
+      }
+      return ValidationStatus.ok();
+    }
+  }
 
 	private CreateComponentModel model;
 
@@ -86,22 +127,22 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 		Label componentTypesLabel = new Label(parent, SWT.NONE);
 		componentTypesLabel.setText("Component type:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(componentTypesLabel);
-		Combo componentTypesCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(componentTypesCombo);
-		ComboViewer componentTypesComboViewer = new ComboViewer(componentTypesCombo);
-		componentTypesComboViewer.setContentProvider(ArrayContentProvider.getInstance());
-		componentTypesComboViewer.setLabelProvider(new ComponentTypeColumLabelProvider());
-		componentTypesComboViewer.setInput(model.getComponentTypes());
-		Binding componentTypesBinding = ValueBindingBuilder
-				.bind(ViewerProperties.singleSelection().observe(componentTypesComboViewer))
-				.validatingAfterGet(new IsNotNullValidator(
-						ValidationStatus.cancel("You have to select a component type.")))
-				.to(BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_TYPE, ComponentType.class)
-						.observe(model))
-				.in(dbc);
-		ControlDecorationSupport.create(componentTypesBinding, SWT.LEFT | SWT.TOP, null,
-				new RequiredControlDecorationUpdater());
+		Tree componentTypesTree = new Tree(parent, SWT.SINGLE);
+    GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+    .applyTo(componentTypesTree);
+		TreeViewer componentTypesTreeViewer = new TreeViewer(componentTypesTree);
+    componentTypesTreeViewer.setContentProvider(new ComponentTypeContentProvider(model.getComponentTypes()));
+		componentTypesTreeViewer.setLabelProvider(new ComponentTypeColumLabelProvider());
+		componentTypesTreeViewer.setInput(model.getComponentTypes());
+    Binding componentTypesBinding = ValueBindingBuilder
+        .bind(ViewerProperties.singleSelection().observe(componentTypesTreeViewer))
+        .validatingAfterGet(new ComponentTypeValidator(
+            ValidationStatus.cancel("You have to select a component type.")))
+        .to(BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_TYPE, ComponentType.class)
+            .observe(model))
+        .in(dbc);
+    ControlDecorationSupport.create(componentTypesBinding, SWT.LEFT | SWT.TOP, null,
+        new RequiredControlDecorationUpdater());
 
 		IObservableValue<ComponentType> componentTypeObservable = BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_TYPE, ComponentType.class).observe(model);
 		Label componentVersionsLabel = new Label(parent, SWT.NONE);
@@ -115,7 +156,7 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 		componentVersionsComboViewer.setInput(PojoProperties.list("versions").observeDetail(componentTypeObservable));
 		Binding componentVersionsBinding = ValueBindingBuilder
 				.bind(ViewerProperties.singleSelection().observe(componentVersionsComboViewer))
-				.validatingAfterGet(new IsNotNullValidator(
+				.validatingAfterGet(new ComponentVersionValidator(
 						ValidationStatus.cancel("You have to select a component version.")))
 				.to(BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_VERSION).observe(model))
 				.in(dbc);

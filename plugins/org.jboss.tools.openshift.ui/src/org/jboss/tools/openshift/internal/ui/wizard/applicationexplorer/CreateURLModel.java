@@ -24,7 +24,7 @@ public class CreateURLModel extends ComponentModel {
 	public static final String PROPERTY_SECURE = "secure";
 
 	private String urlName;
-	private int port;
+	private int port = 1024;
 	private List<Integer> ports;
 	private boolean secure;
 

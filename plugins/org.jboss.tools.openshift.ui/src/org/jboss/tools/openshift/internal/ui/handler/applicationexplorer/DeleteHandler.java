@@ -95,7 +95,7 @@ public class DeleteHandler extends OdoHandler {
 				        component.getParent().getWrapped().getName(),
 				        component.getWrapped().getPath(),
 				        component.getWrapped().getName(),
-				        component.getWrapped().getState() != ComponentState.NOT_PUSHED);
+				        component.getWrapped().getInfo().getComponentKind());
 				if (component.getWrapped().hasContext()) {
 					component.getRoot().removeContext(component.getWrapped().getPath());
 				}

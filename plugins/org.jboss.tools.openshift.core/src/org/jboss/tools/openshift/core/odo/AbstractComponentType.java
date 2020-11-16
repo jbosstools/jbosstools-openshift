@@ -8,24 +8,23 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
+package org.jboss.tools.openshift.core.odo;
 
-import java.util.Objects;
+public abstract class AbstractComponentType implements ComponentType {
+    private String name;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.jboss.tools.openshift.core.odo.ComponentType;
+    public AbstractComponentType(String name) {
+        this.name = name;
+    }
 
-/**
- * @author Red Hat Developers
- *
- */
-public class ComponentTypeColumLabelProvider extends ColumnLabelProvider {
+    @Override
+    public String getName() {
+        return this.name;
+    }
 
-	@Override
-	public String getText(Object element) {
-	  if (element instanceof ComponentType) {
-	    return ((ComponentType)element).getName();
-	  }
-	  return Objects.toString(element);
-	}
+    @Override
+    public String toString() {
+        return getName();
+    }
+
 }
