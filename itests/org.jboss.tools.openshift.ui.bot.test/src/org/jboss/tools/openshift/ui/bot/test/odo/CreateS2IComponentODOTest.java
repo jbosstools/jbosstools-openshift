@@ -43,7 +43,7 @@ public class CreateS2IComponentODOTest extends AbstractODOTest {
 	
 	@Test
 	public void testCreateComponent() {
-		createComponent(projectReq.getProjectName(), "java", true);
+		createComponent(projectReq.getProjectName(), "java", false);
 	}
 
 }
