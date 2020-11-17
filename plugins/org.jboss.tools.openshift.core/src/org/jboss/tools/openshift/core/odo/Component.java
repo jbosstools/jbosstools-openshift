@@ -22,6 +22,8 @@ public interface Component {
   String getPath();
 
   void setPath(String path);
+  
+  ComponentInfo getInfo();
 
   default boolean hasContext() {
     return getPath() != null;
@@ -29,11 +31,13 @@ public interface Component {
 
   class ComponentImpl implements Component {
     private String name;
+    private ComponentInfo info;
     private ComponentState state;
     private String path;
 
-    private ComponentImpl(String name, ComponentState state, String path) {
+    private ComponentImpl(String name, ComponentInfo info, ComponentState state, String path) {
       this.name = name;
+      this.info = info;
       this.state = state;
       this.path = path;
     }
@@ -63,6 +67,10 @@ public interface Component {
       this.path = path;
     }
 
+    public ComponentInfo getInfo() {
+      return info;
+    }
+
     @Override
     public int hashCode() {
       return Objects.hash(name);
@@ -81,15 +89,15 @@ public interface Component {
     }
   }
 
-  static Component of(String name) {
-    return of(name, ComponentState.NO_CONTEXT);
+  static Component of(String name, ComponentInfo info) {
+    return of(name, info, ComponentState.NO_CONTEXT);
   }
 
-  static Component of(String name, ComponentState state) {
-    return of(name, state, null);
+  static Component of(String name, ComponentInfo info, ComponentState state) {
+    return of(name, info, state, null);
   }
 
-  static Component of(String name, ComponentState state, String path) {
-    return new ComponentImpl(name, state, path);
+  static Component of(String name, ComponentInfo info, ComponentState state, String path) {
+    return new ComponentImpl(name, info, state, path);
   }
 }

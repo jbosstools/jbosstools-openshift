@@ -12,5 +12,5 @@ package org.jboss.tools.openshift.core.odo;
 
 public interface ComponentType {
   String getName();
-  String[] getVersions();
+  ComponentKind getKind();
 }

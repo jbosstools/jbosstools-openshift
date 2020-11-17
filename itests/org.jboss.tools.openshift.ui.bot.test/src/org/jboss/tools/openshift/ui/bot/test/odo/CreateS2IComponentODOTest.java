@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 @RequiredODOConnection
 @CleanODOConnection
 @RequiredODOProject
-public class CreateComponentODOTest extends AbstractODOTest {
+public class CreateS2IComponentODOTest extends AbstractODOTest {
 	
 
 	@InjectRequirement
@@ -43,7 +43,7 @@ public class CreateComponentODOTest extends AbstractODOTest {
 	
 	@Test
 	public void testCreateComponent() {
-		createComponent(projectReq.getProjectName());
+		createComponent(projectReq.getProjectName(), "java", false);
 	}
 
 }

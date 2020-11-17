@@ -25,41 +25,24 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  *
  */
 public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<List<ComponentDescriptor>> {
-  /**
-   * 
-   */
   private static final String APP_FIELD = "app";
-  /**
-   * 
-   */
+
   private static final String NAME_FIELD = "name";
-  /**
-   * 
-   */
+
   private static final String CONTEXT_FIELD = "context";
-  /**
-   * 
-   */
+
   private static final String S2I_COMPONENTS_FIELD = "s2iComponents";
-  /**
-   * 
-   */
+  
+  private static final String DEVFILE_COMPONENTS_FIELD = "devfileComponents";
+
   private static final String NAMESPACE_FIELD = "namespace";
-  /**
-   * 
-   */
+
   private static final String PORTS_FIELD = "ports";
-  /**
-   * 
-   */
+
   private static final String SPEC_FIELD = "spec";
-  /**
-   * 
-   */
+
   private static final String STATUS_FIELD = "status";
-  /**
-   * 
-   */
+
   private static final String METADATA_FIELD = "metadata";
 
   public ComponentDescriptorsDeserializer() {
@@ -69,15 +52,19 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
   @Override
   public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
     List<ComponentDescriptor> result = new ArrayList<>();
-    JsonNode items = root.get(S2I_COMPONENTS_FIELD);
+    parseComponents(result, root.get(DEVFILE_COMPONENTS_FIELD), ComponentKind.DEVFILE);
+    parseComponents(result, root.get(S2I_COMPONENTS_FIELD), ComponentKind.S2I);
+    return result;
+  }
+
+  private void parseComponents(List<ComponentDescriptor> result, JsonNode items, ComponentKind kind) {
     if (items != null) {
       for (Iterator<JsonNode> it = items.iterator(); it.hasNext();) {
         JsonNode item = it.next();
         result.add(new ComponentDescriptor(getProject(item), getApplication(item), getPath(item), getName(item),
-            getPorts(item)));
+            kind, getPorts(item)));
       }
     }
-    return result;
   }
 
   private List<Integer> getPorts(JsonNode item) {

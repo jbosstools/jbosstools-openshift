@@ -18,12 +18,14 @@ public class ComponentDescriptor {
   private final String application;
   private final String name;
   private final List<Integer> ports;
+  private final ComponentKind kind;
 
-  ComponentDescriptor(String project, String application, String path, String name, List<Integer> ports) {
+  ComponentDescriptor(String project, String application, String path, String name, ComponentKind kind, List<Integer> ports) {
     this.project = project;
     this.application = application;
     this.path = path;
     this.name = name;
+    this.kind = kind;
     this.ports = ports;
   }
 
@@ -41,6 +43,10 @@ public class ComponentDescriptor {
 
   public String getName() {
     return name;
+  }
+
+  public ComponentKind getKind() {
+    return kind;
   }
 
   public List<Integer> getPorts() {

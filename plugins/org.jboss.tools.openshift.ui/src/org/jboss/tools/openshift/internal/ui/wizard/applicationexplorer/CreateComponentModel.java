@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.jboss.tools.openshift.core.odo.ComponentType;
 import org.jboss.tools.openshift.core.odo.Odo;
+import org.jboss.tools.openshift.core.odo.S2iComponentType;
 
 /**
  * @author Red Hat Developers
@@ -75,8 +76,8 @@ public class CreateComponentModel extends ComponentModel {
 	 */
 	public void setSelectedComponentType(ComponentType selectedComponentType) {
 		firePropertyChange(PROPERTY_SELECTED_COMPONENT_TYPE, this.selectedComponentType, this.selectedComponentType = selectedComponentType);
-		if (selectedComponentType.getVersions().length > 0) {
-			setSelectedComponentVersion(selectedComponentType.getVersions()[0]);
+		if (selectedComponentType instanceof S2iComponentType && !((S2iComponentType)selectedComponentType).getVersions().isEmpty()) {
+			setSelectedComponentVersion(((S2iComponentType)selectedComponentType).getVersions().get(0));
 		}
 	}
 

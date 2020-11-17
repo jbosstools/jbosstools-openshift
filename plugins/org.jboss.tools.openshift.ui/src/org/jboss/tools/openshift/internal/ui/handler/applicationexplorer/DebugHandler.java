@@ -48,7 +48,8 @@ public class DebugHandler extends ComponentHandler {
 			OpenShiftClient client = component.getRoot().getClient();
 			String project = component.getParent().getParent().getWrapped().getMetadata().getName();
 			String application = component.getParent().getWrapped().getName();
-			ComponentInfo info = odo.getComponentInfo(client, project, application, component.getWrapped().getName());
+			ComponentInfo info = odo.getComponentInfo(client, project, application, component.getWrapped().getName(),
+			    component.getWrapped().getPath(), component.getWrapped().getInfo().getComponentKind());
 			RemoteStackDebugger remoteDebugger = RemoteStackProviderRegistry.getInstance().findBytype(info.getComponentTypeName(), info.getComponentTypeVersion());
 			if (remoteDebugger != null) {
 				int port = allocateLocalPort();

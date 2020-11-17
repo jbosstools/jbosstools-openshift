@@ -16,7 +16,8 @@ import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionWizardHandl
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.CreateNewConnectionTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.OpenNewConnectionWizardTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.RemoveConnectionTest;
-import org.jboss.tools.openshift.ui.bot.test.odo.CreateComponentODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.CreateDevfileComponentODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.CreateS2IComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.LoginODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.ProjectManagementODOTest;
 import org.jboss.tools.openshift.ui.bot.test.project.CreateNewProjectTest;
@@ -35,7 +36,8 @@ import org.junit.runners.Suite.SuiteClasses;
 
 	LoginODOTest.class,
 	ProjectManagementODOTest.class, 
-	CreateComponentODOTest.class,
+	CreateS2IComponentODOTest.class,
+	CreateDevfileComponentODOTest.class,
 	
 	OpenNewConnectionWizardTest.class, 
 	CreateNewConnectionTest.class, 

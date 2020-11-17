@@ -333,6 +333,7 @@ public class OpenShiftLabel {
 		public static final String PUSH_AFTER_CREATE = "Push after create:";
 		public static final String URL = "URL:";
 		public static final String TOKEN_ODO = "Token:";
+		public static final String S2I_NODE = "S2I";
 	}
 	
 	public static class JobsLabels {			

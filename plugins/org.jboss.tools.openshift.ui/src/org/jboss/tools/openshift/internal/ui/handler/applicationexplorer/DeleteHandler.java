@@ -18,7 +18,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.core.odo.ComponentState;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -95,7 +94,7 @@ public class DeleteHandler extends OdoHandler {
 				        component.getParent().getWrapped().getName(),
 				        component.getWrapped().getPath(),
 				        component.getWrapped().getName(),
-				        component.getWrapped().getState() != ComponentState.NOT_PUSHED);
+				        component.getWrapped().getInfo().getComponentKind());
 				if (component.getWrapped().hasContext()) {
 					component.getRoot().removeContext(component.getWrapped().getPath());
 				}

@@ -112,7 +112,7 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 	 */
 	public boolean finish() {
 		try {
-			model.getOdo().createService(model.getProjectName(), model.getApplicationName(), model.getSelectedServiceTemplate().getName(), model.getSelectedServiceTemplate().getPlans().get(0), model.getServiceName());
+			model.getOdo().createService(model.getProjectName(), model.getApplicationName(), model.getSelectedServiceTemplate().getName(), model.getSelectedServiceTemplate().getPlans().get(0), model.getServiceName(), false);
 			return true;
 		} catch (IOException e) {
 			setErrorMessage(e.getLocalizedMessage());

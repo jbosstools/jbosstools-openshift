@@ -18,7 +18,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
@@ -56,9 +55,9 @@ public class CreateComponentHandler extends OdoHandler {
 			        project.getWrapped().getMetadata().getName(),
 			        application == null ? "" : application.getWrapped().getName());
 			final IWizard createComponentWizard = new CreateComponentWizard(model);
-			if (WizardUtils.openWizardDialog(createComponentWizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
+      final Shell parent = HandlerUtil.getActiveShell(event);
+			if (WizardUtils.openWizardDialog(createComponentWizard, parent) == Window.OK) {
 				AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel> element = application==null?project:application;
-				final Shell parent = Display.getDefault().getActiveShell();
 				executeInJob("Creating component", monitor -> execute(parent, model, element));
 			}
 			return Status.OK_STATUS;

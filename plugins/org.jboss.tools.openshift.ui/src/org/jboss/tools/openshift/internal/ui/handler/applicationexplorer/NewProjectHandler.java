@@ -40,8 +40,7 @@ public class NewProjectHandler extends OdoHandler {
 		Shell shell = HandlerUtil.getActiveShell(event);
 		InputDialog dialog = new InputDialog(shell, "New project", "Project name:", null, null);
 		if (dialog.open() == Window.OK) {
-			Shell parent = Display.getDefault().getActiveShell();
-			executeInJob("Create project", monitor -> execute(parent, cluster, dialog.getValue()));
+			executeInJob("Create project", monitor -> execute(shell, cluster, dialog.getValue()));
 		}
 		return null;
 	}

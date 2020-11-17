@@ -12,7 +12,8 @@ package org.jboss.tools.openshift.ui.bot.test;
 
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.openshift.ui.bot.test.odo.ConnectionODOCommandsTests;
-import org.jboss.tools.openshift.ui.bot.test.odo.CreateComponentODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.CreateDevfileComponentODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.CreateS2IComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateServiceODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.LoginODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.ProjectManagementODOTest;
@@ -30,7 +31,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	LoginODOTest.class,
 	ProjectManagementODOTest.class,
 	ConnectionODOCommandsTests.class, 
-	CreateComponentODOTest.class,
+	CreateS2IComponentODOTest.class,
+	CreateDevfileComponentODOTest.class,
 	CreateServiceODOTest.class
 })
 public class OpenShiftODOTests {
