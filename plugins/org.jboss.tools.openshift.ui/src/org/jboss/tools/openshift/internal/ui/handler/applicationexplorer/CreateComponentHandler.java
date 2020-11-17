@@ -56,9 +56,9 @@ public class CreateComponentHandler extends OdoHandler {
 			        project.getWrapped().getMetadata().getName(),
 			        application == null ? "" : application.getWrapped().getName());
 			final IWizard createComponentWizard = new CreateComponentWizard(model);
-			if (WizardUtils.openWizardDialog(createComponentWizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
+      final Shell parent = HandlerUtil.getActiveShell(event);
+			if (WizardUtils.openWizardDialog(createComponentWizard, parent) == Window.OK) {
 				AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel> element = application==null?project:application;
-				final Shell parent = HandlerUtil.getActiveShell(event);
 				executeInJob("Creating component", monitor -> execute(parent, model, element));
 			}
 			return Status.OK_STATUS;

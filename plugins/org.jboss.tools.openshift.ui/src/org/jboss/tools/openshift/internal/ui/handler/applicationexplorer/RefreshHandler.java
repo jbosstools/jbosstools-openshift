@@ -34,7 +34,7 @@ public class RefreshHandler extends OdoHandler {
 		if (cluster == null) {
 			return OpenShiftUIActivator.statusFactory().cancelStatus("No cluster selected"); //$NON-NLS-1$
 		}
-		Shell parent = Display.getDefault().getActiveShell();
+		Shell parent = HandlerUtil.getActiveShell(event);
 		executeInJob("Refresh cluster", monitor -> execute(parent, cluster));
 		return null;
 	}
