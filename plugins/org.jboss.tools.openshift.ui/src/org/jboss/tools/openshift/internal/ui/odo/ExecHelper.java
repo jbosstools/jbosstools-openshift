@@ -16,6 +16,7 @@ import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.cdt.utils.pty.PTY;
 import org.eclipse.cdt.utils.spawner.ProcessFactory;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
 import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
 import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
@@ -135,7 +136,7 @@ public class ExecHelper {
 
 	private static void executeWithTerminalInternal(File workingDirectory, boolean waitForProcessToExit,
 	        String... command) throws IOException {
-		Process p = ProcessFactory.getFactory().exec(command, null, workingDirectory, new PTY(PTY.Mode.TERMINAL));
+		Process p = Platform.OS_WIN32.equals(Platform.getOS())?ProcessFactory.getFactory().exec(command, null, workingDirectory):ProcessFactory.getFactory().exec(command, null, workingDirectory, new PTY(PTY.Mode.TERMINAL));
 		InputStream in = new RedirectedStream(p.getInputStream());
 		InputStream err = new RedirectedStream(p.getErrorStream());
 		OutputStream out = p.getOutputStream();
