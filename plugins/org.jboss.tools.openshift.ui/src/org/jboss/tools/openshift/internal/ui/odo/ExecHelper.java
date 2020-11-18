@@ -14,6 +14,8 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.output.WriterOutputStream;
+import org.eclipse.cdt.utils.pty.PTY;
+import org.eclipse.cdt.utils.spawner.ProcessFactory;
 import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
 import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
 import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -132,8 +135,7 @@ public class ExecHelper {
 
 	private static void executeWithTerminalInternal(File workingDirectory, boolean waitForProcessToExit,
 	        String... command) throws IOException {
-		ProcessBuilder builder = new ProcessBuilder(command).directory(workingDirectory).redirectErrorStream(true);
-		Process p = builder.start();
+		Process p = ProcessFactory.getFactory().exec(command, null, workingDirectory, new PTY(PTY.Mode.TERMINAL));
 		InputStream in = new RedirectedStream(p.getInputStream());
 		InputStream err = new RedirectedStream(p.getErrorStream());
 		OutputStream out = p.getOutputStream();
@@ -148,6 +150,7 @@ public class ExecHelper {
 		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDIN, out);
 		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDOUT, in);
 		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDERR, err);
+		properties.put(ITerminalsConnectorConstants.PROP_ENCODING, StandardCharsets.UTF_8.name());
 		ITerminalService service = TerminalServiceFactory.getService();
 		service.openConsole(properties, null);
 		if (waitForProcessToExit) {
