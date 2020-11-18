@@ -14,7 +14,6 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.output.WriterOutputStream;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
 import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
 import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
@@ -135,22 +134,22 @@ public class ExecHelper {
 	        String... command) throws IOException {
 		ProcessBuilder builder = new ProcessBuilder(command).directory(workingDirectory).redirectErrorStream(true);
 		Process p = builder.start();
-		InputStream in = Platform.OS_WIN32.equals(Platform.getOS())?new RedirectedStream(p.getInputStream()):p.getInputStream();
-		 InputStream err = Platform.OS_WIN32.equals(Platform.getOS())?new RedirectedStream(p.getErrorStream()):p.getErrorStream();
-		 OutputStream out = p.getOutputStream();
-		 Map<String, Object> properties = new HashMap<>();
-		 properties.put(ITerminalsConnectorConstants.PROP_DELEGATE_ID,
+		InputStream in = new RedirectedStream(p.getInputStream());
+		InputStream err = new RedirectedStream(p.getErrorStream());
+		OutputStream out = p.getOutputStream();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put(ITerminalsConnectorConstants.PROP_DELEGATE_ID,
 		 "org.eclipse.tm.terminal.connector.streams.launcher.streams");
-		 properties.put(ITerminalsConnectorConstants.PROP_TERMINAL_CONNECTOR_ID,
+		properties.put(ITerminalsConnectorConstants.PROP_TERMINAL_CONNECTOR_ID,
 		 "org.eclipse.tm.terminal.connector.streams.StreamsConnector");
-		 properties.put(ITerminalsConnectorConstants.PROP_TITLE, String.join(" ", command));
-		 properties.put(ITerminalsConnectorConstants.PROP_LOCAL_ECHO, false);
-		 properties.put(ITerminalsConnectorConstants.PROP_FORCE_NEW, true);
-		 properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDIN, out);
-		 properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDOUT, in);
-		 properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDERR, err);
-		 ITerminalService service = TerminalServiceFactory.getService();
-		 service.openConsole(properties, null);
+		properties.put(ITerminalsConnectorConstants.PROP_TITLE, String.join(" ", command));
+		properties.put(ITerminalsConnectorConstants.PROP_LOCAL_ECHO, false);
+		properties.put(ITerminalsConnectorConstants.PROP_FORCE_NEW, true);
+		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDIN, out);
+		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDOUT, in);
+		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDERR, err);
+		ITerminalService service = TerminalServiceFactory.getService();
+		service.openConsole(properties, null);
 		if (waitForProcessToExit) {
 			try {
 				p.waitFor();
