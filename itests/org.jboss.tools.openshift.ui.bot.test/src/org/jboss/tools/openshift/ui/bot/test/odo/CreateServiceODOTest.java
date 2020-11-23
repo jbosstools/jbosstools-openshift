@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.ui.bot.test.odo;
 
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
-import org.eclipse.reddeer.eclipse.condition.ConsoleHasNoChange;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOProjectRequirement;
@@ -21,6 +20,7 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOConnectionRequi
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOProjectRequirement.RequiredODOProject;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOProject;
+import org.jboss.tools.openshift.reddeer.widget.terminal.TerminalHasNoChange;
 import org.jboss.tools.openshift.reddeer.wizard.CreateServiceWizard;
 import org.jboss.tools.openshift.reddeer.wizard.page.CreateServiceWizadPage;
 import org.jboss.tools.openshift.ui.bot.test.AbstractODOTest;
@@ -44,7 +44,7 @@ public class CreateServiceODOTest extends AbstractODOTest {
 	
 	@BeforeClass
 	public static void setupWorkspace() {
-		importLauncherProject();
+		importVertxLauncherProject();
 	}
 	
 	@Test
@@ -60,7 +60,7 @@ public class CreateServiceODOTest extends AbstractODOTest {
 		serviceWizardPage.setApplication("myapp");
 		serviceWizard.finish(TimePeriod.VERY_LONG);
 		
-		new WaitWhile(new ConsoleHasNoChange(), TimePeriod.VERY_LONG);
+		new WaitWhile(new TerminalHasNoChange(), TimePeriod.VERY_LONG);
 	}
 
 }

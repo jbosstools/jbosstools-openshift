@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public interface ComponentInfo {
     ComponentSourceType getSourceType();
     String getComponentTypeName();
@@ -19,6 +22,7 @@ public interface ComponentInfo {
     String getBinaryURL();
     boolean isMigrated();
     ComponentKind getComponentKind();
+    Map<String, String> getEnv();
 
     public class Builder {
         private ComponentSourceType sourceType;
@@ -29,6 +33,7 @@ public interface ComponentInfo {
         private String binaryURL;
         private boolean migrated;
         private ComponentKind kind;
+        private Map<String, String> env = new HashMap<>();
 
         public Builder withSourceType(ComponentSourceType sourceType) {
             this.sourceType = sourceType;
@@ -68,6 +73,16 @@ public interface ComponentInfo {
         public Builder withComponentKind(ComponentKind kind) {
             this.kind = kind;
             return this;
+        }
+        
+        public Builder withEnv(Map<String, String> env) {
+          this.env = env;
+          return this;
+        }
+        
+        public Builder addEnv(String key, String val) {
+          env.put(key, val);
+          return this;
         }
 
         public ComponentInfo build() {
@@ -110,6 +125,11 @@ public interface ComponentInfo {
                 @Override
                 public ComponentKind getComponentKind() {
                   return kind;
+                }
+
+                @Override
+                public Map<String, String> getEnv() {
+                  return env;
                 }
             };
         }

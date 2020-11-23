@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IContainer;
@@ -54,7 +55,7 @@ public class DebugHandler extends ComponentHandler {
 			if (remoteDebugger != null) {
 				int port = allocateLocalPort();
 				executeInJob("Debug", monitor -> startDebug(odo, project, application, component, port));
-				executeInJob("Attach debugger", monitor -> createAndLaunchConfig(component.getWrapped().getPath(), info.getComponentTypeName(), info.getComponentTypeVersion(), port, remoteDebugger, monitor, shell));
+				executeInJob("Attach debugger", monitor -> createAndLaunchConfig(component.getWrapped().getPath(), info.getComponentTypeName(), info.getComponentTypeVersion(), info.getEnv(), port, remoteDebugger, monitor, shell));
 			} else {
 				MessageDialog.openError(shell, "Debug", "Debugging is not supported for this type of component");
 			}
@@ -74,13 +75,13 @@ public class DebugHandler extends ComponentHandler {
 	 * @param shell the shell to use for UI
 	 * @throws CoreException 
 	 */
-	private void createAndLaunchConfig(String path, String stackType, String stackVersion, int port, RemoteStackDebugger remoteDebugger, IProgressMonitor monitor, Shell shell) {
+	private void createAndLaunchConfig(String path, String stackType, String stackVersion, Map<String, String> env, int port, RemoteStackDebugger remoteDebugger, IProgressMonitor monitor, Shell shell) {
 		try {
 			waitForPortAvailable(port, monitor);
 			IPath projectPath = new Path(path);
 			IContainer project = ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(projectPath);
 			if (project instanceof IProject) {
-				remoteDebugger.startRemoteDebugger((IProject) project, stackType, stackVersion, port, monitor);
+				remoteDebugger.startRemoteDebugger((IProject) project, stackType, stackVersion, port, env, monitor);
 			}
 		} catch (CoreException e) {
 			shell.getDisplay().asyncExec(() -> MessageDialog.openError(shell, "Debug", "Error while connecting the debugger"));

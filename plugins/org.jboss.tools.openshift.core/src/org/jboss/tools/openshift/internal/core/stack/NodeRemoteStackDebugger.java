@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.core.stack;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -40,7 +41,7 @@ public class NodeRemoteStackDebugger implements RemoteStackDebugger {
 	}
 
 	@Override
-	public void startRemoteDebugger(IProject project, String stackType, String stackVersion, int port, IProgressMonitor monitor) throws CoreException {
+	public void startRemoteDebugger(IProject project, String stackType, String stackVersion, int port, Map<String, String> env, IProgressMonitor monitor) throws CoreException {
 		try {
 			String name = "OpenShift remote (Node) " + project.getName();
 			ILaunchConfigurationType launchConfigurationType = DebugPlugin.getDefault().getLaunchManager()
@@ -49,18 +50,18 @@ public class NodeRemoteStackDebugger implements RemoteStackDebugger {
 			launchConfiguration.setAttribute("port", port); //$NON-NLS-1$
 			launchConfiguration.setAttribute("address", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
 			launchConfiguration.setAttribute(DSPPlugin.ATTR_CUSTOM_LAUNCH_PARAMS, true);
-			launchConfiguration.setAttribute(DSPPlugin.ATTR_DSP_PARAM, getAdditionJSONSettings(project));
+			launchConfiguration.setAttribute(DSPPlugin.ATTR_DSP_PARAM, getAdditionJSONSettings(project, env));
 			launchConfiguration.launch("debug", monitor);
 		} catch (IOException e) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(e));
 		}
 	}
 	
-	private String getAdditionJSONSettings(IProject project) throws IOException {
+	private String getAdditionJSONSettings(IProject project, Map<String, String> env) throws IOException {
 		try (Writer writer = new StringWriter(); JsonWriter jsonWriter = new JsonWriter(writer)) {
 			jsonWriter.beginObject();
 			jsonWriter.name("localRoot").value(project.getLocation().toOSString());
-			jsonWriter.name("remoteRoot").value("/opt/app-root/src");
+			jsonWriter.name("remoteRoot").value(env.getOrDefault("PROJECTS_ROOT", "/opt/app-root/src"));
 			jsonWriter.endObject().flush();
 			return writer.toString();
 		}
