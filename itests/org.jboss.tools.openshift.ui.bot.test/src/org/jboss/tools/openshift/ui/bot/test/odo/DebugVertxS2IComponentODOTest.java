@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.ui.bot.test.odo;
 import java.io.IOException;
 import java.util.Random;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
@@ -47,16 +46,13 @@ import org.junit.runner.RunWith;
 @CleanODOConnection
 @RequiredODOProject
 public class DebugVertxS2IComponentODOTest extends AbstractODOTest {
-  
-  /**
-   * 
-   */
   private static final String APP_SOURCE = "HttpApplication.java";
 
   private static final String ECLIPSE_PROJECT = "vertxproject" + new Random().nextInt();
   
   private static final int BREAKPOINT_LINE = 41;
 	
+  private static final String APPLICATION_NAME = "myapp";
 
 	@InjectRequirement
 	private static OpenShiftODOProjectRequirement projectReq;
@@ -66,11 +62,11 @@ public class DebugVertxS2IComponentODOTest extends AbstractODOTest {
 	public static void setupWorkspace() {
 		importLauncherProject(ECLIPSE_PROJECT, "vert.x community");
     createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "java", false);
-    createURL(projectReq.getProjectName(), "myapp", ECLIPSE_PROJECT, "url1", 8080, false);
+    createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080, false);
 	}
 	
 	@Test
-	public void checkBreakpointReached() throws CoreException, IOException {
+	public void checkBreakpointReached() throws IOException {
     ProjectExplorer pe = new ProjectExplorer();
     pe.open();
     pe.getProject(ECLIPSE_PROJECT).getProjectItem("src/main/java", "io.openshift.example", APP_SOURCE).open();
@@ -82,9 +78,9 @@ public class DebugVertxS2IComponentODOTest extends AbstractODOTest {
     
     OpenShiftApplicationExplorerView view = new OpenShiftApplicationExplorerView();
     view.activate();
-    view.getOpenShiftODOConnection().getProject(projectReq.getProjectName()).getApplication("myapp").getComponent(ECLIPSE_PROJECT).debug();
+    view.getOpenShiftODOConnection().getProject(projectReq.getProjectName()).getApplication(APPLICATION_NAME).getComponent(ECLIPSE_PROJECT).debug();
     
-    AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), "myapp", ECLIPSE_PROJECT, "/api/greeting");
+    AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "/api/greeting");
 
     try {
       new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE), TimePeriod.LONG);

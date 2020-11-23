@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.ui.bot.test.odo;
 import java.io.IOException;
 import java.util.Random;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
@@ -69,7 +68,7 @@ public class DebugVertxDevfileComponentODOTest extends AbstractODOTest {
 	}
 	
 	@Test
-	public void checkBreakpointReached() throws CoreException, IOException {
+	public void checkBreakpointReached() throws IOException {
     ProjectExplorer pe = new ProjectExplorer();
     pe.open();
     pe.getProject(ECLIPSE_PROJECT).getProjectItem("src/main/java", "io.openshift.example", APP_SOURCE).open();

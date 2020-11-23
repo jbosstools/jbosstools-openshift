@@ -34,8 +34,7 @@ public abstract class AbstractTextCanvas extends AbstractControl<org.eclipse.tm.
    */
   @Override
   public String getText() {
-      String text = TextCanvasHandler.getInstance().getText(swtWidget);
-      return text;
+      return TextCanvasHandler.getInstance().getText(swtWidget);
   }
 
 

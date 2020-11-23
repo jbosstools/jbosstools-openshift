@@ -29,10 +29,6 @@ import org.eclipse.tm.internal.terminal.textcanvas.TextCanvas;
  *
  */
 public class TerminalView extends WorkbenchView {
-
-  private static final String TERMINATE = "Terminate";
-  private static final String CLEAR_CONSOLE = "Clear Console";
-  
   /**
    * Constructs the view with "Console".
    */
@@ -107,7 +103,7 @@ public class TerminalView extends WorkbenchView {
       WidgetIsFound widgetIsFound = new WidgetIsFound(org.eclipse.swt.custom.StyledText.class, cTabItem.getControl());
       widgetIsFound.test();
       org.eclipse.swt.widgets.Widget swtWidget = widgetIsFound.getResult();
-      return (swtWidget == null) ? false : terminalText.equals(
+      return swtWidget != null && terminalText.equals(
           TextCanvasHandler.getInstance().getText((TextCanvas)swtWidget));
     }
 
@@ -137,6 +133,7 @@ public class TerminalView extends WorkbenchView {
    * 
    * @return registered control
    */
+  @Override
   protected Control getRegisteredControl() {
     activate();
     WidgetIsFound widgetIsFound = new WidgetIsFound(TextCanvas.class, cTabItem.getControl());
