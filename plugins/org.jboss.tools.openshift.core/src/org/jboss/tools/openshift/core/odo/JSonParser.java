@@ -69,13 +69,12 @@ public class JSonParser {
                 builder.withSourceType(ComponentSourceType.LOCAL).withComponentTypeName(componentTypeName);
             }
             if (root.get(SPEC_FIELD).has(ENV_FIELD)) {
-              JsonNode env = root.get(SPEC_FIELD).get(ENV_FIELD);
-              for(JsonNode elt : env) {
-                if (elt.has(NAME_FIELD) && elt.has(VALUE_FIELD)) {
-                  builder.addEnv(elt.get(NAME_FIELD).asText(), elt.get(VALUE_FIELD).asText());
+                JsonNode env = root.get(SPEC_FIELD).get(ENV_FIELD);
+                for(JsonNode elt : env) {
+                    if (elt.has(NAME_FIELD) && elt.has(VALUE_FIELD)) {
+                        builder.addEnv(elt.get(NAME_FIELD).asText(), elt.get(VALUE_FIELD).asText());
+                    }
                 }
-              }
-              
             }
         }
         return builder.build();

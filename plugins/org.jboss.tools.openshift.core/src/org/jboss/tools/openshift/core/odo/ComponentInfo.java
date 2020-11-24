@@ -76,13 +76,13 @@ public interface ComponentInfo {
         }
         
         public Builder withEnv(Map<String, String> env) {
-          this.env = env;
-          return this;
+            this.env = env;
+            return this;
         }
         
         public Builder addEnv(String key, String val) {
-          env.put(key, val);
-          return this;
+            env.put(key, val);
+            return this;
         }
 
         public ComponentInfo build() {
@@ -124,12 +124,12 @@ public interface ComponentInfo {
 
                 @Override
                 public ComponentKind getComponentKind() {
-                  return kind;
+                    return kind;
                 }
 
                 @Override
                 public Map<String, String> getEnv() {
-                  return env;
+                    return env;
                 }
             };
         }

@@ -54,85 +54,83 @@ public abstract class AbstractODOTest {
 	}
 	
 	public static void triggerDebugSession(String eclipseProjectName, String project, String application, String component, String urlSuffix) throws IOException {
-   String path = ResourcesPlugin.getWorkspace().getRoot().getProject(eclipseProjectName).getLocation().toOSString();
-   List<URL> urls = OdoCli.get().listURLs(project, application, path, component);
-   java.net.URL url = new java.net.URL("http://" + urls.get(0).getHost() + urlSuffix);
-    new Thread(new Runnable() {
-      public void run() {
-        try {
-          HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-          connection.connect();
-          connection.getResponseCode();
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    }).start();
-  }
+		String path = ResourcesPlugin.getWorkspace().getRoot().getProject(eclipseProjectName).getLocation().toOSString();
+		List<URL> urls = OdoCli.get().listURLs(project, application, path, component);
+		java.net.URL url = new java.net.URL("http://" + urls.get(0).getHost() + urlSuffix);
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+					connection.connect();
+					connection.getResponseCode();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	}
 
-  protected static void importVertxLauncherProject() {
-	  importLauncherProject(eclipseProject, "vert.x community");
+	protected static void importVertxLauncherProject() {
+		importLauncherProject(eclipseProject, "vert.x community");
 	}
 	
 	public static void importLauncherProject(String projectName, String stack) {
-    NewLauncherProjectWizard wizard = new NewLauncherProjectWizard(); 
-    wizard.openWizardFromShellMenu();
-    
-    NewLauncherProjectWizardPage wizardPage = new NewLauncherProjectWizardPage(wizard);
-    wizardPage.setTargetMission("rest-http");
-    wizardPage.setTargetRuntime(stack);
-    wizardPage.setProjectName(projectName);
-    wizardPage.toggleUseDefaultLocationCheckBox(true);
-    
-    wizard.finish(TimePeriod.getCustom(2500));
-	  
+		NewLauncherProjectWizard wizard = new NewLauncherProjectWizard(); 
+		wizard.openWizardFromShellMenu();
+		
+		NewLauncherProjectWizardPage wizardPage = new NewLauncherProjectWizardPage(wizard);
+		wizardPage.setTargetMission("rest-http");
+		wizardPage.setTargetRuntime(stack);
+		wizardPage.setProjectName(projectName);
+		wizardPage.toggleUseDefaultLocationCheckBox(true);
+		
+		wizard.finish(TimePeriod.getCustom(2500));
+		
 	}
 	
 	protected static void createComponent(String projectName, String componentType, boolean devfile) {
-	  createComponent(eclipseProject, projectName, componentType, devfile);
+		createComponent(eclipseProject, projectName, componentType, devfile);
 	}
 	
-	 public static void createComponent(String eclipseProjectName, String projectName, String componentType, boolean devfile) {
-	    OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
-	    explorer.open();
-	    OpenShiftODOProject project = explorer.getOpenShiftODOConnection().getProject(projectName);
-	    project.openCreateComponentWizard();
-	    CreateComponentWizard componentWizard = new CreateComponentWizard();
-	    CreateComponentWizadPage componentWizardPage = new CreateComponentWizadPage(componentWizard);
-	    componentWizardPage.setComponentName(eclipseProjectName);
-	    componentWizardPage.setEclipseProject(eclipseProjectName);
-	    componentWizardPage.selectComponentType(componentType, devfile);
-	    if (!devfile) {
-	      componentWizardPage.selectComponentVersion("latest");
-	    }
-	    componentWizardPage.setApplication("myapp");
-	    componentWizard.finish(TimePeriod.getCustom(600L)); //Maven builds may take more than 5mn
-	    
-	    new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
-	    new WaitWhile(new TerminalHasNoChange(), TimePeriod.VERY_LONG);
-	  }
+	public static void createComponent(String eclipseProjectName, String projectName, String componentType, boolean devfile) {
+		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
+		explorer.open();
+		OpenShiftODOProject project = explorer.getOpenShiftODOConnection().getProject(projectName);
+		project.openCreateComponentWizard();
+		CreateComponentWizard componentWizard = new CreateComponentWizard();
+		CreateComponentWizadPage componentWizardPage = new CreateComponentWizadPage(componentWizard);
+		componentWizardPage.setComponentName(eclipseProjectName);
+		componentWizardPage.setEclipseProject(eclipseProjectName);
+		componentWizardPage.selectComponentType(componentType, devfile);
+		if (!devfile) {
+			componentWizardPage.selectComponentVersion("latest");
+		}
+		componentWizardPage.setApplication("myapp");
+		componentWizard.finish(TimePeriod.getCustom(600L)); //Maven builds may take more than 5mn
+			
+		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+		new WaitWhile(new TerminalHasNoChange(), TimePeriod.VERY_LONG);
+	}
 
-   public static void createURL(String projectName, String applicationName, String componentName, String urlName, int port, boolean devFile) {
-     OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
-     explorer.open();
-     OpenShiftODOProject project = explorer.getOpenShiftODOConnection().getProject(projectName);
-     OpenShiftODOApplication application = project.getApplication(applicationName);
-     OpenShiftODOComponent component = application.getComponent(componentName);
-     component.openCreateURLWizard();
-     WizardDialog dialog = new WizardDialog(OpenShiftLabel.Shell.CREATE_URL);
-     new LabeledText(OpenShiftLabel.TextLabels.NAME).setText(urlName);
-     if (devFile) {
-       new LabeledText(OpenShiftLabel.TextLabels.PORT).setText(String.valueOf(port));
-     } else {
-       new LabeledCombo(OpenShiftLabel.TextLabels.PORT).setSelection(String.valueOf(port));
-       
-     }
-     new FinishButton(dialog).click();
-     
-     new WaitWhile(new WindowIsAvailable(dialog), TimePeriod.VERY_LONG);
-     new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
-     component.select();
-     component.push();
-   }
-
+	public static void createURL(String projectName, String applicationName, String componentName, String urlName, int port, boolean devFile) {
+		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
+		explorer.open();
+		OpenShiftODOProject project = explorer.getOpenShiftODOConnection().getProject(projectName);
+		OpenShiftODOApplication application = project.getApplication(applicationName);
+		OpenShiftODOComponent component = application.getComponent(componentName);
+		component.openCreateURLWizard();
+		WizardDialog dialog = new WizardDialog(OpenShiftLabel.Shell.CREATE_URL);
+		new LabeledText(OpenShiftLabel.TextLabels.NAME).setText(urlName);
+		if (devFile) {
+			new LabeledText(OpenShiftLabel.TextLabels.PORT).setText(String.valueOf(port));
+		} else {
+			new LabeledCombo(OpenShiftLabel.TextLabels.PORT).setSelection(String.valueOf(port));
+		}
+		new FinishButton(dialog).click();
+		 
+		new WaitWhile(new WindowIsAvailable(dialog), TimePeriod.VERY_LONG);
+		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+		component.select();
+		component.push();
+	}
 }

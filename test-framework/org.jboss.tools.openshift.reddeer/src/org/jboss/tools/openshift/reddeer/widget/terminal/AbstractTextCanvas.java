@@ -21,11 +21,11 @@ import org.hamcrest.Matcher;
 public abstract class AbstractTextCanvas extends AbstractControl<org.eclipse.tm.internal.terminal.textcanvas.TextCanvas>
     implements TextCanvas {
   protected AbstractTextCanvas(ReferencedComposite refComposite, int index, Matcher<?>... matchers) {
-    super(org.eclipse.tm.internal.terminal.textcanvas.TextCanvas.class, refComposite, index, matchers);
+      super(org.eclipse.tm.internal.terminal.textcanvas.TextCanvas.class, refComposite, index, matchers);
   }
 
   protected AbstractTextCanvas(org.eclipse.tm.internal.terminal.textcanvas.TextCanvas widget) {
-    super(widget);
+      super(widget);
   }
   
   /**
@@ -36,6 +36,4 @@ public abstract class AbstractTextCanvas extends AbstractControl<org.eclipse.tm.
   public String getText() {
       return TextCanvasHandler.getInstance().getText(swtWidget);
   }
-
-
 }

@@ -46,15 +46,15 @@ import org.junit.runner.RunWith;
 @CleanODOConnection
 @RequiredODOProject
 public class DebugVertxDevfileComponentODOTest extends AbstractODOTest {
-  
-  /**
-   * 
-   */
-  private static final String APP_SOURCE = "HttpApplication.java";
-
-  private static final String ECLIPSE_PROJECT = "vertxproject" + new Random().nextInt();
-  
-  private static final int BREAKPOINT_LINE = 41;
+	
+	/**
+	 * 
+	 */
+	private static final String APP_SOURCE = "HttpApplication.java";
+	
+	private static final String ECLIPSE_PROJECT = "vertxproject" + new Random().nextInt();
+	
+	private static final int BREAKPOINT_LINE = 41;
 	
 
 	@InjectRequirement
@@ -64,33 +64,31 @@ public class DebugVertxDevfileComponentODOTest extends AbstractODOTest {
 	@BeforeClass
 	public static void setupWorkspace() {
 		importLauncherProject(ECLIPSE_PROJECT, "vert.x community");
-    createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "java-maven", true);
+		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "java-maven", true);
 	}
 	
 	@Test
 	public void checkBreakpointReached() throws IOException {
-    ProjectExplorer pe = new ProjectExplorer();
-    pe.open();
-    pe.getProject(ECLIPSE_PROJECT).getProjectItem("src/main/java", "io.openshift.example", APP_SOURCE).open();
-    new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE));
-    TextEditor editor = new TextEditor(APP_SOURCE);
-    editor.setCursorPosition(BREAKPOINT_LINE, 1);
-    new ShellMenuItem("Run", "Toggle Breakpoint").select();
-    editor.setCursorPosition(1);
-    
-    OpenShiftApplicationExplorerView view = new OpenShiftApplicationExplorerView();
-    view.activate();
-    view.getOpenShiftODOConnection().getProject(projectReq.getProjectName()).getApplication("myapp").getComponent(ECLIPSE_PROJECT).debug();
-    
-    AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), "myapp", ECLIPSE_PROJECT, "/api/greeting");
+		ProjectExplorer pe = new ProjectExplorer();
+		pe.open();
+		pe.getProject(ECLIPSE_PROJECT).getProjectItem("src/main/java", "io.openshift.example", APP_SOURCE).open();
+		new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE));
+		TextEditor editor = new TextEditor(APP_SOURCE);
+		editor.setCursorPosition(BREAKPOINT_LINE, 1);
+		new ShellMenuItem("Run", "Toggle Breakpoint").select();
+		editor.setCursorPosition(1);
+		
+		OpenShiftApplicationExplorerView view = new OpenShiftApplicationExplorerView();
+		view.activate();
+		view.getOpenShiftODOConnection().getProject(projectReq.getProjectName()).getApplication("myapp").getComponent(ECLIPSE_PROJECT).debug();
+		
+		AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), "myapp", ECLIPSE_PROJECT, "/api/greeting");
 
-    try {
-      new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE), TimePeriod.LONG);
-      new WaitUntil(new CursorPositionIsOnLine(editor, BREAKPOINT_LINE + 1));
-    } catch (WaitTimeoutExpiredException e) {
-      Assert.fail("Debugger hasn't stopped on breakpoint");
-    }
-
+		try {
+			new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE), TimePeriod.LONG);
+			new WaitUntil(new CursorPositionIsOnLine(editor, BREAKPOINT_LINE + 1));
+		} catch (WaitTimeoutExpiredException e) {
+			Assert.fail("Debugger hasn't stopped on breakpoint");
+		}
 	}
-
 }

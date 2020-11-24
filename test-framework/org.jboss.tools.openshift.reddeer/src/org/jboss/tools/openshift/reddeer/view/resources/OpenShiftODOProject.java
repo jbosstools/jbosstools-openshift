@@ -68,12 +68,11 @@ public class OpenShiftODOProject extends AbstractOpenShiftApplicationExplorerIte
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_SERVICE).select();
 	}
 
-  public OpenShiftODOApplication getApplication(String applicationName) {
-    activateOpenShiftApplicationExplorerView();
-    item.expand();
+	public OpenShiftODOApplication getApplication(String applicationName) {
+		activateOpenShiftApplicationExplorerView();
+		item.expand();
     
-    new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-    
-    return new OpenShiftODOApplication(treeViewerHandler.getTreeItem(item, applicationName), projectName);
-  }
+		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+		return new OpenShiftODOApplication(treeViewerHandler.getTreeItem(item, applicationName), projectName);
+	}
 }

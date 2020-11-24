@@ -47,13 +47,13 @@ import org.junit.runner.RunWith;
 @CleanODOConnection
 @RequiredODOProject
 public class DebugNodeS2IComponentODOTest extends AbstractODOTest {
-  private static final String APP_SOURCE = "app.js";
+	private static final String APP_SOURCE = "app.js";
 
-  private static final String ECLIPSE_PROJECT = "nodeproject" + new Random().nextInt();
+	private static final String ECLIPSE_PROJECT = "nodeproject" + new Random().nextInt();
   
-  private static final int BREAKPOINT_LINE = 34;
+	private static final int BREAKPOINT_LINE = 34;
 	
-  private static final String APPLICATION_NAME = "myapp";
+	private static final String APPLICATION_NAME = "myapp";
 
 	@InjectRequirement
 	private static OpenShiftODOProjectRequirement projectReq;
@@ -62,32 +62,30 @@ public class DebugNodeS2IComponentODOTest extends AbstractODOTest {
 	@BeforeClass
 	public static void setupWorkspace() {
 		importLauncherProject(ECLIPSE_PROJECT, "nodejs v10-community");
-    createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "nodejs", false);
-    createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080, false);
+		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "nodejs", false);
+		createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080, false);
 	}
 	
 	@Test
 	public void checkBreakpointReached() throws CoreException, IOException {
-    ProjectExplorer pe = new ProjectExplorer();
-    pe.open();
-    pe.getProject(ECLIPSE_PROJECT).getProjectItem(APP_SOURCE).open();
-    new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE));
-    TextEditor editor = new TextEditor(APP_SOURCE);
-    NodeJSAppDebugTest.setLineBreakpoint(editor, BREAKPOINT_LINE);
+		ProjectExplorer pe = new ProjectExplorer();
+		pe.open();
+		pe.getProject(ECLIPSE_PROJECT).getProjectItem(APP_SOURCE).open();
+		new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE));
+		TextEditor editor = new TextEditor(APP_SOURCE);
+		NodeJSAppDebugTest.setLineBreakpoint(editor, BREAKPOINT_LINE);
     
-    OpenShiftApplicationExplorerView view = new OpenShiftApplicationExplorerView();
-    view.activate();
-    view.getOpenShiftODOConnection().getProject(projectReq.getProjectName()).getApplication(APPLICATION_NAME).getComponent(ECLIPSE_PROJECT).debug();
+		OpenShiftApplicationExplorerView view = new OpenShiftApplicationExplorerView();
+		view.activate();
+		view.getOpenShiftODOConnection().getProject(projectReq.getProjectName()).getApplication(APPLICATION_NAME).getComponent(ECLIPSE_PROJECT).debug();
     
-    AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "/api/greeting");
+		AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "/api/greeting");
 
-    try {
-      new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE), TimePeriod.LONG);
-      new WaitUntil(new CursorPositionIsOnLine(editor, BREAKPOINT_LINE));
-    } catch (WaitTimeoutExpiredException e) {
-      Assert.fail("Debugger hasn't stopped on breakpoint");
-    }
-
+		try {
+			new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE), TimePeriod.LONG);
+			new WaitUntil(new CursorPositionIsOnLine(editor, BREAKPOINT_LINE));
+		} catch (WaitTimeoutExpiredException e) {
+			Assert.fail("Debugger hasn't stopped on breakpoint");
+		}
 	}
-
 }
