@@ -43,12 +43,7 @@ public class ODOProjectIsDeleted extends AbstractWaitCondition {
 			OpenShiftODOConnection connection = explorer.getOpenShiftODOConnection();
 			connection.refreshConnection();
 			OpenShiftODOProject project = connection.getProject(projectName);
-			if (project == null) {
-				return true;
-			} else {
-				return false;
-			}
-			
+			return project == null;
 		} catch (RedDeerException ex) {
 			return false;
 		}

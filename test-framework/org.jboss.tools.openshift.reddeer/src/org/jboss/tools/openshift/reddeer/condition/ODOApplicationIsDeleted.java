@@ -50,7 +50,7 @@ public class ODOApplicationIsDeleted extends AbstractWaitCondition {
 				return true;
 			} else {
 			  OpenShiftODOApplication application = project.getApplication(applicationName);
-			  return (application == null)?true:false;
+			  return application == null;
 			}
 		} catch (RedDeerException ex) {
 			return false;
