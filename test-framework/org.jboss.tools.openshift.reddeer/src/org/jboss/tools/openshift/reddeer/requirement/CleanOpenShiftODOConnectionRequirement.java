@@ -17,12 +17,9 @@ import java.lang.annotation.Target;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.eclipse.reddeer.common.wait.TimePeriod;
-import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.junit.requirement.Requirement;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.tools.openshift.reddeer.condition.ODOConnectionExists;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftODOConnectionRequirement.CleanODOConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;

@@ -126,7 +126,6 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.LOGIN), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-		//new WaitWhile(new ODOConnectionExists(), TimePeriod.LONG);
 	}
 
 	public boolean connectionExistsAndWorking() {
