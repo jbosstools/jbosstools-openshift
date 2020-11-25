@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.reddeer.condition;
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
 import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOApplication;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOConnection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOProject;
 
@@ -22,17 +23,19 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOProject;
  * @author jkopriva@redhat.com
  *
  */
-public class ODOProjectIsDeleted extends AbstractWaitCondition {
+public class ODOApplicationIsDeleted extends AbstractWaitCondition {
 	
 	private String projectName;
+	private String applicationName;
 
 	/**
 	 * Constructs OODOProjectIsDeleted wait condition. Condition is met when project is deleted.
 	 * 
 	 * @param projectName project name
 	 */
-	public ODOProjectIsDeleted(String projectName) {
+	public ODOApplicationIsDeleted(String projectName, String applicationName) {
 		this.projectName = projectName;
+		this.applicationName = applicationName;
 	}
 	
 	@Override
@@ -41,9 +44,14 @@ public class ODOProjectIsDeleted extends AbstractWaitCondition {
 			OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 			explorer.open();
 			OpenShiftODOConnection connection = explorer.getOpenShiftODOConnection();
-			connection.refresh();
+			connection.refreshConnection();
 			OpenShiftODOProject project = connection.getProject(projectName);
-			return project == null;
+			if (project == null) {
+				return true;
+			} else {
+			  OpenShiftODOApplication application = project.getApplication(applicationName);
+			  return application == null;
+			}
 		} catch (RedDeerException ex) {
 			return false;
 		}
@@ -51,6 +59,6 @@ public class ODOProjectIsDeleted extends AbstractWaitCondition {
 
 	@Override
 	public String description() {
-		return "ODO project with name:"+ projectName +" is deleted";
+		return "ODO application with name:"+ applicationName +" in project "+ projectName + " is deleted";
 	}
 }

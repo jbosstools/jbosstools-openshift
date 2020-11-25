@@ -20,7 +20,7 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
-import org.jboss.tools.openshift.reddeer.condition.ODOProjectIsDeleted;
+import org.jboss.tools.openshift.reddeer.condition.ODOApplicationIsDeleted;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 /**
@@ -30,17 +30,19 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
  * @author jkopriva@redhat.com
  *
  */
-public class OpenShiftODOProject extends AbstractOpenShiftApplicationExplorerItem {
+public class OpenShiftODOApplication extends AbstractOpenShiftApplicationExplorerItem {
 		
 	private String projectName;
+	private String applicationName;
 	
-	public OpenShiftODOProject(TreeItem projectItem) {
-		super(projectItem);
-		this.projectName = treeViewerHandler.getNonStyledText(item);
+	public OpenShiftODOApplication(TreeItem applicationItem, String projectName) {
+		super(applicationItem);
+		this.projectName = projectName;
+		this.applicationName = treeViewerHandler.getNonStyledText(item);
 	}
 	
 	public String getName() {
-		return projectName;
+		return applicationName;
 	}
 	
 	/**
@@ -50,12 +52,12 @@ public class OpenShiftODOProject extends AbstractOpenShiftApplicationExplorerIte
 		item.select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.DELETE_OS_PROJECT).select();
 		
-		new DefaultShell(OpenShiftLabel.Shell.DELETE_PROJECT + " " + getName());
+		new DefaultShell(OpenShiftLabel.Shell.DELETE_APPLICATION + " " + getName());
 		new OkButton().click();
 		
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.DELETE_OS_PROJECT), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(new Matcher[]{CoreMatchers.is(OpenShiftLabel.JobsLabels.DELETE)}), TimePeriod.LONG);
-		new WaitWhile(new ODOProjectIsDeleted(getName()), TimePeriod.getCustom(120));
+		new WaitWhile(new ODOApplicationIsDeleted(projectName, getName()), TimePeriod.getCustom(120));
 	}
 	
 	public void openCreateComponentWizard() {
@@ -68,11 +70,16 @@ public class OpenShiftODOProject extends AbstractOpenShiftApplicationExplorerIte
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_SERVICE).select();
 	}
 
-	public OpenShiftODOApplication getApplication(String applicationName) {
+  /**
+   * @param componentName
+   * @return
+   */
+	public OpenShiftODOComponent getComponent(String componentName) {
 		activateOpenShiftApplicationExplorerView();
 		item.expand();
     
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-		return new OpenShiftODOApplication(treeViewerHandler.getTreeItem(item, applicationName), projectName);
-	}
+    
+		return new OpenShiftODOComponent(treeViewerHandler.getTreeItem(item, componentName), projectName, applicationName);
+  }
 }

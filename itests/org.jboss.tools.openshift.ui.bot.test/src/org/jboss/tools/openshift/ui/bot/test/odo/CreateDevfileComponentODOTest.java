@@ -38,7 +38,7 @@ public class CreateDevfileComponentODOTest extends AbstractODOTest {
 	
 	@BeforeClass
 	public static void setupWorkspace() {
-		importLauncherProject();
+		importVertxLauncherProject();
 	}
 	
 	@Test

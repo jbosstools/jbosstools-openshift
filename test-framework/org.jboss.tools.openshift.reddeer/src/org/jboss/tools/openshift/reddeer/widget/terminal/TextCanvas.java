@@ -8,19 +8,13 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.core.stack;
-
-import java.util.Map;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
+package org.jboss.tools.openshift.reddeer.widget.terminal;
 
 /**
  * @author Red Hat Developers
  *
  */
-public interface RemoteStackDebugger {
-	boolean isValid(String stackType, String stackVersion);
-	void startRemoteDebugger(IProject project, String stackType, String stackVersion, int port, Map<String, String> env, IProgressMonitor monitor) throws CoreException;
+public interface TextCanvas {
+  public String getText();
+
 }

@@ -216,7 +216,7 @@ public class NodeJSAppDebugTest extends AbstractTest {
 		assertThat(var_require.getCell(1), containsString(VAR_VALUE_require));
 	}
 
-	private void setLineBreakpoint(TextEditor editor, int lineNumber) throws CoreException {
+	public static void setLineBreakpoint(TextEditor editor, int lineNumber) throws CoreException {
 		editor.activate();
 		IResource resource = (IResource) editor.getEditorPart().getEditorInput().getAdapter(IResource.class);
 		JavaScriptDebugModel.createLineBreakpoint(resource, lineNumber, -1, -1, new HashMap<String, Object>(), true);
@@ -266,7 +266,7 @@ public class NodeJSAppDebugTest extends AbstractTest {
 		}).start();
 	}
 
-	public class CursorPositionIsOnLine extends AbstractWaitCondition {
+	public static class CursorPositionIsOnLine extends AbstractWaitCondition {
 
 		private TextEditor editor;
 		private int line;

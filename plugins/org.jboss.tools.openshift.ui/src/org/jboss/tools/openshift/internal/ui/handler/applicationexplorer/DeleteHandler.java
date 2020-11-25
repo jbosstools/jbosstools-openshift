@@ -66,11 +66,11 @@ public class DeleteHandler extends OdoHandler {
 		if (element instanceof ProjectElement) {
 			return String.join(" ", "project", ((ProjectElement)element).getWrapped().getMetadata().getName());
 		} else if (element instanceof ApplicationElement) {
-			return String.join("", "application", ((ApplicationElement)element).getWrapped().getName());
+			return String.join(" ", "application", ((ApplicationElement)element).getWrapped().getName());
 		} else if (element instanceof ComponentElement) {
 			return String.join(" ", "component", ((ComponentElement)element).getWrapped().getName());
 		} else if (element instanceof ServiceElement) {
-			return String.join("", "service", ((ServiceElement)element).getWrapped().getMetadata().getName());
+			return String.join(" ", "service", ((ServiceElement)element).getWrapped().getMetadata().getName());
 		} else if (element instanceof URLElement) {
 			return String.join(" ","url", ((URLElement)element).getWrapped().getName());
 		} else if (element instanceof StorageElement) {

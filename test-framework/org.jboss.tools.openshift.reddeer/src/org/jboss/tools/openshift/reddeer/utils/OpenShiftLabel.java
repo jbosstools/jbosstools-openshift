@@ -97,10 +97,13 @@ public class OpenShiftLabel {
 		public static final String[] NEW_COMPONENT = {"New", "Component..."};
 		public static final String[] NEW_PROJECT = {"New", "Project..."};
 		public static final String[] NEW_SERVICE = {"New", "Service..."};
+		public static final String[] NEW_URL = {"New", "URL"};
 		public static final String LIST_CATALOG_SERVICES = "List Catalog Services";
 		public static final String LIST_CATALOG_COMPONENTS = "List Catalog Components";
 		public static final String OPEN_CONSOLE = "Open Console";
 		public static final String ABOUT = "About";
+		public static final String PUSH = "Push";
+		public static final String DEBUG = "Debug";
 	}
 		
 	/**
@@ -204,8 +207,11 @@ public class OpenShiftLabel {
 		public static final String CREATE_PROJECT = "Create project";
 		public static final String CREATE_COMPONENT = "Create component";
 		public static final String CREATE_SERVICE = "Create service";
+		public static final String CREATE_URL = "Create url";
 		public static final String LOGIN = "Login";
 		public static final String DELETE_PROJECT = "Delete project";
+		public static final String DELETE_APPLICATION = "Delete application";
+		public static final String DELETE_COMPONENT = "Delete component";
 		public static final String NEW_PROJECT = "New project";
 	}
 	
@@ -334,12 +340,13 @@ public class OpenShiftLabel {
 		public static final String URL = "URL:";
 		public static final String TOKEN_ODO = "Token:";
 		public static final String S2I_NODE = "S2I";
+		public static final String PORT = "Port:";
 	}
 	
 	public static class JobsLabels {			
 		// OpenShift Application Explorer related
 		public static final String CREATE_PROJECT = "Create Project";
-		public static final String DELETE_PROJECT = "Delete";
+		public static final String DELETE = "Delete";
 	}
 	
 	/**

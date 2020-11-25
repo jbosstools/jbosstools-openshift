@@ -15,6 +15,10 @@ import org.jboss.tools.openshift.ui.bot.test.odo.ConnectionODOCommandsTests;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateDevfileComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateS2IComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateServiceODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.DebugNodeDevfileComponentODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.DebugNodeS2IComponentODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.DebugVertxDevfileComponentODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.DebugVertxS2IComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.LoginODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.ProjectManagementODOTest;
 import org.junit.runner.RunWith;
@@ -33,6 +37,10 @@ import org.junit.runners.Suite.SuiteClasses;
 	ConnectionODOCommandsTests.class, 
 	CreateS2IComponentODOTest.class,
 	CreateDevfileComponentODOTest.class,
+	DebugNodeS2IComponentODOTest.class,
+	DebugNodeDevfileComponentODOTest.class,
+	DebugVertxS2IComponentODOTest.class,
+	DebugVertxDevfileComponentODOTest.class,
 	CreateServiceODOTest.class
 })
 public class OpenShiftODOTests {

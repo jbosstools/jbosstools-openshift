@@ -38,7 +38,7 @@ public class CreateS2IComponentODOTest extends AbstractODOTest {
 	
 	@BeforeClass
 	public static void setupWorkspace() {
-		importLauncherProject();
+		importVertxLauncherProject();
 	}
 	
 	@Test

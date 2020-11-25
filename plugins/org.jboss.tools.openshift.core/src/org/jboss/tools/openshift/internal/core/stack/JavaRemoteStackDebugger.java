@@ -36,7 +36,7 @@ public class JavaRemoteStackDebugger implements RemoteStackDebugger {
 	}
 
 	@Override
-	public void startRemoteDebugger(IProject project, String stackType, String stackVersion, int port, IProgressMonitor monitor) throws CoreException {
+	public void startRemoteDebugger(IProject project, String stackType, String stackVersion, int port, Map<String, String> env, IProgressMonitor monitor) throws CoreException {
 		String name = "OpenShift remote (Java) " + project.getName();
 		ILaunchConfigurationType launchConfigurationType = DebugPlugin.getDefault().getLaunchManager()
 				.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);

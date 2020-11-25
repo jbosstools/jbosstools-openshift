@@ -18,7 +18,8 @@ Require-Bundle:
  org.apache.commons.compress,
  org.apache.commons.lang;bundle-version="2.6.0",
  org.jboss.tools.openshift.core,
- org.jboss.tools.openshift.client
+ org.jboss.tools.openshift.client,
+ org.eclipse.tm.terminal.control
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: jar
@@ -34,6 +35,7 @@ Export-Package: org.jboss.tools.openshift.reddeer.condition,
  org.jboss.tools.openshift.reddeer.view,
  org.jboss.tools.openshift.reddeer.view.resources,
  org.jboss.tools.openshift.reddeer.widget,
+ org.jboss.tools.openshift.reddeer.widget.terminal,
  org.jboss.tools.openshift.reddeer.wizard,
  org.jboss.tools.openshift.reddeer.wizard.importapp,
  org.jboss.tools.openshift.reddeer.wizard.page,
