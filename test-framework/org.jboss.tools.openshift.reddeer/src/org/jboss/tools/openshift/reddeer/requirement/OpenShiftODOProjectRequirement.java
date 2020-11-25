@@ -67,6 +67,7 @@ public class OpenShiftODOProjectRequirement implements Requirement<RequiredODOPr
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();
 		OpenShiftODOConnection connection = explorer.getOpenShiftODOConnection();
+		connection.refresh();
 		try {
 			this.project = connection.createNewProject(projectName);
 		} catch (WaitTimeoutExpiredException ex) {
@@ -74,7 +75,7 @@ public class OpenShiftODOProjectRequirement implements Requirement<RequiredODOPr
 			new DefaultShell(OpenShiftLabel.Shell.CREATE_PROJECT);
 			new OkButton().click();
 			// refresh connection and try it once again
-			connection.refreshConnection();
+			connection.refresh();
 			this.project = connection.createNewProject(projectName);
 		}
 	}
@@ -90,7 +91,7 @@ public class OpenShiftODOProjectRequirement implements Requirement<RequiredODOPr
 			OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 			explorer.open();
 			OpenShiftODOConnection connection = explorer.getOpenShiftODOConnection();
-			connection.refreshConnection();
+			connection.refresh();
 			OpenShiftODOProject odoProject = connection.getProject(this.project.getName());
 			odoProject.delete();
 		}

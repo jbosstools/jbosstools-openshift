@@ -10,6 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test.odo;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftODOConnectionRequirement.CleanODOConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOConnectionRequirement.RequiredODOConnection;
@@ -40,7 +44,10 @@ public class ProjectManagementODOTest extends AbstractODOTest {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();
 		OpenShiftODOConnection connection = explorer.getOpenShiftODOConnection();
-		connection.createNewProject(projectName);
+		OpenShiftODOProject prj  = connection.createNewProject(projectName);
+		assertNotNull(prj);
+		
+		assertTrue(connection.projectExists(projectName));
 	}
 	
 	@Test
@@ -50,6 +57,9 @@ public class ProjectManagementODOTest extends AbstractODOTest {
 		OpenShiftODOConnection connection = explorer.getOpenShiftODOConnection();
 		OpenShiftODOProject project = connection.getProject(projectName);
 		project.delete();
+
+		connection.refresh();
+		assertFalse(connection.projectExists(projectName));
 	}
 
 }

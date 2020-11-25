@@ -13,21 +13,38 @@ package org.jboss.tools.openshift.reddeer.condition;
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
 import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOConnection;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOProject;
 
 /**
- * Wait condition to wait for OpenShift ODO connection and its working.
+ * Wait condition to wait for OpenShift ODO Project exists.
  * 
  * @author jkopriva@redhat.com
  *
  */
-public class ODOConnectionExists extends AbstractWaitCondition {
+public class OpenShiftODOProjectExists extends AbstractWaitCondition {
+	
+	private String projectName;
 
+	/**
+	 * Constructs OODOProjectIsDeleted wait condition. Condition is met when project is deleted.
+	 * 
+	 * @param projectName project name
+	 */
+	public OpenShiftODOProjectExists(String projectName) {
+		this.projectName = projectName;
+	}
+	
 	@Override
 	public boolean test() {
 		try {
 			OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 			explorer.open();
-			return explorer.connectionExistsAndWorking();
+			OpenShiftODOConnection connection = explorer.getOpenShiftODOConnection();
+			connection.refresh();
+			OpenShiftODOProject project = connection.getProject(projectName);
+			return project != null;
+			
 		} catch (RedDeerException ex) {
 			return false;
 		}
@@ -35,7 +52,6 @@ public class ODOConnectionExists extends AbstractWaitCondition {
 
 	@Override
 	public String description() {
-		return "ODO connection exists";
+		return "ODO project with name:"+ projectName +" exists";
 	}
-
 }

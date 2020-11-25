@@ -48,8 +48,11 @@ public class CleanOpenShiftODOConnectionRequirement implements Requirement<Clean
 	public void fulfill() {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();
+		if (explorer.connectionExistsAndWorking()) {
+			explorer.connectToOpenShiftODO(); 
+		}
 		OpenShiftODOConnection connection = explorer.getOpenShiftODOConnection();
-		connection.refreshConnection();
+		connection.refresh();
 		for (OpenShiftODOProject project : connection.getAllProjects()) {
 			try {
 				project.delete();
