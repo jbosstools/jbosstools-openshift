@@ -47,7 +47,7 @@ public class ODOComponentIsDeleted extends AbstractWaitCondition {
 			OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 			explorer.open();
 			OpenShiftODOConnection connection = explorer.getOpenShiftODOConnection();
-			connection.refreshConnection();
+			connection.refresh();
 			OpenShiftODOProject project = connection.getProject(projectName);
 			if (project == null) {
 				return true;
