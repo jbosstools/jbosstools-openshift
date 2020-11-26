@@ -84,9 +84,8 @@ public class OdoProjectDecorator implements Odo {
 
   @Override
   public void createComponentLocal(String project, String application, String componentType, String componentVersion,
-      String component, String source, boolean push) throws IOException {
-    delegate.createComponentLocal(project, application, componentType, componentVersion, component, source, push);
-
+      String component, String source, String devfile, boolean push) throws IOException {
+    delegate.createComponentLocal(project, application, componentType, componentVersion, component, source, devfile, push);
   }
 
   @Override

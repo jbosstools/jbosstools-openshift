@@ -11,10 +11,8 @@
 package org.jboss.tools.openshift.internal.ui.odo;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -97,7 +95,6 @@ import org.jboss.tools.openshift.core.odo.ComponentDescriptorsDeserializer;
 import org.jboss.tools.openshift.core.odo.ComponentDeserializer;
 import org.jboss.tools.openshift.core.odo.ComponentInfo;
 import org.jboss.tools.openshift.core.odo.ComponentKind;
-import org.jboss.tools.openshift.core.odo.ComponentSourceType;
 import org.jboss.tools.openshift.core.odo.ComponentType;
 import org.jboss.tools.openshift.core.odo.ComponentTypesDeserializer;
 import org.jboss.tools.openshift.core.odo.JSonParser;
@@ -241,12 +238,15 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
+  public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, boolean push) throws IOException {
     try {
       List<String> args = new ArrayList<>();
       args.add(command);
       args.add("create");
-      if (StringUtils.isNotBlank(componentVersion)) {
+      if (StringUtils.isNotBlank(devfile)) {
+        args.add("--devfile");
+        args.add(devfile);
+      } else if (StringUtils.isNotBlank(componentVersion)) {
           args.add(componentType + ":" + componentVersion);
       } else {
           args.add(componentType);
