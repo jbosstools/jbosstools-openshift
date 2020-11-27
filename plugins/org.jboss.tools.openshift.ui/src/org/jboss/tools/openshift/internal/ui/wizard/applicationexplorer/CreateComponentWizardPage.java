@@ -26,7 +26,6 @@ import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.IWizard;
@@ -39,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
+import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.MandatoryStringValidator;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.core.odo.ComponentKind;
@@ -143,6 +143,10 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
         .in(dbc);
     ControlDecorationSupport.create(componentTypesBinding, SWT.LEFT | SWT.TOP, null,
         new RequiredControlDecorationUpdater());
+    ValueBindingBuilder.bind(WidgetProperties.enabled().observe(componentTypesTree))
+        .to(BeanProperties.value(CreateComponentModel.PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE).observe(model))
+        .converting(new InvertingBooleanConverter())
+        .in(dbc);
 
 		IObservableValue<ComponentType> componentTypeObservable = BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_TYPE, ComponentType.class).observe(model);
 		Label componentVersionsLabel = new Label(parent, SWT.NONE);
@@ -162,6 +166,10 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 		ControlDecorationSupport.create(componentVersionsBinding, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater());
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(componentVersionsCombo))
+		    .to(BeanProperties.value(CreateComponentModel.PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE).observe(model))
+		    .converting(new InvertingBooleanConverter())
+		    .in(dbc);
 
 		Label applicationLabel = new Label(parent, SWT.NONE);
 		applicationLabel.setText("Application:");

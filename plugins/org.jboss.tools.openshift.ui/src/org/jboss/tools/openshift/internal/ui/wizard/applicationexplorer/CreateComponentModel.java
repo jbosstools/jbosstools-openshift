@@ -23,12 +23,17 @@ import org.jboss.tools.openshift.core.odo.S2iComponentType;
  */
 public class CreateComponentModel extends ComponentModel {
 	public static final String PROPERTY_ECLIPSE_PROJECT = "eclipseProject";
+	public static final String PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE = "eclipseProjectHasDevfile";
 	public static final String PROPERTY_SELECTED_COMPONENT_TYPE = "selectedComponentType";
 	public static final String PROPERTY_SELECTED_COMPONENT_VERSION = "selectedComponentVersion";
 	public static final String PROPERTY_PUSH_AFTER_CREATE = "pushAfterCreate";
 	
+	public static final String DEVFILE_NAME = "devfile.yaml";
+	
 
 	private IProject eclipseProject;
+	
+	private boolean eclipseProjectHasDevfile = false;
 	
 	private final List<ComponentType> componentTypes;
 	
@@ -62,9 +67,24 @@ public class CreateComponentModel extends ComponentModel {
 	 */
 	public void setEclipseProject(IProject project) {
 		firePropertyChange(PROPERTY_ECLIPSE_PROJECT, this.eclipseProject, this.eclipseProject = project);
+		setEclipseProjectHasDevfile(project.getFile(DEVFILE_NAME).exists());
 	}
 
 	/**
+   * @return the eclipseProjectHasDevfile
+   */
+  public boolean isEclipseProjectHasDevfile() {
+    return eclipseProjectHasDevfile;
+  }
+
+  /**
+   * @param eclipseProjectHasDevfile the eclipseProjectHasDevfile to set
+   */
+  public void setEclipseProjectHasDevfile(boolean eclipseProjectHasDevfile) {
+    firePropertyChange(PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE, this.eclipseProjectHasDevfile, this.eclipseProjectHasDevfile = eclipseProjectHasDevfile);
+  }
+
+  /**
 	 * @return the selectedComponentType
 	 */
 	public ComponentType getSelectedComponentType() {

@@ -45,7 +45,7 @@ import org.junit.After;
  */
 public abstract class AbstractODOTest {
 	
-	private static String eclipseProject = "myService";
+	protected static String eclipseProject = "myService";
 	
 	@After
 	public void cleanUp() {
@@ -101,7 +101,9 @@ public abstract class AbstractODOTest {
 		CreateComponentWizadPage componentWizardPage = new CreateComponentWizadPage(componentWizard);
 		componentWizardPage.setComponentName(eclipseProjectName);
 		componentWizardPage.setEclipseProject(eclipseProjectName);
-		componentWizardPage.selectComponentType(componentType, devfile);
+		if (componentType != null) {
+			componentWizardPage.selectComponentType(componentType, devfile);
+		}
 		if (!devfile) {
 			componentWizardPage.selectComponentVersion("latest");
 		}
