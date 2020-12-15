@@ -35,14 +35,18 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.MandatoryStringValidator;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
@@ -99,6 +103,8 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
   }
 
 	private CreateComponentModel model;
+	
+	private static final Image INFORMATION_IMAGE = WorkbenchPlugin.getDefault().getSharedImages().getImage(ISharedImages.IMG_OBJS_INFO_TSK);
 
 	protected CreateComponentWizardPage(IWizard wizard, CreateComponentModel model) {
 		super("Create component", "Specify component parameters.", "Create component", wizard);
@@ -129,13 +135,18 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 				.setEclipseProjectObservable(projectObservable).setSelectionListener(SelectionListener.widgetSelectedAdapter(this::onBrowseProjects))
 				.setButtonIndent(0).build(parent, dbc, 1);
 
-		Label information = new Label(parent, SWT.NONE);
+		CLabel information = new CLabel(parent, SWT.NONE);
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
 				.applyTo(information);
 		ValueBindingBuilder.bind(WidgetProperties.text().observe(information))
 				.notUpdatingParticipant()
 				.to(BeanProperties.value(CreateComponentModel.PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE).observe(model))
 				.converting(IConverter.create(flag -> (boolean) flag?"Project has a devfile, component type selection is not required":""))
+				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.image().observe(information))
+				.notUpdatingParticipant()
+				.to(BeanProperties.value(CreateComponentModel.PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE).observe(model))
+				.converting(IConverter.create(flag -> (boolean) flag?INFORMATION_IMAGE:null))
 				.in(dbc);
 		
 		Label componentTypesLabel = new Label(parent, SWT.NONE);
@@ -210,6 +221,11 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 				.notUpdatingParticipant()
 				.to(computedObservable)
 				.converting(IConverter.create(flag -> (boolean) flag?"Your project is empty, you can initialize it from starters (templates)":""))
+				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.image().observe(information))
+				.notUpdatingParticipant()
+				.to(computedObservable)
+				.converting(IConverter.create(flag -> (boolean) flag?INFORMATION_IMAGE:null))
 				.in(dbc);
 
 		Label applicationLabel = new Label(parent, SWT.NONE);
