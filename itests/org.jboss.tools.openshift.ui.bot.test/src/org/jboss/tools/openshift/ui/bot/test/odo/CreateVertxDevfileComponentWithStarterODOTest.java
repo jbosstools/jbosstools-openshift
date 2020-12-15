@@ -40,7 +40,7 @@ public class CreateVertxDevfileComponentWithStarterODOTest extends AbstractODOTe
 	
 	
 	@BeforeClass
-	public static void setupWorkspace() throws IOException, CoreException {
+	public static void setupWorkspace() {
 		importEmptyProject();
 	}
 	
