@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.core.odo;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,8 @@ public class JSonParser {
     private static final String TYPE_FIELD = "type";
     private static final String ENV_FIELD = "env";
     private static final String VALUE_FIELD = "value";
+    private static final String DATA_FIELD = "Data";
+    private static final String STARTER_PROJECTS_FIELD = "starterProjects";
 
     private final JsonNode root;
 
@@ -78,5 +81,27 @@ public class JSonParser {
             }
         }
         return builder.build();
+    }
+
+    /**
+     * @return
+     */
+    public ComponentTypeInfo parseComponentTypeInfo() {
+      ComponentTypeInfo.Builder builder = new ComponentTypeInfo.Builder();
+      if (root.has(DATA_FIELD)) {
+        JsonNode data = root.get(DATA_FIELD);
+        if (data.has(METADATA_FIELD) && data.get(METADATA_FIELD).has(NAME_FIELD)) {
+          builder.withName(data.get(METADATA_FIELD).get(NAME_FIELD).asText());
+        }
+        if (data.has(STARTER_PROJECTS_FIELD)) {
+          for(JsonNode starter : data.get(STARTER_PROJECTS_FIELD)) {
+            if (starter.has(NAME_FIELD)) {
+              builder.withStarter(starter.get(NAME_FIELD).asText());
+            }
+          }
+
+        }
+      }
+      return builder.build();
     }
 }

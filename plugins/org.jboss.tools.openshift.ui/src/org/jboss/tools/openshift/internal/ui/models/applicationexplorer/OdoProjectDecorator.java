@@ -14,6 +14,14 @@ import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.jobs.Job;
 import org.jboss.tools.openshift.core.odo.Application;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
@@ -21,12 +29,15 @@ import org.jboss.tools.openshift.core.odo.ComponentInfo;
 import org.jboss.tools.openshift.core.odo.ComponentKind;
 import org.jboss.tools.openshift.core.odo.ComponentState;
 import org.jboss.tools.openshift.core.odo.ComponentType;
+import org.jboss.tools.openshift.core.odo.ComponentTypeInfo;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 import org.jboss.tools.openshift.core.odo.Storage;
 import org.jboss.tools.openshift.core.odo.URL;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -81,11 +92,28 @@ public class OdoProjectDecorator implements Odo {
   public void watch(String project, String application, String context, String component) throws IOException {
     delegate.watch(project, application, context, component);
   }
+  
+  private void refreshProject(String location) {
+    Job.create("Refreshing project " + location, monitor -> {
+      IContainer project = ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(new Path(location));
+      if (project instanceof IProject) {
+        project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+      }
+    }).schedule();
+  }
 
   @Override
   public void createComponentLocal(String project, String application, String componentType, String componentVersion,
-      String component, String source, String devfile, boolean push) throws IOException {
-    delegate.createComponentLocal(project, application, componentType, componentVersion, component, source, devfile, push);
+      String component, String source, String devfile, String starter, boolean push) throws IOException {
+    if (StringUtils.isNotBlank(starter)) {
+      File tmpdir = Files.createTempDirectory("odotmp").toFile();
+      delegate.createComponentLocal(project, application, componentType, componentVersion, component, tmpdir.getAbsolutePath(), devfile, starter, push);
+      FileUtils.copyDirectory(tmpdir, new File(source));
+      FileUtils.deleteQuietly(tmpdir);
+      refreshProject(source);
+    } else {
+      delegate.createComponentLocal(project, application, componentType, componentVersion, component, source, devfile, starter, push);
+    }
   }
 
   @Override
@@ -121,6 +149,11 @@ public class OdoProjectDecorator implements Odo {
   @Override
   public List<ComponentType> getComponentTypes() throws IOException {
     return delegate.getComponentTypes();
+  }
+
+  @Override
+  public ComponentTypeInfo getComponentTypeInfo(String componentType) throws IOException {
+    return delegate.getComponentTypeInfo(componentType);
   }
 
   @Override

@@ -10,11 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.beans.typed.PojoProperties;
+import org.eclipse.core.databinding.conversion.IConverter;
+import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -43,6 +48,7 @@ import org.jboss.tools.common.ui.databinding.MandatoryStringValidator;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.core.odo.ComponentKind;
 import org.jboss.tools.openshift.core.odo.ComponentType;
+import org.jboss.tools.openshift.core.odo.S2iComponentType;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
@@ -123,11 +129,19 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 				.setEclipseProjectObservable(projectObservable).setSelectionListener(SelectionListener.widgetSelectedAdapter(this::onBrowseProjects))
 				.setButtonIndent(0).build(parent, dbc, 1);
 
+		Label information = new Label(parent, SWT.NONE);
+		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+				.applyTo(information);
+		ValueBindingBuilder.bind(WidgetProperties.text().observe(information))
+				.notUpdatingParticipant()
+				.to(BeanProperties.value(CreateComponentModel.PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE).observe(model))
+				.converting(IConverter.create(flag -> (boolean) flag?"Project has a devfile, component type selection is not required":""))
+				.in(dbc);
 		
 		Label componentTypesLabel = new Label(parent, SWT.NONE);
 		componentTypesLabel.setText("Component type:");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(componentTypesLabel);
-		Tree componentTypesTree = new Tree(parent, SWT.SINGLE);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).applyTo(componentTypesLabel);
+		Tree componentTypesTree = new Tree(parent, SWT.SINGLE | SWT.BORDER);
     GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
     .applyTo(componentTypesTree);
 		TreeViewer componentTypesTreeViewer = new TreeViewer(componentTypesTree);
@@ -167,9 +181,36 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(componentVersionsBinding, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater());
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(componentVersionsCombo))
-		    .to(BeanProperties.value(CreateComponentModel.PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE).observe(model))
-		    .converting(new InvertingBooleanConverter())
+		    .to(BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_TYPE).observe(model))
+		    .converting(IConverter.create(type -> type instanceof S2iComponentType))
 		    .in(dbc);
+		
+		Label componentStartersLabel = new Label(parent, SWT.NONE);
+		componentStartersLabel.setText("Project starter:");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(componentStartersLabel);
+		Combo componentStartersVersionsCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+				.applyTo(componentStartersVersionsCombo);
+		ComboViewer componentStartersComboViewer = new ComboViewer(componentStartersVersionsCombo);
+		componentStartersComboViewer.setContentProvider(new ObservableListContentProvider<>());
+		componentStartersComboViewer.setInput(BeanProperties.list(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_STARTERS).observe(model));
+		Binding componentStartersBinding = ValueBindingBuilder
+				.bind(ViewerProperties.singleSelection().observe(componentStartersComboViewer))
+				.to(BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_STARTER).observe(model))
+				.in(dbc);
+		IObservableValue<List> selectedStartersObservable = BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_STARTERS, List.class).observe(model);
+		IObservableValue<Boolean> emptyProjectObservable = BeanProperties.value(CreateComponentModel.PROPERTY_ECLIPSE_PROJECT_EMPTY, Boolean.class).observe(model);
+		IObservableValue<Boolean> computedObservable = ComputedValue.create(() -> {
+			return !selectedStartersObservable.getValue().isEmpty() && emptyProjectObservable.getValue();
+		});
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(componentStartersVersionsCombo))
+				.to(computedObservable)
+				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.text().observe(information))
+				.notUpdatingParticipant()
+				.to(computedObservable)
+				.converting(IConverter.create(flag -> (boolean) flag?"Your project is empty, you can initialize it from starters (templates)":""))
+				.in(dbc);
 
 		Label applicationLabel = new Label(parent, SWT.NONE);
 		applicationLabel.setText("Application:");

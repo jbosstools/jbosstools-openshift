@@ -96,6 +96,7 @@ import org.jboss.tools.openshift.core.odo.ComponentDeserializer;
 import org.jboss.tools.openshift.core.odo.ComponentInfo;
 import org.jboss.tools.openshift.core.odo.ComponentKind;
 import org.jboss.tools.openshift.core.odo.ComponentType;
+import org.jboss.tools.openshift.core.odo.ComponentTypeInfo;
 import org.jboss.tools.openshift.core.odo.ComponentTypesDeserializer;
 import org.jboss.tools.openshift.core.odo.JSonParser;
 import org.jboss.tools.openshift.core.odo.KubernetesLabels;
@@ -238,7 +239,7 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, boolean push) throws IOException {
+  public void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, String starter, boolean push) throws IOException {
     try {
       List<String> args = new ArrayList<>();
       args.add(command);
@@ -249,6 +250,9 @@ public class OdoCli implements Odo {
       } else if (StringUtils.isNotBlank(componentVersion)) {
           args.add(componentType + ":" + componentVersion);
       } else {
+        if (StringUtils.isNotBlank(starter)) {
+          args.add("--starter=" + starter);
+        }
           args.add(componentType);
       }
       args.add(component);
@@ -383,6 +387,16 @@ public class OdoCli implements Odo {
         UsageStats.getInstance().odoCommand("catalog list components", false);
         throw e;
       }
+  }
+  
+  private ComponentTypeInfo parseComponentTypeInfo(String json) throws IOException {
+    JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
+    return parser.parseComponentTypeInfo();
+  }
+  
+  @Override
+  public ComponentTypeInfo getComponentTypeInfo(String componentType) throws IOException {
+    return parseComponentTypeInfo(execute(command, "catalog", "describe", "component", componentType, "-o", "json"));
   }
 
   @Override

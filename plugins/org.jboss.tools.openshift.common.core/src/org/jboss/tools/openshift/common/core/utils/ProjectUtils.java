@@ -13,9 +13,11 @@ package org.jboss.tools.openshift.common.core.utils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 
 /**
  * @author Andre Dietisheim
@@ -100,4 +102,14 @@ public class ProjectUtils {
 			return null;
 		}
 	}
+
+  public static boolean isEmpty(IProject project) {
+    try {
+      return Stream.of(project.members())
+          .filter(member -> !member.getName().startsWith("."))
+          .findAny().isEmpty();
+    } catch (CoreException e) {
+      return false;
+    }
+  }
 }
