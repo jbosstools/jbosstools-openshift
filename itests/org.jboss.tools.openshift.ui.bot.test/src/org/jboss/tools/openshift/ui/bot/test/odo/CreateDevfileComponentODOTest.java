@@ -43,7 +43,7 @@ public class CreateDevfileComponentODOTest extends AbstractODOTest {
 	
 	@Test
 	public void testCreateComponent() {
-		createComponent(projectReq.getProjectName(), "java-vertx", true);
+		createComponent(projectReq.getProjectName(), "java-vertx", null, true);
 	}
 
 }

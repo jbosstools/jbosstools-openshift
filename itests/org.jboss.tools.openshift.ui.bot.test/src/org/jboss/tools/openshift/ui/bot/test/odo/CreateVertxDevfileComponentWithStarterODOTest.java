@@ -10,11 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test.odo;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
@@ -35,7 +32,7 @@ import org.junit.runner.RunWith;
 @RequiredODOConnection
 @CleanODOConnection
 @RequiredODOProject
-public class CreateVertxDevfileComponentWithLocalDevfileODOTest extends AbstractODOTest {
+public class CreateVertxDevfileComponentWithStarterODOTest extends AbstractODOTest {
 	
 
 	@InjectRequirement
@@ -44,14 +41,12 @@ public class CreateVertxDevfileComponentWithLocalDevfileODOTest extends Abstract
 	
 	@BeforeClass
 	public static void setupWorkspace() throws IOException, CoreException {
-		importVertxLauncherProject();
-		IFile file = ResourcesPlugin.getWorkspace().getRoot().getProject(eclipseProject).getFile("devfile.yaml");
-		file.create(new FileInputStream("resources/devfiles/java-maven/devfile.yaml"), true, null);
+		importEmptyProject();
 	}
 	
 	@Test
 	public void testCreateComponent() {
-		createComponent(projectReq.getProjectName(), null, null, true);
+		createComponent(projectReq.getProjectName(), "java-vertx", "vertx-ex", true);
 	}
 
 }
