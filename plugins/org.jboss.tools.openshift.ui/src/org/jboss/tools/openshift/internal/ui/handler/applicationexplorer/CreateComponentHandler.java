@@ -78,7 +78,8 @@ public class CreateComponentHandler extends OdoHandler {
 			model.getOdo().createComponentLocal(model.getProjectName(), model.getApplicationName(),
 			        model.getSelectedComponentType().getName(), model.getSelectedComponentVersion(),
 			        model.getComponentName(), model.getEclipseProject().getLocation().toOSString(),
-			        model.isEclipseProjectHasDevfile()?CreateComponentModel.DEVFILE_NAME:null, model.isPushAfterCreate());
+			        model.isEclipseProjectHasDevfile()?CreateComponentModel.DEVFILE_NAME:null, 
+			        model.getSelectedComponentStarter(), model.isPushAfterCreate());
 			LabelNotification.openNotification(notification, shell, "Component " + model.getComponentName() + " created");
 			element.getRoot().addContext(model.getEclipseProject());
 			element.refresh();

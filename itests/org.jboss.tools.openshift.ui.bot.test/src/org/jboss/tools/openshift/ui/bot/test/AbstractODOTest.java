@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.reddeer.jface.condition.WindowIsAvailable;
 import org.eclipse.reddeer.jface.wizard.WizardDialog;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
@@ -69,6 +70,13 @@ public abstract class AbstractODOTest {
 			}
 		}).start();
 	}
+	
+	protected static void importEmptyProject() {
+		BasicNewProjectResourceWizard wizard = new BasicNewProjectResourceWizard();
+		wizard.open();
+		new LabeledText("Project name:").setText(eclipseProject);
+		wizard.finish();
+	}
 
 	protected static void importVertxLauncherProject() {
 		importLauncherProject(eclipseProject, "vert.x community");
@@ -88,11 +96,11 @@ public abstract class AbstractODOTest {
 		
 	}
 	
-	protected static void createComponent(String projectName, String componentType, boolean devfile) {
-		createComponent(eclipseProject, projectName, componentType, devfile);
+	protected static void createComponent(String projectName, String componentType, String starter, boolean devfile) {
+		createComponent(eclipseProject, projectName, componentType, starter, devfile);
 	}
 	
-	public static void createComponent(String eclipseProjectName, String projectName, String componentType, boolean devfile) {
+	public static void createComponent(String eclipseProjectName, String projectName, String componentType, String starter, boolean devfile) {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();
 		OpenShiftODOProject project = explorer.getOpenShiftODOConnection().getProject(projectName);
@@ -103,6 +111,9 @@ public abstract class AbstractODOTest {
 		componentWizardPage.setEclipseProject(eclipseProjectName);
 		if (componentType != null) {
 			componentWizardPage.selectComponentType(componentType, devfile);
+		}
+		if (starter != null) {
+		  componentWizardPage.selectStarter(starter);
 		}
 		if (!devfile) {
 			componentWizardPage.selectComponentVersion("latest");

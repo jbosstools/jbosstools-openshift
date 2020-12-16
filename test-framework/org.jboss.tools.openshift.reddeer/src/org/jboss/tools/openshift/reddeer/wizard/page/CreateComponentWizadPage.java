@@ -81,4 +81,11 @@ public class CreateComponentWizadPage extends WizardPage {
 		new  PushButton(OpenShiftLabel.TextLabels.PUSH_AFTER_CREATE).click();
 	}
 
+	public void selectStarter(String starter) {
+		new LabeledCombo(OpenShiftLabel.TextLabels.PROJECT_STARTER).setSelection(starter);
+	}
+  
+	public String getSelectedStarter() {
+		return new LabeledCombo(OpenShiftLabel.TextLabels.PROJECT_STARTER).getSelection();
+	}
 }

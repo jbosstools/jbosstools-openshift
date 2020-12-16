@@ -10,10 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.core.odo.ComponentType;
+import org.jboss.tools.openshift.core.odo.DevfileComponentType;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.S2iComponentType;
 
@@ -24,8 +28,11 @@ import org.jboss.tools.openshift.core.odo.S2iComponentType;
 public class CreateComponentModel extends ComponentModel {
 	public static final String PROPERTY_ECLIPSE_PROJECT = "eclipseProject";
 	public static final String PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE = "eclipseProjectHasDevfile";
+	public static final String PROPERTY_ECLIPSE_PROJECT_EMPTY = "eclipseProjectEmpty";
 	public static final String PROPERTY_SELECTED_COMPONENT_TYPE = "selectedComponentType";
 	public static final String PROPERTY_SELECTED_COMPONENT_VERSION = "selectedComponentVersion";
+	public static final String PROPERTY_SELECTED_COMPONENT_STARTERS = "selectedComponentStarters";
+	public static final String PROPERTY_SELECTED_COMPONENT_STARTER = "selectedComponentStarter";
 	public static final String PROPERTY_PUSH_AFTER_CREATE = "pushAfterCreate";
 	
 	public static final String DEVFILE_NAME = "devfile.yaml";
@@ -35,9 +42,15 @@ public class CreateComponentModel extends ComponentModel {
 	
 	private boolean eclipseProjectHasDevfile = false;
 	
+	private boolean eclipseProjectEmpty = false;
+	
 	private final List<ComponentType> componentTypes;
 	
 	private ComponentType selectedComponentType;
+	
+	private List<String> selectedComponentStarters;
+	
+	private String selectedComponentStarter;
 	
 	private String selectedComponentVersion;
 	
@@ -68,6 +81,8 @@ public class CreateComponentModel extends ComponentModel {
 	public void setEclipseProject(IProject project) {
 		firePropertyChange(PROPERTY_ECLIPSE_PROJECT, this.eclipseProject, this.eclipseProject = project);
 		setEclipseProjectHasDevfile(project.getFile(DEVFILE_NAME).exists());
+		setEclipseProjectEmpty(ProjectUtils.isEmpty(project));
+		setSelectedComponentStarter(null);
 	}
 
 	/**
@@ -85,6 +100,20 @@ public class CreateComponentModel extends ComponentModel {
   }
 
   /**
+   * @return the eclipseProjectEmpty
+   */
+  public boolean isEclipseProjectEmpty() {
+    return eclipseProjectEmpty;
+  }
+
+  /**
+   * @param eclipseProjectEmpty the eclipseProjectEmpty to set
+   */
+  public void setEclipseProjectEmpty(boolean eclipseProjectEmpty) {
+    firePropertyChange(PROPERTY_ECLIPSE_PROJECT_EMPTY, this.eclipseProjectEmpty, this.eclipseProjectEmpty = eclipseProjectEmpty);
+  }
+
+  /**
 	 * @return the selectedComponentType
 	 */
 	public ComponentType getSelectedComponentType() {
@@ -98,6 +127,14 @@ public class CreateComponentModel extends ComponentModel {
 		firePropertyChange(PROPERTY_SELECTED_COMPONENT_TYPE, this.selectedComponentType, this.selectedComponentType = selectedComponentType);
 		if (selectedComponentType instanceof S2iComponentType && !((S2iComponentType)selectedComponentType).getVersions().isEmpty()) {
 			setSelectedComponentVersion(((S2iComponentType)selectedComponentType).getVersions().get(0));
+		}
+		if (selectedComponentType instanceof DevfileComponentType) {
+		  try {
+        setSelectedComponentStarters(getOdo().getComponentTypeInfo(selectedComponentType.getName()).getStarters());
+      } catch (IOException e) {
+        setSelectedComponentStarters(Collections.emptyList());
+      }
+		  setSelectedComponentStarter(null);
 		}
 	}
 
@@ -116,6 +153,34 @@ public class CreateComponentModel extends ComponentModel {
 	}
 
 	/**
+   * @return the selectedComponentStarters
+   */
+  public List<String> getSelectedComponentStarters() {
+    return selectedComponentStarters;
+  }
+
+  /**
+   * @param selectedComponentStarters the selectedComponentStarters to set
+   */
+  public void setSelectedComponentStarters(List<String> selectedComponentStarters) {
+    firePropertyChange(PROPERTY_SELECTED_COMPONENT_STARTERS, this.selectedComponentStarters, this.selectedComponentStarters = selectedComponentStarters);
+  }
+
+  /**
+   * @return the selectedComponentStarter
+   */
+  public String getSelectedComponentStarter() {
+    return selectedComponentStarter;
+  }
+
+  /**
+   * @param selectedComponentStarter the selectedComponentStarter to set
+   */
+  public void setSelectedComponentStarter(String selectedComponentStarter) {
+    firePropertyChange(PROPERTY_SELECTED_COMPONENT_STARTER, this.selectedComponentStarter, this.selectedComponentStarter = selectedComponentStarter);
+  }
+
+  /**
 	 * @return the pushAfterCreate
 	 */
 	public boolean isPushAfterCreate() {

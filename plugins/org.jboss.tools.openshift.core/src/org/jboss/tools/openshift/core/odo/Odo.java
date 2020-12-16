@@ -35,7 +35,7 @@ public interface Odo {
 
     void watch(String project, String application, String context, String component) throws IOException;
 
-    void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, boolean push) throws IOException;
+    void createComponentLocal(String project, String application, String componentType, String componentVersion, String component, String source, String devfile, String starter, boolean push) throws IOException;
 
     void createComponentGit(String project, String application, String context, String componentType, String componentVersion, String component, String source, String reference, boolean push) throws IOException;
 
@@ -48,6 +48,8 @@ public interface Odo {
     void deleteService(String project, String application, String service) throws IOException;
 
     List<ComponentType> getComponentTypes() throws IOException;
+    
+    ComponentTypeInfo getComponentTypeInfo(String componentType) throws IOException;
 
     List<ServiceTemplate> getServiceTemplates() throws IOException;
 

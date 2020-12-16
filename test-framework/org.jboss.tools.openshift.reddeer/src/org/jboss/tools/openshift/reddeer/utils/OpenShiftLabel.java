@@ -341,6 +341,7 @@ public class OpenShiftLabel {
 		public static final String TOKEN_ODO = "Token:";
 		public static final String S2I_NODE = "S2I";
 		public static final String PORT = "Port:";
+		public static final String PROJECT_STARTER = "Project starter:";
 	}
 	
 	public static class JobsLabels {			
