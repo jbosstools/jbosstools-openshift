@@ -10,13 +10,18 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test.odo;
 
+import static org.junit.Assert.fail;
+
+import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOProjectRequirement;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftODOConnectionRequirement.CleanODOConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOConnectionRequirement.RequiredODOConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOProjectRequirement.RequiredODOProject;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOProject;
@@ -53,6 +58,13 @@ public class CreateServiceODOTest extends AbstractODOTest {
 		explorer.open();
 		OpenShiftODOProject project = explorer.getOpenShiftODOConnection().getProject(projectReq.getProjectName());
 		project.openCreateServiceWizard();
+		try {
+			new DefaultShell("Unable to create service");
+			new OkButton().click();
+		} catch (RedDeerException ex) {
+			// Service catalog is not installed
+			fail();
+		}
 		CreateServiceWizard serviceWizard = new CreateServiceWizard();
 		CreateServiceWizadPage serviceWizardPage = new CreateServiceWizadPage(serviceWizard);
 		serviceWizardPage.setServiceName("myapp");

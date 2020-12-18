@@ -16,10 +16,13 @@ import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.reddeer.jface.condition.WindowIsAvailable;
 import org.eclipse.reddeer.jface.wizard.WizardDialog;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
@@ -50,6 +53,10 @@ public abstract class AbstractODOTest {
 	
 	@After
 	public void cleanUp() {
+		//delete all projects - test could fail and interfere next test
+		ProjectExplorer pe = new ProjectExplorer();
+		pe.open();
+		pe.deleteAllProjects();
 		//Cleanup notifications
 		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 	}
@@ -92,6 +99,7 @@ public abstract class AbstractODOTest {
 		wizardPage.setProjectName(projectName);
 		wizardPage.toggleUseDefaultLocationCheckBox(true);
 		
+		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.LONG);
 		wizard.finish(TimePeriod.getCustom(2500));
 		
 	}
