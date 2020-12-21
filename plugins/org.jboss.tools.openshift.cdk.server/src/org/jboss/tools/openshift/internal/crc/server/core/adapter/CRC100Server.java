@@ -77,10 +77,6 @@ public class CRC100Server extends ServerDelegate {
 		if (!bin.exists() || !json.exists() || !log.exists()) {
 			return false;
 		}
-		File oc = new File(bin, "oc");
-		File ocExe = new File(bin, "oc.exe");
-		if( !oc.exists() && !ocExe.exists()) 
-			return false;
 		return true;
 	}
 
