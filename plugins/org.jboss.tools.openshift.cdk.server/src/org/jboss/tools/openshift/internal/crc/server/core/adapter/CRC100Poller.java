@@ -145,16 +145,22 @@ public class CRC100Poller extends AbstractCDKPoller {
 		try {
 			String[] lines = new CDKLaunchUtility().callMachineReadable(cmdLoc, args, 
 					getWorkingDirectory(server), env);
-			String allContent = String.join("\n", lines);
-		    ObjectMapper mapper = new ObjectMapper();
-		    JsonNode actualObj = mapper.readTree(allContent);
-		    JsonNode field = actualObj.get("crcStatus");
-		    String status = field.asText();
-		    if( "Running".equals(status)) 
-		    	return Status.OK_STATUS;
-		    if( "Stopped".equals(status)) 
-				return CDKCoreActivator.statusFactory()
-						.errorStatus("crc status indicates the CodeReady Container is stopped.");
+			// there is not handled the case where crc has no status - aka was not started
+			// it returns a string `Machine 'crc' does not exist. Use 'crc start' to create it`
+			// but this string is only obtained from error output from process call
+			// JBIDE-27589
+			if (lines != null && lines.length != 0) {
+				String allContent = String.join("\n", lines);
+			    ObjectMapper mapper = new ObjectMapper();
+			    JsonNode actualObj = mapper.readTree(allContent);
+			    JsonNode field = actualObj.get("crcStatus");
+			    String status = field.asText();
+			    if( "Running".equals(status))
+			    	return Status.OK_STATUS;
+			    if( "Stopped".equals(status)) 
+					return CDKCoreActivator.statusFactory()
+							.errorStatus("crc status indicates the CodeReady Container is stopped.");
+			}
 			return StatusFactory.infoStatus(CDKCoreActivator.PLUGIN_ID, "The CRC Container is starting.");
 		} catch (CommandTimeoutException vte) {
 			// Try to salvage it, it could be the process never terminated but
