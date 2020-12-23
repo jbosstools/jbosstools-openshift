@@ -62,8 +62,7 @@ public class CreateServiceODOTest extends AbstractODOTest {
 			new DefaultShell("Unable to create service");
 			new OkButton().click();
 		} catch (RedDeerException ex) {
-			// Service catalog is not installed
-			fail();
+			fail("Service catalog is not installed");
 		}
 		CreateServiceWizard serviceWizard = new CreateServiceWizard();
 		CreateServiceWizadPage serviceWizardPage = new CreateServiceWizadPage(serviceWizard);
