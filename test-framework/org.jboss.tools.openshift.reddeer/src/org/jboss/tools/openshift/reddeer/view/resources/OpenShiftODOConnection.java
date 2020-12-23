@@ -54,7 +54,7 @@ public class OpenShiftODOConnection extends AbstractOpenShiftApplicationConnecti
 		refresh();
 		item.expand();
 		
-		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+		new WaitWhile(new JobIsRunning());
 		return new OpenShiftODOProject(treeViewerHandler.getTreeItem(item, projectName));
 		
 	}
