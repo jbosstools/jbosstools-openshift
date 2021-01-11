@@ -156,7 +156,7 @@ public class ConfigureCRCFrameworksListener extends UnitedServerListener {
 	private File findOcBin(IServer server) {
 		String home = getServerHome(server);
 		String ocBinaryName = OCBinary.getInstance().getName();
-		return Paths.get(home, "bin", ocBinaryName).toFile();
+		return Paths.get(home, "bin", "oc", ocBinaryName).toFile();
 	}
 
 	private String getServerHome(IServer server) {
