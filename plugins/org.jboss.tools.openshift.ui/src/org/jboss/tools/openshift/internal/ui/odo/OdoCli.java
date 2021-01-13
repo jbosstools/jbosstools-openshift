@@ -268,11 +268,11 @@ public class OdoCli implements Odo {
       }
       ExecHelper.executeWithTerminal(new File(source), args.toArray(new String[0]));
       UsageStats.getInstance().odoCommand("create", true);
-      String componentStatPrefix = (StringUtils.isNotBlank(componentVersion) ? "s2i:" : "devfile:");
+      String componentStatPrefix = StringUtils.isNotBlank(componentVersion) ? "s2i:" : "devfile:";
       UsageStats.getInstance().createComponent(componentStatPrefix + componentType, true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("create", false);
-      String componentStatPrefix = (StringUtils.isNotBlank(componentVersion) ? "s2i:" : "devfile:");
+      String componentStatPrefix = StringUtils.isNotBlank(componentVersion) ? "s2i:" : "devfile:";
       UsageStats.getInstance().createComponent(componentStatPrefix + componentType, false);
       throw e;
     }
