@@ -17,6 +17,7 @@ import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.cdt.utils.pty.PTY;
 import org.eclipse.cdt.utils.spawner.ProcessFactory;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
 import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
 import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
@@ -154,6 +155,9 @@ public class ExecHelper {
 		properties.put(ITerminalsConnectorConstants.PROP_ENCODING, StandardCharsets.UTF_8.name());
 		ITerminalService service = TerminalServiceFactory.getService();
 		service.openConsole(properties, null);
+		if (Display.getDefault().getThread() == Thread.currentThread()) {
+		  waitForProcessToExit = false;
+		}
 		if (waitForProcessToExit) {
 			try {
 				p.waitFor();
