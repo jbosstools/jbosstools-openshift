@@ -10,16 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test.application.v3.advanced;
 
-import static org.junit.Assert.assertNotNull;
-import org.apache.commons.lang.StringUtils;
-
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertNotNull;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.api.Combo;
 import org.eclipse.reddeer.swt.api.Text;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
@@ -29,7 +27,6 @@ import org.eclipse.reddeer.swt.impl.combo.DefaultCombo;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.DefaultText;
-import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.ResourceIsUpdated;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
@@ -57,7 +54,6 @@ import org.junit.runner.RunWith;
  *
  */
 @RunWith(RedDeerSuite.class)
-@OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection()
 @CleanConnection
 @RequiredProject()

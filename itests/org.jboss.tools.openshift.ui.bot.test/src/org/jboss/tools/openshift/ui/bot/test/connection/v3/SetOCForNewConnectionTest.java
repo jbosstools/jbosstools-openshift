@@ -22,10 +22,8 @@ import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheet;
 import org.eclipse.reddeer.junit.execution.annotation.RunIf;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
-import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.reddeer.enums.AuthenticationMethod;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
@@ -47,7 +45,6 @@ import org.junit.runner.RunWith;
  * @author jkopriva@redhat.com
  */
 @RunWith(RedDeerSuite.class)
-@OpenPerspective(JBossPerspective.class)
 @CleanOpenShiftExplorer
 public class SetOCForNewConnectionTest extends AbstractTest {
 

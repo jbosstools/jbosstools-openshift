@@ -30,7 +30,6 @@ import org.eclipse.reddeer.eclipse.ui.wizards.datatransfer.ExternalProjectImport
 import org.eclipse.reddeer.eclipse.ui.wizards.datatransfer.WizardProjectsImportPage;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.ctab.DefaultCTabItem;
@@ -40,7 +39,6 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.impl.editor.TextEditor;
 import org.hamcrest.core.StringStartsWith;
-import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.ApplicationPodIsRunning;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
@@ -63,7 +61,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@OpenPerspective(value=JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
 @OCBinary(cleanup=false, setOCInPrefs=true)
 @CleanOpenShiftExplorer

@@ -23,22 +23,22 @@ public class OpenShiftResources {
 	/**
 	 * the template that creates a basic eap service
 	 */
-	public static final String EAP_TEMPLATE = "eap72-basic-s2i";
+	public static final String EAP_TEMPLATE = "eap73-basic-s2i";
 	public static final String EAP_SERVICE = "eap-app";
 	public static final String EAP_SERVICE_PING = "eap-app-ping";
 	public static final String EAP_APP_REPLICATION_CONTROLLER = "eap-app-1";
 	public static final String EAP_APP_GIT_NAME = "jboss-eap-quickstarts";
 	public static final String EAP_TEMPLATE_RESOURCES_PATH = "resources/eap72-basic-s2i-helloworld.json";
 	public static final String EAP_TEMPLATE_RESOURCES_FILENAME = "eap72-basic-s2i-helloworld.json";
-	public static final String EAP_TEMPLATE_RESOURCES_PATH_OS4 = "resources/os4templates/eap72-basic-s2i-helloworld.json";
-	public static final String EAP_TEMPLATE_RESOURCES_FILENAME_OS4 = "eap72-basic-s2i-helloworld.json";
+	public static final String EAP_TEMPLATE_RESOURCES_PATH_OS4 = "resources/os4templates/eap73-basic-s2i-helloworld.json";
+	public static final String EAP_TEMPLATE_RESOURCES_FILENAME_OS4 = "eap73-basic-s2i-helloworld.json";
 	
 	public static final String EAP_CD_TEMPLATE = "resources/eap-cd-basic-s2i-helloworld.json";
 
 	/**	
 	 * the template that creates a basic nodejs service
 	 */
-	public static final String NODEJS_TEMPLATE = "https://raw.githubusercontent.com/sclorg/nodejs-ex/master/openshift/templates/nodejs.json";
+	public static final String NODEJS_TEMPLATE = "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/os4templates/nodejs.json";
 	public static final String NODEJS_TEMPLATE_OS4 = "resources/os4templates/nodejs.json";
 	public static final String NODEJS_SERVICE = "nodejs-example";
 	public static final String NODEJS_APP_REPLICATION_CONTROLLER = "nodejs-example-1";

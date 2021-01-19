@@ -18,9 +18,7 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.eclipse.ui.browser.BrowserEditor;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
-import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.AmountOfResourcesExists;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
@@ -30,8 +28,8 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRe
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
@@ -39,7 +37,6 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@OpenPerspective(value=JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
 @OCBinary
 @RequiredBasicConnection
@@ -61,14 +58,14 @@ public class DeploymentTest extends AbstractTest {
 				projectReq.getProjectName(), connectionReq.getConnection()), TimePeriod.DEFAULT, false);
 
 		try {
-			new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-1", ResourceState.COMPLETE, projectReq.getProjectName(), connectionReq.getConnection()),
+			new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-2", ResourceState.COMPLETE, projectReq.getProjectName(), connectionReq.getConnection()),
 					TimePeriod.getCustom(600), true);
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("There should be a successful build of an application, but there is not.");
 		}
 
 		try {
-			new WaitUntil(new AmountOfResourcesExists(Resource.POD, 2, projectReq.getProjectName(), connectionReq.getConnection()), TimePeriod.getCustom(60), true);
+			new WaitUntil(new AmountOfResourcesExists(Resource.POD, 4, projectReq.getProjectName(), connectionReq.getConnection()), TimePeriod.getCustom(60), true);
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("There should be precisely 2 pods. One of the build and one of an running application.");
 		}

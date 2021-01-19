@@ -11,8 +11,6 @@
 package org.jboss.tools.openshift.ui.bot.test.application.v3.advanced;
 
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
-import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
@@ -30,7 +28,6 @@ import org.junit.runners.MethodSorters;
  * @author jkopriva@redhat.com
  */
 @RunWith(RedDeerSuite.class)
-@OpenPerspective(value = JBossPerspective.class)
 @OCBinary(cleanup=false, setOCInPrefs = true)
 @CleanOpenShiftExplorer
 @RequiredBasicConnection

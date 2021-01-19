@@ -55,7 +55,12 @@ public class OpenShiftODOConnection extends AbstractOpenShiftApplicationConnecti
 		item.expand();
 		
 		new WaitWhile(new JobIsRunning());
-		return new OpenShiftODOProject(treeViewerHandler.getTreeItem(item, projectName));
+		try {
+			return new OpenShiftODOProject(treeViewerHandler.getTreeItem(item, projectName));
+		} catch (RedDeerException ex) {
+			return null;
+		}
+		
 		
 	}
 
@@ -125,8 +130,7 @@ public class OpenShiftODOConnection extends AbstractOpenShiftApplicationConnecti
 	 */
 	public boolean projectExists(String projectName) {
 		try {
-			getProject(projectName);
-			return true;
+			return getProject(projectName) != null;
 		} catch (RedDeerException ex) {
 			return false;
 		}
