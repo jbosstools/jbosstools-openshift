@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.ui;singleton:=true
-Bundle-Version: 3.13.0.qualifier
+Bundle-Version: 3.14.0.qualifier
 Bundle-Activator: org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
@@ -62,7 +62,7 @@ Require-Bundle: org.jboss.tools.openshift.common.ui;bundle-version="[3.0.0,4.0.0
  org.eclipse.tm.terminal.view.ui,
  org.eclipse.tm.terminal.connector.local,
  org.eclipse.cdt.core.native
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.comparators;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
