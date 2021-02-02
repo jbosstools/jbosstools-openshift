@@ -364,6 +364,9 @@
     <provider
           class="org.jboss.tools.openshift.internal.core.stack.NodeRemoteStackDebugger">
     </provider>
+    <provider
+          class="org.jboss.tools.openshift.internal.core.stack.PythonRemoteStackDebugger">
+    </provider>
  </extension>
  <extension
        point="org.eclipse.core.contenttype.contentTypes">

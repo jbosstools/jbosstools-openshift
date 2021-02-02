@@ -88,6 +88,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.common.util.DownloadHelper;
+import org.jboss.tools.openshift.core.OpenShiftCoreConstants.DebugStatus;
 import org.jboss.tools.openshift.core.odo.Application;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
@@ -101,6 +102,7 @@ import org.jboss.tools.openshift.core.odo.ComponentTypesDeserializer;
 import org.jboss.tools.openshift.core.odo.DevfileComponentType;
 import org.jboss.tools.openshift.core.odo.DevfileRegistriesDeserializer;
 import org.jboss.tools.openshift.core.odo.DevfileRegistry;
+import org.jboss.tools.openshift.core.odo.DebugInfo;
 import org.jboss.tools.openshift.core.odo.JSonParser;
 import org.jboss.tools.openshift.core.odo.KubernetesLabels;
 import org.jboss.tools.openshift.core.odo.Odo;
@@ -772,6 +774,20 @@ public class OdoCli implements Odo {
       UsageStats.getInstance().odoCommand("debug port-forward", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("debug port-forward", false);
+      throw e;
+    }
+  }
+  
+  @Override
+  public DebugInfo debugInfo(String project, String application, String context, String component) throws IOException {
+    try {
+      String json = ExecHelper.execute(command, new File(context), "debug", "info", "-o", "json");
+      JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
+      return parser.parseDebugInfo();
+    } catch (IOException e) {
+      if (e.getMessage().contains("debug is not running")) {
+        return new DebugInfo(DebugStatus.NOT_RUNNING);
+      }
       throw e;
     }
   }

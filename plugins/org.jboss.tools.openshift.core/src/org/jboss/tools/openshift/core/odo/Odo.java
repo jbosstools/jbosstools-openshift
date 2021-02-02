@@ -107,6 +107,8 @@ public interface Odo {
 
     void debug(String project, String application, String context, String component, Integer port) throws IOException;
     
+    DebugInfo debugInfo(String project, String application, String context, String component) throws IOException;
+    
     List<ComponentDescriptor> discover(String path) throws IOException;
 
     boolean isServiceCatalogAvailable(OpenShiftClient client);
