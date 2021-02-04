@@ -172,8 +172,7 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 		try {
 			checkOpen();
 		} catch (WaitTimeoutExpiredException ex) {
-			//try it once again
-			checkOpen();
+			//swallow exception
 		}
 		log.info("Activate view " + getTitle());
 		if (!new ODOIsDownloaded().test()) {
@@ -191,13 +190,6 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 			});
 			WorkbenchPartHandler.getInstance()
 			.focusChildControl(WorkbenchPartLookup.getInstance().getActiveWorkbenchPart());
-			try {
-				DefaultShell shell = new DefaultShell("odo tool required");
-				new PushButton(shell, "Yes").click();
-				new WaitWhile(new ODOIsDownloaded(), TimePeriod.LONG);
-			} catch (CoreLayerException ex) {
-				// swallow exception dialog is not found
-			}
 		} else {
 			cTabItem.activate();
 			WorkbenchPartHandler.getInstance()

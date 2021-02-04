@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.reddeer.view.resources;
 
 import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
@@ -55,7 +56,7 @@ public class OpenShiftODOProject extends AbstractOpenShiftApplicationExplorerIte
 		
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.DELETE_OS_PROJECT), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(new Matcher[]{CoreMatchers.is(OpenShiftLabel.JobsLabels.DELETE)}), TimePeriod.LONG);
-		new WaitWhile(new ODOProjectIsDeleted(getName()), TimePeriod.getCustom(120));
+		new WaitUntil(new ODOProjectIsDeleted(getName()), TimePeriod.getCustom(120));
 	}
 	
 	public void openCreateComponentWizard() {

@@ -60,7 +60,7 @@ public class TriggerBuildTest extends AbstractTest {
 		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD_CONFIG, (Matcher<String>) null, ResourceState.UNSPECIFIED, projectReq.getProjectName(), connectionReq.getConnection()), 
 				TimePeriod.getCustom(120), true);
 		
-		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-1", ResourceState.UNSPECIFIED, projectReq.getProjectName(), connectionReq.getConnection()), 
+		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-2", ResourceState.UNSPECIFIED, projectReq.getProjectName(), connectionReq.getConnection()), 
 				TimePeriod.LONG, true);
 		
 		List<OpenShiftResource> builds = explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).

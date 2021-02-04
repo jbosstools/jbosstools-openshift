@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.ui.bot.test.connection.v3;
 
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.api.Shell;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.CancelButton;
@@ -20,7 +19,6 @@ import org.eclipse.reddeer.swt.impl.combo.DefaultCombo;
 import org.eclipse.reddeer.swt.impl.link.DefaultLink;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.toolbar.DefaultToolItem;
-import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.requirement.ConnectionUtils;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -37,7 +35,6 @@ import org.junit.runner.RunWith;
  *
  */
 
-@OpenPerspective(value=JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
 @CleanOpenShiftExplorer
 public class OpenNewConnectionWizardTest extends AbstractTest {

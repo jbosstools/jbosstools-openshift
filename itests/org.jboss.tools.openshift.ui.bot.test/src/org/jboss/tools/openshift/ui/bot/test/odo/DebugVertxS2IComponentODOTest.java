@@ -61,7 +61,7 @@ public class DebugVertxS2IComponentODOTest extends AbstractODOTest {
 	@BeforeClass
 	public static void setupWorkspace() {
 		importLauncherProject(ECLIPSE_PROJECT, "vert.x community");
-		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "java", false);
+		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "java", null, false);
 		createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080, false);
 	}
 	

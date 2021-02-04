@@ -49,7 +49,7 @@ import org.junit.After;
  */
 public abstract class AbstractODOTest {
 	
-	protected static String eclipseProject = "myService";
+	protected static String eclipseProject = "myservice";
 	
 	@After
 	public void cleanUp() {
@@ -90,18 +90,20 @@ public abstract class AbstractODOTest {
 	}
 	
 	public static void importLauncherProject(String projectName, String stack) {
-		NewLauncherProjectWizard wizard = new NewLauncherProjectWizard(); 
+		NewLauncherProjectWizard wizard = new NewLauncherProjectWizard();
 		wizard.openWizardFromShellMenu();
-		
+
 		NewLauncherProjectWizardPage wizardPage = new NewLauncherProjectWizardPage(wizard);
-		wizardPage.setTargetMission("rest-http");
-		wizardPage.setTargetRuntime(stack);
-		wizardPage.setProjectName(projectName);
-		wizardPage.toggleUseDefaultLocationCheckBox(true);
-		
-		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.LONG);
+		if (!wizardPage.getTargetMissions().isEmpty() && !wizardPage.getTargetRuntimes().isEmpty()) {
+			wizardPage.setTargetMission("rest-http");
+			wizardPage.setTargetRuntime(stack);
+			wizardPage.setProjectName(projectName);
+			wizardPage.toggleUseDefaultLocationCheckBox(true);
+		}
+
+		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.VERY_LONG, false);
 		wizard.finish(TimePeriod.getCustom(2500));
-		
+
 	}
 	
 	protected static void createComponent(String projectName, String componentType, String starter, boolean devfile) {
