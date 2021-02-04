@@ -13,11 +13,13 @@ package org.jboss.tools.openshift.ui.bot.test;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.openshift.ui.bot.test.odo.ConnectionODOCommandsTests;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateDevfileComponentODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.CreatePythonDevfileComponentWithStarterODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateS2IComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateServiceODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateVertxDevfileComponentWithLocalDevfileODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.DebugNodeDevfileComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.DebugNodeS2IComponentODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.DebugPythonDevfileComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.DebugVertxDevfileComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.DebugVertxS2IComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.LoginODOTest;
@@ -43,6 +45,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	DebugNodeDevfileComponentODOTest.class,
 	DebugVertxS2IComponentODOTest.class,
 	DebugVertxDevfileComponentODOTest.class,
+	CreatePythonDevfileComponentWithStarterODOTest.class,
+	DebugPythonDevfileComponentODOTest.class,
 	//CreateServiceODOTest.class - disable this suite for now, depends on service catalog (which is not supported on newer OpenShift)
 })
 public class OpenShiftODOTests {

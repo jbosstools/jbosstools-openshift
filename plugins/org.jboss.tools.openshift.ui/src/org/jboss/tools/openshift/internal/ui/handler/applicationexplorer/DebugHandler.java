@@ -121,6 +121,7 @@ public class DebugHandler extends ComponentHandler {
           try {
             Thread.sleep(1_000L);
           } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage()));
           }
         } else {
