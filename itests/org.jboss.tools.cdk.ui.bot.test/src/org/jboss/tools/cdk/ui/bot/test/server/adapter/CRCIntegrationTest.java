@@ -98,7 +98,28 @@ public class CRCIntegrationTest extends CDKServerAdapterAbstractTest {
 		}
 		connection.select();
 		handleSSLDialog();
-		connection.refresh(TimePeriod.getCustom(120));
+		try {
+			handleSSLDialog();
+		} catch (CoreLayerException exc) {
+			// consumes exception, dialog was not shown
+		}
+		try {
+			connection.refresh(TimePeriod.getCustom(120));
+		} catch (WaitTimeoutExpiredException exc) {
+			ShellIsAvailable refreshShellAvailable = new ShellIsAvailable(CDKLabel.Shell.PROBLEM_DIALOG);
+			new WaitUntil(refreshShellAvailable, TimePeriod.DEFAULT, false);
+			if (refreshShellAvailable.getResult() != null) {
+				DefaultShell refreshFailed = new DefaultShell(refreshShellAvailable.getResult());
+				System.out.println("Refresh Failed dialog expected, text: " + refreshFailed.getText());
+				if (refreshFailed.getText().contains("Failed to refresh element")) {
+					refreshFailed.close();
+					new WaitWhile(refreshShellAvailable, TimePeriod.DEFAULT);
+				} else {
+					fail("Unexpected problem dialog appeared: " + refreshFailed.getText());
+				}
+			}
+			connection.refresh(TimePeriod.getCustom(60));
+		}
 		connection.expand();
 		CDKTestUtils.testOpenshiftConnection(connection);
 		// should be addad after crc ga

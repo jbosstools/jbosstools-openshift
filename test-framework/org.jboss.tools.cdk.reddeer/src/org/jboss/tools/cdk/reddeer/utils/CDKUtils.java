@@ -345,8 +345,8 @@ public final class CDKUtils {
 	public static void confirmOverwritingOfSetupCDK(String shellName) {
 		SystemJobIsRunning runningJob = new SystemJobIsRunning(new JobMatcher("Setup CDK"));
 		log.info("Confirming overwriting of minishift home content");
-		handleWarningDialog(shellName, OkButton.class);
 		new WaitUntil(runningJob, TimePeriod.MEDIUM);
+		handleWarningDialog(shellName, OkButton.class);
 		new WaitWhile(runningJob, TimePeriod.getCustom(30));
 		new WaitUntil(new ConsoleHasNoChange(TimePeriod.MEDIUM), TimePeriod.DEFAULT);
 	}
