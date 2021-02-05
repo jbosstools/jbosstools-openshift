@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.ui.bot.test;
 
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.OpenNewApplicationWizardTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.CreateNewConnectionTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.OpenNewConnectionWizardTest;
@@ -42,7 +41,6 @@ import org.junit.runners.Suite.SuiteClasses;
 	
 	CreateNewProjectTest.class, 
 	DeleteProjectTest.class, 
-	OpenNewApplicationWizardTest.class, 
 })
 
 public class OpenShiftInteropTests {

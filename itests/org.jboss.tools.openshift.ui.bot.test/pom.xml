@@ -109,6 +109,12 @@
 				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShiftInteropTests</test.class>
 			</properties>
 		</profile>
+		<profile>
+			<id>openshift-odo</id>
+			<properties>
+				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShiftODOTests</test.class>
+			</properties>
+		</profile>
 	</profiles>
 	<repositories>
 		<!-- needed for org.jboss.tools.central -->
