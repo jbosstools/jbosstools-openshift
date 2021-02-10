@@ -135,12 +135,17 @@
                         </artifactItem>
                         <artifactItem>
                             <groupId>io.fabric8</groupId>
+                            <artifactId>openshift-model</artifactId>
+                            <version>${openshift-client.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>io.fabric8</groupId>
                             <artifactId>kubernetes-client</artifactId>
                             <version>${openshift-client.version}</version>
                         </artifactItem>
                         <artifactItem>
                             <groupId>io.fabric8</groupId>
-                            <artifactId>kubernetes-model</artifactId>
+                            <artifactId>kubernetes-model-core</artifactId>
                             <version>${openshift-client.version}</version>
                         </artifactItem>
                         <artifactItem>

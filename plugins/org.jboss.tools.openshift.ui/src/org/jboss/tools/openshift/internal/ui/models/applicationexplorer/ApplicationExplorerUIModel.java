@@ -38,7 +38,7 @@ import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIModel;
 import org.jboss.tools.openshift.internal.ui.odo.OdoCli;
 
 import io.fabric8.kubernetes.api.model.Config;
-import io.fabric8.kubernetes.api.model.Context;
+import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
@@ -177,32 +177,32 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
   }
   
     private boolean hasContextChanged(Config newConfig, Config currentConfig) {
-        Context currentContext = KubeConfigUtils.getCurrentContext(currentConfig);
-        Context newContext = KubeConfigUtils.getCurrentContext(newConfig);
+        NamedContext currentContext = KubeConfigUtils.getCurrentContext(currentConfig);
+        NamedContext newContext = KubeConfigUtils.getCurrentContext(newConfig);
         return hasServerChanged(newContext, currentContext)
                 || hasNewToken(newContext, newConfig, currentContext, currentConfig);
     }
 
-    private boolean hasServerChanged(Context newContext, Context currentContext) {
+    private boolean hasServerChanged(NamedContext newContext, NamedContext currentContext) {
         return newContext == null
                 || currentContext == null
-                || !StringUtils.equals(currentContext.getCluster(), newContext.getCluster())
-                || !StringUtils.equals(currentContext.getUser(), newContext.getUser());
+                || !StringUtils.equals(currentContext.getContext().getCluster(), newContext.getContext().getCluster())
+                || !StringUtils.equals(currentContext.getContext().getUser(), newContext.getContext().getUser());
     }
 
-  private boolean hasNewToken(Context newContext, Config newConfig, Context currentContext, Config currentConfig) {
+  private boolean hasNewToken(NamedContext newContext, Config newConfig, NamedContext currentContext, Config currentConfig) {
     if (newContext == null) {
       return false;
     }
     if (currentContext == null) {
       return true;
     }
-    String newToken = KubeConfigUtils.getUserToken(newConfig, newContext);
+    String newToken = KubeConfigUtils.getUserToken(newConfig, newContext.getContext());
     if (newToken == null) {
       // logout, do not refresh, LogoutAction already refreshes
       return false;
     }
-    String currentToken = KubeConfigUtils.getUserToken(currentConfig, currentContext);
+    String currentToken = KubeConfigUtils.getUserToken(currentConfig, currentContext.getContext());
     return !StringUtils.equals(newToken, currentToken);
   }
 
