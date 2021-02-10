@@ -19,11 +19,10 @@
 	<classpathentry exported="true" kind="lib" path="lib/jackson-dataformat-yaml-2.10.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/snakeyaml-1.25.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/logging-interceptor-4.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/kubernetes-client-4.9.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-4.9.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/openshift-client-4.9.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/servicecatalog-client-4.9.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/servicecatalog-model-4.9.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jackson-datatype-jsr310-2.10.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-client-4.11.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-4.11.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-client-4.11.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/servicecatalog-client-4.11.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/servicecatalog-model-4.11.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
