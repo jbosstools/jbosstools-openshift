@@ -42,6 +42,7 @@ public class OpenShiftODOComponent extends AbstractOpenShiftApplicationExplorerI
 		this.projectName = projectName;
 		this.applicationName = applicationName;
 		this.componentName = treeViewerHandler.getNonStyledText(item);
+		item.select();
 	}
 	
 	public String getName() {
@@ -52,7 +53,7 @@ public class OpenShiftODOComponent extends AbstractOpenShiftApplicationExplorerI
 	 * Push OpenShift component.
 	 */
 	public void push() {
-		item.select();
+		select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.PUSH).select();
     
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
@@ -63,7 +64,7 @@ public class OpenShiftODOComponent extends AbstractOpenShiftApplicationExplorerI
 	 * Debug OpenShift component.
 	 */
 	public void debug() {
-		item.select();
+		select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.DEBUG).select();
     
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
@@ -74,7 +75,7 @@ public class OpenShiftODOComponent extends AbstractOpenShiftApplicationExplorerI
 	 * Deletes OpenShift component.
 	 */
 	public void delete() {
-		item.select();
+		select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.DELETE_OS_PROJECT).select();
 		
 		new DefaultShell(OpenShiftLabel.Shell.DELETE_COMPONENT + " " + getName());

@@ -50,8 +50,7 @@ public class OpenShiftODOConnection extends AbstractOpenShiftApplicationConnecti
 	 * @return OpenShift project
 	 */
 	public OpenShiftODOProject getProject(String projectName) {
-		activateOpenShiftApplicationExplorerView();
-		refresh();
+		select();
 		item.expand();
 		
 		new WaitWhile(new JobIsRunning());

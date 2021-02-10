@@ -45,9 +45,8 @@ public abstract class AbstractOpenShiftApplicationExplorerItem {
 	}
 	
 	public void expand() {
-		activateOpenShiftApplicationExplorerView();
+		select();
 		item.expand();
-		
 		// There can be some processing, wait for it
 		new WaitWhile(new JobIsRunning(), TimePeriod.DEFAULT);
 	}
