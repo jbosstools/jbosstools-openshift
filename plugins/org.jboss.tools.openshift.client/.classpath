@@ -17,6 +17,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-2.0.0-alpha1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/log4j-slf4j18-impl-2.13.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-dataformat-yaml-2.10.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-datatype-jsr310-2.10.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/snakeyaml-1.25.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/logging-interceptor-4.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/kubernetes-client-4.11.2.jar"/>
