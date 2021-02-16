@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.ConfigBuilder;
-import io.fabric8.kubernetes.api.model.Context;
+import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 
 import java.io.File;
@@ -63,7 +63,7 @@ public class ConfigHelper {
         }
     }
 
-    public static Context getCurrentContext() {
+    public static NamedContext getCurrentContext() {
         try {
             Config config = loadKubeConfig();
             return KubeConfigUtils.getCurrentContext(config);
