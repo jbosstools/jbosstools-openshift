@@ -365,5 +365,22 @@
           class="org.jboss.tools.openshift.internal.core.stack.NodeRemoteStackDebugger">
     </provider>
  </extension>
+ <extension
+       point="org.eclipse.core.contenttype.contentTypes">
+    <content-type
+          base-type="org.eclipse.wildwebdeveloper.yaml"
+          file-names="devfile.yaml,devfile.yml"
+          id="org.jboss.tools.openshift.core.devfile"
+          name="Devfile"
+          priority="normal">
+    </content-type>
+ </extension>
+ <extension
+       point="org.eclipse.wildwebdeveloper.json.schema">
+    <schema
+          pattern="devfile.y*ml"
+          url="platform:/plugin/org.jboss.tools.openshift.core/devfile.json">
+    </schema>
+ </extension>
  
 </plugin>
