@@ -31,7 +31,9 @@ import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
@@ -53,6 +55,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.core.odo.ComponentKind;
 import org.jboss.tools.openshift.core.odo.ComponentType;
 import org.jboss.tools.openshift.core.odo.S2iComponentType;
+import org.jboss.tools.openshift.core.odo.Starter;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
@@ -204,6 +207,15 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 				.applyTo(componentStartersVersionsCombo);
 		ComboViewer componentStartersComboViewer = new ComboViewer(componentStartersVersionsCombo);
 		componentStartersComboViewer.setContentProvider(new ObservableListContentProvider<>());
+		componentStartersComboViewer.setLabelProvider(new LabelProvider() {
+      @Override
+      public String getText(Object element) {
+        if (element instanceof Starter) {
+          return ((Starter) element).getName();
+        }
+        return "";
+      }
+		});
 		componentStartersComboViewer.setInput(BeanProperties.list(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_STARTERS).observe(model));
 		Binding componentStartersBinding = ValueBindingBuilder
 				.bind(ViewerProperties.singleSelection().observe(componentStartersComboViewer))

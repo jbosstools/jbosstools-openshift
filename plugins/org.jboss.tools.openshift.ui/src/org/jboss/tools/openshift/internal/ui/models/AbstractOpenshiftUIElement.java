@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IAdaptable;
  *
  * @param <R> the wrapped element type
  * @param <P> the parent type
+ * @param <M> the model type
  */
  public abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElement<?, ?, M>, M extends AbstractOpenshiftUIModel<?, ?>>
 		implements IAdaptable, IOpenshiftUIElement<R, P, M> {

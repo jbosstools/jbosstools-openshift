@@ -98,6 +98,9 @@ import org.jboss.tools.openshift.core.odo.ComponentKind;
 import org.jboss.tools.openshift.core.odo.ComponentType;
 import org.jboss.tools.openshift.core.odo.ComponentTypeInfo;
 import org.jboss.tools.openshift.core.odo.ComponentTypesDeserializer;
+import org.jboss.tools.openshift.core.odo.DevfileComponentType;
+import org.jboss.tools.openshift.core.odo.DevfileRegistriesDeserializer;
+import org.jboss.tools.openshift.core.odo.DevfileRegistry;
 import org.jboss.tools.openshift.core.odo.JSonParser;
 import org.jboss.tools.openshift.core.odo.KubernetesLabels;
 import org.jboss.tools.openshift.core.odo.Odo;
@@ -389,6 +392,15 @@ public class OdoCli implements Odo {
         UsageStats.getInstance().odoCommand("catalog list components", false);
         throw e;
       }
+  }
+  
+  @Override
+  public List<DevfileComponentType> getComponentTypes(String registryName) throws IOException {
+    return getComponentTypes().stream().
+        filter(type -> type instanceof DevfileComponentType).
+        map(type -> (DevfileComponentType)type).
+        filter(type -> registryName.equals(type.getDevfileRegistry().getName())).
+        collect(Collectors.toList());
   }
   
   private ComponentTypeInfo parseComponentTypeInfo(String json) throws IOException {
@@ -987,5 +999,26 @@ public class OdoCli implements Odo {
   @Override
   public boolean isServiceCatalogAvailable(OpenShiftClient client) {
     return client.isAdaptable(ServiceCatalogClient.class);
+  }
+
+  @Override
+  public List<DevfileRegistry> listDevfileRegistries() throws IOException {
+    return configureObjectMapper(new DevfileRegistriesDeserializer()).readValue(
+        execute(command, "registry" , "list", "-o", "json"),
+        new TypeReference<List<DevfileRegistry>>() {});
+  }
+
+  @Override
+  public void createDevfileRegistry(String name, String url, boolean secure) throws IOException {
+    if (secure) {
+      execute(command, "registry", "add", name, url, "--token", "true");
+    } else {
+      execute(command, "registry", "add", name, url);
+    }
+  }
+
+  @Override
+  public void deleteDevfileRegistry(String name) throws IOException {
+    execute(command, "registry", "delete", "-f", name);
   }
 }

@@ -30,6 +30,8 @@ import org.jboss.tools.openshift.core.odo.ComponentKind;
 import org.jboss.tools.openshift.core.odo.ComponentState;
 import org.jboss.tools.openshift.core.odo.ComponentType;
 import org.jboss.tools.openshift.core.odo.ComponentTypeInfo;
+import org.jboss.tools.openshift.core.odo.DevfileComponentType;
+import org.jboss.tools.openshift.core.odo.DevfileRegistry;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 import org.jboss.tools.openshift.core.odo.Storage;
@@ -149,6 +151,11 @@ public class OdoProjectDecorator implements Odo {
   @Override
   public List<ComponentType> getComponentTypes() throws IOException {
     return delegate.getComponentTypes();
+  }
+
+  @Override
+  public List<DevfileComponentType> getComponentTypes(String registryName) throws IOException {
+    return delegate.getComponentTypes(registryName);
   }
 
   @Override
@@ -359,5 +366,20 @@ public class OdoProjectDecorator implements Odo {
   @Override
   public boolean isServiceCatalogAvailable(OpenShiftClient client) {
     return delegate.isServiceCatalogAvailable(client);
+  }
+
+  @Override
+  public List<DevfileRegistry> listDevfileRegistries() throws IOException {
+    return delegate.listDevfileRegistries();
+  }
+
+  @Override
+  public void createDevfileRegistry(String name, String url, boolean secure) throws IOException {
+    delegate.createDevfileRegistry(name, url, secure);
+  }
+
+  @Override
+  public void deleteDevfileRegistry(String name) throws IOException {
+    delegate.deleteDevfileRegistry(name);
   }
 }

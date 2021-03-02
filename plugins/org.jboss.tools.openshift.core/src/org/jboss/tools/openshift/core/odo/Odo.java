@@ -49,6 +49,8 @@ public interface Odo {
 
     List<ComponentType> getComponentTypes() throws IOException;
     
+    List<DevfileComponentType> getComponentTypes(String registryName) throws IOException;
+    
     ComponentTypeInfo getComponentTypeInfo(String componentType) throws IOException;
 
     List<ServiceTemplate> getServiceTemplates() throws IOException;
@@ -108,5 +110,11 @@ public interface Odo {
     List<ComponentDescriptor> discover(String path) throws IOException;
 
     boolean isServiceCatalogAvailable(OpenShiftClient client);
+    
+    List<DevfileRegistry> listDevfileRegistries() throws IOException;
+
+    void createDevfileRegistry(String name, String url, boolean secure) throws IOException;
+
+    void deleteDevfileRegistry(String name) throws IOException;
 
 }
