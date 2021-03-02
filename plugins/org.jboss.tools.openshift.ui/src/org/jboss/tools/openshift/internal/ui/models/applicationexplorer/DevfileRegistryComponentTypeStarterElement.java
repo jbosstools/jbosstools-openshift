@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models.applicationexplorer;
 
-import org.jboss.tools.openshift.core.odo.DevfileComponentType;
 import org.jboss.tools.openshift.core.odo.Starter;
 import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
 

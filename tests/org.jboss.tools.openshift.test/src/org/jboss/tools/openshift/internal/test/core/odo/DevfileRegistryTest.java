@@ -14,8 +14,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
-import org.jboss.tools.openshift.core.odo.ComponentDescriptorsDeserializer;
 import org.jboss.tools.openshift.core.odo.DevfileRegistriesDeserializer;
 import org.jboss.tools.openshift.core.odo.DevfileRegistry;
 import org.junit.Assert;
