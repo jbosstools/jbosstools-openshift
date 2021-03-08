@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2021 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -9,11 +9,6 @@
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.widget.terminal;
-
-/**
- * @author Red Hat Developers
- *
- */
 
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
 
@@ -58,7 +53,9 @@ public class TerminalContainsText extends AbstractWaitCondition {
 
 	private static String getTerminalText() {
 		TerminalView consoleView = new TerminalView();
-		consoleView.open();
+		if (!consoleView.isOpen()) {
+			consoleView.open();
+		}
 		return consoleView.getTerminalText();
 	}
 }
