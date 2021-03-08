@@ -40,7 +40,23 @@ public class OCCommandUtilsTest {
 				OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=1234567891234567-89   "));
 	}
 
-	@Test
+  @Test
+  public void testCommandWithTokenOCP4() {
+    assertEquals("sha256~123456789123456789",
+        OCCommandUtils.getToken("oc login https://api.engint.openshift.com --token=sha256~123456789123456789"));
+    assertEquals("sha256~123456789123456789",
+        OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~123456789123456789   "));
+    assertEquals("sha256~1234567891234567..89",
+        OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~1234567891234567..89   "));
+    assertEquals("sha256~12345678912345678_9",
+        OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~12345678912345678_9   "));
+    assertEquals("sha256~1234567891234567.89",
+        OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~1234567891234567.89   "));
+    assertEquals("sha256~1234567891234567-89",
+        OCCommandUtils.getToken("oc login https://api.-uengint.openshift.com --token=sha256~1234567891234567-89   "));
+  }
+
+  @Test
 	public void testCommandWithPassword() {
 		assertEquals("developerPassword", OCCommandUtils.getPassword("oc login -u developer -p developerPassword"));
 		assertEquals("developerPassword", OCCommandUtils.getPassword("oc login -u developer -p developerPassword"));

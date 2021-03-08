@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.jboss.tools.openshift.internal.ui.wizard.connection.OAuthDetailView.TokenExtractor;
+import org.jboss.tools.openshift.internal.ui.wizard.connection.TokenExtractor;
 import org.junit.Test;
 
 /**
