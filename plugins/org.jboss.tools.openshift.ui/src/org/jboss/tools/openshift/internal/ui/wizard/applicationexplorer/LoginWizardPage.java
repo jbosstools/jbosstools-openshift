@@ -165,7 +165,7 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
         txtUsername.setText(OCCommandUtils.getUsername(clipboardText));
         txtPassword.setText(OCCommandUtils.getPassword(clipboardText));
       } else if (IAuthorizationContext.AUTHSCHEME_OAUTH.equals(OCCommandUtils.getAuthMethod(clipboardText))) {
-        txtToken.setText(OCCommandUtils.getServer(clipboardText));
+        txtToken.setText(OCCommandUtils.getToken(clipboardText));
       }
     } else {
       MessageDialog.openError(getWizard().getContainer().getShell(), "Error when parsing login command",
@@ -186,11 +186,14 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 	  });
 	  try {
       WizardUtils.runInWizard(job,getContainer(), getDataBindingContext());
-      if (JobUtils.isOk(job.getResult())) {
+      if (JobUtils.isOk(job.getResult()) && tokenEndpoint[0] != null) {
         OAuthDialog dialog = new OAuthDialog(getShell(), tokenEndpoint[0], true);
         if (dialog.open() == Window.OK && dialog.getToken() != null) {
           txtToken.setText(dialog.getToken());
         }
+      } else {
+        MessageDialog.openError(getWizard().getContainer().getShell(), "Error when launching web based authentication",
+            "Can't retrieve the token endpoint from cluster to start from");
       }
     } catch (InvocationTargetException | InterruptedException e) {
       MessageDialog.openError(getWizard().getContainer().getShell(), "Error when launching web browser",
