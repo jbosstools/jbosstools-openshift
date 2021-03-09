@@ -15,11 +15,13 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.junit.execution.annotation.RunIf;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.openshift.reddeer.condition.ODOConnectionExists;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
 import org.jboss.tools.openshift.ui.bot.test.AbstractODOTest;
+import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionCredentialsExists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -36,6 +38,7 @@ public class LoginODOTest extends AbstractODOTest  {
 	String token = DatastoreOS3.TOKEN;
 
 	@Test
+	@RunIf(conditionClass = ConnectionCredentialsExists.class)
 	public void testCreateNewODOBasicConnection() {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();
@@ -53,6 +56,7 @@ public class LoginODOTest extends AbstractODOTest  {
 	}
 
 	@Test
+	@RunIf(conditionClass = ConnectionCredentialsExists.class)
 	public void testCreateNewODOOAuthConnection() {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();

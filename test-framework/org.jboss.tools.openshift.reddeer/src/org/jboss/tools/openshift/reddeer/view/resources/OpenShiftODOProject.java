@@ -70,9 +70,8 @@ public class OpenShiftODOProject extends AbstractOpenShiftApplicationExplorerIte
 	}
 
 	public OpenShiftODOApplication getApplication(String applicationName) {
-		activateOpenShiftApplicationExplorerView();
+		select();
 		item.expand();
-    
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 		return new OpenShiftODOApplication(treeViewerHandler.getTreeItem(item, applicationName), projectName);
 	}

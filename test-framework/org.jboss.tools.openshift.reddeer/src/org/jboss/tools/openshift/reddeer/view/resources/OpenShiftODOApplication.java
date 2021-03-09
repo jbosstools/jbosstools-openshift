@@ -49,7 +49,7 @@ public class OpenShiftODOApplication extends AbstractOpenShiftApplicationExplore
 	 * Deletes OpenShift project.
 	 */
 	public void delete() {
-		item.select();
+		select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.DELETE_OS_PROJECT).select();
 		
 		new DefaultShell(OpenShiftLabel.Shell.DELETE_APPLICATION + " " + getName());
@@ -75,11 +75,9 @@ public class OpenShiftODOApplication extends AbstractOpenShiftApplicationExplore
    * @return
    */
 	public OpenShiftODOComponent getComponent(String componentName) {
-		activateOpenShiftApplicationExplorerView();
+		select();
 		item.expand();
-    
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-    
 		return new OpenShiftODOComponent(treeViewerHandler.getTreeItem(item, componentName), projectName, applicationName);
   }
 }
