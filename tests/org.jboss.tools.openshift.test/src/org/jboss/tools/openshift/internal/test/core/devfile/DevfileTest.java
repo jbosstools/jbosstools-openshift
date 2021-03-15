@@ -43,6 +43,7 @@ public class DevfileTest {
   
   @Before
   public void setUp() throws CoreException {
+    System.out.println("setup start thread=" + Thread.currentThread());
     IIntroPart intro = PlatformUI.getWorkbench().getIntroManager().getIntro();
     if (intro != null) {
       PlatformUI.getWorkbench().getIntroManager().closeIntro(intro);
@@ -54,16 +55,19 @@ public class DevfileTest {
     project = ResourcesPlugin.getWorkspace().getRoot().getProject("p" + RANDOM.nextInt(Integer.MAX_VALUE));
     project.create(new NullProgressMonitor());
     project.open(new NullProgressMonitor());
+    System.out.println("setup done project=" + project.getName() + " thread=" + Thread.currentThread());
   }
 
   @Test
   public void testInvalidDevfile() throws Exception {
+    System.out.println("testInvalidDevfile start thread=" + Thread.currentThread());
     IFile file = project.getFile("devfile.yaml");
     file.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
     IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
     ITextEditor editor = (ITextEditor) IDE.openEditor(activePage, file, true);
     IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
     document.set("s: 1");
+    System.out.println("testInvalidDevfile before helper thread=" + Thread.currentThread());
     boolean markerFound = new DisplayHelper() {
       @Override
       protected boolean condition() {
@@ -74,17 +78,20 @@ public class DevfileTest {
         }
       }
     }.waitForCondition(activePage.getWorkbenchWindow().getShell().getDisplay(), 10000);
+    System.out.println("testInvalidDevfile after helper thread=" + Thread.currentThread());
     assertTrue(markerFound);
   }
 
   @Test
   public void testValidDevfile() throws Exception {
+    System.out.println("testValidDevfile start thread=" + Thread.currentThread());
     IFile file = project.getFile("devfile.yaml");
     file.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
     IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
     ITextEditor editor = (ITextEditor) IDE.openEditor(activePage, file, true);
     IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
     document.set("schemaVersion: \"2.0.0\"");
+    System.out.println("testValidDevfile before helper thread=" + Thread.currentThread());
     boolean markerFound = new DisplayHelper() {
       @Override
       protected boolean condition() {
@@ -95,6 +102,7 @@ public class DevfileTest {
         }
       }
     }.waitForCondition(activePage.getWorkbenchWindow().getShell().getDisplay(), 10000);
+    System.out.println("testValidDevfile after helper thread=" + Thread.currentThread());
     assertFalse(Arrays.stream(file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO))
         .map(Object::toString).collect(Collectors.joining("\n")), markerFound);
   }
