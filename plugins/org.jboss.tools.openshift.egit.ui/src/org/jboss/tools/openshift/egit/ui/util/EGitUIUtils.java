@@ -19,7 +19,6 @@ import org.eclipse.egit.ui.Activator;
 import org.eclipse.egit.ui.internal.sharing.SharingWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.transport.JschConfigSessionFactory;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 

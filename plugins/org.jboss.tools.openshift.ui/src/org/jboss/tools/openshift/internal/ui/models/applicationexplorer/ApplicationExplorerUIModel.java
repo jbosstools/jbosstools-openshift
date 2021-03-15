@@ -27,7 +27,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.utils.ConfigHelper;
@@ -157,9 +159,21 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
   /**
    * 
    */
-  private void loadProjects() {
+  private void internalLoadProjects() {
     for(IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
       addContext(project);
+    }
+  }
+  
+  private void loadProjects() {
+    if (Display.getCurrent() == null) {
+      internalLoadProjects();
+    } else {
+      Job.createSystem("Load model", monitor -> {
+        internalLoadProjects();
+        refresh();
+        return Status.OK_STATUS;
+      }).schedule();
     }
   }
   
