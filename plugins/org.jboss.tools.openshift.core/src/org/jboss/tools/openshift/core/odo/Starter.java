@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2021 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,39 +10,30 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author Red Hat Developers
  *
  */
-public interface ComponentTypeInfo {
+public interface Starter {
   String getName();
-  List<Starter> getStarters();
+  String getDescription();
   
   public class Builder {
     private String name;
-    
-    private List<Starter> starters = new ArrayList<>();
+    private String description;
     
     public Builder withName(String name) {
       this.name = name;
       return this;
     }
     
-    public Builder withStarters(List<Starter> starters) {
-      this.starters = starters;
+    public Builder withDescription(String description) {
+      this.description = description;
       return this;
     }
     
-    public Builder withStarter(Starter starter) {
-     starters.add(starter);
-     return this;
-    }
-    
-    public ComponentTypeInfo build() {
-      return new ComponentTypeInfo() {
+    public Starter build() {
+      return new Starter() {
 
         @Override
         public String getName() {
@@ -50,8 +41,8 @@ public interface ComponentTypeInfo {
         }
 
         @Override
-        public List<Starter> getStarters() {
-          return starters;
+        public String getDescription() {
+          return description;
         }
       };
     }

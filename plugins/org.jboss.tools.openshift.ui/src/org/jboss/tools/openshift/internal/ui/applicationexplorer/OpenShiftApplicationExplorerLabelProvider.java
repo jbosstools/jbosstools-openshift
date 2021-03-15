@@ -22,6 +22,10 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistriesElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryComponentTypeElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryComponentTypeStarterElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.MessageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceElement;
@@ -64,6 +68,14 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 			return style(KubernetesLabels.getComponentName(((ServiceElement) element).getWrapped()), "", limit);
 		} else if (element instanceof MessageElement) {
 			return getStyledText((MessageElement) element);
+		} else if (element instanceof DevfileRegistriesElement) {
+		  return style("Devfile registries", "", limit);
+		} else if (element instanceof DevfileRegistryElement) {
+		  return style(((DevfileRegistryElement)element).getWrapped().getName(), ((DevfileRegistryElement)element).getWrapped().getURL(), limit);
+		} else if (element instanceof DevfileRegistryComponentTypeElement) {
+		  return style(((DevfileRegistryComponentTypeElement) element).getWrapped().getDisplayName(), ((DevfileRegistryComponentTypeElement) element).getWrapped().getDescription(), limit);
+		} else if (element instanceof DevfileRegistryComponentTypeStarterElement) {
+		  return style(((DevfileRegistryComponentTypeStarterElement) element).getWrapped().getName(), ((DevfileRegistryComponentTypeStarterElement) element).getWrapped().getDescription(), limit);
 		}
 		return super.getStyledText(element, limit);
 	}
@@ -99,6 +111,10 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 			}return OpenShiftImages.URL_IMG;
 		} else if (element instanceof StorageElement) {
 			return OpenShiftImages.STORAGE_IMG;
+		} else if (element instanceof DevfileRegistryComponentTypeElement) {
+		  return OpenShiftImages.COMPONENT_TYPE_IMG;
+		} else if (element instanceof DevfileRegistryComponentTypeStarterElement) {
+		  return OpenShiftImages.STARTER_IMG;
 		}
 		return super.getImage(element);
 	}

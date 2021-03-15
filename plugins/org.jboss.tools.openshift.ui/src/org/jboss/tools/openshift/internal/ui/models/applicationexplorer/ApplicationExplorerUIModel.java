@@ -94,7 +94,9 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
     private Job watcherJob;
     
     private Config config;
-  
+
+    private DevfileRegistriesElement registries;
+
   private ApplicationExplorerUIModel() {
     super(null, new ClusterInfo());
     loadProjects();
@@ -251,5 +253,16 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
       }
     }
     return false;
+  }
+
+
+  /**
+   * @return
+   */
+  public DevfileRegistriesElement getRegistriesElement() {
+    if (registries == null) {
+      registries = new DevfileRegistriesElement(this);
+    }
+    return registries;
   }
 }

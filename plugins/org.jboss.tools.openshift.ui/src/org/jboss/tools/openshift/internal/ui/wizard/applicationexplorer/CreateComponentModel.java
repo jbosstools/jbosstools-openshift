@@ -20,6 +20,7 @@ import org.jboss.tools.openshift.core.odo.ComponentType;
 import org.jboss.tools.openshift.core.odo.DevfileComponentType;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.S2iComponentType;
+import org.jboss.tools.openshift.core.odo.Starter;
 
 /**
  * @author Red Hat Developers
@@ -48,9 +49,9 @@ public class CreateComponentModel extends ComponentModel {
 	
 	private ComponentType selectedComponentType;
 	
-	private List<String> selectedComponentStarters;
+	private List<Starter> selectedComponentStarters;
 	
-	private String selectedComponentStarter;
+	private Starter selectedComponentStarter;
 	
 	private String selectedComponentVersion;
 	
@@ -155,28 +156,28 @@ public class CreateComponentModel extends ComponentModel {
 	/**
    * @return the selectedComponentStarters
    */
-  public List<String> getSelectedComponentStarters() {
+  public List<Starter> getSelectedComponentStarters() {
     return selectedComponentStarters;
   }
 
   /**
    * @param selectedComponentStarters the selectedComponentStarters to set
    */
-  public void setSelectedComponentStarters(List<String> selectedComponentStarters) {
+  public void setSelectedComponentStarters(List<Starter> selectedComponentStarters) {
     firePropertyChange(PROPERTY_SELECTED_COMPONENT_STARTERS, this.selectedComponentStarters, this.selectedComponentStarters = selectedComponentStarters);
   }
 
   /**
    * @return the selectedComponentStarter
    */
-  public String getSelectedComponentStarter() {
+  public Starter getSelectedComponentStarter() {
     return selectedComponentStarter;
   }
 
   /**
    * @param selectedComponentStarter the selectedComponentStarter to set
    */
-  public void setSelectedComponentStarter(String selectedComponentStarter) {
+  public void setSelectedComponentStarter(Starter selectedComponentStarter) {
     firePropertyChange(PROPERTY_SELECTED_COMPONENT_STARTER, this.selectedComponentStarter, this.selectedComponentStarter = selectedComponentStarter);
   }
 

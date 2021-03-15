@@ -54,6 +54,16 @@
               name="OpenShift Application Explorer Content">
            <possibleChildren></possibleChildren>
            <triggerPoints></triggerPoints>
+           <commonSorter
+                 class="org.jboss.tools.openshift.internal.ui.applicationexplorer.OpenShiftApplicationExplorerContentProvider">
+              <parentExpression>
+                 <or>
+                    <instanceof
+                          value="org.eclipse.core.resources.IWorkspaceRoot">
+                    </instanceof>
+                 </or>
+              </parentExpression>
+           </commonSorter>
         </navigatorContent>
     </extension>
     <extension
@@ -1730,6 +1740,31 @@ $            <command
                                        type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.URLElement" />
                                 <adapt
                                        type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.StorageElement" />
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryElement" />
+                              </or>
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
+        <!-- menu: New Registry -->
+        <menuContribution
+                          allPopups="false"
+                          locationURI="popup:org.jboss.tools.openshift.common.ui.applicationExplorer.applicationExplorerViewPopup.new">
+            <command
+                     commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.registry.new"
+                     style="push"
+                     tooltip="New registry">
+                <visibleWhen
+                             checkEnabled="false">
+                    <and>
+                        <count
+                               value="1" />
+                        <iterate>
+                            <or>
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistriesElement" />
                               </or>
                         </iterate>
                     </and>
@@ -1964,6 +1999,10 @@ $            <command
         <handler
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.RefreshHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.refresh">
+        </handler>  
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.CreateDevfileRegistryHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.registry.new">
         </handler>  
     </extension>
 
@@ -2230,7 +2269,10 @@ $            <command
                  id="org.jboss.tools.openshift.ui.command.applicationexplorer.refresh"
                  name="Refresh">
         </command>
-        
+        <command
+                 id="org.jboss.tools.openshift.ui.command.applicationexplorer.registry.new"
+                 name="Registry">
+        </command>
     </extension>
 
     <!-- editor for express connections -->

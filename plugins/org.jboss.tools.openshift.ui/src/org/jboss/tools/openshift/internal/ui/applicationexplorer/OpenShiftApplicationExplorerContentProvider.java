@@ -18,11 +18,16 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.jboss.tools.openshift.internal.ui.models.IElementListener;
 import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistriesElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryComponentTypeElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryComponentTypeStarterElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.MessageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceElement;
@@ -35,7 +40,7 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
  * @author Red Hat Developers
  *
  */
-public class OpenShiftApplicationExplorerContentProvider implements ITreeContentProvider, IElementListener {
+public class OpenShiftApplicationExplorerContentProvider extends ViewerComparator implements ITreeContentProvider, IElementListener {
 
   private ApplicationExplorerUIModel model;
   private StructuredViewer viewer;
@@ -75,7 +80,7 @@ public class OpenShiftApplicationExplorerContentProvider implements ITreeContent
   @Override
   public Object[] getElements(Object inputElement) {
     if (inputElement instanceof IWorkspaceRoot) {
-      return new Object[] { model };
+      return new Object[] { model, model.getRegistriesElement() };
     } else {
       return new Object[0];
     }
@@ -91,6 +96,12 @@ public class OpenShiftApplicationExplorerContentProvider implements ITreeContent
       return getChildren((ApplicationElement) parentElement);
     } else if (parentElement instanceof ComponentElement) {
       return getChildren((ComponentElement) parentElement);
+    } else if (parentElement instanceof DevfileRegistriesElement ) {
+      return getRegistries();
+    } else if (parentElement instanceof DevfileRegistryElement) {
+      return getComponentTypes((DevfileRegistryElement) parentElement); 
+    } else if (parentElement instanceof DevfileRegistryComponentTypeElement) {
+      return getStarters((DevfileRegistryComponentTypeElement) parentElement);
     }
     return null;
   }
@@ -103,6 +114,30 @@ public class OpenShiftApplicationExplorerContentProvider implements ITreeContent
     } catch (Exception e) {
       return new Object[] { new MessageElement("Can't connect to cluster. Click to login.", parentElement) };
     }
+  }
+  
+  private Object[] getRegistries() {
+    List<DevfileRegistryElement> childs = new ArrayList<>();
+    try {
+      model.getOdo().listDevfileRegistries().forEach(registry -> childs.add(new DevfileRegistryElement(registry, model.getRegistriesElement())));
+    } catch (IOException e) {}
+    return childs.toArray();
+  }
+  
+  private Object[] getComponentTypes(DevfileRegistryElement registry) {
+    List<DevfileRegistryComponentTypeElement> result = new ArrayList<>();
+    try {
+      model.getOdo().getComponentTypes(registry.getWrapped().getName()).forEach(type -> result.add(new DevfileRegistryComponentTypeElement(type,  registry)));
+    } catch (IOException e) {}
+    return result.toArray();
+  }
+  
+  private Object[] getStarters(DevfileRegistryComponentTypeElement componentType) {
+    List<DevfileRegistryComponentTypeStarterElement> result = new ArrayList<>();
+    try {
+      model.getOdo().getComponentTypeInfo(componentType.getWrapped().getName()).getStarters().forEach(starter -> result.add(new DevfileRegistryComponentTypeStarterElement(starter, componentType)));
+    } catch (IOException e) {}
+    return result.toArray();
   }
 
   private Object[] getChildren(ProjectElement parentElement) {
@@ -155,6 +190,15 @@ public class OpenShiftApplicationExplorerContentProvider implements ITreeContent
   @Override
   public boolean hasChildren(Object element) {
     return element instanceof ApplicationExplorerUIModel || element instanceof ProjectElement
-            || element instanceof ApplicationElement || element instanceof ComponentElement;
+            || element instanceof ApplicationElement || element instanceof ComponentElement ||
+            element instanceof DevfileRegistriesElement || element instanceof DevfileRegistryElement ||
+            element instanceof DevfileRegistryComponentTypeElement;
   }
+
+  @Override
+  public int compare(Viewer viewer, Object e1, Object e2) {
+    return 0;
+  }
+
+  
 }

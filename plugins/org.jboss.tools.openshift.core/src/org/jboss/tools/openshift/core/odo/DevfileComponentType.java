@@ -11,9 +11,16 @@
 package org.jboss.tools.openshift.core.odo;
 
 public final class DevfileComponentType extends AbstractComponentType {
+  
+    private final String displayName;
+    private final String description;
+    private final DevfileRegistry devfileRegistry;  
 
-    public DevfileComponentType(String name) {
+    public DevfileComponentType(String name, String displayName, String description, DevfileRegistry devfileRegistry) {
         super(name);
+        this.displayName = displayName;
+        this.description = description;
+        this.devfileRegistry = devfileRegistry;
     }
 
     @Override
@@ -21,4 +28,24 @@ public final class DevfileComponentType extends AbstractComponentType {
         return ComponentKind.DEVFILE;
     }
 
+    /**
+     * @return the displayName
+     */
+    public String getDisplayName() {
+      return displayName;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+      return description;
+    }
+
+    /**
+     * @return the devfileRegistry
+     */
+    public DevfileRegistry getDevfileRegistry() {
+      return devfileRegistry;
+    }
 }

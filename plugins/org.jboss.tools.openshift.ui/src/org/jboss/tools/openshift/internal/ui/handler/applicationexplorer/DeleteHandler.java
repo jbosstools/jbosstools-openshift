@@ -25,6 +25,7 @@ import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.StorageElement;
@@ -75,6 +76,8 @@ public class DeleteHandler extends OdoHandler {
 			return String.join(" ","url", ((URLElement)element).getWrapped().getName());
 		} else if (element instanceof StorageElement) {
 			return String.join(" ", "storage", ((StorageElement)element).getWrapped().getName());
+		} else if (element instanceof DevfileRegistryElement) {
+		  return String.join(" ", "devfile registry", ((DevfileRegistryElement)element).getWrapped().getName());
 		}
 		return "";
 	}
@@ -118,6 +121,8 @@ public class DeleteHandler extends OdoHandler {
 				        ((StorageElement) element).getParent().getWrapped().getPath(),
 				        ((StorageElement) element).getParent().getWrapped().getName(),
 				        ((StorageElement) element).getWrapped().getName());
+			} else if (element instanceof DevfileRegistryElement) {
+			  odo.deleteDevfileRegistry(((DevfileRegistryElement) element).getWrapped().getName());
 			}
 			element.getParent().refresh();
 		} catch (IOException e) {

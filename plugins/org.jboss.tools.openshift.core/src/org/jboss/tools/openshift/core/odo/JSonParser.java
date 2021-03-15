@@ -11,10 +11,10 @@
 package org.jboss.tools.openshift.core.odo;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.gson.JsonObject;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jboss.tools.openshift.core.odo.Starter.Builder;
 
 public class JSonParser {
     private static final String ITEMS_FIELD = "items";
@@ -27,6 +27,16 @@ public class JSonParser {
     private static final String VALUE_FIELD = "value";
     private static final String DATA_FIELD = "Data";
     private static final String STARTER_PROJECTS_FIELD = "starterProjects";
+    private static final String DESCRIPTION_FIELD = "description";
+    private static final String SUBDIR_FIELD = "subDir";
+    private static final String GIT_FIELD = "git";
+    private static final String GITHUB_FIELD = "github";
+    private static final String ZIP_FIELD = "zip";
+    private static final String LOCATION_FIELD = "location";
+    private static final String CHECKOUT_FROM_FIELD = "checkoutFrom";
+    private static final String REMOTE_FIELD = "remote";
+    private static final String REVISION_FIELD = "revision";
+    private static final String REMOTES_FIELD = "remotes";
 
     private final JsonNode root;
 
@@ -95,13 +105,18 @@ public class JSonParser {
         }
         if (data.has(STARTER_PROJECTS_FIELD)) {
           for(JsonNode starter : data.get(STARTER_PROJECTS_FIELD)) {
-            if (starter.has(NAME_FIELD)) {
-              builder.withStarter(starter.get(NAME_FIELD).asText());
-            }
+            builder.withStarter(parseStarter(starter));
           }
 
         }
       }
+      return builder.build();
+    }
+    
+    public Starter parseStarter(JsonNode node) {
+      String name = node.get(NAME_FIELD).asText();
+      String description = node.has(DESCRIPTION_FIELD)?node.get(DESCRIPTION_FIELD).asText():"";
+      Builder builder = new Builder().withName(name).withDescription(description);
       return builder.build();
     }
 }
