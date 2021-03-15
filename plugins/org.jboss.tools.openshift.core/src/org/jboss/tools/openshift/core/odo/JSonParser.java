@@ -30,15 +30,6 @@ public class JSonParser {
     private static final String DATA_FIELD = "Data";
     private static final String STARTER_PROJECTS_FIELD = "starterProjects";
     private static final String DESCRIPTION_FIELD = "description";
-    private static final String SUBDIR_FIELD = "subDir";
-    private static final String GIT_FIELD = "git";
-    private static final String GITHUB_FIELD = "github";
-    private static final String ZIP_FIELD = "zip";
-    private static final String LOCATION_FIELD = "location";
-    private static final String CHECKOUT_FROM_FIELD = "checkoutFrom";
-    private static final String REMOTE_FIELD = "remote";
-    private static final String REVISION_FIELD = "revision";
-    private static final String REMOTES_FIELD = "remotes";
     private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
     private static final String LOCAL_PORT_FIELD = "localPort";
 
@@ -123,7 +114,6 @@ public class JSonParser {
       Builder builder = new Builder().withName(name).withDescription(description);
       return builder.build();
     }
-}
 
     /**
      * @return
