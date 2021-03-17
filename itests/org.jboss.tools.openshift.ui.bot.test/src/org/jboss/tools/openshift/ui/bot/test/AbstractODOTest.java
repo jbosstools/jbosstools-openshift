@@ -78,11 +78,15 @@ public abstract class AbstractODOTest {
 		}).start();
 	}
 	
-	protected static void importEmptyProject() {
-		BasicNewProjectResourceWizard wizard = new BasicNewProjectResourceWizard();
-		wizard.open();
-		new LabeledText("Project name:").setText(eclipseProject);
-		wizard.finish();
+  protected static void importEmptyProject(String projectName) {
+    BasicNewProjectResourceWizard wizard = new BasicNewProjectResourceWizard();
+    wizard.open();
+    new LabeledText("Project name:").setText(projectName);
+    wizard.finish();
+  }
+
+  protected static void importEmptyProject() {
+    importEmptyProject(eclipseProject);
 	}
 
 	protected static void importVertxLauncherProject() {

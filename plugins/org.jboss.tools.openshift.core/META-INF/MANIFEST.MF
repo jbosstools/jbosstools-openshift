@@ -41,6 +41,9 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.eclipse.wildwebdeveloper,
  org.eclipse.lsp4e.debug,
  com.google.gson,
+ org.eclipse.lsp4j.debug,
+ org.eclipse.lsp4j,
+ org.eclipse.lsp4j.jsonrpc,
  org.eclipse.wildwebdeveloper.embedder.node;resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

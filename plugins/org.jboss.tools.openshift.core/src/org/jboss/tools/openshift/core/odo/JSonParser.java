@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.tools.openshift.core.odo.Starter.Builder;
+import org.apache.commons.lang.StringUtils;
+import org.jboss.tools.openshift.core.OpenShiftCoreConstants.DebugStatus;
 
 public class JSonParser {
     private static final String ITEMS_FIELD = "items";
@@ -28,15 +30,8 @@ public class JSonParser {
     private static final String DATA_FIELD = "Data";
     private static final String STARTER_PROJECTS_FIELD = "starterProjects";
     private static final String DESCRIPTION_FIELD = "description";
-    private static final String SUBDIR_FIELD = "subDir";
-    private static final String GIT_FIELD = "git";
-    private static final String GITHUB_FIELD = "github";
-    private static final String ZIP_FIELD = "zip";
-    private static final String LOCATION_FIELD = "location";
-    private static final String CHECKOUT_FROM_FIELD = "checkoutFrom";
-    private static final String REMOTE_FIELD = "remote";
-    private static final String REVISION_FIELD = "revision";
-    private static final String REMOTES_FIELD = "remotes";
+    private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
+    private static final String LOCAL_PORT_FIELD = "localPort";
 
     private final JsonNode root;
 
@@ -119,4 +114,23 @@ public class JSonParser {
       Builder builder = new Builder().withName(name).withDescription(description);
       return builder.build();
     }
-}
+
+    /**
+     * @return
+     */
+    public DebugInfo parseDebugInfo() {
+      DebugStatus status = DebugStatus.UNKNOWN;
+      if (root.has(SPEC_FIELD) && root.get(SPEC_FIELD).has(DEBUG_PROCESS_ID_FIELD)) {
+        String processID = root.get(SPEC_FIELD).get(DEBUG_PROCESS_ID_FIELD).asText();
+        if (StringUtils.isNumeric(processID)) {
+          status = DebugStatus.RUNNING;
+        }
+      }
+      DebugInfo info = new DebugInfo(status);
+      if (root.has(SPEC_FIELD) && root.get(SPEC_FIELD).has(LOCAL_PORT_FIELD)) {
+        info.setLocalPort(root.get(SPEC_FIELD).get(LOCAL_PORT_FIELD).asInt());
+      }
+      return info;
+    }
+  }
+

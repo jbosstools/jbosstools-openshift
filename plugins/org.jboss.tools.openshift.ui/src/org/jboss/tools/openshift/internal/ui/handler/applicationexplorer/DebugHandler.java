@@ -11,11 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Map;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -28,7 +24,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.jboss.tools.openshift.core.OpenShiftCoreConstants.DebugStatus;
+import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.ComponentInfo;
+import org.jboss.tools.openshift.core.odo.DebugInfo;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.stack.RemoteStackDebugger;
 import org.jboss.tools.openshift.core.stack.RemoteStackProviderRegistry;
@@ -53,9 +52,12 @@ public class DebugHandler extends ComponentHandler {
 			    component.getWrapped().getPath(), component.getWrapped().getInfo().getComponentKind());
 			RemoteStackDebugger remoteDebugger = RemoteStackProviderRegistry.getInstance().findBytype(info.getComponentTypeName(), info.getComponentTypeVersion());
 			if (remoteDebugger != null) {
-				int port = allocateLocalPort();
-				executeInJob("Debug", monitor -> startDebug(odo, project, application, component, port));
-				executeInJob("Attach debugger", monitor -> createAndLaunchConfig(component.getWrapped().getPath(), info.getComponentTypeName(), info.getComponentTypeVersion(), info.getEnv(), port, remoteDebugger, monitor, shell));
+			  DebugInfo debugInfo = odo.debugInfo(project, application, component.getWrapped().getPath(), component.getWrapped().getName());
+			  int port = debugInfo.getStatus() == DebugStatus.RUNNING?debugInfo.getLocalPort():allocateLocalPort();
+			  if (debugInfo.getStatus() != DebugStatus.RUNNING) {
+	        executeInJob("Debug", monitor -> startDebug(odo, project, application, component, port));
+			  }
+				executeInJob("Attach debugger", monitor -> createAndLaunchConfig(odo, project, application, component.getWrapped(), info, port, remoteDebugger, monitor, shell));
 			} else {
 				MessageDialog.openError(shell, "Debug", "Debugging is not supported for this type of component");
 			}
@@ -75,13 +77,13 @@ public class DebugHandler extends ComponentHandler {
 	 * @param shell the shell to use for UI
 	 * @throws CoreException 
 	 */
-	private void createAndLaunchConfig(String path, String stackType, String stackVersion, Map<String, String> env, int port, RemoteStackDebugger remoteDebugger, IProgressMonitor monitor, Shell shell) {
+	private void createAndLaunchConfig(Odo odo, String project, String application, Component component, ComponentInfo info, int port, RemoteStackDebugger remoteDebugger, IProgressMonitor monitor, Shell shell) {
 		try {
-			waitForPortAvailable(port, monitor);
-			IPath projectPath = new Path(path);
-			IContainer project = ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(projectPath);
-			if (project instanceof IProject) {
-				remoteDebugger.startRemoteDebugger((IProject) project, stackType, stackVersion, port, env, monitor);
+			waitForDebugRunning(odo, project, application, component, monitor);
+			IPath projectPath = new Path(component.getPath());
+			IContainer ecliseProject = ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(projectPath);
+			if (ecliseProject instanceof IProject) {
+				remoteDebugger.startRemoteDebugger((IProject) ecliseProject, info.getComponentTypeName(), info.getComponentTypeVersion(), port, info.getEnv(), monitor);
 			}
 		} catch (CoreException e) {
 			shell.getDisplay().asyncExec(() -> MessageDialog.openError(shell, "Debug", "Error while connecting the debugger"));
@@ -110,23 +112,25 @@ public class DebugHandler extends ComponentHandler {
 		}
 	}
 	
-	private void waitForPortAvailable(int port, IProgressMonitor monitor) throws CoreException {
-		long start = System.currentTimeMillis();
-		while (System.currentTimeMillis() - start < 60_000 && !monitor.isCanceled()) {
-			try (Socket socket = new Socket("localhost", port)) {
-				return;
-			} catch (ConnectException e) {
-				try {
-					Thread.sleep(1000L);
-				} catch (InterruptedException e1) {
-					throw new CoreException(
-							new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage()));
-				}
-			} catch (IOException e) {
-				throw new CoreException(
-						new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage()));
-			}
-		}
-		throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Can't connect to JVM"));
+	private void waitForDebugRunning(Odo odo, String project, String application, Component component, IProgressMonitor monitor) throws CoreException {
+    long start = System.currentTimeMillis();
+    while (System.currentTimeMillis() - start < 60_000 && !monitor.isCanceled()) {
+      try {
+        DebugInfo info = odo.debugInfo(project, application, component.getPath(), component.getName());
+        if (info.getStatus() != DebugStatus.RUNNING) {
+          try {
+            Thread.sleep(1_000L);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage()));
+          }
+        } else {
+          return;
+        }
+      } catch (IOException e) {
+        throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage()));
+      }
+    }
+    throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Can't connect to JVM"));
 	}
 }

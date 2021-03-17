@@ -32,6 +32,7 @@ import org.jboss.tools.openshift.core.odo.ComponentType;
 import org.jboss.tools.openshift.core.odo.ComponentTypeInfo;
 import org.jboss.tools.openshift.core.odo.DevfileComponentType;
 import org.jboss.tools.openshift.core.odo.DevfileRegistry;
+import org.jboss.tools.openshift.core.odo.DebugInfo;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 import org.jboss.tools.openshift.core.odo.Storage;
@@ -340,6 +341,11 @@ public class OdoProjectDecorator implements Odo {
   public void debug(String project, String application, String context, String component, Integer port)
       throws IOException {
     delegate.debug(project, application, component, context, port);
+  }
+
+  @Override
+  public DebugInfo debugInfo(String project, String application, String context, String component) throws IOException {
+    return delegate.debugInfo(project, application, context, component);
   }
 
   @Override
