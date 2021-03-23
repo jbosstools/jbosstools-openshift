@@ -153,8 +153,22 @@ public class CRC100Poller extends AbstractCDKPoller {
 				String allContent = String.join("\n", lines);
 			    ObjectMapper mapper = new ObjectMapper();
 			    JsonNode actualObj = mapper.readTree(allContent);
-			    JsonNode field = actualObj.get("crcStatus");
-			    String status = field.asText();
+				// Since crc 1.22.0 there is another patch that breaks this code.
+				// https://github.com/code-ready/crc/issues/1909
+				// Now "./crc status --output json" output does not end on stdErr
+				// but returns stdOut and json string which we have to handle.
+			    if (!actualObj.has("success") && !actualObj.has("crcStatus")) {
+			    	// not really sure about this exception and the state when it might occur
+			    	throw new PollingException("Cannot derive CRC status, json retrieved: \n\r" + actualObj.toPrettyString());
+			    }
+			    JsonNode successField = actualObj.get("success");
+			    String success = successField.asText();
+			    if (success.equals("false")) {
+				    return StatusFactory.infoStatus(CDKCoreActivator.PLUGIN_ID, "The CRC Container is starting.");
+			    }
+			    
+			    JsonNode statusField = actualObj.get("crcStatus");
+			    String status = statusField.asText();
 			    if( "Running".equals(status))
 			    	return Status.OK_STATUS;
 			    if( "Stopped".equals(status)) 
