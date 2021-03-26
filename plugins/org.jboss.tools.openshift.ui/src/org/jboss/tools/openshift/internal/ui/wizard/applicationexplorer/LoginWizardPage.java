@@ -28,11 +28,14 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -41,12 +44,16 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.common.util.SwtUtil;
 import org.jboss.tools.openshift.core.odo.utils.KubernetesClusterHelper;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimTrailingSlashConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.OCCommandUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.validator.URLValidator;
+import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.sandbox.SandboxModel;
+import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.sandbox.SandboxWizard;
 import org.jboss.tools.openshift.internal.ui.wizard.connection.OAuthDialog;
 
 import com.openshift.restclient.authorization.IAuthorizationContext;
@@ -72,12 +79,29 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 		super("Sign in to OpenShift", "Please sign in to your OpenShift server.", "Server Connection", wizard);
 		this.model = model;
 	}
+	
+	private void onSandboxClicked(Composite parent) {
+	  SandboxModel sandboxModel = new SandboxModel();
+	  SandboxWizard wizard = new SandboxWizard(sandboxModel);
+	  Point size = SwtUtil.getOptimumSizeFromTopLevelShell(getShell());
+	  WizardDialog dialog = new WizardDialog(getShell(), wizard);
+	  dialog.setMinimumPageSize(size);
+	  dialog.create();
+	  if (dialog.open() == Window.OK) {
+	    model.setUrl(sandboxModel.getClusterURL());
+	    model.setToken(sandboxModel.getClusterToken());
+	  }
+	}
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
 
-		Label urlLabel = new Label(parent, SWT.NONE);
+    StyledText expLabel = StyledTextUtils.emulateLinkWidget("Enter the cluster URL and the required credentials. You can also bootstrap a <a>Red Hat Developer Sandbox</a> cluster using your Red Hat account", new StyledText(parent, SWT.WRAP));
+    GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(expLabel);
+    StyledTextUtils.emulateLinkAction(expLabel, r -> onSandboxClicked(parent));
+
+    Label urlLabel = new Label(parent, SWT.NONE);
 		urlLabel.setText("URL:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(urlLabel);
 		txtURL = new Text(parent, SWT.BORDER);
