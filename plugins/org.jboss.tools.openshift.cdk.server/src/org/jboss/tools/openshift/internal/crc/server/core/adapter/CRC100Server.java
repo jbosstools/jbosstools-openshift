@@ -22,6 +22,8 @@ import org.eclipse.wst.server.core.model.ServerDelegate;
 import org.jboss.ide.eclipse.as.core.util.ServerNamingUtility;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.cdk.server.core.BinaryUtility;
+import org.jboss.tools.openshift.internal.cdk.server.core.detection.MinishiftVersionLoader;
+import org.jboss.tools.openshift.internal.cdk.server.core.detection.MinishiftVersionLoader.MinishiftVersions;
 
 public class CRC100Server extends ServerDelegate {
 	public static final String CRC_100_SERVER_TYPE_ID = "org.jboss.tools.openshift.crc.server.type.crc.v100";
@@ -77,11 +79,30 @@ public class CRC100Server extends ServerDelegate {
 		if (!bin.exists() || !json.exists() || !log.exists()) {
 			return false;
 		}
+		
+		// OC only present for pre-1.24.0 crc
+		String binLoc = getCRCBinaryLocation(getServer());
+		MinishiftVersions minishiftVersionProps = MinishiftVersionLoader.getVersionProperties(binLoc);
+		String crcVersion = minishiftVersionProps.getCRCVersion();
+		if( matchesCRC_1_24_OrGreater(crcVersion))
+			return true;
+		
 		File oc = new File(bin, "oc");
 		File ocExe = new File(bin, "oc.exe");
 		if( !oc.exists() && !ocExe.exists()) 
 			return false;
 		return true;
+	}
+
+	public static boolean matchesCRC_1_24_OrGreater(String version) {
+		if (version.contains("+")) {
+			String prefix = version.substring(0, version.indexOf("+"));
+			String[] segments = prefix.split("\\.");
+			if ("1".equals(segments[0]) && Integer.parseInt(segments[1]) >= 24) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public String getCRCHome(IServer server) {
