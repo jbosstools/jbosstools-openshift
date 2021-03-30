@@ -81,10 +81,7 @@ public class CRC100Server extends ServerDelegate {
 		}
 		
 		// OC only present for pre-1.24.0 crc
-		String binLoc = getCRCBinaryLocation(getServer());
-		MinishiftVersions minishiftVersionProps = MinishiftVersionLoader.getVersionProperties(binLoc);
-		String crcVersion = minishiftVersionProps.getCRCVersion();
-		if( matchesCRC_1_24_OrGreater(crcVersion))
+		if( matchesCRC_1_24_OrGreater(getServer()))
 			return true;
 		
 		File oc = new File(bin, "oc");
@@ -94,11 +91,27 @@ public class CRC100Server extends ServerDelegate {
 		return true;
 	}
 
-	public static boolean matchesCRC_1_24_OrGreater(String version) {
+	public static boolean matchesCRC_1_24_OrGreater(IServer server) {
+		return matchesCRC_1_x_OrGreater(server, 24);
+	}
+
+	public static boolean matchesCRC_1_21_OrGreater(IServer server) {
+		return matchesCRC_1_x_OrGreater(server, 21);
+	}
+
+	public static boolean matchesCRC_1_x_OrGreater(IServer server, int minor) {
+		String binLoc = getCRCBinaryLocation(server);
+		MinishiftVersions minishiftVersionProps = MinishiftVersionLoader.getVersionProperties(binLoc);
+		String crcVersion = minishiftVersionProps.getCRCVersion();
+		if( matchesCRC_1_x_OrGreater(crcVersion, minor))
+			return true;
+		return false;
+	}
+	public static boolean matchesCRC_1_x_OrGreater(String version, int minor) {
 		if (version.contains("+")) {
 			String prefix = version.substring(0, version.indexOf("+"));
 			String[] segments = prefix.split("\\.");
-			if ("1".equals(segments[0]) && Integer.parseInt(segments[1]) >= 24) {
+			if ("1".equals(segments[0]) && Integer.parseInt(segments[1]) >= minor) {
 				return true;
 			}
 		}

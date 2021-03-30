@@ -17,6 +17,9 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.Launch;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.util.ArgsUtil;
@@ -61,8 +64,31 @@ public class SetupCRCJob extends SetupCDKJob {
 	protected String getLaunchArgs() {
 		return "setup";
 	}
+	
+	private String promptTelemetry(IServer server) {
+		final String[] ret = new String[1];
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				int style = SWT.APPLICATION_MODAL | SWT.YES | SWT.NO;
+				MessageBox messageBox = new MessageBox(Display.getCurrent().getActiveShell(), style);
+				messageBox.setText("Telemetry Permissions");
+				messageBox.setMessage("Would you like to contribute anonymous usage statistics?");
+				if (messageBox.open() == SWT.YES) {
+					ret[0] = "yes";
+				} else {
+					ret[0] = "no";
+				}
+			}
+		});
+		return ret[0];
+	}
 	@Override
 	protected ILaunch launchSetup(IServer server) {
+		if( CRC100Server.matchesCRC_1_24_OrGreater(server)) {
+			// Ask about telemetry
+			// Would you like to contribute anonymous usage statistics
+			setTelemetryFlag(server, promptTelemetry(server));
+		}
 		if( useTerminal) {
 			Process p = launchSetupViaTerminal(server);
 			ILaunch l = new Launch(null, "run", null);
@@ -72,6 +98,20 @@ public class SetupCRCJob extends SetupCDKJob {
 			return super.launchSetup(server);
 		}
 	}
+	private void setTelemetryFlag(IServer server, String val) {
+		String cmd = getBinaryLocation();
+		File wd = new File(cmd).getParentFile();
+		String args = "config set consent-telemetry " + val;
+		Process p;
+		try {
+			p = ProcessLaunchUtility.callProcess(cmd, 
+					ArgsUtil.parse(args), wd, new HashMap<>(System.getenv()), false);
+			p.waitFor();
+		} catch (IOException | InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	protected Process launchSetupViaTerminal(IServer server) {
 		String cmd = getBinaryLocation();
 		File wd = new File(cmd).getParentFile();
