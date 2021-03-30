@@ -110,7 +110,7 @@ public class SetupCDKJob extends Job {
 	}
 
 	
-	private boolean promptRun(String home) {
+	protected boolean promptRun(String home) {
 		final int[] retmain = new int[1];
 		if (new File(home).exists()) {
 			Display.getDefault().syncExec(() -> {

@@ -108,12 +108,14 @@ public class CRC100Server extends ServerDelegate {
 		return false;
 	}
 	public static boolean matchesCRC_1_x_OrGreater(String version, int minor) {
+		String prefix = version;
 		if (version.contains("+")) {
-			String prefix = version.substring(0, version.indexOf("+"));
-			String[] segments = prefix.split("\\.");
-			if ("1".equals(segments[0]) && Integer.parseInt(segments[1]) >= minor) {
-				return true;
-			}
+			prefix = version.substring(0, version.indexOf("+"));
+		}
+		
+		String[] segments = prefix.split("\\.");
+		if ("1".equals(segments[0]) && Integer.parseInt(segments[1]) >= minor) {
+			return true;
 		}
 		return false;
 	}

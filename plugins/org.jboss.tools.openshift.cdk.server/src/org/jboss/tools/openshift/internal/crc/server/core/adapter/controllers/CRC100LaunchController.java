@@ -31,7 +31,12 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -54,6 +59,7 @@ import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookup
 import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Poller;
 import org.jboss.tools.openshift.internal.crc.server.core.adapter.CRC100Server;
 import org.jboss.tools.openshift.internal.crc.server.ui.view.SetupCRCJob;
+import org.jboss.tools.openshift.internal.crc.server.ui.view.SetupCRCJob.TELEMETRY;
 
 public class CRC100LaunchController extends AbstractCDKLaunchController
 		implements ILaunchServerController, IExternalLaunchConstants {
@@ -151,21 +157,54 @@ public class CRC100LaunchController extends AbstractCDKLaunchController
 		return crcBin;
 	}
 	
+	private class LaunchSetupCrcDialog extends MessageDialog {
+		private boolean telemSelection = true;
+		public LaunchSetupCrcDialog() {
+			this(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
+					"Your CRC installation has not been properly initialized. Would you like us to run crc setup for you?",
+					"Warning: CRC has not been properly initialized!"
+				);
+		}
+
+		public LaunchSetupCrcDialog(Shell shell, String msg, String title) {
+			super(shell, title, null, msg, MessageDialog.WARNING, 
+					new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 0);
+		}
+		
+		@Override
+		protected Control createCustomArea(Composite parent) {
+			final Button checkBox = new Button(parent, SWT.CHECK);
+			checkBox.setText("Would you like to contribute anonymous usage statistics?");
+			checkBox.setSelection(true);
+			checkBox.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					telemSelection = checkBox.getSelection();
+				}
+			});
+			return checkBox;
+		}
+
+		public boolean getTelemSelection() {
+			return telemSelection;
+		}
+
+	}
+	
 	private void launchCheckSetupCRC(IServer s, CRC100Server crc, ControllableServerBehavior beh) throws CoreException {
 		if( !crc.isInitialized()) {
 			int[] retmain = new int[1];
 			retmain[0] = -1;
-			String home = crc.getCRCHome(s);
+			TELEMETRY[] retTelem = new TELEMETRY[1];
 			Display.getDefault().syncExec(() -> {
-				Shell sh = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				String msgText = "Your CRC installation has not been properly initialized. Would you like us to run crc setup for you?";
-				String msg = NLS.bind(msgText, home);
-				MessageDialog messageDialog = new MessageDialog(sh, "Warning: CRC has not been properly initialized!", null, msg, MessageDialog.WARNING, 
-						new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 0);
+				LaunchSetupCrcDialog messageDialog = new LaunchSetupCrcDialog();
 				retmain[0] = messageDialog.open();
+				boolean approvedTelem = messageDialog.getTelemSelection();
+				retTelem[0] = (approvedTelem ? TELEMETRY.YES : TELEMETRY.NO);
 			});
+			
 			if( retmain[0] == IDialogConstants.OK_ID) {
-				Job j = new SetupCRCJob(s, null, true, true);
+				Job j = new SetupCRCJob(s, null, true, true, retTelem[0]);
 				j.schedule();
 				
 				try {
