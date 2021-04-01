@@ -45,5 +45,5 @@ jobs:
         uses: scacap/action-surefire-report@v1
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
-          report_paths: '${{github.workspace}}/*test-reports/*tests/**/TEST-*.xml'
+          report_paths: '${{github.workspace}}/*test-reports/**/TEST-*.xml'
           commit: ${{github.event.workflow_run.head_sha}}
