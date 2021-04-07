@@ -23,6 +23,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.openshift.core.odo.utils.KubernetesClusterHelper;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.connection.OAuthBrowser;
 import org.jboss.tools.openshift.internal.ui.wizard.connection.OAuthBrowser.TokenEvent;
 import org.jboss.tools.openshift.internal.ui.wizard.connection.OAuthBrowser.TokenListener;
@@ -81,8 +82,7 @@ public class SandboxLoginPage extends AbstractOpenShiftWizardPage {
         status.setValue(ValidationStatus.cancel("Please complete login"));
       }
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      OpenShiftUIActivator.log(ERROR, e.getLocalizedMessage(), e);
     }
   }
 
