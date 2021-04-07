@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2021 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
+package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.sandbox;
 
 import org.eclipse.jface.wizard.Wizard;
 
@@ -16,15 +16,23 @@ import org.eclipse.jface.wizard.Wizard;
  * @author Red Hat Developers
  *
  */
-public class LoginWizard extends Wizard {
+public class SandboxWizard extends Wizard {
+  
+  private final SandboxModel model;
 	
-	public LoginWizard(LoginModel model) {
-		this.addPage(new LoginWizardPage(this, model));
+	public SandboxWizard(SandboxModel model) {
+	  this.model = model;
 		setNeedsProgressMonitor(true);
-		setWindowTitle("Login");
+		setWindowTitle("Red Hat Developer Sandbox");
 	}
 
 	@Override
+  public void addPages() {
+    addPage(new SandboxWorkflowPage(this, model));
+    addPage(new SandboxLoginPage(this, model));
+  }
+
+  @Override
 	public boolean performFinish() {
 		return true;
 	}

@@ -16,7 +16,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.graphics.Point;
@@ -25,7 +24,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
+import org.jboss.tools.common.util.SwtUtil;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.wizard.connection.OAuthBrowser.TokenEvent;
+import org.jboss.tools.openshift.internal.ui.wizard.connection.OAuthBrowser.TokenListener;
 
 /*
  * Leaving for now as we may need this if we are ever able
@@ -35,7 +37,7 @@ public class OAuthDialog extends Dialog {
 
 	private String loadingHtml;
 	private String url;
-	private Browser browser;
+	private OAuthBrowser browser;
 	private String token;
 	private final boolean autoClose;
 
@@ -67,7 +69,7 @@ public class OAuthDialog extends Dialog {
 
 	@Override
 	protected Point getInitialSize() {
-		return new Point(500, 700);
+	  return SwtUtil.getOptimumSizeFromTopLevelShell(getShell());
 	}
 
 	@Override
@@ -76,7 +78,7 @@ public class OAuthDialog extends Dialog {
 		container.setLayout(new GridLayout());
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
 
-		browser = new Browser(container, SWT.BORDER);
+		browser = new OAuthBrowser(container, SWT.BORDER);
 		browser.setText(loadingHtml);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(browser);
 
@@ -95,16 +97,20 @@ public class OAuthDialog extends Dialog {
 			@Override
 			public void completed(ProgressEvent event) {
 				progressBar.setSelection(0);
-				TokenExtractor extractor = new TokenExtractor(browser.getText());
-				if (extractor.isTokenPage()) {
-					token = extractor.getToken();
-					if (autoClose) {
-					  OAuthDialog.this.close();
-					}
-				}
 			}
 		};
+		
+		TokenListener tokenListener = new TokenListener() {
+      @Override
+      public void tokenReceived(TokenEvent event) {
+        token = event.getToken();
+        if (autoClose) {
+          OAuthDialog.this.close();
+        }
+      }
+		};
 		browser.addProgressListener(progressListener);
+		browser.addTokenListener(tokenListener);
 		setURL(url);
 		return container;
 	}

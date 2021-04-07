@@ -76,12 +76,12 @@ public class UsageStats {
 		this.odoCreateService = createEventType("odo_create_service", "service type", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 		this.odoCreateStorage = createEventType("odo_create_storage", "storage size", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 		this.odoCreateUrl = createEventType("odo_create_url", "secure/not secure", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoLogin = createEventType("odo_login", null, null);
-    this.odoLogout = createEventType("odo_logout", null, null);
-		this.odoPush = createEventType("odo_push", null, null);
-		this.odoWatch = createEventType("odo_watch", null, null);
-		this.odoDebug = createEventType("odo_debug", null, null);
-		this.odoLink = createEventType("odo_link", null, null);
+		this.odoLogin = createEventType("odo_login", "Number of logins", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+    this.odoLogout = createEventType("odo_logout", "Number of logouts", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		this.odoPush = createEventType("odo_push", "Number of push", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		this.odoWatch = createEventType("odo_watch", "Number of watch", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		this.odoDebug = createEventType("odo_debug", "Number of debug", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		this.odoLink = createEventType("odo_link", "Number of link", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
 	}
 
 	private UsageEventType createEventType(String actionName, String labelDescription, String valueDescription) {

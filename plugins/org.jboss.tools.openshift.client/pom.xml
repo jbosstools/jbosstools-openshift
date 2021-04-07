@@ -31,6 +31,7 @@
 		<openshift-client.version>4.11.2</openshift-client.version>
 		<jackson.version>2.10.3</jackson.version>
 		<snakeyaml.version>1.25</snakeyaml.version>
+		<retrofit.version>2.9.0</retrofit.version>
 	</properties>
 
 	<build>
@@ -177,6 +178,28 @@
                           <groupId>com.squareup.okhttp3</groupId>
                           <artifactId>logging-interceptor</artifactId>
                           <version>${ok-http.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                          <groupId>com.squareup.retrofit2</groupId>
+                          <artifactId>retrofit</artifactId>
+                          <version>${retrofit.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                          <groupId>com.squareup.retrofit2</groupId>
+                          <artifactId>retrofit</artifactId>
+                          <version>${retrofit.version}</version>
+                          <classifier>sources</classifier>
+                        </artifactItem>
+                        <artifactItem>
+                          <groupId>com.squareup.retrofit2</groupId>
+                          <artifactId>converter-jackson</artifactId>
+                          <version>${retrofit.version}</version>
+                        </artifactItem>
+                        <artifactItem>
+                          <groupId>com.squareup.retrofit2</groupId>
+                          <artifactId>converter-jackson</artifactId>
+                          <version>${retrofit.version}</version>
+                          <classifier>sources</classifier>
                         </artifactItem>
 					</artifactItems>
 				</configuration>

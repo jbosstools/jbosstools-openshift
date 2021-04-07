@@ -29,7 +29,9 @@ Bundle-ClassPath: .,
  lib/openshift-client-4.11.2.jar,
  lib/servicecatalog-client-4.11.2.jar,
  lib/servicecatalog-model-4.11.2.jar,
- lib/openshift-model-4.11.2.jar
+ lib/openshift-model-4.11.2.jar,
+ lib/converter-jackson-2.9.0.jar,
+ lib/retrofit-2.9.0.jar
 Export-Package: com.fasterxml.jackson.dataformat.yaml,
  com.openshift.internal.restclient;x-friends:="org.jboss.tools.openshift.test",
  com.openshift.restclient,
@@ -108,7 +110,10 @@ Export-Package: com.fasterxml.jackson.dataformat.yaml,
  okhttp3.internal.ws,
  okhttp3.logging,
  okio,
- okio.internal
+ okio.internal,
+ retrofit2,
+ retrofit2.converter.jackson,
+ retrofit2.http
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.debug.internal.core,
  org.eclipse.osgi.service.debug;version="1.2.0",
