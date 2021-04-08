@@ -35,7 +35,7 @@ public class CRCDownloadRuntimeTest extends DownloadContainerRuntimeAbstractTest
 
 	@Parameters(name = "{0}")
 	public static Collection<CDKVersion> data() {
-		return Arrays.asList(CDKVersion.CRC1120);
+		return Arrays.asList(CDKVersion.CRC1240);
 	}
 
 	@Override

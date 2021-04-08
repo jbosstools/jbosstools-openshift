@@ -27,12 +27,12 @@ public class DownloadContainerRuntimeDefaultSettingsTest extends DownloadContain
 	
 	@Test
 	public void testDownloadingCDK390RuntimeDefaults() {
-		downloadAndVerifyContainerRuntime(CDKVersion.CDK3130, USERNAME, PASSWORD, "", "", true, true);
+		downloadAndVerifyContainerRuntime(CDKVersion.CDK3150, USERNAME, PASSWORD, "", "", true, true);
 	}
 	
 	@Test
 	public void testDownloadingMinishiftRuntimeDefaults() {
-		downloadAndVerifyContainerRuntime(CDKVersion.MINISHIFT1342, "", "", "", "", true, true);
+		downloadAndVerifyContainerRuntime(CDKVersion.MINISHIFT1343, "", "", "", "", true, true);
 	}
 	
 }
