@@ -77,9 +77,11 @@ public class SandboxLoginPage extends AbstractOpenShiftWizardPage {
     try {
       if (model.getClusterToken() != null) {
         status.setValue(ValidationStatus.ok());
-      } else {
+      } else if (model.getClusterURL() != null){
         browser.setUrl(KubernetesClusterHelper.getTokenRequest(model.getClusterURL()));
         status.setValue(ValidationStatus.cancel("Please complete login"));
+      } else {
+    	  status.setValue(ValidationStatus.error("Failed to login"));
       }
     } catch (IOException e) {
       OpenShiftUIActivator.log(ERROR, e.getLocalizedMessage(), e);
