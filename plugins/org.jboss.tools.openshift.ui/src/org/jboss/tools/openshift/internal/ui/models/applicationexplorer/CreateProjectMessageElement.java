@@ -10,16 +10,22 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models.applicationexplorer;
 
+import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.internal.common.ui.explorer.ILink;
-import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
+import org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.NewProjectHandler;
 
 /**
  * @author Red Hat Developers
  *
  */
-public abstract class MessageElement<P extends AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel>> extends AbstractOpenshiftUIElement<String, P, ApplicationExplorerUIModel> implements ILink {
+public class CreateProjectMessageElement extends MessageElement<ApplicationExplorerUIModel> implements ILink {
 	
-	protected MessageElement(P parentElement, String message) {
-		super(parentElement, message);
+	public CreateProjectMessageElement(ApplicationExplorerUIModel parentElement) {
+		super(parentElement, "No namespaces/projects, click here to create one.");
 	}
+
+	@Override
+  public void execute() {
+    NewProjectHandler.openDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getRoot());
+  }
 }

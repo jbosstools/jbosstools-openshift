@@ -80,7 +80,7 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 		return super.getStyledText(element, limit);
 	}
 
-	private StyledString getStyledText(MessageElement messageElement) {
+	private StyledString getStyledText(MessageElement<?> messageElement) {
 		StyledString styledString = new StyledString();
 		styledString.append(messageElement.getWrapped(), new Styler() {
 

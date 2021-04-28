@@ -61,10 +61,10 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
     return INSTANCE;
   }
   
-  static class ClusterInfo {
+  public static class ClusterInfo {
     private OpenShiftClient client = loadClient();
     
-    Odo getOdo() throws IOException {
+    public Odo getOdo() throws IOException {
       return OdoCli.get();
     }
 
@@ -96,14 +96,18 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
     private Config config;
 
     private DevfileRegistriesElement registries;
+    
+    protected ApplicationExplorerUIModel(ClusterInfo clusterInfo) {
+      super(null, clusterInfo);
+      loadProjects();
+      watcherJob = Job.createSystem("Watching kubeconfig", this::startWatcher);
+      watcherJob.schedule();
+      this.config = loadConfig();
+      ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
+    }
 
   private ApplicationExplorerUIModel() {
-    super(null, new ClusterInfo());
-    loadProjects();
-    watcherJob = Job.createSystem("Watching kubeconfig", this::startWatcher);
-    watcherJob.schedule();
-    this.config = loadConfig();
-    ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
+    this(new ClusterInfo());
   }
 
 
