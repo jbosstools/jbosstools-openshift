@@ -81,12 +81,10 @@ public class TestProject {
 
 	public void dispose() throws CoreException, IOException {
 		if (project.exists())
-			project.delete(true, true, null);
-		else {
-			File f = new File(location);
-			if (f.exists())
-				FileUtils.delete(f, FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.SKIP_MISSING);
-		}
+			project.delete(false, false, null);
+		File f = new File(location);
+		if (f.exists())
+			FileUtils.delete(f, FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.SKIP_MISSING);
 	}
 
 	public IFile getFile(String filepath) throws Exception {
