@@ -66,12 +66,14 @@ Require-Bundle: org.jboss.tools.openshift.common.ui;bundle-version="[3.0.0,4.0.0
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.ui.applicationexplorer;x-friends:="org.jboss.tools.openshift.reddeer,org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.comparators;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.dialog;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.explorer;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.handler;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.job;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.models;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.ui.models.applicationexplorer;x-friends:="org.jboss.tools.openshift.reddeer,org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.odo;x-friends:="org.jboss.tools.openshift.reddeer,org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.portforwading;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",

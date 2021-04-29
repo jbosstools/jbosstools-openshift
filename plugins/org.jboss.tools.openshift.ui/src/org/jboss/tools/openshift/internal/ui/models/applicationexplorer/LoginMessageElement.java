@@ -10,16 +10,29 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models.applicationexplorer;
 
+import java.io.IOException;
+
+import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.internal.common.ui.explorer.ILink;
-import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.LoginHandler;
 
 /**
  * @author Red Hat Developers
  *
  */
-public abstract class MessageElement<P extends AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel>> extends AbstractOpenshiftUIElement<String, P, ApplicationExplorerUIModel> implements ILink {
+public class LoginMessageElement extends MessageElement<ApplicationExplorerUIModel> implements ILink {
 	
-	protected MessageElement(P parentElement, String message) {
-		super(parentElement, message);
+	public LoginMessageElement(ApplicationExplorerUIModel parentElement) {
+		super(parentElement, "Can't connect to cluster. Click to login.");
+	}
+
+	@Override
+	public void execute() {
+		try {
+			LoginHandler.openDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getRoot());
+		} catch (IOException e) {
+			OpenShiftUIActivator.getDefault().getLogger().logError(e);
+		}
 	}
 }

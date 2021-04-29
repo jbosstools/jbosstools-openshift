@@ -670,8 +670,12 @@ public class OdoCli implements Odo {
 
   @Override
   public List<ServiceInstance> getServices(OpenShiftClient client, String project, String application) {
-    ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
-    return sc.serviceInstances().inNamespace(project).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application).build()).list().getItems();
+    try {
+      ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
+      return sc.serviceInstances().inNamespace(project).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application).build()).list().getItems();
+    } catch (KubernetesClientException e) {
+      return Collections.emptyList();
+    }
   }
 
   protected LabelSelector getLabelSelector(String application, String component) {

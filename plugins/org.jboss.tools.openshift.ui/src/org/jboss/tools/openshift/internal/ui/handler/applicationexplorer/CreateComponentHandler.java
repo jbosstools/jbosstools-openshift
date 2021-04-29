@@ -49,29 +49,34 @@ public class CreateComponentHandler extends OdoHandler {
 			}
 			project = application.getParent();
 		}
+    final Shell parent = HandlerUtil.getActiveShell(event);
 		try {
-			Odo odo = project.getParent().getOdo();
-			final CreateComponentModel model = new CreateComponentModel(odo, odo.getComponentTypes(),
-			        project.getWrapped().getMetadata().getName(),
-			        application == null ? "" : application.getWrapped().getName());
-			final IWizard createComponentWizard = new CreateComponentWizard(model);
-      final Shell parent = HandlerUtil.getActiveShell(event);
-			if (WizardUtils.openWizardDialog(createComponentWizard, parent) == Window.OK) {
-				AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel> element = application==null?project:application;
-				executeInJob("Creating component", monitor -> execute(parent, model, element));
-			}
+			openDialog(application, project, parent);
 			return Status.OK_STATUS;
 		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 	}
 
+  private static void openDialog(ApplicationElement application, ProjectElement project, final Shell parent)
+      throws IOException {
+    Odo odo = project.getParent().getOdo();
+    final CreateComponentModel model = new CreateComponentModel(odo, odo.getComponentTypes(),
+            project.getWrapped().getMetadata().getName(),
+            application == null ? "" : application.getWrapped().getName());
+    final IWizard createComponentWizard = new CreateComponentWizard(model);
+    if (WizardUtils.openWizardDialog(createComponentWizard, parent) == Window.OK) {
+    	AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel> element = application==null?project:application;
+    	executeInJob("Creating component", monitor -> execute(parent, model, element));
+    }
+  }
+
 	/**
 	 * @param shell
 	 * @param model
 	 * @return
 	 */
-	private void execute(Shell shell, CreateComponentModel model,
+	private static void execute(Shell shell, CreateComponentModel model,
 	        AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel> element) {
 		LabelNotification notification = LabelNotification.openNotification(shell, "Creating component " + model.getComponentName());
 		try {
@@ -91,4 +96,23 @@ public class CreateComponentHandler extends OdoHandler {
 			});
 		}
 	}
+
+  /**
+   * @param shell
+   * @param parent
+   */
+  public static void openDialog(Shell shell, AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel> parent) {
+    try {
+      if (parent instanceof ProjectElement) {
+        openDialog(null, (ProjectElement) parent, shell);
+      } else if (parent instanceof ApplicationElement) {
+        ApplicationElement application = (ApplicationElement) parent;
+        openDialog(application, application.getParent(), shell);
+      }
+    } catch (IOException e) {
+      MessageDialog.openError(shell, "Create component",
+          "Error creating component");
+    }
+    
+  }
 }

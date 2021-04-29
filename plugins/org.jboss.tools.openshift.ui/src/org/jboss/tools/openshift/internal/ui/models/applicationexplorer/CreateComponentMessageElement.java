@@ -10,16 +10,23 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models.applicationexplorer;
 
+import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.internal.common.ui.explorer.ILink;
+import org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.CreateComponentHandler;
 import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
 
 /**
  * @author Red Hat Developers
  *
  */
-public abstract class MessageElement<P extends AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel>> extends AbstractOpenshiftUIElement<String, P, ApplicationExplorerUIModel> implements ILink {
+public class CreateComponentMessageElement<T extends AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel>> extends MessageElement<T> implements ILink {
 	
-	protected MessageElement(P parentElement, String message) {
-		super(parentElement, message);
+	public CreateComponentMessageElement(T parentElement) {
+		super(parentElement, "No deployments, click here to create one.");
 	}
+
+	@Override
+  public void execute() {
+    CreateComponentHandler.openDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getParent());
+  }
 }

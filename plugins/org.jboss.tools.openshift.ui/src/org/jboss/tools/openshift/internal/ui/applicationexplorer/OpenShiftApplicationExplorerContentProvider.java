@@ -24,11 +24,13 @@ import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.CreateComponentMessageElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.CreateProjectMessageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistriesElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryComponentTypeElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryComponentTypeStarterElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryElement;
-import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.MessageElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.LoginMessageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.StorageElement;
@@ -107,13 +109,16 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
   }
 
   private Object[] getChildren(ApplicationExplorerUIModel parentElement) {
+    List<Object> childs = new ArrayList<>();
     try {
-      List<ProjectElement> childs = new ArrayList<>();
       parentElement.getOdo().getProjects(parentElement.getClient()).forEach(project -> childs.add(new ProjectElement(project, parentElement)));
-      return childs.toArray();
     } catch (Exception e) {
-      return new Object[] { new MessageElement("Can't connect to cluster. Click to login.", parentElement) };
+      childs.add(new LoginMessageElement(parentElement));
     }
+    if (childs.isEmpty()) {
+      childs.add(new CreateProjectMessageElement(parentElement));
+    }
+    return childs.toArray();
   }
   
   private Object[] getRegistries() {
@@ -141,13 +146,16 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
   }
 
   private Object[] getChildren(ProjectElement parentElement) {
+    List<Object> childs = new ArrayList<>();
     try {
-      List<ApplicationElement> childs = new ArrayList<>();
       parentElement.getParent().getOdo().getApplications(parentElement.getWrapped().getMetadata().getName()).forEach(application -> childs.add(new ApplicationElement(application, parentElement)));
-      return childs.toArray();
     } catch (IOException e) {
-      return new Object[] { "Can't list applications" };
+      childs.add("Can't list applications");
     }
+    if (childs.isEmpty()) {
+      childs.add(new CreateComponentMessageElement<ProjectElement>(parentElement));
+    }
+    return childs.toArray();
   }
 
   private Object[] getChildren(ApplicationElement parentElement) {
@@ -161,6 +169,9 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
       if (childs.isEmpty()) {
         return new Object[] { "Can't list components" };
       }
+    }
+    if (childs.isEmpty()) {
+      childs.add(new CreateComponentMessageElement<ApplicationElement>(parentElement));
     }
     return childs.toArray();
   }
