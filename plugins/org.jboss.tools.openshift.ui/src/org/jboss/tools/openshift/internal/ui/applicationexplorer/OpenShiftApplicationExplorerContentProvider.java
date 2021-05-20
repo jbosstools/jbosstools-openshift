@@ -140,7 +140,7 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
   private Object[] getStarters(DevfileRegistryComponentTypeElement componentType) {
     List<DevfileRegistryComponentTypeStarterElement> result = new ArrayList<>();
     try {
-      model.getOdo().getComponentTypeInfo(componentType.getWrapped().getName()).getStarters().forEach(starter -> result.add(new DevfileRegistryComponentTypeStarterElement(starter, componentType)));
+      model.getOdo().getComponentTypeInfo(componentType.getWrapped().getName(), componentType.getWrapped().getDevfileRegistry().getName()).getStarters().forEach(starter -> result.add(new DevfileRegistryComponentTypeStarterElement(starter, componentType)));
     } catch (IOException e) {}
     return result.toArray();
   }
