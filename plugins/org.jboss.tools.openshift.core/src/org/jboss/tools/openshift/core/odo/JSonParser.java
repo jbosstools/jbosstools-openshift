@@ -27,11 +27,12 @@ public class JSonParser {
     private static final String TYPE_FIELD = "type";
     private static final String ENV_FIELD = "env";
     private static final String VALUE_FIELD = "value";
-    private static final String DATA_FIELD = "Data";
+    private static final String DEVFILE_FIELD = "Devfile";
     private static final String STARTER_PROJECTS_FIELD = "starterProjects";
     private static final String DESCRIPTION_FIELD = "description";
     private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
     private static final String LOCAL_PORT_FIELD = "localPort";
+    private static final String REGISTRY_NAME_FIELD = "RegistryName";
 
     private final JsonNode root;
 
@@ -91,18 +92,22 @@ public class JSonParser {
     /**
      * @return
      */
-    public ComponentTypeInfo parseComponentTypeInfo() {
+    public ComponentTypeInfo parseComponentTypeInfo(String registryName) {
       ComponentTypeInfo.Builder builder = new ComponentTypeInfo.Builder();
-      if (root.has(DATA_FIELD)) {
-        JsonNode data = root.get(DATA_FIELD);
-        if (data.has(METADATA_FIELD) && data.get(METADATA_FIELD).has(NAME_FIELD)) {
-          builder.withName(data.get(METADATA_FIELD).get(NAME_FIELD).asText());
-        }
-        if (data.has(STARTER_PROJECTS_FIELD)) {
-          for(JsonNode starter : data.get(STARTER_PROJECTS_FIELD)) {
-            builder.withStarter(parseStarter(starter));
+      for(JsonNode element : root) {
+        if (element.has(REGISTRY_NAME_FIELD) && registryName.equals(element.get(REGISTRY_NAME_FIELD).asText())) {
+          if (element.has(DEVFILE_FIELD)) {
+            JsonNode data = element.get(DEVFILE_FIELD);
+            if (data.has(METADATA_FIELD) && data.get(METADATA_FIELD).has(NAME_FIELD)) {
+              builder.withName(data.get(METADATA_FIELD).get(NAME_FIELD).asText());
+            }
+            if (data.has(STARTER_PROJECTS_FIELD)) {
+              for(JsonNode starter : data.get(STARTER_PROJECTS_FIELD)) {
+                builder.withStarter(parseStarter(starter));
+              }
+            }
           }
-
+          break;
         }
       }
       return builder.build();

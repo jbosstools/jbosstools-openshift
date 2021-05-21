@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.ui.odo;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.cdt.utils.pty.PTY;
 import org.eclipse.cdt.utils.spawner.ProcessFactory;
@@ -30,6 +31,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -42,36 +44,122 @@ public class ExecHelper {
         SERVICE.submit(runnable);
     }
 
-    public static String execute(String executable, boolean checkExitCode, File workingDirectory, String... arguments) throws IOException {
-        DefaultExecutor executor = new DefaultExecutor() {
-            @Override
-            public boolean isFailure(int exitValue) {
-                if (checkExitCode) {
-                    return super.isFailure(exitValue);
-                } else {
-                    return false;
-                }
-            }
-        };
-        StringWriter writer = new StringWriter();
-        PumpStreamHandler handler = new PumpStreamHandler(new WriterOutputStream(writer));
-        executor.setStreamHandler(handler);
-        executor.setWorkingDirectory(workingDirectory);
-        CommandLine command = new CommandLine(executable).addArguments(arguments);
-        try {
-            executor.execute(command);
-            return writer.toString();
-        } catch (IOException e) {
-            throw new IOException(e.getLocalizedMessage() + " " + writer.toString(), e);
+    /**
+     * This method combine <b>out</b> and <b>err</b> outputs in result string, if you need to have them separately
+     *  use @link {@link #executeWithResult(String, boolean, File, Map, String...)}
+     *
+     * @param executable the executable
+     * @param checkExitCode if exit code should be checked
+     * @param workingDirectory the working directory for the process
+     * @param envs the map for the environment variables
+     * @param arguments the arguments
+     * @return the combined output and error stream as a String
+     * @throws IOException if error during process execution
+     */
+    public static String execute(String executable, boolean checkExitCode, File workingDirectory, Map<String,String> envs,
+                                 String... arguments) throws IOException {
+      DefaultExecutor executor = new DefaultExecutor() {
+        @Override
+        public boolean isFailure(int exitValue) {
+          if (checkExitCode) {
+            return super.isFailure(exitValue);
+          } else {
+            return false;
+          }
         }
+      };
+      StringWriter writer = new StringWriter();
+      PumpStreamHandler handler = new PumpStreamHandler(new WriterOutputStream(writer));
+      executor.setStreamHandler(handler);
+      executor.setWorkingDirectory(workingDirectory);
+      CommandLine command = new CommandLine(executable).addArguments(arguments, false);
+      Map<String, String> env = new HashMap<>(System.getenv());
+      env.putAll(envs);
+      try {
+        executor.execute(command, env);
+        return writer.toString();
+      } catch (IOException e) {
+        throw new IOException(e.getLocalizedMessage() + " " + writer.toString(), e);
+      }
     }
 
+    /**
+     * This method combine <b>out</b> and <b>err</b> outputs in result string, if you need to have them separately
+     *  use @link {@link #executeWithResult(String, boolean, File, Map, String...)}
+     * @param executable the executable
+     * @param workingDirectory the working directory for the process
+     * @param envs the map for the environment variables
+     * @param arguments the arguments
+     * @return the combined output and error stream as a String
+     * @throws IOException if error during process execution
+     */
+    public static String execute(String executable, File workingDirectory, Map<String, String> envs, String... arguments) throws IOException {
+      return execute(executable, true, workingDirectory, envs, arguments);
+    }
+
+    /**
+     * This method combine <b>out</b> and <b>err</b> outputs in result string, if you need to have them separately
+     *  use @link {@link #executeWithResult(String, boolean, File, Map, String...)}
+     * @param executable the executable
+     * @param envs the map for the environment variables
+     * @param arguments the arguments
+     * @return the combined output and error stream as a String
+     * @throws IOException if error during process execution
+     */
+    public static String execute(String executable, Map<String, String> envs, String... arguments) throws IOException {
+      return execute(executable, true, new File(HOME_FOLDER), envs, arguments);
+    }
+    /**
+     * This method combine <b>out</b> and <b>err</b> outputs in result string, if you need to have them separately
+     *  use @link {@link #executeWithResult(String, boolean, File, Map, String...)}
+     * @param executable the executable
+     * @param arguments the arguments
+     * @return the combined output and error stream as a String
+     * @throws IOException if error during process execution
+     */
+    public static String execute(String executable, String... arguments) throws IOException {
+      return execute(executable, Collections.emptyMap(), arguments);
+    }
+
+    /**
+     * This method combine <b>out</b> and <b>err</b> outputs in result string, if you need to have them separately
+     *  use @link {@link #executeWithResult(String, boolean, File, Map, String...)}
+     * @param executable the executable
+     * @param workingDirectory the working directory for the process
+     * @param arguments the arguments
+     * @return the combined output and error stream as a String
+     * @throws IOException if error during process execution
+     */
     public static String execute(String executable, File workingDirectory, String... arguments) throws IOException {
-        return execute(executable, true, workingDirectory, arguments);
+      return execute(executable, true, workingDirectory, Collections.emptyMap(), arguments);
     }
 
+    /**
+     * This method combine <b>out</b> and <b>err</b> outputs in result string, if you need to have them separately
+     *  use @link {@link #executeWithResult(String, boolean, File, Map, String...)}
+     * @param executable the executable
+     * @param checkExitCode if exit code should be checked
+     * @param envs the map for the environment variables
+     * @param arguments the arguments
+     * @return the combined output and error stream as a String
+     * @throws IOException if error during process execution
+     */
+    public static String execute(String executable, boolean checkExitCode, Map<String, String> envs,
+                                 String... arguments) throws IOException {
+      return execute(executable, checkExitCode, new File(HOME_FOLDER), envs, arguments);
+    }
+
+    /**
+     * This method combine <b>out</b> and <b>err</b> outputs in result string, if you need to have them separately
+     *  use @link {@link #executeWithResult(String, boolean, File, Map, String...)}
+     * @param executable the executable
+     * @param checkExitCode if exit code should be checked
+     * @param arguments the arguments
+     * @return the combined output and error stream as a String
+     * @throws IOException if error during process execution
+     */
     public static String execute(String executable, boolean checkExitCode, String... arguments) throws IOException {
-        return execute(executable, checkExitCode, new File(HOME_FOLDER), arguments);
+      return execute(executable, checkExitCode, new File(HOME_FOLDER), Collections.emptyMap(), arguments);
     }
     
     private static class RedirectedStream extends FilterInputStream {
@@ -134,10 +222,16 @@ public class ExecHelper {
       }
   }
 
+  private static Map<String, String> appendNativeEnv(Map<String, String> env) {
+    Map<String, String> nativeEnv = new HashMap(System.getenv());
+    nativeEnv.putAll(env);
+    return nativeEnv;
+  }
 
 	private static void executeWithTerminalInternal(File workingDirectory, boolean waitForProcessToExit,
-	        String... command) throws IOException {
-		Process p = Platform.OS_WIN32.equals(Platform.getOS())?ProcessFactory.getFactory().exec(command, null, workingDirectory):ProcessFactory.getFactory().exec(command, null, workingDirectory, new PTY(PTY.Mode.TERMINAL));
+	        Map<String, String> envs, String... command) throws IOException {
+	  String[] env = envs==null?null:EnvironmentUtils.toStrings(appendNativeEnv(envs));
+		Process p = Platform.OS_WIN32.equals(Platform.getOS())?ProcessFactory.getFactory().exec(command, env, workingDirectory):ProcessFactory.getFactory().exec(command, env, workingDirectory, new PTY(PTY.Mode.TERMINAL));
 		InputStream in = new RedirectedStream(p.getInputStream());
 		InputStream err = new RedirectedStream(p.getErrorStream());
 		OutputStream out = p.getOutputStream();
@@ -172,13 +266,25 @@ public class ExecHelper {
         executeWithTerminal(workingDirectory, true, command);
     }
 
-	public static void executeWithTerminal(File workingDirectory, boolean waitForProcessToExit, String... command)
+    public static void executeWithTerminal(File workingDirectory, Map<String, String> envs, String... command) throws IOException {
+        executeWithTerminal(workingDirectory, true, envs, command);
+    }
+
+    public static void executeWithTerminal(File workingDirectory, boolean waitForProcessToExit, String... command)
 	        throws IOException {
-		executeWithTerminalInternal(workingDirectory, waitForProcessToExit, command);
-	}
+       executeWithTerminal(workingDirectory, waitForProcessToExit, Collections.emptyMap(), command);
+    }
+
+    public static void executeWithTerminal(File workingDirectory, boolean waitForProcessToExit, Map<String, String> envs, String... command)
+        throws IOException {
+       executeWithTerminalInternal(workingDirectory, waitForProcessToExit, envs, command);
+    }
 
     public static void executeWithTerminal(String... command) throws IOException {
         executeWithTerminal(new File(HOME_FOLDER), command);
     }
 
+    public static void executeWithTerminal(Map<String, String> envs, String... command) throws IOException {
+        executeWithTerminal(new File(HOME_FOLDER), envs, command);
+    }
 }

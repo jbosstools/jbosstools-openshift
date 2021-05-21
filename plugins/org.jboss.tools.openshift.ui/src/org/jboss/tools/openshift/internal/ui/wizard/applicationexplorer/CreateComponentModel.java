@@ -131,7 +131,7 @@ public class CreateComponentModel extends ComponentModel {
 		}
 		if (selectedComponentType instanceof DevfileComponentType) {
 		  try {
-        setSelectedComponentStarters(getOdo().getComponentTypeInfo(selectedComponentType.getName()).getStarters());
+        setSelectedComponentStarters(getOdo().getComponentTypeInfo(selectedComponentType.getName(), ((DevfileComponentType) selectedComponentType).getDevfileRegistry().getName()).getStarters());
       } catch (IOException e) {
         setSelectedComponentStarters(Collections.emptyList());
       }
