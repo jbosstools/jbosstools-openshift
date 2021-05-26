@@ -156,8 +156,12 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 		componentTypesLabel.setText("Component type:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).applyTo(componentTypesLabel);
 		Tree componentTypesTree = new Tree(parent, SWT.SINGLE | SWT.BORDER);
-    GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-    .applyTo(componentTypesTree);
+    GridDataFactory.fillDefaults().
+        span(2, 1).
+        align(SWT.FILL, SWT.CENTER).
+        grab(true, false).
+        hint(SWT.DEFAULT, 150).
+        applyTo(componentTypesTree);
 		TreeViewer componentTypesTreeViewer = new TreeViewer(componentTypesTree);
     componentTypesTreeViewer.setContentProvider(new ComponentTypeContentProvider(model.getComponentTypes()));
 		componentTypesTreeViewer.setLabelProvider(new ComponentTypeColumLabelProvider());
