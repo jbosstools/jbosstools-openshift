@@ -17,6 +17,7 @@ import java.lang.annotation.Target;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.junit.requirement.Requirement;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
@@ -59,6 +60,8 @@ public class CleanOpenShiftODOConnectionRequirement implements Requirement<Clean
 			} catch (WaitTimeoutExpiredException ex) {
 				//delete could throw Delete window, that project has been deleted
 				new PushButton(new DefaultShell("Delete"), "OK").click();
+			} catch (CoreLayerException e) {
+				//project has been deleted
 			}
 		}
 	}
