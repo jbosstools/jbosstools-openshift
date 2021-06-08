@@ -30,9 +30,13 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryComponentTypeElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryComponentTypeStarterElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement;
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateComponentModel;
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateComponentWizard;
+
+import io.fabric8.openshift.client.OpenShiftClient;
 
 /**
  * @author Red Hat Developers
@@ -44,31 +48,46 @@ public class CreateComponentHandler extends OdoHandler {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
 		ApplicationElement application = null;
 		ProjectElement project = UIUtils.getFirstElement(selection, ProjectElement.class);
+		DevfileRegistryComponentTypeElement componentType = null;
 		if (project == null) {
 			application = UIUtils.getFirstElement(selection, ApplicationElement.class);
 			if (application == null) {
-				return OpenShiftUIActivator.statusFactory().cancelStatus("No project or application selected"); //$NON-NLS-1$
+			  componentType = UIUtils.getFirstElement(selection, DevfileRegistryComponentTypeElement.class);
+			  if (componentType == null) {
+			    DevfileRegistryComponentTypeStarterElement starter = UIUtils.getFirstElement(selection, DevfileRegistryComponentTypeStarterElement.class);
+			    if (starter == null) {
+		        return OpenShiftUIActivator.statusFactory().cancelStatus("No project or application selected"); //$NON-NLS-1$
+			    } else {
+			      componentType = starter.getParent();
+			    }
+			  }
+			} else {
+	      project = application.getParent();
 			}
-			project = application.getParent();
 		}
     final Shell parent = HandlerUtil.getActiveShell(event);
 		try {
-			openDialog(application, project, parent);
+			openDialog(componentType, application, project, parent);
 			return Status.OK_STATUS;
 		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 	}
 
-  private static void openDialog(ApplicationElement application, ProjectElement project, final Shell parent)
+  private static void openDialog(DevfileRegistryComponentTypeElement componentType, ApplicationElement application, ProjectElement project, final Shell parent)
       throws IOException {
-    Odo odo = project.getParent().getOdo();
+    Odo odo = project!=null?project.getParent().getOdo():componentType.getRoot().getOdo();
+    OpenShiftClient client = project!=null?project.getParent().getClient():componentType.getRoot().getClient();
+    String projectName = project != null?project.getWrapped().getMetadata().getName():odo.getProject(client).getMetadata().getName();
     final CreateComponentModel model = new CreateComponentModel(odo, odo.getComponentTypes(),
-            project.getWrapped().getMetadata().getName(),
+            projectName,
             application == null ? "" : application.getWrapped().getName());
+    if (componentType != null) {
+      model.setSelectedComponentType(componentType.getWrapped());
+    }
     final IWizard createComponentWizard = new CreateComponentWizard(model);
     if (WizardUtils.openWizardDialog(createComponentWizard, parent) == Window.OK) {
-    	AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel> element = application==null?project:application;
+    	AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel> element = componentType!=null?componentType.getRoot():application==null?project:application;
     	executeInJob("Creating component", monitor -> execute(parent, model, element));
     }
   }
@@ -107,10 +126,10 @@ public class CreateComponentHandler extends OdoHandler {
   public static void openDialog(Shell shell, AbstractOpenshiftUIElement<?, ?, ApplicationExplorerUIModel> parent) {
     try {
       if (parent instanceof ProjectElement) {
-        openDialog(null, (ProjectElement) parent, shell);
+        openDialog(null, null, (ProjectElement) parent, shell);
       } else if (parent instanceof ApplicationElement) {
         ApplicationElement application = (ApplicationElement) parent;
-        openDialog(application, application.getParent(), shell);
+        openDialog(null, application, application.getParent(), shell);
       }
     } catch (IOException e) {
       MessageDialog.openError(shell, "Create component",

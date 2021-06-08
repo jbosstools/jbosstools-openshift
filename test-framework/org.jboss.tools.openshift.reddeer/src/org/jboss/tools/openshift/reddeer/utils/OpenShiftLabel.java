@@ -212,6 +212,7 @@ public class OpenShiftLabel {
 		public static final String DELETE_PROJECT = "Delete project";
 		public static final String DELETE_APPLICATION = "Delete application";
 		public static final String DELETE_COMPONENT = "Delete component";
+		public static final String DELETE_REGISTRY = "Delete devfile registry";
 		public static final String NEW_PROJECT = "New project";
 	}
 	

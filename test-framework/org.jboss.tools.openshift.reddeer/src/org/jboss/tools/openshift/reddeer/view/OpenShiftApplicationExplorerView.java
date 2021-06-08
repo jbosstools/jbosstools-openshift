@@ -39,6 +39,7 @@ import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOConnection;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODORegistries;
 
 /**
  * 
@@ -162,12 +163,23 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 		return connection;
 	}
 
-	private TreeItem getConnectionItem() {
+  public OpenShiftODORegistries getOpenShiftODORegistries() {
+    OpenShiftODORegistries registries = null;
+    registries = new OpenShiftODORegistries(getRegistriesItem());
+    return registries;
+  }
+
+  private TreeItem getConnectionItem() {
 		open();
 		return new DefaultTree().getItems().get(0);
 	}
 
-	@Override
+  private TreeItem getRegistriesItem() {
+    open();
+    return new DefaultTree().getItems().get(1);
+  }
+
+  @Override
 	public void activate() {
 		try {
 			checkOpen();
