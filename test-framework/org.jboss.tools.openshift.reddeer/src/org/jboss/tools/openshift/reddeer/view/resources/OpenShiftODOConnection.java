@@ -88,7 +88,9 @@ public class OpenShiftODOConnection extends AbstractOpenShiftApplicationConnecti
 				explorer.activate();
 				explorer.connectToOpenShiftODO();
 			}
-			projects.add(new OpenShiftODOProject(treeItem));
+			if (!treeItem.getText().contains("No namespaces/projects, click here to create one.")) {
+				projects.add(new OpenShiftODOProject(treeItem));
+			}
 		}
 		return projects;
 	}

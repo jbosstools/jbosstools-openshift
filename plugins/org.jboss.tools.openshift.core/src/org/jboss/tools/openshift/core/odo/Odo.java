@@ -16,10 +16,17 @@ import io.fabric8.servicecatalog.api.model.ServiceInstance;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 public interface Odo {
     List<Project> getProjects(OpenShiftClient client);
+    
+    default Project getProject(OpenShiftClient client) {
+      List<Project> projects = getProjects(client);
+      Optional<Project> project = projects.stream().filter(p -> p.getMetadata().getName().equals(client.getNamespace())).findFirst();
+      return project.orElseGet(() -> projects.isEmpty()?null:projects.get(0));
+    }
 
     List<Project> getPreOdo10Projects(OpenShiftClient client);
 

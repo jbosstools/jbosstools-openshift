@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
+import java.util.Objects;
+
 public final class DevfileComponentType extends AbstractComponentType {
   
     private final String displayName;
@@ -47,5 +49,22 @@ public final class DevfileComponentType extends AbstractComponentType {
      */
     public DevfileRegistry getDevfileRegistry() {
       return devfileRegistry;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(devfileRegistry.getName(), getName());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!(obj instanceof DevfileComponentType)) {
+        return false;
+      }
+      DevfileComponentType other = (DevfileComponentType) obj;
+      return Objects.equals(devfileRegistry.getName(), other.devfileRegistry.getName()) && Objects.equals(getName(), other.getName());
     }
 }

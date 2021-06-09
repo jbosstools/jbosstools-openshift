@@ -1321,6 +1321,10 @@ $            <command
                                        type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement" />
                                 <adapt
                                        type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement" />
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryComponentTypeElement" />
+                                <adapt
+                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryComponentTypeStarterElement" />
                           </or>
                         </iterate>
                     </and>
