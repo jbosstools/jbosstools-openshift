@@ -14,6 +14,7 @@ import java.util.Objects;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.jboss.tools.openshift.core.odo.ComponentType;
+import org.jboss.tools.openshift.core.odo.DevfileComponentType;
 
 /**
  * @author Red Hat Developers
@@ -24,7 +25,11 @@ public class ComponentTypeColumLabelProvider extends ColumnLabelProvider {
 	@Override
 	public String getText(Object element) {
 	  if (element instanceof ComponentType) {
-	    return ((ComponentType)element).getName();
+	    String text = ((ComponentType)element).getName();
+	    if (element instanceof DevfileComponentType) {
+	      text += " (from " + ((DevfileComponentType)element).getDevfileRegistry().getName() + ")";
+	    }
+	    return text;
 	  }
 	  return Objects.toString(element);
 	}

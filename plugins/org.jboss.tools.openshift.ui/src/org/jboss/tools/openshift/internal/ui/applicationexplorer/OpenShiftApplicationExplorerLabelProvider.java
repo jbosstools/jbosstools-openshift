@@ -111,6 +111,8 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 			}return OpenShiftImages.URL_IMG;
 		} else if (element instanceof StorageElement) {
 			return OpenShiftImages.STORAGE_IMG;
+		} else if (element instanceof DevfileRegistriesElement || element instanceof DevfileRegistryElement) {
+			return OpenShiftImages.REGISTRY_IMG;
 		} else if (element instanceof DevfileRegistryComponentTypeElement) {
 		  return OpenShiftImages.COMPONENT_TYPE_IMG;
 		} else if (element instanceof DevfileRegistryComponentTypeStarterElement) {
