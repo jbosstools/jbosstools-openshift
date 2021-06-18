@@ -29,9 +29,11 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -44,6 +46,7 @@ import org.jboss.tools.common.oauth.core.TokenProvider;
 import org.jboss.tools.common.oauth.core.exception.OAuthException;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.ui.validator.CountryCodeValidator;
 import org.jboss.tools.openshift.internal.ui.validator.PhoneNumberValidator;
@@ -59,7 +62,7 @@ public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage { // implem
   
   private SandboxProcessor processor;
   
-  private Label messageLabel;
+  private CLabel messageLabel;
   
   private Group verificationGroup;
   
@@ -79,7 +82,14 @@ public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage { // implem
   }
   
   private void reportMessage(String message, int type) {
-    getControl().getDisplay().asyncExec(() -> messageLabel.setText(message));
+	  getControl().getDisplay().asyncExec(() -> {
+		  if (type == ERROR) {
+			messageLabel.setImage(OpenShiftCommonImages.ERROR);
+		  } else {
+			  messageLabel.setImage(null);
+		  }
+		  messageLabel.setText(message);
+	  });
   }
   
   private void ssoLogin(IProgressMonitor monitor) {
@@ -186,7 +196,8 @@ public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage { // implem
     
     GridLayoutFactory.fillDefaults().numColumns(1).margins(10, 10).applyTo(parent);
     
-    messageLabel = new Label(parent, SWT.NONE);
+    messageLabel = new CLabel(parent, SWT.NONE);
+    messageLabel.setAlignment(SWT.CENTER);
     GridDataFactory.fillDefaults().grab(true, true).applyTo(messageLabel);
     
     verificationGroup = new Group(parent, SWT.NONE);
