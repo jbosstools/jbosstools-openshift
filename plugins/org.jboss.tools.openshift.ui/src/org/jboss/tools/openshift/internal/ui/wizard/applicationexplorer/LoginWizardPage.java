@@ -86,7 +86,6 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 	  Point size = SwtUtil.getOptimumSizeFromTopLevelShell(getShell());
 	  WizardDialog dialog = new WizardDialog(getShell(), wizard);
 	  dialog.setMinimumPageSize(size);
-	  dialog.create();
 	  if (dialog.open() == Window.OK) {
 	    model.setUrl(sandboxModel.getClusterURL());
 	    model.setToken(sandboxModel.getClusterToken());
