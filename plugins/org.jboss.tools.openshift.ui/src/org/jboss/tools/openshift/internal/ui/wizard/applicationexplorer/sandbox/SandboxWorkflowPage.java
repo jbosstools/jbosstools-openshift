@@ -35,6 +35,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -52,7 +53,7 @@ import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.sandbox.
  * @author Red Hat Developers
  *
  */
-public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage implements PaintListener {
+public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage { // implements PaintListener {
 
   private final SandboxModel model;
   
@@ -263,12 +264,6 @@ public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage implements 
 
   @Override
   protected void onPageActivated(DataBindingContext dbc) {
-    getControl().addPaintListener(this);
-   }
-
-  @Override
-  public void paintControl(PaintEvent e) {
-    launchJob();
-    getControl().removePaintListener(this);
+    Display.getCurrent().asyncExec(() -> launchJob());
   }
 }
