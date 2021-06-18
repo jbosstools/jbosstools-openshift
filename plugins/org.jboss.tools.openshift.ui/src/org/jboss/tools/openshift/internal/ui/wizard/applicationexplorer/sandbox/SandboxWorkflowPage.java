@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.sandbox
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
@@ -30,10 +31,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -196,6 +194,20 @@ public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage { // implem
     
     GridLayoutFactory.fillDefaults().numColumns(1).margins(10, 10).applyTo(parent);
     
+    // disable next/finish as long as status is not ok
+    dbc.addValidationStatusProvider(new MultiValidator() {
+
+		@Override
+		protected IStatus validate() {
+			Object value = status.getValue();
+			if (!(value instanceof IStatus)) {
+				return ValidationStatus.cancel("");
+			} else {
+				return (IStatus) value;
+			}
+		}
+	});
+
     messageLabel = new CLabel(parent, SWT.NONE);
     messageLabel.setAlignment(SWT.CENTER);
     GridDataFactory.fillDefaults().grab(true, true).applyTo(messageLabel);
