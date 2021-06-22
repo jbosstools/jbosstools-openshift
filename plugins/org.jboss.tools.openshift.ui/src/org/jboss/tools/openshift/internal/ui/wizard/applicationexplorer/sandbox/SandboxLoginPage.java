@@ -38,7 +38,8 @@ public class SandboxLoginPage extends AbstractOpenShiftWizardPage {
   
   private OAuthBrowser browser;
   
-  private final WritableValue<IStatus> status = new WritableValue<>();  
+  private final WritableValue<IStatus> status = new WritableValue<>(
+		  ValidationStatus.cancel("Log in to Red Hat Developer Sandbox"), IStatus.class);
   /**
    * @param title
    * @param description

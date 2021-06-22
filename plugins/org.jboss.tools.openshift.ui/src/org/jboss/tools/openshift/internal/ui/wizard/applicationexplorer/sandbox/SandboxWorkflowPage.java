@@ -21,7 +21,6 @@ import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
@@ -43,6 +42,7 @@ import org.jboss.tools.common.oauth.core.CommonOAuthCoreConstants;
 import org.jboss.tools.common.oauth.core.TokenProvider;
 import org.jboss.tools.common.oauth.core.exception.OAuthException;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
@@ -54,7 +54,7 @@ import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.sandbox.
  * @author Red Hat Developers
  *
  */
-public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage { // implements PaintListener {
+public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage {
 
   private final SandboxModel model;
   
@@ -66,7 +66,7 @@ public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage { // implem
   
   private Group confirmVerificationGroup;
   
-  private final WritableValue<IStatus> status = new WritableValue<>();
+  private final WritableValue<IStatus> status = new WritableValue<>(ValidationStatus.cancel("Login to Red Hat SSO required"), IStatus.class);
   
   /**
    * @param title
@@ -96,45 +96,45 @@ public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage { // implem
       model.setIDToken(TokenProvider.get().getToken(CommonOAuthCoreConstants.REDHAT_SSO_SERVER_ID, TokenProvider.ID_TOKEN, getControl()));
     } catch (OAuthException e) {
       reportMessage("Failed to login to Red Hat SSO", ERROR);
+      setStatus(ValidationStatus.error("Failed to login to Red Hat SSO", e));
     }
   }
   
-  private IStatus retrieveState(IProgressMonitor monitor) {
+  private void retrieveState(IProgressMonitor monitor) {
     if (model.getIDToken() == null) {
       ssoLogin(monitor);
     }
     if (model.getIDToken() != null) {
       checkSandbox(monitor);
     }
-    return Status.OK_STATUS;
   }
   
   private void reportState(State state) {
     switch (state) {
     case NONE:
-      status.getRealm().asyncExec(() -> status.setValue(ValidationStatus.cancel("Checking Red Hat Developer Sandbox signup state")));
+      setStatus(ValidationStatus.cancel("Checking Red Hat Developer Sandbox signup state"));
       break;
     case NEEDS_SIGNUP:
-      status.getRealm().asyncExec(() -> status.setValue(ValidationStatus.cancel("Checking Red Hat Developer Sandbox needs signup")));
+      setStatus(ValidationStatus.cancel("Checking Red Hat Developer Sandbox needs signup"));
       break;
     case NEEDS_APPROVAL:
-      status.getRealm().asyncExec(() -> status.setValue(ValidationStatus.cancel("Your Red Hat Developer Sandbox needs to be approved, you should wait or retry later")));
+      setStatus(ValidationStatus.cancel("Your Red Hat Developer Sandbox needs to be approved, you should wait or retry later"));
       break;
     case NEEDS_VERIFICATION:
-      status.getRealm().asyncExec(() -> status.setValue(ValidationStatus.cancel("Your Red Hat Developer Sandbox needs to be verified, enter your country code and phone number and click 'Verify'")));
+      setStatus(ValidationStatus.cancel("Your Red Hat Developer Sandbox needs to be verified, enter your country code and phone number and click 'Verify'"));
       break;
     case CONFIRM_VERIFICATION:
-      status.getRealm().asyncExec(() -> status.setValue(ValidationStatus.cancel("You need to send the verification code received on your phone, enter the verification code and phone number and click 'Verify'")));
+      setStatus(ValidationStatus.cancel("You need to send the verification code received on your phone, enter the verification code and phone number and click 'Verify'"));
       break;
     case READY:
       reportMessage("Your Red Hat Developer Sandbox is ready, let's login now !!!", NONE);
-      status.getRealm().asyncExec(() -> status.setValue(ValidationStatus.ok()));
+      setStatus(ValidationStatus.ok());
       model.setClusterURL(processor.getClusterURL());
       break;
     }
   }
 
-  private IStatus checkSandbox(IProgressMonitor monitor) {
+  private void checkSandbox(IProgressMonitor monitor) {
     reportMessage("Checking Developer Sandbox account", NONE);
     if (processor == null) {
       processor = new SandboxProcessor(model.getIDToken());
@@ -154,15 +154,20 @@ public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage { // implem
         }
       }
     } catch (IOException e) {
-      reportMessage("Error accessing the Red Hat Developer Sandbox API: " + e.getLocalizedMessage(), ERROR);
+      String message = "Error accessing the Red Hat Developer Sandbox API: " + e.getLocalizedMessage();
+      reportMessage(message, ERROR);
+      setStatus(ValidationStatus.error(message, e));
     }
-    return Status.OK_STATUS;
   }
-  
+
+  private void setStatus(IStatus status) {
+	  this.status.getRealm().asyncExec(() -> this.status.setValue(status));
+  }
+
   private void launchJob() {
     try {
       Job job = Job.create("Retrieving Red Hat Developer Sandbox state", this::retrieveState);
-      WizardUtils.runInWizard(job, getContainer());
+      WizardUtils.runInWizard(job, getContainer(), getDatabindingContext());
       updateGroups();
     } catch (InvocationTargetException e) {
     } catch (InterruptedException e) {
@@ -193,20 +198,6 @@ public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage { // implem
   protected void doCreateControls(Composite parent, DataBindingContext dbc) {
     
     GridLayoutFactory.fillDefaults().numColumns(1).margins(10, 10).applyTo(parent);
-    
-    // disable next/finish as long as status is not ok
-    dbc.addValidationStatusProvider(new MultiValidator() {
-
-		@Override
-		protected IStatus validate() {
-			Object value = status.getValue();
-			if (!(value instanceof IStatus)) {
-				return ValidationStatus.cancel("");
-			} else {
-				return (IStatus) value;
-			}
-		}
-	});
 
     messageLabel = new CLabel(parent, SWT.NONE);
     messageLabel.setAlignment(SWT.CENTER);
