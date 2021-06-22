@@ -98,6 +98,7 @@ public class OpenShiftLabel {
 		public static final String[] NEW_PROJECT = {"New", "Project..."};
 		public static final String[] NEW_SERVICE = {"New", "Service..."};
 		public static final String[] NEW_URL = {"New", "URL"};
+		public static final String[] NEW_REGISTRY = {"New", "Registry"};
 		public static final String LIST_CATALOG_SERVICES = "List Catalog Services";
 		public static final String LIST_CATALOG_COMPONENTS = "List Catalog Components";
 		public static final String OPEN_CONSOLE = "Open Console";
@@ -212,8 +213,9 @@ public class OpenShiftLabel {
 		public static final String DELETE_PROJECT = "Delete project";
 		public static final String DELETE_APPLICATION = "Delete application";
 		public static final String DELETE_COMPONENT = "Delete component";
-		public static final String DELETE_REGISTRY = "Delete devfile registry";
 		public static final String NEW_PROJECT = "New project";
+		public static final String NEW_REGISTRY = "Create devfile registry";
+		public static final String DELETE_REGISTRY = "Delete devfile registry";
 	}
 	
 	/**
@@ -343,6 +345,7 @@ public class OpenShiftLabel {
 		public static final String S2I_NODE = "S2I";
 		public static final String PORT = "Port:";
 		public static final String PROJECT_STARTER = "Project starter:";
+		public static final String SECURE = "Secure:";
 	}
 	
 	public static class JobsLabels {			

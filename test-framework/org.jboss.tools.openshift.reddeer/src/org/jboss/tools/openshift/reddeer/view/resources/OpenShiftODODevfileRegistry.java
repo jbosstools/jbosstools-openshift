@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.view.resources;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,59 +31,59 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 /**
  * 
- * OpenShift Application Explorer Registry implemented with RedDeer.
+ * OpenShift Application Explorer Registry implemented with
+ * RedDeer.
  * 
  */
-public class OpenShiftODORegistry extends AbstractOpenShiftApplicationExplorerItem {
-		
+public class OpenShiftODODevfileRegistry extends AbstractOpenShiftApplicationExplorerItem {
+
 	private String registryName;
-	
-	public OpenShiftODORegistry(TreeItem registryItem) {
+
+	public OpenShiftODODevfileRegistry(TreeItem registryItem) {
 		super(registryItem);
 		this.registryName = treeViewerHandler.getNonStyledText(item);
 	}
-	
+
 	public String getName() {
 		return registryName;
 	}
-	
-	 /**
-   * Gets an OpenShift project with specified project name.
-   *  
-   * @param devfileName name of a devfile
-   * @return OpenShift devfile
-   */
-  public OpenShiftODODevfile getDevfile(String devfileName) {
-    select();
-    item.expand();
-    
-    new WaitWhile(new JobIsRunning());
-    try {
-      return new OpenShiftODODevfile(treeViewerHandler.getTreeItem(item, devfileName));
-    } catch (RedDeerException ex) {
-      return null;
-    }
-  }
 
-  /**
-   * Gets all projects existing on a connection.
-   * 
-   * @return list of all projects for a connection.
-   */
-  public List<OpenShiftODODevfile> getAllDevfiles() {
-    List<OpenShiftODODevfile> devfiles = new ArrayList<>();
-    activateOpenShiftApplicationExplorerView();
-    item.select();
-    item.expand();
-    for (TreeItem treeItem: item.getItems()) {
-      devfiles.add(new OpenShiftODODevfile(treeItem));
-    }
-    return devfiles;
-  }
-
-	
 	/**
-	 * Deletes registry.
+	 * Gets an OpenShift registry with specified registry name.
+	 * 
+	 * @param devfileName name of a devfile
+	 * @return OpenShift devfile
+	 */
+	public OpenShiftODODevfile getDevfile(String devfileName) {
+		select();
+		item.expand();
+
+		new WaitWhile(new JobIsRunning());
+		try {
+			return new OpenShiftODODevfile(treeViewerHandler.getTreeItem(item, devfileName));
+		} catch (RedDeerException ex) {
+			return null;
+		}
+	}
+
+	/**
+	 * Gets all registries existing on a connection.
+	 * 
+	 * @return list of all projects for a connection.
+	 */
+	public List<OpenShiftODODevfile> getAllDevfiles() {
+		List<OpenShiftODODevfile> devfiles = new ArrayList<>();
+		activateOpenShiftApplicationExplorerView();
+		item.select();
+		item.expand();
+		for (TreeItem treeItem : item.getItems()) {
+			devfiles.add(new OpenShiftODODevfile(treeItem));
+		}
+		return devfiles;
+	}
+
+	/**
+	 * Deletes OpenShift registry.
 	 */
 	public void delete() {
 		item.select();
@@ -95,4 +96,5 @@ public class OpenShiftODORegistry extends AbstractOpenShiftApplicationExplorerIt
 		new WaitWhile(new JobIsRunning(new Matcher[]{CoreMatchers.is(OpenShiftLabel.JobsLabels.DELETE)}), TimePeriod.LONG);
 		new WaitUntil(new ODORegistryIsDeleted(getName()), TimePeriod.getCustom(120));
 	}
+
 }

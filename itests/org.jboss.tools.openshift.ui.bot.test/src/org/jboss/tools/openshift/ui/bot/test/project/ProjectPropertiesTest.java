@@ -21,13 +21,11 @@ import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheet;
 import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheetProperty;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.impl.table.DefaultTable;
-import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
@@ -39,7 +37,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(project=DatastoreOS3.TEST_PROJECT, 
