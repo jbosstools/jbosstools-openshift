@@ -12,9 +12,11 @@ package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -24,6 +26,7 @@ import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.window.Window;
@@ -43,6 +46,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.common.util.SwtUtil;
 import org.jboss.tools.openshift.core.odo.utils.KubernetesClusterHelper;
@@ -123,9 +127,9 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(txtUsername);
 
 		ISWTObservableValue<String> userObservable = WidgetProperties.text(SWT.Modify).observe(txtUsername);
-		Binding userBinding = ValueBindingBuilder.bind(userObservable)
+		ValueBindingBuilder.bind(userObservable)
 		        .to(BeanProperties.value(LoginModel.PROPERTY_USERNAME).observe(model)).in(dbc);
-		ControlDecorationSupport.create(userBinding, SWT.LEFT | SWT.TOP);
+		ControlDecoration usernameDecoration = new ControlDecoration(txtUsername, SWT.LEFT | SWT.TOP);
 
 		Label passwordLabel = new Label(parent, SWT.NONE);
 		passwordLabel.setText("Password:");
@@ -135,45 +139,32 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(txtPassword);
 
 		ISWTObservableValue<String> passwordObservable = WidgetProperties.text(SWT.Modify).observe(txtPassword);
-		Binding passwordBinding = ValueBindingBuilder.bind(passwordObservable)
+		ValueBindingBuilder.bind(passwordObservable)
 		        .to(BeanProperties.value(LoginModel.PROPERTY_PASSWORD).observe(model)).in(dbc);
-		ControlDecorationSupport.create(passwordBinding, SWT.LEFT | SWT.TOP);
+		ControlDecoration passwordDecoration = new ControlDecoration(txtPassword, SWT.LEFT | SWT.TOP);
+
 
 		Label tokenLabel = new Label(parent, SWT.NONE);
 		tokenLabel.setText("Token:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(tokenLabel);
 		txtToken = new Text(parent, SWT.BORDER);
 		txtToken.setEchoChar('*');
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(txtToken);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(txtToken);
 
 		ISWTObservableValue<String> tokenObservable = WidgetProperties.text(SWT.Modify).observe(txtToken);
-		Binding tokenBinding = ValueBindingBuilder.bind(tokenObservable)
+		ValueBindingBuilder.bind(tokenObservable)
 		        .to(BeanProperties.value(LoginModel.PROPERTY_TOKEN).observe(model)).in(dbc);
-		ControlDecorationSupport.create(tokenBinding, SWT.LEFT | SWT.TOP);
-		
+		ControlDecoration tokenDecoration = new ControlDecoration(txtToken, SWT.LEFT | SWT.TOP);
+
 		Button retrieveTokenButton = new Button(parent, SWT.NONE);
 		retrieveTokenButton.setText("Retrieve token");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(retrieveTokenButton);
 		retrieveTokenButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(this::onRetrieveToken));
 
-		dbc.addValidationStatusProvider(new MultiValidator() {
-
-			@Override
-			protected IStatus validate() {
-				String user = userObservable.getValue();
-				String password = passwordObservable.getValue();
-				String token = tokenObservable.getValue();
-				if (!token.isEmpty() && (!user.isEmpty() || !password.isEmpty())) {
-					return ValidationStatus.error("Can't use token authentication with user or password");
-				}
-				if (!user.isEmpty() && (password.isEmpty() || !token.isEmpty())) {
-					return ValidationStatus.error("Can't use user authentication without a password or with a token");
-				}
-				if (user.isEmpty() && password.isEmpty() && token.isEmpty()) {
-					return ValidationStatus.error("User and password or token must be provided");
-				}
-				return ValidationStatus.ok();
-			}
-		});
+		dbc.addValidationStatusProvider(new LoginFormValidator(
+				userObservable, usernameDecoration,
+				passwordObservable, passwordDecoration,
+				tokenObservable, tokenDecoration));
 	}
 	
   private void onPasteLoginCommand(SelectionEvent e) {
@@ -225,5 +216,72 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
         Thread.currentThread().interrupt();
       }
     }
+	}
+	
+	private static class LoginFormValidator extends MultiValidator {
+		
+		private static final IStatus requiredStatus = ValidationStatus.cancel("Token or Username and Password are required");
+
+		private IObservableValue<String> userObservable;
+		private ControlDecoration userDecoration;
+
+		private IObservableValue<String> passwordObservable;
+		private ControlDecoration passwordDecoration;
+
+		private IObservableValue<String> tokenObservable;
+		private ControlDecoration tokenDecoration;
+
+		private UpdateableDecorationUpdater decorationUpdater = new UpdateableDecorationUpdater();
+
+		private LoginFormValidator(IObservableValue<String> userObservable, ControlDecoration userDecoration,
+				IObservableValue<String> passwordObservable, ControlDecoration passwordDecoration,
+				IObservableValue<String> tokenObservable, ControlDecoration tokenDecoration) {
+			this.userObservable = userObservable;
+			this.userDecoration = userDecoration;
+			this.passwordObservable = passwordObservable;
+			this.passwordDecoration = passwordDecoration;
+			this.tokenObservable = tokenObservable;
+			this.tokenDecoration = tokenDecoration;
+		}
+
+		@Override
+		protected IStatus validate() {
+			String user = userObservable.getValue();
+			String password = passwordObservable.getValue();
+			String token = tokenObservable.getValue();
+
+			if (token.isEmpty() && user.isEmpty() && password.isEmpty()) {
+				updateDecorations(requiredStatus, requiredStatus, requiredStatus);
+				return requiredStatus;
+			}
+			else if (!token.isEmpty() && (!user.isEmpty() || !password.isEmpty())) {
+				IStatus error = ValidationStatus.error("Can't use token authentication with user or password");
+				updateDecorations(ValidationStatus.ok(), error, error);
+				return error;
+			}
+			else if (!user.isEmpty() && (password.isEmpty() || !token.isEmpty())) {
+				IStatus error = ValidationStatus.error("Can't use user authentication without a password or with a token");
+				updateDecorations(error, ValidationStatus.ok(), error);
+				return error;
+			} else {
+				updateDecorations(ValidationStatus.ok(), ValidationStatus.ok(), ValidationStatus.ok());
+				return ValidationStatus.ok();
+			}
+		}
+
+		private void updateDecorations(IStatus tokenStatus, IStatus userStatus, IStatus passwordStatus) {
+			decorationUpdater.update(tokenDecoration, tokenStatus);
+			decorationUpdater.update(userDecoration, userStatus);
+			decorationUpdater.update(passwordDecoration, passwordStatus);
+		}
+
+		static class UpdateableDecorationUpdater extends RequiredControlDecorationUpdater {
+
+			@Override
+			protected void update(ControlDecoration decoration, IStatus status) {
+				super.update(decoration, status);
+			}
+
+		}
 	}
 }
