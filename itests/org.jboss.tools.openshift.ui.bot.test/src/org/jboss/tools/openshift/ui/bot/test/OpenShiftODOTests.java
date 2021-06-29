@@ -24,6 +24,7 @@ import org.jboss.tools.openshift.ui.bot.test.odo.DebugVertxDevfileComponentODOTe
 import org.jboss.tools.openshift.ui.bot.test.odo.DebugVertxS2IComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.LoginODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.ProjectManagementODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.RegistryODOTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
@@ -48,6 +49,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	CreatePythonDevfileComponentWithStarterODOTest.class,
 	DebugPythonDevfileComponentODOTest.class,
 	//CreateServiceODOTest.class - disable this suite for now, depends on service catalog (which is not supported on newer OpenShift)
+	RegistryODOTest.class
 })
 public class OpenShiftODOTests {
 

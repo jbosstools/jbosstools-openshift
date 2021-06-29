@@ -39,7 +39,7 @@ import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOConnection;
-import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODORegistries;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODODevfileRegistries;
 
 /**
  * 
@@ -163,9 +163,9 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 		return connection;
 	}
 
-  public OpenShiftODORegistries getOpenShiftODORegistries() {
-    OpenShiftODORegistries registries = null;
-    registries = new OpenShiftODORegistries(getRegistriesItem());
+  public OpenShiftODODevfileRegistries getOpenShiftODORegistries() {
+    OpenShiftODODevfileRegistries registries = null;
+    registries = new OpenShiftODODevfileRegistries(getRegistriesItem());
     return registries;
   }
 
@@ -186,7 +186,6 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 		} catch (WaitTimeoutExpiredException ex) {
 			//swallow exception
 		}
-		log.info("Activate view " + getTitle());
 		if (!new ODOIsDownloaded().test()) {
 			CTabItemHandler handler = CTabItemHandler.getInstance();
 			Display.syncExec(new Runnable() {

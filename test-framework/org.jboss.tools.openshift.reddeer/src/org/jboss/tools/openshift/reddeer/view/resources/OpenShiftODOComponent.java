@@ -68,7 +68,7 @@ public class OpenShiftODOComponent extends AbstractOpenShiftApplicationExplorerI
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.DEBUG).select();
     
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
-		new WaitWhile(new TerminalHasNoChange(), TimePeriod.VERY_LONG);
+		new WaitWhile(new TerminalHasNoChange(), TimePeriod.VERY_LONG, false);
 	}
 
 	/**

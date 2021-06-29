@@ -38,7 +38,7 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOApplication;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOComponent;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODODevfile;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOProject;
-import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODORegistry;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODODevfileRegistry;
 import org.jboss.tools.openshift.reddeer.widget.terminal.TerminalHasNoChange;
 import org.jboss.tools.openshift.reddeer.wizard.CreateComponentWizard;
 import org.jboss.tools.openshift.reddeer.wizard.page.CreateComponentWizadPage;
@@ -148,7 +148,7 @@ public abstract class AbstractODOTest {
   public static void createComponentFromRegistry(String eclipseProjectName, String registryName, String componentType, String starter) {
     OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
     explorer.open();
-    OpenShiftODORegistry registry = explorer.getOpenShiftODORegistries().getRegistry(registryName);
+    OpenShiftODODevfileRegistry registry = explorer.getOpenShiftODORegistries().getRegistry(registryName);
     OpenShiftODODevfile devfile = registry.getDevfile(componentType);
     devfile.openCreateComponentWizard();
     CreateComponentWizard componentWizard = new CreateComponentWizard();
@@ -166,7 +166,7 @@ public abstract class AbstractODOTest {
   }
 
 
-	public static void createURL(String projectName, String applicationName, String componentName, String urlName, int port, boolean devFile) {
+	public static void createURL(String projectName, String applicationName, String componentName, String urlName, int port) {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();
 		OpenShiftODOProject project = explorer.getOpenShiftODOConnection().getProject(projectName);
@@ -175,11 +175,7 @@ public abstract class AbstractODOTest {
 		component.openCreateURLWizard();
 		WizardDialog dialog = new WizardDialog(OpenShiftLabel.Shell.CREATE_URL);
 		new LabeledText(OpenShiftLabel.TextLabels.NAME).setText(urlName);
-		if (devFile) {
 			new LabeledText(OpenShiftLabel.TextLabels.PORT).setText(String.valueOf(port));
-		} else {
-			new LabeledCombo(OpenShiftLabel.TextLabels.PORT).setSelection(String.valueOf(port));
-		}
 		new FinishButton(dialog).click();
 		 
 		new WaitWhile(new WindowIsAvailable(dialog), TimePeriod.VERY_LONG);

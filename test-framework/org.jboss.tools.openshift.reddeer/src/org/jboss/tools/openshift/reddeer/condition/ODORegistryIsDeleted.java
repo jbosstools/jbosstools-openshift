@@ -13,8 +13,8 @@ package org.jboss.tools.openshift.reddeer.condition;
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
 import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
-import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODORegistries;
-import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODORegistry;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODODevfileRegistries;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODODevfileRegistry;
 
 /**
  * Wait condition to wait for registry is deleted.
@@ -38,8 +38,8 @@ public class ODORegistryIsDeleted extends AbstractWaitCondition {
 		try {
 			OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 			explorer.open();
-			OpenShiftODORegistries registries = explorer.getOpenShiftODORegistries();
-			OpenShiftODORegistry registry = registries.getRegistry(registryName);
+			OpenShiftODODevfileRegistries registries = explorer.getOpenShiftODORegistries();
+			OpenShiftODODevfileRegistry registry = registries.getRegistry(registryName);
 			return registry == null;
 		} catch (RedDeerException ex) {
 			return false;

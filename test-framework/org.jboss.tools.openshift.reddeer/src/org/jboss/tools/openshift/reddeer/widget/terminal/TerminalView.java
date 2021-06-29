@@ -41,7 +41,9 @@ public class TerminalView extends WorkbenchView {
 	 * @return terminal text, if there is a terminal, null otherwise
 	 */
 	public String getTerminalText() {
-		activate();
+		if (!isActive()) {
+			activate();
+		}
 		WidgetIsFound widgetIsFound = new WidgetIsFound(TextCanvas.class, cTabItem.getControl());
 		new WaitUntil(widgetIsFound, TimePeriod.DEFAULT, false);
 		// Check whether there is a console to display or not

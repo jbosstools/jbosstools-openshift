@@ -77,7 +77,9 @@ public class TerminalHasNoChange extends AbstractWaitCondition {
 
   private static String getTerminalText() {
     TerminalView consoleView = new TerminalView();
-    consoleView.open();
+    if (!consoleView.isOpen()) {
+    	consoleView.open();
+    }
 
     return consoleView.getTerminalText();
   }

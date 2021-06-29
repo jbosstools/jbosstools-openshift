@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.wizard.page;
 
+import org.eclipse.reddeer.core.matcher.TreeItemRegexMatcher;
 import org.eclipse.reddeer.core.matcher.WithLabelMatcher;
 import org.eclipse.reddeer.core.reference.ReferencedComposite;
 import org.eclipse.reddeer.jface.wizard.WizardPage;
@@ -21,7 +22,8 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 /**
  * 
- * Create component wizard page implemented with RedDeer(for OpenShift Application Explorer).
+ * Create component wizard page implemented with RedDeer(for OpenShift
+ * Application Explorer).
  * 
  * @author jkopriva@redhat.com
  *
@@ -48,12 +50,13 @@ public class CreateComponentWizadPage extends WizardPage {
 		return new LabeledText(OpenShiftLabel.TextLabels.ECLIPSE_PROJECT).getText();
 	}
 
+	@SuppressWarnings("unchecked")
 	public void selectComponentType(String componentType, boolean devfile) {
 		DefaultTree tree = new DefaultTree(new WithLabelMatcher(OpenShiftLabel.TextLabels.COMPONENT_TYPE));
 		if (devfile) {
-		  tree.selectItems(tree.getItem(componentType));
+			tree.selectItems(tree.getItem(new TreeItemRegexMatcher(".*" + componentType + ".*")));
 		} else {
-		  tree.selectItems(tree.getItem(OpenShiftLabel.TextLabels.S2I_NODE, componentType));
+			tree.selectItems(tree.getItem(OpenShiftLabel.TextLabels.S2I_NODE, componentType));
 		}
 	}
 
@@ -78,13 +81,13 @@ public class CreateComponentWizadPage extends WizardPage {
 	}
 
 	public void clickPushAfterCreate() {
-		new  PushButton(OpenShiftLabel.TextLabels.PUSH_AFTER_CREATE).click();
+		new PushButton(OpenShiftLabel.TextLabels.PUSH_AFTER_CREATE).click();
 	}
 
 	public void selectStarter(String starter) {
 		new LabeledCombo(OpenShiftLabel.TextLabels.PROJECT_STARTER).setSelection(starter);
 	}
-  
+
 	public String getSelectedStarter() {
 		return new LabeledCombo(OpenShiftLabel.TextLabels.PROJECT_STARTER).getSelection();
 	}
