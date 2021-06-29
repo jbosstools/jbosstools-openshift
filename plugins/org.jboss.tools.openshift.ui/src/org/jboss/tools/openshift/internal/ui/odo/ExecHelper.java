@@ -56,7 +56,7 @@ public class ExecHelper {
      * @return the combined output and error stream as a String
      * @throws IOException if error during process execution
      */
-    public static String execute(String executable, boolean checkExitCode, File workingDirectory, Map<String,String> envs,
+    public static ExecResult execute(String executable, boolean checkExitCode, File workingDirectory, Map<String,String> envs,
                                  String... arguments) throws IOException {
       DefaultExecutor executor = new DefaultExecutor() {
         @Override
@@ -68,20 +68,22 @@ public class ExecHelper {
           }
         }
       };
-      StringWriter writer = new StringWriter();
-      PumpStreamHandler handler = new PumpStreamHandler(new WriterOutputStream(writer));
+      StringWriter outWriter = new StringWriter();
+      StringWriter errWriter = new StringWriter();
+      PumpStreamHandler handler = new PumpStreamHandler(new WriterOutputStream(outWriter), new WriterOutputStream(errWriter));
       executor.setStreamHandler(handler);
       executor.setWorkingDirectory(workingDirectory);
       CommandLine command = new CommandLine(executable).addArguments(arguments, false);
       Map<String, String> env = new HashMap<>(System.getenv());
       env.putAll(envs);
       try {
-        executor.execute(command, env);
-        return writer.toString();
+        int exitCode = executor.execute(command, env);
+        return new ExecResult(outWriter.toString(), errWriter.toString(), exitCode);
       } catch (IOException e) {
-        throw new IOException(e.getLocalizedMessage() + " " + writer.toString(), e);
+        throw new IOException(e.getLocalizedMessage() + " " + errWriter.toString(), e);
       }
     }
+
 
     /**
      * This method combine <b>out</b> and <b>err</b> outputs in result string, if you need to have them separately
@@ -93,7 +95,7 @@ public class ExecHelper {
      * @return the combined output and error stream as a String
      * @throws IOException if error during process execution
      */
-    public static String execute(String executable, File workingDirectory, Map<String, String> envs, String... arguments) throws IOException {
+    public static ExecResult execute(String executable, File workingDirectory, Map<String, String> envs, String... arguments) throws IOException {
       return execute(executable, true, workingDirectory, envs, arguments);
     }
 
@@ -106,7 +108,7 @@ public class ExecHelper {
      * @return the combined output and error stream as a String
      * @throws IOException if error during process execution
      */
-    public static String execute(String executable, Map<String, String> envs, String... arguments) throws IOException {
+    public static ExecResult execute(String executable, Map<String, String> envs, String... arguments) throws IOException {
       return execute(executable, true, new File(HOME_FOLDER), envs, arguments);
     }
     /**
@@ -117,7 +119,7 @@ public class ExecHelper {
      * @return the combined output and error stream as a String
      * @throws IOException if error during process execution
      */
-    public static String execute(String executable, String... arguments) throws IOException {
+    public static ExecResult execute(String executable, String... arguments) throws IOException {
       return execute(executable, Collections.emptyMap(), arguments);
     }
 
@@ -130,7 +132,7 @@ public class ExecHelper {
      * @return the combined output and error stream as a String
      * @throws IOException if error during process execution
      */
-    public static String execute(String executable, File workingDirectory, String... arguments) throws IOException {
+    public static ExecResult execute(String executable, File workingDirectory, String... arguments) throws IOException {
       return execute(executable, true, workingDirectory, Collections.emptyMap(), arguments);
     }
 
@@ -144,7 +146,7 @@ public class ExecHelper {
      * @return the combined output and error stream as a String
      * @throws IOException if error during process execution
      */
-    public static String execute(String executable, boolean checkExitCode, Map<String, String> envs,
+    public static ExecResult execute(String executable, boolean checkExitCode, Map<String, String> envs,
                                  String... arguments) throws IOException {
       return execute(executable, checkExitCode, new File(HOME_FOLDER), envs, arguments);
     }
@@ -158,8 +160,32 @@ public class ExecHelper {
      * @return the combined output and error stream as a String
      * @throws IOException if error during process execution
      */
-    public static String execute(String executable, boolean checkExitCode, String... arguments) throws IOException {
+    public static ExecResult execute(String executable, boolean checkExitCode, String... arguments) throws IOException {
       return execute(executable, checkExitCode, new File(HOME_FOLDER), Collections.emptyMap(), arguments);
+    }
+    
+    public static class ExecResult {
+      private final String stdOut;
+      private final String stdErr;
+      private final int exitCode;
+
+      public ExecResult(String stdOut, String stdErr, int exitCode) {
+        this.stdOut = stdOut;
+        this.stdErr = stdErr;
+        this.exitCode = exitCode;
+      }
+
+      public String getStdOut() {
+        return stdOut;
+      }
+
+      public String getStdErr() {
+        return stdErr;
+      }
+
+      public int getExitCode() {
+        return exitCode;
+      }
     }
     
     private static class RedirectedStream extends FilterInputStream {

@@ -112,6 +112,7 @@ import org.jboss.tools.openshift.core.odo.Storage;
 import org.jboss.tools.openshift.core.odo.StoragesDeserializer;
 import org.jboss.tools.openshift.core.odo.URL;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
+import org.jboss.tools.openshift.internal.ui.odo.ExecHelper.ExecResult;
 
 public class OdoCli implements Odo {
   public static final String ODO_DOWNLOAD_FLAG = OdoCli.class.getName() + ".download";
@@ -163,8 +164,8 @@ public class OdoCli implements Odo {
   }
 
   private static String execute(File workingDirectory, String command, String ...args) throws IOException {
-    String output = ExecHelper.execute(command, workingDirectory, ODO_ENV, args);
-    try (BufferedReader reader = new BufferedReader(new StringReader(output))) {
+    ExecResult result = ExecHelper.execute(command, workingDirectory, ODO_ENV, args);
+    try (BufferedReader reader = new BufferedReader(new StringReader(result.getStdOut()))) {
       BinaryOperator<String> reducer = new BinaryOperator<String>() {
         private boolean notificationFound = false;
 
@@ -789,8 +790,8 @@ public class OdoCli implements Odo {
   @Override
   public DebugInfo debugInfo(String project, String application, String context, String component) throws IOException {
     try {
-      String json = ExecHelper.execute(command, new File(context), "debug", "info", "-o", "json");
-      JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
+      ExecResult result = ExecHelper.execute(command, new File(context), "debug", "info", "-o", "json");
+      JSonParser parser = new JSonParser(JSON_MAPPER.readTree(result.getStdOut()));
       return parser.parseDebugInfo();
     } catch (IOException e) {
       if (e.getMessage().contains("debug is not running")) {
