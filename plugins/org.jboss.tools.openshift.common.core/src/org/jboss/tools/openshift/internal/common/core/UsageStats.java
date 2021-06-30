@@ -19,7 +19,7 @@ public class UsageStats {
 	private static final int SUCCESS = 1;
 	private static final int FAILURE = 0;
 	private static final String HOSTTYPE_OTHER = "other";
-
+	
 	private static final String SECURE = "secure";
 	private static final String UNSECURE = "not secure";
 
@@ -31,7 +31,7 @@ public class UsageStats {
 	private UsageEventType newConnectionV3;
 	private UsageEventType newApplicationV3;
 	private UsageEventType importApplicationV3;
-
+	
 	private UsageEventType odoCli;
 	private UsageEventType odoCreateComponent;
 	private UsageEventType odoCreateService;
@@ -73,29 +73,21 @@ public class UsageStats {
 		this.importApplicationV3 = createEventType("import_app_v3", // actionName
 				"host type: redhat/other", // labelDescription
 				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-
+		
 		this.odoCli = createEventType("odo_command", "odo command", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoCreateComponent = createEventType("odo_create_component", "component type",
-				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoCreateService = createEventType("odo_create_service", "service type",
-				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoCreateStorage = createEventType("odo_create_storage", "storage size",
-				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoCreateUrl = createEventType("odo_create_url", "secure/not secure",
-				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoLogin = createEventType("odo_login", "Number of logins",
-				UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
-		this.odoLogout = createEventType("odo_logout", "Number of logouts",
-				UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		this.odoCli = createEventType("odo_command", "odo command", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoCreateComponent = createEventType("odo_create_component", "component type", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoCreateService = createEventType("odo_create_service", "service type", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoCreateStorage = createEventType("odo_create_storage", "storage size", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoCreateUrl = createEventType("odo_create_url", "secure/not secure", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoLogin = createEventType("odo_login", "Number of logins", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		this.odoLogout = createEventType("odo_logout", "Number of logouts", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
 		this.odoPush = createEventType("odo_push", "Number of push", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
-		this.odoWatch = createEventType("odo_watch", "Number of watch",
-				UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
-		this.odoDebug = createEventType("odo_debug", "Number of debug",
-				UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		this.odoWatch = createEventType("odo_watch", "Number of watch", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		this.odoDebug = createEventType("odo_debug", "Number of debug", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
 		this.odoLink = createEventType("odo_link", "Number of link", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
 		this.odoKubernetesVersion = createEventType("odo_kubernetes_version", "Kubernetes version", null);
-		this.odoIsOpenshift = createEventType("odo_is_openshift", "Is Cluster Openshift?",
-				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoIsOpenshift = createEventType("odo_is_openshift", "Is Cluster Openshift?", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 		this.odoOpenshiftVersion = createEventType("odo_kubernetes_version", "Openshift version", null);
 	}
 
@@ -132,11 +124,11 @@ public class UsageStats {
 		UsageReporter.getInstance()
 				.trackEvent(importApplicationV3.event(getHostType(host), success ? SUCCESS : FAILURE));
 	}
-
+	
 	public void odoCommand(String command, boolean success) {
 		UsageReporter.getInstance().trackEvent(odoCli.event(command, success ? SUCCESS : FAILURE));
 	}
-
+	
 	public void createComponent(String componentType, boolean success) {
 		UsageReporter.getInstance().trackEvent(odoCreateComponent.event(componentType, success ? SUCCESS : FAILURE));
 	}
@@ -150,10 +142,9 @@ public class UsageStats {
 	}
 
 	public void createURL(boolean secure, boolean success) {
-		UsageReporter.getInstance()
-				.trackEvent(odoCreateUrl.event(secure ? SECURE : UNSECURE, success ? SUCCESS : FAILURE));
+		UsageReporter.getInstance().trackEvent(odoCreateUrl.event(secure ? SECURE : UNSECURE, success ? SUCCESS : FAILURE));
 	}
-
+	
 	public void login() {
 		UsageReporter.getInstance().countEvent(odoLogin.event());
 	}
