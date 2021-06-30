@@ -35,8 +35,11 @@ import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.utils.ConfigHelper;
 import org.jboss.tools.openshift.core.odo.utils.ConfigWatcher;
 import org.jboss.tools.openshift.core.odo.utils.ConfigWatcher.Listener;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIModel;
+import org.jboss.tools.openshift.internal.ui.odo.ClusterHelper;
+import org.jboss.tools.openshift.internal.ui.odo.ClusterInfo;
 import org.jboss.tools.openshift.internal.ui.odo.OdoCli;
 
 import io.fabric8.kubernetes.api.model.Config;
@@ -50,7 +53,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
  * @author Red Hat Developers
  *
  */
-public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<ApplicationExplorerUIModel.ClusterInfo, ApplicationExplorerUIModel> implements Listener, IResourceChangeListener, IResourceDeltaVisitor {
+public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<ApplicationExplorerUIModel.ClusterClient, ApplicationExplorerUIModel> implements Listener, IResourceChangeListener, IResourceDeltaVisitor {
 
   private static ApplicationExplorerUIModel INSTANCE;
   
@@ -61,8 +64,16 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
     return INSTANCE;
   }
   
-  public static class ClusterInfo {
-    private OpenShiftClient client = loadClient();
+  public static class ClusterClient {
+    private static OpenShiftClient client;
+    
+    static {
+        client = loadClient();
+        ClusterInfo info = ClusterHelper.getClusterInfo(client);
+        UsageStats.getInstance().kubernetesVersion(info.getKubernetesVersion());
+        UsageStats.getInstance().isOpenShift(info.isOpenshift());
+        UsageStats.getInstance().openshiftVersion(info.getOpenshiftVersion());
+    }
     
     public Odo getOdo() throws IOException {
       return OdoCli.get();
@@ -75,7 +86,7 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
       return client;
     }
     
-    private OpenShiftClient loadClient() {
+    private static OpenShiftClient loadClient() {
         return new DefaultOpenShiftClient(new ConfigBuilder().build());
     }
 
@@ -97,8 +108,8 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
 
     private DevfileRegistriesElement registries;
     
-    protected ApplicationExplorerUIModel(ClusterInfo clusterInfo) {
-      super(null, clusterInfo);
+    protected ApplicationExplorerUIModel(ClusterClient clusterClient) {
+      super(null, clusterClient);
       loadProjects();
       watcherJob = Job.createSystem("Watching kubeconfig", this::startWatcher);
       watcherJob.schedule();
@@ -107,7 +118,7 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
     }
 
   private ApplicationExplorerUIModel() {
-    this(new ClusterInfo());
+    this(new ClusterClient());
   }
 
 
