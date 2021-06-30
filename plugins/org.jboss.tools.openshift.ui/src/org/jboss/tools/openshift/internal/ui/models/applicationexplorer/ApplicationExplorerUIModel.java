@@ -45,6 +45,7 @@ import org.jboss.tools.openshift.internal.ui.odo.OdoCli;
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
@@ -65,15 +66,7 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
   }
   
   public static class ClusterClient {
-    private static OpenShiftClient client;
-    
-    static {
-        client = loadClient();
-        ClusterInfo info = ClusterHelper.getClusterInfo(client);
-        UsageStats.getInstance().kubernetesVersion(info.getKubernetesVersion());
-        UsageStats.getInstance().isOpenShift(info.isOpenshift());
-        UsageStats.getInstance().openshiftVersion(info.getOpenshiftVersion());
-    }
+    private OpenShiftClient client;
     
     public Odo getOdo() throws IOException {
       return OdoCli.get();
@@ -83,18 +76,37 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
      * @return
      */
     public OpenShiftClient getClient() {
+      if (client == null) {
+        loadClient(true);
+      }
       return client;
     }
     
-    private static OpenShiftClient loadClient() {
-        return new DefaultOpenShiftClient(new ConfigBuilder().build());
+    private void loadClient(boolean reload) {
+      client = new DefaultOpenShiftClient(new ConfigBuilder().build());
+      if (reload) {
+        reportTelemetry();
+      }
     }
 
-    /**
-     * 
-     */
-    public void reload() {
-      client = loadClient();
+    void reload() {
+      loadClient(true);
+    }
+    
+    void refresh() {
+      loadClient(false);
+    }
+     
+    private void reportTelemetry() {
+      try {
+        ClusterInfo info = ClusterHelper.getClusterInfo(client);
+        UsageStats.getInstance().kubernetesVersion(info.getKubernetesVersion());
+        UsageStats.getInstance().isOpenShift(info.isOpenshift());
+        UsageStats.getInstance().openshiftVersion(info.getOpenshiftVersion());
+      }catch (KubernetesClientException e) {
+        // WARNING only as it can be no route to host errors and only impact telemetry info
+        OpenShiftUIActivator.log(IStatus.WARNING, e.getLocalizedMessage(), e);
+      }
     }
   }
   
@@ -124,6 +136,11 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
 
   @Override
   public void refresh() {
+    getWrapped().refresh();
+    fireChanged(this);
+  }
+  
+  public void reload() {
     getWrapped().reload();
     fireChanged(this);
   }

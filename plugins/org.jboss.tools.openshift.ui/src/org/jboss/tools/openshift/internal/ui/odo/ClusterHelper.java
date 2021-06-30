@@ -12,28 +12,31 @@ package org.jboss.tools.openshift.internal.ui.odo;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
 import io.fabric8.openshift.client.OpenShiftClient;
 
 public class ClusterHelper {
-    private static String assemble(String major, String minor) {
-        return major + '.' + minor;
-    }
+	private static String assemble(String major, String minor) {
+		return major + '.' + minor;
+	}
 
-    public static ClusterInfo getClusterInfo(KubernetesClient client) {
-        if (client instanceof OpenShiftClient || client.isAdaptable(OpenShiftClient.class)) {
-            OpenShiftClient oclient;
-            if (client instanceof OpenShiftClient) {
-                oclient = (OpenShiftClient) client;
-                client = new DefaultKubernetesClient(client.getConfiguration());
-            } else {
-                oclient = client.adapt(OpenShiftClient.class);
-            }
-            VersionInfo oVersion = oclient.getVersion();
-            return new ClusterInfo(client.getVersion().getGitVersion(), true,
-                    oVersion != null && oVersion.getMajor() != null? assemble(oVersion.getMajor(), oVersion.getMinor()) : "");
-        } else {
-            return new ClusterInfo(client.getVersion().getGitVersion(), false, "");
-        }
-    }
+	public static ClusterInfo getClusterInfo(KubernetesClient client) throws KubernetesClientException {
+		if (client instanceof OpenShiftClient || client.isAdaptable(OpenShiftClient.class)) {
+			OpenShiftClient oclient;
+			KubernetesClient kclient;
+			if (client instanceof OpenShiftClient) {
+				oclient = (OpenShiftClient) client;
+				kclient = new DefaultKubernetesClient(client.getConfiguration());
+			} else {
+				oclient = client.adapt(OpenShiftClient.class);
+				kclient = client;
+			}
+			VersionInfo oVersion = oclient.getVersion();
+			return new ClusterInfo(kclient.getVersion().getGitVersion(), true,
+					oVersion != null && oVersion.getMajor() != null ? assemble(oVersion.getMajor(), oVersion.getMinor())
+							: "");
+		}
+		return new ClusterInfo(client.getVersion().getGitVersion(), false, "");
+	}
 }
