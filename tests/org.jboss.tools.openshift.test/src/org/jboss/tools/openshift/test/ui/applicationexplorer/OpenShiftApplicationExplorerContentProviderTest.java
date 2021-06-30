@@ -23,7 +23,7 @@ import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.internal.ui.applicationexplorer.OpenShiftApplicationExplorerContentProvider;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
-import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel.ClusterInfo;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel.ClusterClient;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.CreateComponentMessageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.CreateProjectMessageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement;
@@ -51,7 +51,7 @@ public class OpenShiftApplicationExplorerContentProviderTest {
 	@Before
 	public void setup() throws Exception {
 	  odo = mock(Odo.class);
-	  ClusterInfo info = mock(ClusterInfo.class);
+	  ClusterClient info = mock(ClusterClient.class);
 	  doReturn(odo).when(info).getOdo();
 		this.model = new ApplicationExplorerUIModel(info) {
 		};

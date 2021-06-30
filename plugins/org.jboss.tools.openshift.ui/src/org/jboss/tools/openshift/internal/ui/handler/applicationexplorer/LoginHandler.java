@@ -59,7 +59,7 @@ public class LoginHandler extends OdoHandler {
 	private static void execute(LoginModel model, ApplicationExplorerUIModel cluster) {
 		try {
 			model.getOdo().login(model.getUrl(), model.getUsername(), model.getPassword().toCharArray(), model.getToken());
-			cluster.refresh();
+			cluster.reload();
 		} catch (IOException e) {
 			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(), "Login", "Can't login error message:" + e.getLocalizedMessage()));
 		}

@@ -35,13 +35,17 @@ import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.utils.ConfigHelper;
 import org.jboss.tools.openshift.core.odo.utils.ConfigWatcher;
 import org.jboss.tools.openshift.core.odo.utils.ConfigWatcher.Listener;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIModel;
+import org.jboss.tools.openshift.internal.ui.odo.ClusterHelper;
+import org.jboss.tools.openshift.internal.ui.odo.ClusterInfo;
 import org.jboss.tools.openshift.internal.ui.odo.OdoCli;
 
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
@@ -50,7 +54,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
  * @author Red Hat Developers
  *
  */
-public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<ApplicationExplorerUIModel.ClusterInfo, ApplicationExplorerUIModel> implements Listener, IResourceChangeListener, IResourceDeltaVisitor {
+public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<ApplicationExplorerUIModel.ClusterClient, ApplicationExplorerUIModel> implements Listener, IResourceChangeListener, IResourceDeltaVisitor {
 
   private static ApplicationExplorerUIModel INSTANCE;
   
@@ -61,8 +65,8 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
     return INSTANCE;
   }
   
-  public static class ClusterInfo {
-    private OpenShiftClient client = loadClient();
+  public static class ClusterClient {
+    private OpenShiftClient client;
     
     public Odo getOdo() throws IOException {
       return OdoCli.get();
@@ -72,18 +76,37 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
      * @return
      */
     public OpenShiftClient getClient() {
+      if (client == null) {
+        loadClient(true);
+      }
       return client;
     }
     
-    private OpenShiftClient loadClient() {
-        return new DefaultOpenShiftClient(new ConfigBuilder().build());
+    private void loadClient(boolean reload) {
+      client = new DefaultOpenShiftClient(new ConfigBuilder().build());
+      if (reload) {
+        reportTelemetry();
+      }
     }
 
-    /**
-     * 
-     */
-    public void reload() {
-      client = loadClient();
+    void reload() {
+      loadClient(true);
+    }
+    
+    void refresh() {
+      loadClient(false);
+    }
+     
+    private void reportTelemetry() {
+      try {
+        ClusterInfo info = ClusterHelper.getClusterInfo(client);
+        UsageStats.getInstance().kubernetesVersion(info.getKubernetesVersion());
+        UsageStats.getInstance().isOpenShift(info.isOpenshift());
+        UsageStats.getInstance().openshiftVersion(info.getOpenshiftVersion());
+      }catch (KubernetesClientException e) {
+        // WARNING only as it can be no route to host errors and only impact telemetry info
+        OpenShiftUIActivator.log(IStatus.WARNING, e.getLocalizedMessage(), e);
+      }
     }
   }
   
@@ -97,8 +120,8 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
 
     private DevfileRegistriesElement registries;
     
-    protected ApplicationExplorerUIModel(ClusterInfo clusterInfo) {
-      super(null, clusterInfo);
+    protected ApplicationExplorerUIModel(ClusterClient clusterClient) {
+      super(null, clusterClient);
       loadProjects();
       watcherJob = Job.createSystem("Watching kubeconfig", this::startWatcher);
       watcherJob.schedule();
@@ -107,12 +130,17 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
     }
 
   private ApplicationExplorerUIModel() {
-    this(new ClusterInfo());
+    this(new ClusterClient());
   }
 
 
   @Override
   public void refresh() {
+    getWrapped().refresh();
+    fireChanged(this);
+  }
+  
+  public void reload() {
     getWrapped().reload();
     fireChanged(this);
   }
