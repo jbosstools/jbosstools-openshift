@@ -75,7 +75,6 @@ public class UsageStats {
 				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 		
 		this.odoCli = createEventType("odo_command", "odo command", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoCli = createEventType("odo_command", "odo command", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 		this.odoCreateComponent = createEventType("odo_create_component", "component type", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 		this.odoCreateService = createEventType("odo_create_service", "service type", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 		this.odoCreateStorage = createEventType("odo_create_storage", "storage size", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
