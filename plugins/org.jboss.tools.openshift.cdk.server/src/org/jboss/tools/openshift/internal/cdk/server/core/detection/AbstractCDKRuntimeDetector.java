@@ -140,7 +140,7 @@ public abstract class AbstractCDKRuntimeDetector extends AbstractRuntimeDetector
 	}
 
 	protected boolean validate(RuntimeDefinition rd) {
-		return validate(rd.getLocation());
+		return validate(rd.getLocation()) && getServerType(rd) != null;
 	}
 	
 	protected boolean validate(File root) {
