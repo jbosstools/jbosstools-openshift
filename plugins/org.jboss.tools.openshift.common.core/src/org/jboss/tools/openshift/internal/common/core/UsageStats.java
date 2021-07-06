@@ -87,7 +87,7 @@ public class UsageStats {
 		this.odoLink = createEventType("odo_link", "Number of link", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
 		this.odoKubernetesVersion = createEventType("odo_kubernetes_version", "Kubernetes version", null);
 		this.odoIsOpenshift = createEventType("odo_is_openshift", "Is Cluster Openshift?", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoOpenshiftVersion = createEventType("odo_kubernetes_version", "Openshift version", null);
+		this.odoOpenshiftVersion = createEventType("odo_openshift_version", "Openshift version", null);
 	}
 
 	private UsageEventType createEventType(String actionName, String labelDescription, String valueDescription) {
