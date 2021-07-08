@@ -147,7 +147,7 @@ public class CDKLaunchUtility {
 
 	public String[] callMachineReadable(String rootCommand, String[] args, File dir,
 			Map<String, String> env) throws IOException, CommandTimeoutException {
-		return ProcessLaunchUtility.call(rootCommand, args, dir, env, 30000, false);
+		return ProcessLaunchUtility.call(rootCommand, args, dir, env, 90000, false);
 	}
 
 	public Process callInteractive(IServer s, String args, String launchConfigName, boolean skipCredentials) throws CoreException, IOException {
