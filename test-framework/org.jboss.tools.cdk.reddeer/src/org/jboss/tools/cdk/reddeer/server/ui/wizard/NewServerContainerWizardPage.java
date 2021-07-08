@@ -61,7 +61,7 @@ public class NewServerContainerWizardPage extends WizardPage {
 		if (ok.isEnabled()) {
 			ok.click();
 		} else {
-			String text = credentialsPage.getDescriptionText().getText();
+			String text = credentialsPage.getDescriptionText();
 			if (text.length() > 0) {
 				log.info("Adding new credential failed to add new user " + username);
 				log.info("There is an error while setting Red Hat Credentials: \r\n" + text);

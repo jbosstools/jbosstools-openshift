@@ -51,7 +51,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(RedDeerSuite.class)
 @ContainerRuntimeServer(
-		version = CDKVersion.CDK3150,
+		version = CDKVersion.CDK3160,
 		useExistingBinaryFromConfig=true,
 		makeRuntimePersistent=true,
 		usernameProperty="developers.username",
