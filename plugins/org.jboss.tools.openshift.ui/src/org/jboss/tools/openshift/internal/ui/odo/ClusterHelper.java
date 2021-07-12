@@ -23,20 +23,21 @@ public class ClusterHelper {
 
 	public static ClusterInfo getClusterInfo(KubernetesClient client) throws KubernetesClientException {
 		if (client instanceof OpenShiftClient || client.isAdaptable(OpenShiftClient.class)) {
-			OpenShiftClient oclient;
-			KubernetesClient kclient;
+			VersionInfo oClientVersionInfo;
+			VersionInfo kClientVersionInfo;
 			if (client instanceof OpenShiftClient) {
-				oclient = (OpenShiftClient) client;
-				kclient = new DefaultKubernetesClient(client.getConfiguration());
+				oClientVersionInfo = ((OpenShiftClient) client).getVersion();
+				kClientVersionInfo = new DefaultKubernetesClient(client.getConfiguration()).getVersion();
 			} else {
-				oclient = client.adapt(OpenShiftClient.class);
-				kclient = client;
+				oClientVersionInfo = client.adapt(OpenShiftClient.class).getVersion();
+				kClientVersionInfo = client.getVersion();
 			}
-			VersionInfo oVersion = oclient.getVersion();
-			return new ClusterInfo(kclient.getVersion().getGitVersion(), true,
-					oVersion != null && oVersion.getMajor() != null ? assemble(oVersion.getMajor(), oVersion.getMinor())
+			return new ClusterInfo(kClientVersionInfo != null ? kClientVersionInfo.getGitVersion() : "", true,
+					oClientVersionInfo != null && oClientVersionInfo.getMajor() != null
+							? assemble(oClientVersionInfo.getMajor(), oClientVersionInfo.getMinor())
 							: "");
 		}
-		return new ClusterInfo(client.getVersion().getGitVersion(), false, "");
+		VersionInfo kClientVersionInfo = client.getVersion();
+		return new ClusterInfo(kClientVersionInfo != null ? kClientVersionInfo.getGitVersion() : "", false, "");
 	}
 }
