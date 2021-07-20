@@ -127,7 +127,7 @@ public abstract class ServiceManagerEnvironmentLoader {
 			throws IOException {
 		String[] lines = null;
 		try {
-			lines = ProcessLaunchUtility.call(cmdLoc, args, wd, env, 30000, false);
+			lines = ProcessLaunchUtility.call(cmdLoc, args, wd, env, 90000, false);
 		} catch (IOException ce) {
 			throw ce;
 		} catch (CommandTimeoutException ce) {
@@ -156,7 +156,7 @@ public abstract class ServiceManagerEnvironmentLoader {
 			throws IOException {
 		String[] lines = null;
 		try {
-			lines = ProcessLaunchUtility.call(cmdLoc, args, wd, env, 30000, false);
+			lines = ProcessLaunchUtility.call(cmdLoc, args, wd, env, 90000, false);
 		} catch (IOException ioe) {
 			throw ioe;
 		} catch (CommandTimeoutException ce) {
