@@ -21,7 +21,7 @@
 		<ok-io.version>2.4.0</ok-io.version>
 		<kotlin-stdlib.version>1.3.50</kotlin-stdlib.version>
 		<jboss-dmr.version>1.3.0.Final</jboss-dmr.version>
-		<commons-compress.version>1.19</commons-compress.version>
+		<commons-compress.version>1.21</commons-compress.version>
 		<log4j.version>2.13.3</log4j.version>
 		<slf4j.version>2.0.0-alpha1</slf4j.version>
 		<commons-codec.version>1.13</commons-codec.version>
