@@ -31,7 +31,7 @@ public class MinishiftVersionLoader {
 		Properties ret = new Properties();
 		try {
 			String[] lines = ProcessLaunchUtility.call(commandPath, new String[] { "version" },
-					new File(commandPath).getParentFile(), new HashMap<String, String>(), 10000, false);
+					new File(commandPath).getParentFile(), new HashMap<>(), 30000, false);
 
 			for (int i = 0; i < lines.length; i++) {
 				if (lines[i].trim().isEmpty())
