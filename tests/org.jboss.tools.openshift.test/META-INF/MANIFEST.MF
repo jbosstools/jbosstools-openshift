@@ -54,3 +54,10 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.jboss.tools.openshift.internal.test.OpenShiftTestActivator
 Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: lib/powermock-api-mockito-1.7.4.jar,
+ lib/powermock-module-junit4-1.7.4.jar,
+ .,
+ lib/powermock-module-junit4-common-1.7.4.jar,
+ lib/powermock-core-1.7.4.jar,
+ lib/powermock-api-support-1.7.4.jar,
+ lib/powermock-reflect-1.7.4.jar
