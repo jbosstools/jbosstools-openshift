@@ -67,9 +67,13 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
       }
       return odo;
     }
+    
+    public OdoCliFactory getFactory() {
+      return OdoCliFactory.getInstance();
+    }
 
     private void loadClient() {
-      odo = OdoCliFactory.getInstance().getOdo();
+      odo = getFactory().getOdo();
     }
 
     void reload() {

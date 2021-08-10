@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.TimeoutException;
@@ -51,8 +50,9 @@ public class OpenShiftApplicationExplorerContentProviderTest {
 	  odo = mock(Odo.class);
 	  ClusterClient info = mock(ClusterClient.class);
 	  doReturn(odo).when(info).getOdo();
-	  OdoCliFactory factory = spy(OdoCliFactory.getInstance());
+	  OdoCliFactory factory = mock(OdoCliFactory.class);
 	  doReturn(odo).when(factory).getOdo();
+	  doReturn(factory).when(info).getFactory();
 		this.model = new ApplicationExplorerUIModel(info) {
 		};
 		this.provider = new OpenShiftApplicationExplorerContentProvider(model) {
