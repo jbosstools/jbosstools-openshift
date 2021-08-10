@@ -49,7 +49,7 @@ public class LoginHandler extends OdoHandler {
 	}
 
 	public static void openDialog(final Shell shell, ApplicationExplorerUIModel cluster) throws IOException {
-		final LoginModel model = new LoginModel(cluster.getClient().getMasterUrl().toString(), cluster.getOdo());
+		final LoginModel model = new LoginModel(cluster.getOdo().getMasterUrl().toString(), cluster.getOdo());
 		final IWizard loginWizard = new LoginWizard(model);
 		if (WizardUtils.openWizardDialog(loginWizard, shell) == Window.OK) {
 			executeInJob("Login to Cluster", monitor -> execute(model, cluster));

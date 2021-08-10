@@ -51,7 +51,7 @@ public class CreateServiceHandler extends AbstractHandler {
 		}
 		try {
 			Odo odo = project.getParent().getOdo();
-			if (odo.isServiceCatalogAvailable(project.getParent().getClient())) {
+			if (odo.isServiceCatalogAvailable()) {
 				List<ServiceTemplate> templates = odo.getServiceTemplates();
 				if (!templates.isEmpty()) {
 					final IWizard createServiceWizard = new CreateServiceWizard(templates,

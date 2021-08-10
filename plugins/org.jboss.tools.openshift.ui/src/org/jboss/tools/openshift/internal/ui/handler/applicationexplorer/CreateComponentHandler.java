@@ -36,8 +36,6 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectE
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateComponentModel;
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateComponentWizard;
 
-import io.fabric8.openshift.client.OpenShiftClient;
-
 /**
  * @author Red Hat Developers
  */
@@ -77,8 +75,7 @@ public class CreateComponentHandler extends OdoHandler {
   private static void openDialog(DevfileRegistryComponentTypeElement componentType, ApplicationElement application, ProjectElement project, final Shell parent)
       throws IOException {
     Odo odo = project!=null?project.getParent().getOdo():componentType.getRoot().getOdo();
-    OpenShiftClient client = project!=null?project.getParent().getClient():componentType.getRoot().getClient();
-    String projectName = project != null?project.getWrapped().getMetadata().getName():odo.getProject(client).getMetadata().getName();
+    String projectName = project != null?project.getWrapped().getMetadata().getName():odo.getProject().getMetadata().getName();
     final CreateComponentModel model = new CreateComponentModel(odo, odo.getComponentTypes(),
             projectName,
             application == null ? "" : application.getWrapped().getName());

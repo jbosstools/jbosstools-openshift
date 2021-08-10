@@ -40,7 +40,7 @@ public class CreateURLHandler extends ComponentHandler {
 			Odo odo = component.getRoot().getOdo();
 			String projectName = component.getParent().getParent().getWrapped().getMetadata().getName();
 			String applicationName = component.getParent().getWrapped().getName();
-			List<Integer> ports = component.getWrapped().getInfo().getComponentKind() == ComponentKind.S2I ?odo.getServicePorts(component.getRoot().getClient(), projectName, applicationName,
+			List<Integer> ports = component.getWrapped().getInfo().getComponentKind() == ComponentKind.S2I ?odo.getServicePorts(projectName, applicationName,
 					component.getWrapped().getName()) : Collections.emptyList();
 			if (component.getWrapped().getInfo().getComponentKind() == ComponentKind.S2I && ports.isEmpty()) {
 				MessageDialog.openWarning(shell, "Create url", "No ports defined for this components to bind to.");

@@ -31,8 +31,6 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceE
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.StorageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.URLElement;
 
-import io.fabric8.openshift.client.OpenShiftClient;
-
 /**
  * @author Red Hat Developers
  */
@@ -50,8 +48,7 @@ public class DeleteHandler extends OdoHandler {
 			String label = getLabel(element);
 			if (MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), String.join(" ", "Delete", label), String.join(" ", "Are you sure to delete", label, "?"))) {
 				Odo odo = ((ApplicationExplorerUIModel)element.getRoot()).getOdo();
-				OpenShiftClient client = ((ApplicationExplorerUIModel)element.getRoot()).getClient();
-				executeInJob("Delete", monitor -> execute(odo, client, element));
+				executeInJob("Delete", monitor -> execute(odo, element));
 			}
 			return Status.OK_STATUS;
 		} catch (IOException e) {
@@ -82,12 +79,12 @@ public class DeleteHandler extends OdoHandler {
 		return "";
 	}
 
-	private void execute(Odo odo, OpenShiftClient client, AbstractOpenshiftUIElement<?, ?, ?> element) {
+	private void execute(Odo odo, AbstractOpenshiftUIElement<?, ?, ?> element) {
 		try {
 			if (element instanceof ProjectElement) {
 				odo.deleteProject(((ProjectElement) element).getWrapped().getMetadata().getName());
 			} else if (element instanceof ApplicationElement) {
-				odo.deleteApplication(client,
+				odo.deleteApplication(
 				        ((ApplicationElement) element).getParent().getWrapped().getMetadata().getName(),
 				        ((ApplicationElement) element).getWrapped().getName());
 			} else if (element instanceof ComponentElement) {

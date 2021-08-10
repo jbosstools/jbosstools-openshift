@@ -34,8 +34,6 @@ import org.jboss.tools.openshift.core.stack.RemoteStackProviderRegistry;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 
-import io.fabric8.openshift.client.OpenShiftClient;
-
 /**
  * @author Red Hat Developers
  */
@@ -45,10 +43,9 @@ public class DebugHandler extends ComponentHandler {
 	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
 			Odo odo = component.getRoot().getOdo();
-			OpenShiftClient client = component.getRoot().getClient();
 			String project = component.getParent().getParent().getWrapped().getMetadata().getName();
 			String application = component.getParent().getWrapped().getName();
-			ComponentInfo info = odo.getComponentInfo(client, project, application, component.getWrapped().getName(),
+			ComponentInfo info = odo.getComponentInfo(project, application, component.getWrapped().getName(),
 			    component.getWrapped().getPath(), component.getWrapped().getInfo().getComponentKind());
 			RemoteStackDebugger remoteDebugger = RemoteStackProviderRegistry.getInstance().findBytype(info.getComponentTypeName(), info.getComponentTypeVersion());
 			if (remoteDebugger != null) {

@@ -24,7 +24,6 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceElement;
-import io.fabric8.openshift.client.OpenShiftClient;
 
 /**
  * @author Red Hat Developers
@@ -49,22 +48,21 @@ public class DescribeHandler extends OdoHandler {
 		}
 		try {
 			Odo odo = component!=null?component.getRoot().getOdo():service!=null?service.getRoot().getOdo():application.getRoot().getOdo();
-			OpenShiftClient client = component!=null?component.getRoot().getClient():service!=null?service.getRoot().getClient():application.getRoot().getClient();
 			final ServiceElement fService = service;
 			final ApplicationElement fApplication = application;
-			executeInJob("Describe", monitor -> execute(odo, client, component, fService, fApplication));
+			executeInJob("Describe", monitor -> execute(odo, component, fService, fApplication));
 			return Status.OK_STATUS;
 		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 	}
 
-	private void execute(Odo odo, OpenShiftClient client, ComponentElement component, ServiceElement service, ApplicationElement application) {
+	private void execute(Odo odo, ComponentElement component, ServiceElement service, ApplicationElement application) {
 		try {
 			if (component != null) {
 				odo.describeComponent(component.getParent().getParent().getWrapped().getMetadata().getName(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
 			} else if (service != null) {
-				String template = odo.getServiceTemplate(client, service.getParent().getParent().getWrapped().getMetadata().getName(), service.getParent().getWrapped().getName(), service.getWrapped().getMetadata().getName());
+				String template = odo.getServiceTemplate(service.getParent().getParent().getWrapped().getMetadata().getName(), service.getParent().getWrapped().getName(), service.getWrapped().getMetadata().getName());
 				odo.describeServiceTemplate(template);
 			} else {
 				odo.describeApplication(application.getParent().getWrapped().getMetadata().getName(), application.getWrapped().getName());

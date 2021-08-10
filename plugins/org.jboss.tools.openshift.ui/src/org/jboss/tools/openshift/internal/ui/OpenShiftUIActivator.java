@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2015 Red Hat, Inc.
+ * Copyright (c) 2014-2021 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.internal.ui;
 import java.io.InputStream;
 import java.net.URL;
 
+import org.eclipse.core.net.proxy.IProxyService;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -22,6 +24,7 @@ import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.foundation.ui.plugin.BaseUIPlugin;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.openshift.restclient.OpenShiftException;
 
@@ -32,6 +35,8 @@ public class OpenShiftUIActivator extends BaseUIPlugin {
 	private static OpenShiftUIActivator plugin;
 
 	private IPreferenceStore corePreferenceStore;
+	
+	private ServiceTracker<IProxyService, IProxyService> proxyServiceTracker;
 
 	public OpenShiftUIActivator() {
 	}
@@ -49,6 +54,9 @@ public class OpenShiftUIActivator extends BaseUIPlugin {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+    if (proxyServiceTracker != null) {
+      proxyServiceTracker.close();
+    }
 		super.stop(context);
 	}
 
@@ -106,4 +114,22 @@ public class OpenShiftUIActivator extends BaseUIPlugin {
 	private String getId() {
 		return getBundle().getSymbolicName();
 	}
+
+  /**
+   * @return
+   */
+  public IProxyService getProxyService() {
+    try {
+      if (proxyServiceTracker == null) {
+        proxyServiceTracker = new ServiceTracker<>(getBundle().getBundleContext(), IProxyService.class.getName(), null);
+        proxyServiceTracker.open();
+      }
+      return proxyServiceTracker.getService();
+    } catch (Exception e) {
+      log(IStatus.ERROR, e.getLocalizedMessage(), e);
+    } catch (NoClassDefFoundError e) {
+      log(IStatus.ERROR, e.getLocalizedMessage(), e);
+    }
+    return null;
+  }
 }
