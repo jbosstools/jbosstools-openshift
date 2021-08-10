@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.TimeoutException;
@@ -30,19 +31,15 @@ import org.jboss.tools.openshift.internal.ui.odo.OdoCliFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.openshift.api.model.Project;
 
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-
 /**
  * @author jeff.cantrill
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(fullyQualifiedNames = "org.jboss.tools.openshift.internal.ui.odo.*")
+@RunWith(MockitoJUnitRunner.class)
 public class OpenShiftApplicationExplorerContentProviderTest {
 
 	private OpenShiftApplicationExplorerContentProvider provider;
@@ -54,10 +51,8 @@ public class OpenShiftApplicationExplorerContentProviderTest {
 	  odo = mock(Odo.class);
 	  ClusterClient info = mock(ClusterClient.class);
 	  doReturn(odo).when(info).getOdo();
-	  mockStatic(OdoCliFactory.class);
-	  OdoCliFactory factory = mock(OdoCliFactory.class);
+	  OdoCliFactory factory = spy(OdoCliFactory.getInstance());
 	  doReturn(odo).when(factory).getOdo();
-	  doReturn(factory).when(OdoCliFactory.getInstance());
 		this.model = new ApplicationExplorerUIModel(info) {
 		};
 		this.provider = new OpenShiftApplicationExplorerContentProvider(model) {
