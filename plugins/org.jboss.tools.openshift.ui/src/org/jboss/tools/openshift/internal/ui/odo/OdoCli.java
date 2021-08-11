@@ -33,6 +33,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceFluent;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -81,6 +82,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -149,6 +151,35 @@ public class OdoCli implements Odo {
     return builder.toString();
   }
   
+  private IProxyData getProxyData(URI uri) {
+    IProxyData data = null;
+    IProxyService proxyService = OpenShiftUIActivator.getDefault().getProxyService();
+    if (proxyService != null) {
+      IProxyData[] datas = proxyService.select(uri);
+      if (datas != null && datas.length > 0) {
+        data = datas[0];
+      }
+    }
+    return data;
+  }
+  
+  protected Config getConfig() {
+    ConfigBuilder builder = new ConfigBuilder();
+    try {
+      IProxyData data = getProxyData(new URI(builder.getMasterUrl()));
+      if (data != null) {
+        if (data.isRequiresAuthentication()) {
+          builder.withProxyUsername(data.getUserId());
+          builder.withProxyPassword(data.getPassword());
+        }
+        builder.withHttpsProxy("http://" + data.getHost() + ':' + data.getPort());
+      }
+    } catch (URISyntaxException e) {
+      OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+    }
+    return builder.build();
+  }
+  
   protected Map<String, String> buildEnvVars() {
     final String HTTP_PROXY = "HTTP_PROXY";
     final String HTTPS_PROXY = "HTTPS_PROXY";
@@ -156,18 +187,14 @@ public class OdoCli implements Odo {
     final Set<String> proxyEnvironmentVariables = new HashSet<>(Arrays.asList(HTTP_PROXY, HTTPS_PROXY, ALL_PROXY));
     Map<String, String> vars = new HashMap<>();
     vars.put("ODO_DISABLE_TELEMETRY", "true");
-    IProxyService proxyService = OpenShiftUIActivator.getDefault().getProxyService();
     try {
-      if (proxyService != null) {
-        IProxyData[] data = proxyService.select(getMasterUrl().toURI());
-        if (data != null && data.length > 0) {
-          final String envVarValue = buildHttpProxy(data[0]);
+      IProxyData data = getProxyData(getMasterUrl().toURI());
+      if (data != null) {
+          final String envVarValue = buildHttpProxy(data);
           proxyEnvironmentVariables.forEach(envVarName -> {
             vars.put(envVarName, envVarValue);
             vars.put(envVarName.toLowerCase(), envVarValue);
           });
-          
-        }
       }
     } catch (URISyntaxException e) {
       OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
@@ -177,7 +204,7 @@ public class OdoCli implements Odo {
 
   OdoCli(String command) {
     this.command = command;
-    this.client = new DefaultKubernetesClient(new ConfigBuilder().build());
+    this.client = new DefaultKubernetesClient(getConfig());
     this.envVars = buildEnvVars();
     reportTelemetry();
   }
