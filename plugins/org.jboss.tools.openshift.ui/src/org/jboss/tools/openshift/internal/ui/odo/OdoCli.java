@@ -141,17 +141,7 @@ public class OdoCli implements Odo {
   private static String buildHttpProxy(IProxyData data) {
     StringBuilder builder = new StringBuilder();
     
-    switch (data.getType()) {
-    case IProxyData.HTTP_PROXY_TYPE:
-      builder.append("http://");
-      break;
-    case IProxyData.HTTPS_PROXY_TYPE:
-      builder.append("https://");
-      break;
-    case IProxyData.SOCKS_PROXY_TYPE:
-      builder.append("socks://");
-      break;
-    }
+    builder.append("http://");
     if (data.isRequiresAuthentication()) {
       builder.append(data.getUserId()).append(':').append(data.getPassword()).append('@');
     }
