@@ -21,7 +21,7 @@ import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.Remo
 @DisableSecureStorage
 @RemoveCDKServers
 @ContainerRuntimeServer(
-		version = CDKVersion.CDK3150,
+		version = CDKVersion.CDK3160,
 		usernameProperty="developers.username",
 		passwordProperty="developers.password",
 		createServerAdapter=false,

@@ -11,12 +11,14 @@
 package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
 import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.jface.dialogs.TitleAreaDialog;
 import org.eclipse.reddeer.swt.api.Button;
 import org.eclipse.reddeer.swt.api.Text;
 import org.eclipse.reddeer.swt.impl.button.CancelButton;
 import org.eclipse.reddeer.swt.impl.button.CheckBox;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 /**
@@ -24,14 +26,14 @@ import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
  * @author odockal
  *
  */
-public class CredentialsWizardPage {
-	
-	public void activate() {
-		new DefaultShell(CDKLabel.Shell.ADD_CREDENTIALS_DIALOG);
+public class CredentialsWizardPage extends TitleAreaDialog {
+
+	public CredentialsWizardPage() {
+		super(CDKLabel.Shell.ADD_CREDENTIALS_DIALOG);
 	}
 	
-	public Text getDescriptionText() {
-		return new LabeledText(CDKLabel.Labels.ADD_CREDENTIAL);
+	public String getDescriptionText() {
+		return this.getMessage();
 	}
 	
 	public void setUsername(String user) {
