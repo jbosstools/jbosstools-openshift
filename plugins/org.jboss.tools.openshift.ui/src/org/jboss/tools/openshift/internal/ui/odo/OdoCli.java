@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2020 Red Hat, Inc.
+ * Copyright (c) 2019-2021 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -33,6 +33,10 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceFluent;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.client.Config;
+import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
@@ -78,16 +82,25 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.tools.common.util.DownloadHelper;
+import org.eclipse.core.net.proxy.IProxyData;
+import org.eclipse.core.net.proxy.IProxyService;
+import org.eclipse.core.runtime.IStatus;
 import org.jboss.tools.openshift.core.OpenShiftCoreConstants.DebugStatus;
 import org.jboss.tools.openshift.core.odo.Application;
 import org.jboss.tools.openshift.core.odo.Component;
@@ -112,46 +125,103 @@ import org.jboss.tools.openshift.core.odo.Storage;
 import org.jboss.tools.openshift.core.odo.StoragesDeserializer;
 import org.jboss.tools.openshift.core.odo.URL;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.odo.ExecHelper.ExecResult;
 
 public class OdoCli implements Odo {
-  public static final String ODO_DOWNLOAD_FLAG = OdoCli.class.getName() + ".download";
-
   private static final ObjectMapper JSON_MAPPER = new ObjectMapper(new JsonFactory());
   
-  private static final Map<String, String> ODO_ENV = Collections.singletonMap("ODO_DISABLE_TELEMETRY", "true");
-
   /**
    * Home sub folder for the plugin
    */
   public static final String PLUGIN_FOLDER = ".odo";
 
-  private String command;
-
-  private OdoCli() throws IOException {
-    command = getCommand();
-  }
-
-  private static Odo INSTANCE;
-
-  public static final Odo get() throws IOException {
-    if (INSTANCE == null) {
-      INSTANCE = new OdoCli();
+  private final String command;
+  private Map<String, String> envVars;
+  private final KubernetesClient client;
+  
+  private static String buildHttpProxy(IProxyData data) {
+    StringBuilder builder = new StringBuilder();
+    
+    builder.append("http://");
+    if (data.isRequiresAuthentication()) {
+      builder.append(data.getUserId()).append(':').append(data.getPassword()).append('@');
     }
-    return INSTANCE;
-  }
-
-  public String getCommand() throws IOException {
-    if (command == null) {
-      command = getOdoCommand();
-    }
-    return command;
-  }
-
-  private String getOdoCommand() throws IOException {
-    return DownloadHelper.getInstance().downloadIfRequired("odo", OdoCli.class.getResource("/tools.json"));
+    builder.append(data.getHost()).append(':').append(data.getPort());
+    return builder.toString();
   }
   
+  private IProxyData getProxyData(URI uri) {
+    IProxyData data = null;
+    IProxyService proxyService = OpenShiftUIActivator.getDefault().getProxyService();
+    if (proxyService != null) {
+      IProxyData[] datas = proxyService.select(uri);
+      if (datas != null && datas.length > 0) {
+        data = datas[0];
+      }
+    }
+    return data;
+  }
+  
+  protected Config getConfig() {
+    ConfigBuilder builder = new ConfigBuilder();
+    try {
+      IProxyData data = getProxyData(new URI(builder.getMasterUrl()));
+      if (data != null) {
+        if (data.isRequiresAuthentication()) {
+          builder.withProxyUsername(data.getUserId());
+          builder.withProxyPassword(data.getPassword());
+        }
+        builder.withHttpsProxy("http://" + data.getHost() + ':' + data.getPort());
+      }
+    } catch (URISyntaxException e) {
+      OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+    }
+    return builder.build();
+  }
+  
+  protected Map<String, String> buildEnvVars() {
+    final String HTTP_PROXY = "HTTP_PROXY";
+    final String HTTPS_PROXY = "HTTPS_PROXY";
+    final String ALL_PROXY = "ALL_PROXY";
+    final Set<String> proxyEnvironmentVariables = new HashSet<>(Arrays.asList(HTTP_PROXY, HTTPS_PROXY, ALL_PROXY));
+    Map<String, String> vars = new HashMap<>();
+    vars.put("ODO_DISABLE_TELEMETRY", "true");
+    try {
+      IProxyData data = getProxyData(getMasterUrl().toURI());
+      if (data != null) {
+          final String envVarValue = buildHttpProxy(data);
+          proxyEnvironmentVariables.forEach(envVarName -> {
+            vars.put(envVarName, envVarValue);
+            vars.put(envVarName.toLowerCase(), envVarValue);
+          });
+      }
+    } catch (URISyntaxException e) {
+      OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+    }
+    return vars;
+  }
+
+  OdoCli(String command) {
+    this.command = command;
+    this.client = new DefaultKubernetesClient(getConfig());
+    this.envVars = buildEnvVars();
+    reportTelemetry();
+  }
+  
+  private void reportTelemetry() {
+    try {
+      ClusterInfo info = ClusterHelper.getClusterInfo(client);
+      UsageStats.getInstance().kubernetesVersion(info.getKubernetesVersion());
+      UsageStats.getInstance().isOpenShift(info.isOpenshift());
+      UsageStats.getInstance().openshiftVersion(info.getOpenshiftVersion());
+    }catch (KubernetesClientException e) {
+      // WARNING only as it can be no route to host errors and only impact telemetry info
+      OpenShiftUIActivator.log(IStatus.WARNING, e.getLocalizedMessage(), e);
+    }
+  }
+
+
   private ObjectMapper configureObjectMapper(final JsonDeserializer deserializer) {
     final SimpleModule module = new SimpleModule();
     module.addDeserializer(List.class, deserializer);
@@ -159,12 +229,20 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public List<Project> getProjects(OpenShiftClient client) {
-    return client.projects().list().getItems();
+  public List<Project> getProjects() {
+    return client.adapt(OpenShiftClient.class).projects().list().getItems();
+  }
+  
+  @Override
+  public Project getProject() {
+    List<Project> projects = getProjects();
+    Optional<Project> project = projects.stream().filter(p -> p.getMetadata().getName().equals(client.getNamespace())).findFirst();
+    return project.orElseGet(() -> projects.isEmpty()?null:projects.get(0));
   }
 
-  private static String execute(File workingDirectory, String command, String ...args) throws IOException {
-    ExecResult result = ExecHelper.execute(command, workingDirectory, ODO_ENV, args);
+
+  private static String execute(File workingDirectory, String command, Map<String, String> envs, String ...args) throws IOException {
+    ExecResult result = ExecHelper.execute(command, workingDirectory, envs, args);
     try (BufferedReader reader = new BufferedReader(new StringReader(result.getStdOut()))) {
       BinaryOperator<String> reducer = new BinaryOperator<String>() {
         private boolean notificationFound = false;
@@ -181,14 +259,14 @@ public class OdoCli implements Odo {
     }
   }
 
-  private static String execute(String command, String ...args) throws IOException {
-    return execute(new File(HOME_FOLDER), command, args);
+  private static String execute(String command, Map<String, String> envs, String ...args) throws IOException {
+    return execute(new File(HOME_FOLDER), command, envs, args);
   }
 
   @Override
   public void describeApplication(String project, String application) throws IOException {
     try {
-      ExecHelper.executeWithTerminal(ODO_ENV, command, "app", "describe", application, "--project", project);
+      ExecHelper.executeWithTerminal(envVars, command, "app", "describe", application, "--project", project);
       UsageStats.getInstance().odoCommand("app describe", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("app describe", false);
@@ -197,9 +275,9 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public void deleteApplication(OpenShiftClient client, String project, String application) throws IOException {
+  public void deleteApplication(String project, String application) throws IOException {
     try {
-      execute(command, "app", "delete", application, "-f", "--project", project);
+      execute(command, envVars, "app", "delete", application, "-f", "--project", project);
       UsageStats.getInstance().odoCommand("app delete", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("app delete", false);
@@ -211,7 +289,7 @@ public class OdoCli implements Odo {
   public void push(String project, String application, String context, String component) throws IOException {
     UsageStats.getInstance().push();
     try {
-      ExecHelper.executeWithTerminal(new File(context), false, ODO_ENV, command, "push");
+      ExecHelper.executeWithTerminal(new File(context), false, envVars, command, "push");
       UsageStats.getInstance().odoCommand("push", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("push", false);
@@ -223,9 +301,9 @@ public class OdoCli implements Odo {
   public void describeComponent(String project, String application, String context, String component) throws IOException {
     try {
       if (context != null) {
-        ExecHelper.executeWithTerminal(new File(context), ODO_ENV, command, "describe");
+        ExecHelper.executeWithTerminal(new File(context), envVars, command, "describe");
       } else {
-        ExecHelper.executeWithTerminal(ODO_ENV, command, "describe", "--project", project, "--app", application, component);
+        ExecHelper.executeWithTerminal(envVars, command, "describe", "--project", project, "--app", application, component);
       }
       UsageStats.getInstance().odoCommand("describe", true);
     } catch (IOException e) {
@@ -238,7 +316,7 @@ public class OdoCli implements Odo {
   public void watch(String project, String application, String context, String component) throws IOException {
     UsageStats.getInstance().watch();
     try {
-      ExecHelper.executeWithTerminal(new File(context), false, ODO_ENV, command, "watch");
+      ExecHelper.executeWithTerminal(new File(context), false, envVars, command, "watch");
       UsageStats.getInstance().odoCommand("watch", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("watch", false);
@@ -276,7 +354,7 @@ public class OdoCli implements Odo {
       if (push) {
           args.add("--now");
       }
-      ExecHelper.executeWithTerminal(new File(source), ODO_ENV, args.toArray(new String[0]));
+      ExecHelper.executeWithTerminal(new File(source), envVars, args.toArray(new String[0]));
       UsageStats.getInstance().odoCommand("create", true);
       String componentStatPrefix = StringUtils.isNotBlank(componentVersion) ? "s2i:" : "devfile:";
       UsageStats.getInstance().createComponent(componentStatPrefix + componentType, true);
@@ -293,18 +371,18 @@ public class OdoCli implements Odo {
     try {
       if (StringUtils.isNotBlank(reference)) {
         if (push) {
-          ExecHelper.executeWithTerminal(new File(context), ODO_ENV, command, "create", componentType + ':' + componentVersion, component,
+          ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
                   "--git", source, "--ref", reference, "--project", project, "--app", application, "--now");
         } else {
-          ExecHelper.executeWithTerminal(new File(context), ODO_ENV, command, "create", componentType + ':' + componentVersion, component,
+          ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
                   "--git", source, "--ref", reference, "--project", project, "--app", application);
         }
       } else {
         if (push) {
-          ExecHelper.executeWithTerminal(new File(context), ODO_ENV, command, "create", componentType + ':' + componentVersion, component,
+          ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
                   "--git", source, "--project", project, "--app", application, "--now");
         } else {
-          ExecHelper.executeWithTerminal(new File(context), ODO_ENV, command, "create", componentType + ':' + componentVersion, component,
+          ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
                   "--git", source, "--project", project, "--app", application);
         }
       }
@@ -321,10 +399,10 @@ public class OdoCli implements Odo {
   public void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException {
     try {
       if (push) {
-        ExecHelper.executeWithTerminal(new File(context), ODO_ENV, command, "create", componentType + ':' + componentVersion, component,
+        ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
                 "--binary", source, "--project", project, "--app", application, "--now");
       } else {
-        ExecHelper.executeWithTerminal(new File(context), ODO_ENV, command, "create", componentType + ':' + componentVersion, component,
+        ExecHelper.executeWithTerminal(new File(context), envVars, command, "create", componentType + ':' + componentVersion, component,
                 "--binary", source, "--project", project, "--app", application);
       }
       UsageStats.getInstance().odoCommand("create", true);
@@ -356,9 +434,9 @@ public class OdoCli implements Odo {
     try {
       ensureDefaultOdoConfigFileExists();
       if (wait) {
-        ExecHelper.executeWithTerminal(new File(HOME_FOLDER), ODO_ENV, command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project, "-w");
+        ExecHelper.executeWithTerminal(new File(HOME_FOLDER), envVars, command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project, "-w");
       } else {
-        ExecHelper.executeWithTerminal(new File(HOME_FOLDER), ODO_ENV, command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project);
+        ExecHelper.executeWithTerminal(new File(HOME_FOLDER), envVars, command, "service", "create", serviceTemplate, "--plan", servicePlan, service, "--app", application, "--project", project);
       }
       UsageStats.getInstance().odoCommand("service create", true);
       UsageStats.getInstance().createService(serviceTemplate, true);
@@ -371,7 +449,7 @@ public class OdoCli implements Odo {
 
 
   @Override
-  public String getServiceTemplate(OpenShiftClient client, String project, String application, String service) {
+  public String getServiceTemplate(String project, String application, String service) {
     ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
     return sc.serviceInstances().inNamespace(project).withName(service).get().getMetadata().getLabels().get(KubernetesLabels.NAME_LABEL);
   }
@@ -379,7 +457,7 @@ public class OdoCli implements Odo {
   @Override
   public void deleteService(String project, String application, String service) throws IOException {
     try {
-      execute(command, "service", "delete", "--project", project, "--app", application, service, "-f");
+      execute(command, envVars, "service", "delete", "--project", project, "--app", application, service, "-f");
       UsageStats.getInstance().odoCommand("service delete", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("service delete", false);
@@ -391,7 +469,7 @@ public class OdoCli implements Odo {
   public List<ComponentType> getComponentTypes() throws IOException {
       try {
         List<ComponentType> componentTypes = configureObjectMapper(new ComponentTypesDeserializer()).readValue(
-                execute(command, "catalog", "list", "components", "-o", "json"),
+                execute(command, envVars, "catalog", "list", "components", "-o", "json"),
                 new TypeReference<List<ComponentType>>() {});
         UsageStats.getInstance().odoCommand("catalog list components", true);
         return componentTypes;
@@ -417,14 +495,14 @@ public class OdoCli implements Odo {
   
   @Override
   public ComponentTypeInfo getComponentTypeInfo(String componentType, String registryName) throws IOException {
-    return parseComponentTypeInfo(execute(command, "catalog", "describe", "component", componentType, "-o", "json"), registryName);
+    return parseComponentTypeInfo(execute(command, envVars, "catalog", "describe", "component", componentType, "-o", "json"), registryName);
   }
 
   @Override
   public List<ServiceTemplate> getServiceTemplates() throws IOException {
     try {
       List<ServiceTemplate> serviceTemplates = configureObjectMapper(new ServiceTemplatesDeserializer()).readValue(
-              execute(command, "catalog", "list", "services", "-o", "json"),
+              execute(command, envVars, "catalog", "list", "services", "-o", "json"),
               new TypeReference<List<ServiceTemplate>>() {
               });
       UsageStats.getInstance().odoCommand("catalog list services", true);
@@ -439,7 +517,7 @@ public class OdoCli implements Odo {
   public void describeServiceTemplate(String template) throws IOException {
     try {
       ensureDefaultOdoConfigFileExists();
-      ExecHelper.executeWithTerminal(ODO_ENV, command, "catalog", "describe", "service", template);
+      ExecHelper.executeWithTerminal(envVars, command, "catalog", "describe", "service", template);
       UsageStats.getInstance().odoCommand("catalog describe service", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("catalog describe service", false);
@@ -448,7 +526,7 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public List<Integer> getServicePorts(OpenShiftClient client, String project, String application, String component) {
+  public List<Integer> getServicePorts(String project, String application, String component) {
     Service service = client.services().inNamespace(project).withName(component + '-' + application).get();
     return service!=null?service.getSpec().getPorts().stream().map(ServicePort::getPort).collect(Collectors.toList()):new ArrayList<>();
   }
@@ -475,7 +553,7 @@ public class OdoCli implements Odo {
   public List<URL> listURLs(String project, String application, String context, String component) throws IOException {
     try {
       if (context != null) {
-        List<URL> urls = parseURLs(execute(new File(context), command, "url", "list", "-o", "json"));
+        List<URL> urls = parseURLs(execute(new File(context), command, envVars, "url", "list", "-o", "json"));
         UsageStats.getInstance().odoCommand("url list", true);
         return urls;
       } else {
@@ -493,8 +571,8 @@ public class OdoCli implements Odo {
 }
 
   @Override
-  public ComponentInfo getComponentInfo(OpenShiftClient client, String project, String application, String component, String path, ComponentKind kind) throws IOException {
-    return parseComponentInfo(execute(new File(path), command, "describe", "-o", "json"), kind);
+  public ComponentInfo getComponentInfo(String project, String application, String component, String path, ComponentKind kind) throws IOException {
+    return parseComponentInfo(execute(new File(path), command, envVars, "describe", "-o", "json"), kind);
   }
 
   @Override
@@ -513,7 +591,7 @@ public class OdoCli implements Odo {
       if (secure) {
         args.add("--secure");
       }
-      ExecHelper.executeWithTerminal(new File(context), ODO_ENV, args.toArray(new String[args.size()]));
+      ExecHelper.executeWithTerminal(new File(context), envVars, args.toArray(new String[args.size()]));
       UsageStats.getInstance().odoCommand("url create", true);
       UsageStats.getInstance().createURL(secure, true);
     } catch (IOException e) {
@@ -526,7 +604,7 @@ public class OdoCli implements Odo {
   @Override
   public void deleteURL(String project, String application, String context, String component, String name) throws IOException {
     try {
-      execute(new File(context), command, "url", "delete", "-f", name);
+      execute(new File(context), command, envVars, "url", "delete", "-f", name);
       UsageStats.getInstance().odoCommand("url delete", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("url delete", false);
@@ -546,14 +624,14 @@ public class OdoCli implements Odo {
           args.add("--s2i");
       }
       if (context != null) {
-          execute(new File(context), command, args.toArray(new String[0]));
+          execute(new File(context), command, envVars, args.toArray(new String[0]));
       } else {
           args.add("--project");
           args.add(project);
           args.add("--app");
           args.add(application);
           args.add(component);
-          execute(command, args.toArray(new String[0]));
+          execute(command, envVars, args.toArray(new String[0]));
       }
       UsageStats.getInstance().odoCommand("delete", true);
     } catch (IOException e) {
@@ -575,7 +653,7 @@ public class OdoCli implements Odo {
   @Override
   public void follow(String project, String application, String context, String component) throws IOException {
     try {
-      ExecHelper.executeWithTerminal(new File(context), false, ODO_ENV, command, "log", "-f");
+      ExecHelper.executeWithTerminal(new File(context), false, envVars, command, "log", "-f");
       UsageStats.getInstance().odoCommand("log", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("log", false);
@@ -586,7 +664,7 @@ public class OdoCli implements Odo {
   @Override
   public void log(String project, String application, String context, String component) throws IOException {
     try {
-      ExecHelper.executeWithTerminal(new File(context), ODO_ENV, command, "log");
+      ExecHelper.executeWithTerminal(new File(context), envVars, command, "log");
       UsageStats.getInstance().odoCommand("log", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("log", false);
@@ -597,7 +675,7 @@ public class OdoCli implements Odo {
   @Override
   public void createProject(String project) throws IOException {
     try {
-      execute(command, "project", "create", "-w", project);
+      execute(command, envVars, "project", "create", "-w", project);
       UsageStats.getInstance().odoCommand("project create", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("project create", false);
@@ -608,7 +686,7 @@ public class OdoCli implements Odo {
   @Override
   public void deleteProject(String project) throws IOException {
     try {
-      execute(command, "project", "delete", project, "-f");
+      execute(command, envVars, "project", "delete", project, "-f");
       UsageStats.getInstance().odoCommand("project delete", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("project delete", false);
@@ -621,9 +699,9 @@ public class OdoCli implements Odo {
     UsageStats.getInstance().login();
     try {
       if (token == null || token.isEmpty()) {
-        execute(command, "login", url, "-u", userName, "-p", String.valueOf(password), " --insecure-skip-tls-verify");
+        execute(command, envVars, "login", url, "-u", userName, "-p", String.valueOf(password), " --insecure-skip-tls-verify");
       } else {
-        execute(command, "login", url, "-t", token, " --insecure-skip-tls-verify");
+        execute(command, envVars, "login", url, "-t", token, " --insecure-skip-tls-verify");
       }
       UsageStats.getInstance().odoCommand("login", true);
     } catch (IOException e) {
@@ -636,7 +714,7 @@ public class OdoCli implements Odo {
   public void logout() throws IOException {
     UsageStats.getInstance().logout();
     try {
-      execute(command, "logout");
+      execute(command, envVars, "logout");
       UsageStats.getInstance().odoCommand("logout", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("logout", false);
@@ -656,7 +734,7 @@ public class OdoCli implements Odo {
   @Override
   public List<Application> getApplications(String project) throws IOException {
     try {
-      List<Application> applications = parseApplications(execute(command, "app", "list", "--project", project, "-o", "json"));
+      List<Application> applications = parseApplications(execute(command, envVars, "app", "list", "--project", project, "-o", "json"));
       UsageStats.getInstance().odoCommand("app list", true);
       return applications;
     } catch (IOException e) {
@@ -666,15 +744,15 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public List<Component> getComponents(OpenShiftClient client, String project, String application) throws IOException {
+  public List<Component> getComponents(String project, String application) throws IOException {
     return configureObjectMapper(new ComponentDeserializer()).readValue(
-        execute(command, "list", "--app", application, "--project", project, "-o", "json"),
+        execute(command, envVars, "list", "--app", application, "--project", project, "-o", "json"),
         new TypeReference<List<Component>>() {
         });
   }
 
   @Override
-  public List<ServiceInstance> getServices(OpenShiftClient client, String project, String application) {
+  public List<ServiceInstance> getServices(String project, String application) {
     try {
       ServiceCatalogClient sc = client.adapt(ServiceCatalogClient.class);
       return sc.serviceInstances().inNamespace(project).withLabelSelector(new LabelSelectorBuilder().addToMatchLabels(KubernetesLabels.APP_LABEL, application).build()).list().getItems();
@@ -690,10 +768,10 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public List<Storage> getStorages(OpenShiftClient client, String project, String application, String context, String component) throws IOException {
+  public List<Storage> getStorages(String project, String application, String context, String component) throws IOException {
     if (context != null) {
       return configureObjectMapper(new StoragesDeserializer()).readValue(
-              execute(new File(context), command, "storage", "list", "-o", "json"),
+              execute(new File(context), command, envVars, "storage", "list", "-o", "json"),
               new TypeReference<List<Storage>>() {});
     } else {
       return client.persistentVolumeClaims().inNamespace(project).withLabelSelector(getLabelSelector(application, component)).list().getItems()
@@ -704,7 +782,7 @@ public class OdoCli implements Odo {
   @Override
   public void listComponents() throws IOException {
     try {
-      ExecHelper.executeWithTerminal(ODO_ENV, command, "catalog", "list", "components");
+      ExecHelper.executeWithTerminal(envVars, command, "catalog", "list", "components");
       UsageStats.getInstance().odoCommand("catalog list components", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("catalog list components", false);
@@ -715,7 +793,7 @@ public class OdoCli implements Odo {
   @Override
   public void listServices() throws IOException {
     try {
-      ExecHelper.executeWithTerminal(ODO_ENV, command,"catalog", "list", "services");
+      ExecHelper.executeWithTerminal(envVars, command,"catalog", "list", "services");
       UsageStats.getInstance().odoCommand("catalog list services", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("catalog list services", false);
@@ -726,7 +804,7 @@ public class OdoCli implements Odo {
   @Override
   public void about() throws IOException {
     try {
-      ExecHelper.executeWithTerminal(ODO_ENV, command, "version");
+      ExecHelper.executeWithTerminal(envVars, command, "version");
       UsageStats.getInstance().odoCommand("version", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("version", false);
@@ -737,7 +815,7 @@ public class OdoCli implements Odo {
   @Override
   public void createStorage(String project, String application, String context, String component, String name, String mountPath, String storageSize) throws IOException {
     try {
-      execute(new File(context), command, "storage", "create", name, "--path", mountPath, "--size", storageSize);
+      execute(new File(context), command, envVars, "storage", "create", name, "--path", mountPath, "--size", storageSize);
       UsageStats.getInstance().odoCommand("storage create", true);
       UsageStats.getInstance().createStorage(storageSize, true);
     } catch (IOException e) {
@@ -750,7 +828,7 @@ public class OdoCli implements Odo {
   @Override
   public void deleteStorage(String project, String application, String context, String component, String storage) throws IOException {
     try {
-      execute(new File(context), command, "storage", "delete", storage, "-f");
+      execute(new File(context), command, envVars, "storage", "delete", storage, "-f");
       UsageStats.getInstance().odoCommand("storage delete", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("storage delete", false);
@@ -763,9 +841,9 @@ public class OdoCli implements Odo {
     UsageStats.getInstance().link();
     try {
       if (port != null) {
-        execute(new File(context), command, "link", source, "--port", port.toString(), "--wait");
+        execute(new File(context), command, envVars, "link", source, "--port", port.toString(), "--wait");
       } else {
-        execute(new File(context), command, "link", source, "--wait");
+        execute(new File(context), command, envVars, "link", source, "--wait");
       }
       UsageStats.getInstance().odoCommand("link", true);
     } catch (IOException e) {
@@ -779,7 +857,7 @@ public class OdoCli implements Odo {
     UsageStats.getInstance().debug();
     try {
       ExecHelper.execute(command, new File(component), "push", "--debug");
-      ExecHelper.executeWithTerminal(new File(component), false, ODO_ENV, command, "debug", "port-forward", "--local-port", port.toString());
+      ExecHelper.executeWithTerminal(new File(component), false, envVars, command, "debug", "port-forward", "--local-port", port.toString());
       UsageStats.getInstance().odoCommand("debug port-forward", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("debug port-forward", false);
@@ -790,7 +868,7 @@ public class OdoCli implements Odo {
   @Override
   public DebugInfo debugInfo(String project, String application, String context, String component) throws IOException {
     try {
-      ExecResult result = ExecHelper.execute(command, new File(context), "debug", "info", "-o", "json");
+      ExecResult result = ExecHelper.execute(command, new File(context), envVars, "debug", "info", "-o", "json");
       JSonParser parser = new JSonParser(JSON_MAPPER.readTree(result.getStdOut()));
       return parser.parseDebugInfo();
     } catch (IOException e) {
@@ -802,12 +880,17 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public List<Project> getPreOdo10Projects(OpenShiftClient client) {
-    return getProjects(client).stream().filter(project -> isLegacyProject(client, project)).collect(Collectors.toList());
+  public java.net.URL getMasterUrl() {
+    return client.getMasterUrl();
   }
 
-  private boolean isLegacyProject(OpenShiftClient client, Project project) {
-    boolean hasLegacyResources = !client.deploymentConfigs().inNamespace(project.getMetadata().getName()).withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems().isEmpty();
+  @Override
+  public List<Project> getPreOdo10Projects() {
+    return getProjects().stream().filter(project -> isLegacyProject(project)).collect(Collectors.toList());
+  }
+
+  private boolean isLegacyProject(Project project) {
+    boolean hasLegacyResources = !client.adapt(OpenShiftClient.class).deploymentConfigs().inNamespace(project.getMetadata().getName()).withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems().isEmpty();
     if (!hasLegacyResources) {
       try {
         hasLegacyResources = !client.adapt(ServiceCatalogClient.class).serviceInstances().inNamespace(project.getMetadata().getName()).withLabel(KubernetesLabels.COMPONENT_NAME_LABEL_PRE10).list().getItems().isEmpty();
@@ -817,17 +900,17 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public List<Exception> migrateProjects(OpenShiftClient client, List<Project> projects, BiConsumer<String, String> reporter) {
+  public List<Exception> migrateProjects(List<Project> projects, BiConsumer<String, String> reporter) {
     List<Exception> exceptions = new ArrayList<>();
     for(Project project : projects) {
       reporter.accept(project.getMetadata().getName(), "deployment configs");
-      migrateDCs(client.deploymentConfigs().inNamespace(project.getMetadata().getName()), exceptions);
+      migrateDCs(client.adapt(OpenShiftClient.class).deploymentConfigs().inNamespace(project.getMetadata().getName()), exceptions);
       reporter.accept(project.getMetadata().getName(), "routes");
-      migrateRoutes(client.routes().inNamespace(project.getMetadata().getName()), exceptions);
+      migrateRoutes(client.adapt(OpenShiftClient.class).routes().inNamespace(project.getMetadata().getName()), exceptions);
       reporter.accept(project.getMetadata().getName(), "build configs");
-      migrateBuildConfigs(client.buildConfigs().inNamespace(project.getMetadata().getName()), exceptions);
+      migrateBuildConfigs(client.adapt(OpenShiftClient.class).buildConfigs().inNamespace(project.getMetadata().getName()), exceptions);
       reporter.accept(project.getMetadata().getName(), "image streams");
-      migrateImageStreams(client.imageStreams().inNamespace(project.getMetadata().getName()), exceptions);
+      migrateImageStreams(client.adapt(OpenShiftClient.class).imageStreams().inNamespace(project.getMetadata().getName()), exceptions);
       reporter.accept(project.getMetadata().getName(), "services");
       migrateServices(client.services().inNamespace(project.getMetadata().getName()), exceptions);
       reporter.accept(project.getMetadata().getName(), "storages");
@@ -995,9 +1078,9 @@ public class OdoCli implements Odo {
   }
 
   @Override
-  public String consoleURL(OpenShiftClient client) throws IOException {
+  public String consoleURL() throws IOException {
     try {
-      VersionInfo version = client.getVersion();
+      VersionInfo version = client.adapt(OpenShiftClient.class).getVersion();
       if (version == null || "4".equals(version.getMajor())) { // assuming null version is version 4
         ConfigMap configMap = client.configMaps().inNamespace(OCP4_CONFIG_NAMESPACE).withName(OCP4_CONSOLE_PUBLIC_CONFIG_MAP_NAME).get();
         if (configMap != null) {
@@ -1017,33 +1100,33 @@ public class OdoCli implements Odo {
   @Override
   public List<ComponentDescriptor> discover(String path) throws IOException {
     return configureObjectMapper(new ComponentDescriptorsDeserializer()).readValue(
-            execute(new File(path), command, "list", "--path", ".", "-o", "json"),
+            execute(new File(path), command, envVars, "list", "--path", ".", "-o", "json"),
             new TypeReference<List<ComponentDescriptor>>() {});
   }
   
   @Override
-  public boolean isServiceCatalogAvailable(OpenShiftClient client) {
+  public boolean isServiceCatalogAvailable() {
     return client.isAdaptable(ServiceCatalogClient.class);
   }
 
   @Override
   public List<DevfileRegistry> listDevfileRegistries() throws IOException {
     return configureObjectMapper(new DevfileRegistriesDeserializer()).readValue(
-        execute(command, "registry" , "list", "-o", "json"),
+        execute(command, envVars, "registry" , "list", "-o", "json"),
         new TypeReference<List<DevfileRegistry>>() {});
   }
 
   @Override
   public void createDevfileRegistry(String name, String url, boolean secure) throws IOException {
     if (secure) {
-      execute(command, "registry", "add", name, url, "--token", "true");
+      execute(command, envVars, "registry", "add", name, url, "--token", "true");
     } else {
-      execute(command, "registry", "add", name, url);
+      execute(command, envVars, "registry", "add", name, url);
     }
   }
 
   @Override
   public void deleteDevfileRegistry(String name) throws IOException {
-    execute(command, "registry", "delete", "-f", name);
+    execute(command, envVars, "registry", "delete", "-f", name);
   }
 }

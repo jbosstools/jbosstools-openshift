@@ -30,8 +30,6 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.Componen
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.LinkModel;
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.LinkServiceWizard;
 
-import io.fabric8.openshift.client.OpenShiftClient;
-
 /**
  * @author Red Hat Developers
  */
@@ -41,10 +39,9 @@ public class LinkServiceHandler extends ComponentHandler {
 	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
 			Odo odo = component.getRoot().getOdo();
-			OpenShiftClient client = component.getRoot().getClient();
 			String projectName = component.getParent().getParent().getWrapped().getMetadata().getName();
 			String applicationName = component.getParent().getWrapped().getName();
-			List<String> serviceNames = odo.getServices(client, projectName, applicationName).stream()
+			List<String> serviceNames = odo.getServices(projectName, applicationName).stream()
 			        .map(service -> KubernetesLabels.getComponentName(service)).collect(Collectors.toList());
 			final LinkModel<String> model = new LinkModel<>(odo, projectName, applicationName,
 			        component.getWrapped().getName(), serviceNames);

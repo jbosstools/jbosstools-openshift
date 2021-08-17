@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2017 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2021 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -10,7 +10,6 @@ package org.jboss.tools.openshift.test.ui.applicationexplorer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -27,6 +26,7 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.Applicat
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.CreateComponentMessageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.CreateProjectMessageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement;
+import org.jboss.tools.openshift.internal.ui.odo.OdoCliFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,15 +34,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.openshift.api.model.Project;
-import io.fabric8.openshift.client.OpenShiftClient;
 
 /**
  * @author jeff.cantrill
  */
 @RunWith(MockitoJUnitRunner.class)
 public class OpenShiftApplicationExplorerContentProviderTest {
-
-	private static final String OPENSHIFT_SERVER_URL = "https://localhost:8442";
 
 	private OpenShiftApplicationExplorerContentProvider provider;
 	private ApplicationExplorerUIModel model;
@@ -53,6 +50,9 @@ public class OpenShiftApplicationExplorerContentProviderTest {
 	  odo = mock(Odo.class);
 	  ClusterClient info = mock(ClusterClient.class);
 	  doReturn(odo).when(info).getOdo();
+	  OdoCliFactory factory = mock(OdoCliFactory.class);
+	  doReturn(odo).when(factory).getOdo();
+	  doReturn(factory).when(info).getFactory();
 		this.model = new ApplicationExplorerUIModel(info) {
 		};
 		this.provider = new OpenShiftApplicationExplorerContentProvider(model) {
@@ -64,7 +64,7 @@ public class OpenShiftApplicationExplorerContentProviderTest {
     ObjectMeta meta = mock(ObjectMeta.class);
     doReturn(name).when(meta).getName();
     doReturn(meta).when(project).getMetadata();
-    doReturn(Collections.singletonList(project)).when(odo).getProjects(any(OpenShiftClient.class));
+    doReturn(Collections.singletonList(project)).when(odo).getProjects();
     return project;
   }
 

@@ -24,14 +24,13 @@ import org.eclipse.reddeer.jface.condition.WindowIsAvailable;
 import org.eclipse.reddeer.jface.wizard.WizardDialog;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
-import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.jboss.tools.common.launcher.reddeer.wizards.NewLauncherProjectWizard;
 import org.jboss.tools.common.launcher.reddeer.wizards.NewLauncherProjectWizardPage;
 import org.jboss.tools.openshift.core.odo.URL;
-import org.jboss.tools.openshift.internal.ui.odo.OdoCli;
+import org.jboss.tools.openshift.internal.ui.odo.OdoCliFactory;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOApplication;
@@ -65,7 +64,7 @@ public abstract class AbstractODOTest {
 	
 	public static void triggerDebugSession(String eclipseProjectName, String project, String application, String component, String urlSuffix) throws IOException {
 		String path = ResourcesPlugin.getWorkspace().getRoot().getProject(eclipseProjectName).getLocation().toOSString();
-		List<URL> urls = OdoCli.get().listURLs(project, application, path, component);
+		List<URL> urls = OdoCliFactory.getInstance().getOdo().listURLs(project, application, path, component);
 		java.net.URL url = new java.net.URL("http://" + urls.get(0).getHost() + urlSuffix);
 		new Thread(new Runnable() {
 			public void run() {

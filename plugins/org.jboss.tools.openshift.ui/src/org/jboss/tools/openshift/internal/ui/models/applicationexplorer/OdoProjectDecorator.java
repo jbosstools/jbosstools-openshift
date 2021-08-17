@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2020 Red Hat, Inc.
+ * Copyright (c) 2019-2021 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.internal.ui.models.applicationexplorer;
 
 import io.fabric8.openshift.api.model.Project;
-import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
 
 import org.apache.commons.io.FileUtils;
@@ -55,8 +54,13 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public List<io.fabric8.openshift.api.model.Project> getProjects(OpenShiftClient client) {
-    return delegate.getProjects(client);
+  public List<io.fabric8.openshift.api.model.Project> getProjects() {
+    return delegate.getProjects();
+  }
+
+  @Override
+  public Project getProject() {
+    return delegate.getProject();
   }
 
   @Override
@@ -65,9 +69,9 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public void deleteApplication(OpenShiftClient client, String project, String application) throws IOException {
+  public void deleteApplication(String project, String application) throws IOException {
     final IOException[] exception = { null };
-    getComponents(client, project, application).forEach(component -> {
+    getComponents(project, application).forEach(component -> {
       try {
         deleteComponent(project, application, component.getPath(), component.getName(),
             component.getInfo().getComponentKind());
@@ -140,8 +144,8 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public String getServiceTemplate(OpenShiftClient client, String project, String application, String service) {
-    return delegate.getServiceTemplate(client, project, application, service);
+  public String getServiceTemplate(String project, String application, String service) {
+    return delegate.getServiceTemplate(project, application, service);
   }
 
   @Override
@@ -175,8 +179,8 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public List<Integer> getServicePorts(OpenShiftClient client, String project, String application, String component) {
-    List<Integer> ports = delegate.getServicePorts(client, project, application, component);
+  public List<Integer> getServicePorts(String project, String application, String component) {
+    List<Integer> ports = delegate.getServicePorts(project, application, component);
     model.getComponents().forEach((path, comp) -> {
       if (comp.getProject().equals(project) && comp.getApplication().equals(application)
           && comp.getName().equals(component)) {
@@ -196,9 +200,9 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public ComponentInfo getComponentInfo(OpenShiftClient client, String project, String application, String component, String path, ComponentKind kind)
+  public ComponentInfo getComponentInfo(String project, String application, String component, String path, ComponentKind kind)
       throws IOException {
-    return delegate.getComponentInfo(client, project, application, component, path, kind);
+    return delegate.getComponentInfo(project, application, component, path, kind);
   }
 
   @Override
@@ -268,9 +272,9 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public List<Component> getComponents(OpenShiftClient client, String project, String application) throws IOException {
+  public List<Component> getComponents(String project, String application) throws IOException {
     final IOException[] exceptions = { null };
-    List<Component> components = delegate.getComponents(client, project, application);
+    List<Component> components = delegate.getComponents(project, application);
     model.getComponents().forEach((path, comp) -> {
       if (comp.getProject().equals(project) && comp.getApplication().equals(application)) {
         Optional<Component> found = components.stream().filter(comp1 -> comp1.getName().equals(comp.getName()))
@@ -280,7 +284,7 @@ public class OdoProjectDecorator implements Odo {
           found.get().setPath(path);
         } else {
           try {
-            components.add(Component.of(comp.getName(), getComponentInfo(client, project, application, comp.getName(), comp.getPath(), comp.getKind()), ComponentState.NOT_PUSHED, path));
+            components.add(Component.of(comp.getName(), getComponentInfo(project, application, comp.getName(), comp.getPath(), comp.getKind()), ComponentState.NOT_PUSHED, path));
           } catch (IOException e) {
             exceptions[0] = e;
           }
@@ -294,14 +298,14 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public List<ServiceInstance> getServices(OpenShiftClient client, String project, String application) {
-    return delegate.getServices(client, project, application);
+  public List<ServiceInstance> getServices(String project, String application) {
+    return delegate.getServices(project, application);
   }
 
   @Override
-  public List<Storage> getStorages(OpenShiftClient client, String project, String application, String context,
+  public List<Storage> getStorages(String project, String application, String context,
       String component) throws IOException {
-    return delegate.getStorages(client, project, application, context, component);
+    return delegate.getStorages(project, application, context, component);
   }
 
   @Override
@@ -349,19 +353,19 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public List<Project> getPreOdo10Projects(OpenShiftClient client) {
-    return delegate.getPreOdo10Projects(client);
+  public List<Project> getPreOdo10Projects() {
+    return delegate.getPreOdo10Projects();
   }
 
   @Override
-  public List<Exception> migrateProjects(OpenShiftClient client, List<Project> projects,
+  public List<Exception> migrateProjects(List<Project> projects,
       BiConsumer<String, String> reporter) {
-    return delegate.migrateProjects(client, projects, reporter);
+    return delegate.migrateProjects(projects, reporter);
   }
 
   @Override
-  public String consoleURL(OpenShiftClient client) throws IOException {
-    return delegate.consoleURL(client);
+  public String consoleURL() throws IOException {
+    return delegate.consoleURL();
   }
 
   @Override
@@ -370,8 +374,13 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public boolean isServiceCatalogAvailable(OpenShiftClient client) {
-    return delegate.isServiceCatalogAvailable(client);
+  public boolean isServiceCatalogAvailable() {
+    return delegate.isServiceCatalogAvailable();
+  }
+
+  @Override
+  public java.net.URL getMasterUrl() {
+    return delegate.getMasterUrl();
   }
 
   @Override

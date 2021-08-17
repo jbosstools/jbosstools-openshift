@@ -17,8 +17,6 @@ import java.util.Map;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.Odo;
 
-import io.fabric8.openshift.client.OpenShiftClient;
-
 /**
  * @author Red Hat Developers
  *
@@ -30,12 +28,10 @@ public class LinkComponentModel extends LinkModel<Component> {
 	private Integer port;
 	
 	private List<Integer> ports;
-	private OpenShiftClient client;
 	private Map<String, List<Integer>> cache = new HashMap<>();
 	
-	public LinkComponentModel(Odo odo, String projectName, String applicationName, String componentName, List<Component> targets, OpenShiftClient client) {
+	public LinkComponentModel(Odo odo, String projectName, String applicationName, String componentName, List<Component> targets) {
 		super(odo, projectName, applicationName, componentName, targets);
-		this.client = client;
 	}
 
 	/**
@@ -72,6 +68,6 @@ public class LinkComponentModel extends LinkModel<Component> {
 	@Override
 	public void setTarget(Component target) {
 		super.setTarget(target);
-		setPorts(cache.computeIfAbsent(target.getName(), name -> getOdo().getServicePorts(client, getProjectName(), getApplicationName(), target.getName())));
+		setPorts(cache.computeIfAbsent(target.getName(), name -> getOdo().getServicePorts(getProjectName(), getApplicationName(), target.getName())));
 	}
 }

@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.applicationexplorer;
 
+import java.io.IOException;
+
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.SWT;
@@ -41,7 +43,10 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 	@Override
 	public String getText(Object element) {
 		if (element instanceof ApplicationExplorerUIModel) {
-			return ((ApplicationExplorerUIModel) element).getClient().getMasterUrl().toString();
+			try {
+        return ((ApplicationExplorerUIModel) element).getOdo().getMasterUrl().toString();
+      } catch (IOException e) {
+      }
 		}
 		return super.getText(element);
 	}
@@ -49,7 +54,11 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 	@Override
 	public StyledString getStyledText(Object element, int limit) {
 		if (element instanceof ApplicationExplorerUIModel) {
-			return style(((ApplicationExplorerUIModel) element).getClient().getMasterUrl().toString(), "", limit);
+			try {
+        return style(((ApplicationExplorerUIModel) element).getOdo().getMasterUrl().toString(), "", limit);
+      } catch (IOException e) {
+        return style("Error", "", limit);
+      }
 		} else if (element instanceof ProjectElement) {
 			return style(((ProjectElement) element).getWrapped().getMetadata().getName(), "", limit);
 		} else if (element instanceof ApplicationElement) {

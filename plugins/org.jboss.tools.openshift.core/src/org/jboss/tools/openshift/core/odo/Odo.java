@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2020 Red Hat, Inc.
+ * Copyright (c) 2019-2021 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -20,21 +20,17 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 
 public interface Odo {
-    List<Project> getProjects(OpenShiftClient client);
+    List<Project> getProjects();
     
-    default Project getProject(OpenShiftClient client) {
-      List<Project> projects = getProjects(client);
-      Optional<Project> project = projects.stream().filter(p -> p.getMetadata().getName().equals(client.getNamespace())).findFirst();
-      return project.orElseGet(() -> projects.isEmpty()?null:projects.get(0));
-    }
+    Project getProject();
 
-    List<Project> getPreOdo10Projects(OpenShiftClient client);
+    List<Project> getPreOdo10Projects();
 
-    List<Exception> migrateProjects(OpenShiftClient client, List<Project> projects, BiConsumer<String, String> reporter);
+    List<Exception> migrateProjects(List<Project> projects, BiConsumer<String, String> reporter);
 
     void describeApplication(String project, String application) throws IOException;
 
-    void deleteApplication(OpenShiftClient client, String project, String application) throws IOException;
+    void deleteApplication(String project, String application) throws IOException;
 
     void push(String project, String application, String context, String component) throws IOException;
 
@@ -50,7 +46,7 @@ public interface Odo {
 
     void createService(String project, String application, String serviceTemplate, String servicePlan, String service, boolean wait) throws IOException;
 
-    String getServiceTemplate(OpenShiftClient client, String project, String application, String service);
+    String getServiceTemplate(String project, String application, String service);
 
     void deleteService(String project, String application, String service) throws IOException;
 
@@ -64,11 +60,11 @@ public interface Odo {
 
     void describeServiceTemplate(String template) throws IOException;
 
-    List<Integer> getServicePorts(OpenShiftClient client, String project, String application, String component);
+    List<Integer> getServicePorts(String project, String application, String component);
 
     List<URL> listURLs(String project, String application, String context, String component) throws IOException;
 
-    ComponentInfo getComponentInfo(OpenShiftClient client, String project, String application, String component, String path, ComponentKind kind) throws IOException;
+    ComponentInfo getComponentInfo(String project, String application, String component, String path, ComponentKind kind) throws IOException;
 
     void createURL(String project, String application, String context, String component, String name, Integer port, boolean secure) throws IOException;
 
@@ -92,11 +88,11 @@ public interface Odo {
 
     List<Application> getApplications(String project) throws IOException;
 
-    List<Component> getComponents(OpenShiftClient client, String project, String application) throws IOException;
+    List<Component> getComponents(String project, String application) throws IOException;
 
-    List<ServiceInstance> getServices(OpenShiftClient client, String project, String application);
+    List<ServiceInstance> getServices(String project, String application);
 
-    List<Storage> getStorages(OpenShiftClient client, String project, String application, String context, String component) throws IOException;
+    List<Storage> getStorages(String project, String application, String context, String component) throws IOException;
 
     void listComponents() throws IOException;
 
@@ -110,7 +106,7 @@ public interface Odo {
 
     void link(String project, String application, String component, String context, String source, Integer port) throws IOException;
 
-    String consoleURL(OpenShiftClient client) throws IOException;
+    String consoleURL() throws IOException;
 
     void debug(String project, String application, String context, String component, Integer port) throws IOException;
     
@@ -118,12 +114,13 @@ public interface Odo {
     
     List<ComponentDescriptor> discover(String path) throws IOException;
 
-    boolean isServiceCatalogAvailable(OpenShiftClient client);
+    boolean isServiceCatalogAvailable();
+    
+    java.net.URL getMasterUrl();
     
     List<DevfileRegistry> listDevfileRegistries() throws IOException;
 
     void createDevfileRegistry(String name, String url, boolean secure) throws IOException;
 
     void deleteDevfileRegistry(String name) throws IOException;
-
 }

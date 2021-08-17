@@ -35,20 +35,13 @@ import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.utils.ConfigHelper;
 import org.jboss.tools.openshift.core.odo.utils.ConfigWatcher;
 import org.jboss.tools.openshift.core.odo.utils.ConfigWatcher.Listener;
-import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIModel;
-import org.jboss.tools.openshift.internal.ui.odo.ClusterHelper;
-import org.jboss.tools.openshift.internal.ui.odo.ClusterInfo;
-import org.jboss.tools.openshift.internal.ui.odo.OdoCli;
+import org.jboss.tools.openshift.internal.ui.odo.OdoCliFactory;
 
 import io.fabric8.kubernetes.api.model.Config;
 import io.fabric8.kubernetes.api.model.NamedContext;
-import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
-import io.fabric8.openshift.client.DefaultOpenShiftClient;
-import io.fabric8.openshift.client.OpenShiftClient;
 
 /**
  * @author Red Hat Developers
@@ -66,48 +59,31 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
   }
   
   public static class ClusterClient {
-    private OpenShiftClient client;
+    private Odo odo;
     
     public Odo getOdo() throws IOException {
-      return OdoCli.get();
-    }
-
-    /**
-     * @return
-     */
-    public OpenShiftClient getClient() {
-      if (client == null) {
-        loadClient(true);
+      if (odo == null) {
+        loadClient();
       }
-      return client;
+      return odo;
     }
     
-    private void loadClient(boolean reload) {
-      client = new DefaultOpenShiftClient(new ConfigBuilder().build());
-      if (reload) {
-        reportTelemetry();
-      }
+    public OdoCliFactory getFactory() {
+      return OdoCliFactory.getInstance();
+    }
+
+    private void loadClient() {
+      odo = getFactory().getOdo();
     }
 
     void reload() {
-      loadClient(true);
+      loadClient();
     }
     
     void refresh() {
-      loadClient(false);
+      loadClient();
     }
      
-    private void reportTelemetry() {
-      try {
-        ClusterInfo info = ClusterHelper.getClusterInfo(client);
-        UsageStats.getInstance().kubernetesVersion(info.getKubernetesVersion());
-        UsageStats.getInstance().isOpenShift(info.isOpenshift());
-        UsageStats.getInstance().openshiftVersion(info.getOpenshiftVersion());
-      }catch (KubernetesClientException e) {
-        // WARNING only as it can be no route to host errors and only impact telemetry info
-        OpenShiftUIActivator.log(IStatus.WARNING, e.getLocalizedMessage(), e);
-      }
-    }
   }
   
     private final Map<String, ComponentDescriptor> components = new HashMap<>();
@@ -150,10 +126,6 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
       odo = new OdoProjectDecorator(getWrapped().getOdo(), this);
     }
     return odo;
-  }
-  
-  public OpenShiftClient getClient() {
-    return getWrapped().getClient();
   }
   
     protected Config loadConfig() {
