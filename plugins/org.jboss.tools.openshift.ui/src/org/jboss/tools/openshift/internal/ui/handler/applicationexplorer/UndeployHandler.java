@@ -39,7 +39,7 @@ public class UndeployHandler extends ComponentHandler {
 
 	private void execute(Odo odo, ComponentElement component) {
 		try {
-			odo.undeployComponent(component.getParent().getParent().getWrapped().getMetadata().getName(),
+			odo.undeployComponent(component.getParent().getParent().getWrapped(),
 			        component.getParent().getWrapped().getName(), component.getWrapped().getPath(),
 			        component.getWrapped().getName(), component.getWrapped().getInfo().getComponentKind());
 			component.getWrapped().setState(ComponentState.NOT_PUSHED);

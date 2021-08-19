@@ -13,12 +13,18 @@ package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 import java.io.IOException;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.notification.LabelNotification;
@@ -71,14 +77,26 @@ public class CreateComponentHandler extends OdoHandler {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 	}
+	
+	private static IProject getOpenedProject() {
+	  for(IProject p : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+	    try {
+        if (p.isOpen() && !p.hasNature("org.eclipse.rse.ui.remoteSystemsTempNature")) {
+          return p;
+        }
+      } catch (CoreException e) {}
+	  }
+	  return null;
+	}
 
   private static void openDialog(DevfileRegistryComponentTypeElement componentType, ApplicationElement application, ProjectElement project, final Shell parent)
       throws IOException {
     Odo odo = project!=null?project.getParent().getOdo():componentType.getRoot().getOdo();
-    String projectName = project != null?project.getWrapped().getMetadata().getName():odo.getProject().getMetadata().getName();
+    String projectName = project != null?project.getWrapped():odo.getNamespace();
+    IProject eclipseProject = getOpenedProject();
     final CreateComponentModel model = new CreateComponentModel(odo, odo.getComponentTypes(),
             projectName,
-            application == null ? "" : application.getWrapped().getName());
+            application == null ? "app" : application.getWrapped().getName(), eclipseProject);
     if (componentType != null) {
       model.setSelectedComponentType(componentType.getWrapped());
     }

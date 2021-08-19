@@ -10,19 +10,25 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
+import java.util.List;
 import java.util.Objects;
 
 public final class DevfileComponentType extends AbstractComponentType {
   
     private final String displayName;
     private final String description;
-    private final DevfileRegistry devfileRegistry;  
+    private final DevfileRegistry devfileRegistry;
+    private final String language;
+    private final List<String> tags;  
 
-    public DevfileComponentType(String name, String displayName, String description, DevfileRegistry devfileRegistry) {
+    public DevfileComponentType(String name, String displayName, String description, DevfileRegistry devfileRegistry,
+        String language, List<String> tags) {
         super(name);
         this.displayName = displayName;
         this.description = description;
         this.devfileRegistry = devfileRegistry;
+        this.language = language;
+        this.tags = tags;
     }
 
     @Override
@@ -49,6 +55,24 @@ public final class DevfileComponentType extends AbstractComponentType {
      */
     public DevfileRegistry getDevfileRegistry() {
       return devfileRegistry;
+    }
+
+    /**
+     * @return the language
+     */
+    public String getLanguage() {
+      return language;
+    }
+
+    /**
+     * @return the tags
+     */
+    public List<String> getTags() {
+      return tags;
+    }
+    
+    public String getProjectType() {
+      return null;
     }
 
     @Override

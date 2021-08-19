@@ -43,7 +43,7 @@ public class DebugHandler extends ComponentHandler {
 	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
 			Odo odo = component.getRoot().getOdo();
-			String project = component.getParent().getParent().getWrapped().getMetadata().getName();
+			String project = component.getParent().getParent().getWrapped();
 			String application = component.getParent().getWrapped().getName();
 			ComponentInfo info = odo.getComponentInfo(project, application, component.getWrapped().getName(),
 			    component.getWrapped().getPath(), component.getWrapped().getInfo().getComponentKind());

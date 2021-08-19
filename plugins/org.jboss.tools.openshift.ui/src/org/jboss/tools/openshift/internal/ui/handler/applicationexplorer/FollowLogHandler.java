@@ -24,7 +24,7 @@ public class FollowLogHandler extends ComponentHandler {
 	@Override
 	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
-			component.getRoot().getOdo().follow(component.getParent().getParent().getWrapped().getMetadata().getName(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
+			component.getRoot().getOdo().follow(component.getParent().getParent().getWrapped(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
 		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}

@@ -38,7 +38,7 @@ public class CreateURLHandler extends ComponentHandler {
 	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
 			Odo odo = component.getRoot().getOdo();
-			String projectName = component.getParent().getParent().getWrapped().getMetadata().getName();
+			String projectName = component.getParent().getParent().getWrapped();
 			String applicationName = component.getParent().getWrapped().getName();
 			List<Integer> ports = component.getWrapped().getInfo().getComponentKind() == ComponentKind.S2I ?odo.getServicePorts(projectName, applicationName,
 					component.getWrapped().getName()) : Collections.emptyList();

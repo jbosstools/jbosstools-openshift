@@ -62,7 +62,7 @@ public class DeleteHandler extends OdoHandler {
 	 */
 	private String getLabel(AbstractOpenshiftUIElement<?, ?, ?> element) {
 		if (element instanceof ProjectElement) {
-			return String.join(" ", "project", ((ProjectElement)element).getWrapped().getMetadata().getName());
+			return String.join(" ", "project", ((ProjectElement)element).getWrapped());
 		} else if (element instanceof ApplicationElement) {
 			return String.join(" ", "application", ((ApplicationElement)element).getWrapped().getName());
 		} else if (element instanceof ComponentElement) {
@@ -82,15 +82,15 @@ public class DeleteHandler extends OdoHandler {
 	private void execute(Odo odo, AbstractOpenshiftUIElement<?, ?, ?> element) {
 		try {
 			if (element instanceof ProjectElement) {
-				odo.deleteProject(((ProjectElement) element).getWrapped().getMetadata().getName());
+				odo.deleteProject(((ProjectElement) element).getWrapped());
 			} else if (element instanceof ApplicationElement) {
 				odo.deleteApplication(
-				        ((ApplicationElement) element).getParent().getWrapped().getMetadata().getName(),
+				        ((ApplicationElement) element).getParent().getWrapped(),
 				        ((ApplicationElement) element).getWrapped().getName());
 			} else if (element instanceof ComponentElement) {
 				ComponentElement component = (ComponentElement) element;
 				odo.deleteComponent(
-				        component.getParent().getParent().getWrapped().getMetadata().getName(),
+				        component.getParent().getParent().getWrapped(),
 				        component.getParent().getWrapped().getName(),
 				        component.getWrapped().getPath(),
 				        component.getWrapped().getName(),
@@ -100,20 +100,19 @@ public class DeleteHandler extends OdoHandler {
 				}
 			} else if (element instanceof ServiceElement) {
 				odo.deleteService(
-				        ((ServiceElement) element).getParent().getParent().getWrapped().getMetadata().getName(),
+				        ((ServiceElement) element).getParent().getParent().getWrapped(),
 				        ((ServiceElement) element).getParent().getWrapped().getName(),
 				        ((ServiceElement) element).getWrapped().getMetadata().getName());
 			} else if (element instanceof URLElement) {
 				odo.deleteURL(
-				        ((URLElement) element).getParent().getParent().getParent().getWrapped().getMetadata().getName(),
+				        ((URLElement) element).getParent().getParent().getParent().getWrapped(),
 				        ((URLElement) element).getParent().getParent().getWrapped().getName(),
 				        ((URLElement) element).getParent().getWrapped().getPath(),
 				        ((URLElement) element).getParent().getWrapped().getName(),
 				        ((URLElement) element).getWrapped().getName());
 			} else if (element instanceof StorageElement) {
 				odo.deleteStorage(
-				        ((StorageElement) element).getParent().getParent().getParent().getWrapped().getMetadata()
-				                .getName(),
+				        ((StorageElement) element).getParent().getParent().getParent().getWrapped(),
 				        ((StorageElement) element).getParent().getParent().getWrapped().getName(),
 				        ((StorageElement) element).getParent().getWrapped().getPath(),
 				        ((StorageElement) element).getParent().getWrapped().getName(),

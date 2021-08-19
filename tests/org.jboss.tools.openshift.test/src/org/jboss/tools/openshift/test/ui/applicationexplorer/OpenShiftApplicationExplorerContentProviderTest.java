@@ -59,12 +59,12 @@ public class OpenShiftApplicationExplorerContentProviderTest {
 		};
 	}
 
-  protected Project mockProject(String name) {
+  protected Project mockProject(String name) throws IOException {
     Project project = mock(Project.class);
     ObjectMeta meta = mock(ObjectMeta.class);
     doReturn(name).when(meta).getName();
     doReturn(meta).when(project).getMetadata();
-    doReturn(Collections.singletonList(project)).when(odo).getProjects();
+    doReturn(Collections.singletonList(project)).when(odo).getNamespaces();
     return project;
   }
 
@@ -78,7 +78,7 @@ public class OpenShiftApplicationExplorerContentProviderTest {
 	
 	 @Test
    public void checkClusterWithSingleProjectReturnsLinkToCreateComponent()
-       throws InterruptedException, TimeoutException {
+       throws InterruptedException, TimeoutException, IOException {
 	   mockProject("myproject");
      Object[] childs = provider.getChildren(model);
      assertEquals(1, childs.length);

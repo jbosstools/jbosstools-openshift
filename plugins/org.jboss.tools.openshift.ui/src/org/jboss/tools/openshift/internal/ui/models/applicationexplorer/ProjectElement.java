@@ -11,13 +11,12 @@
 package org.jboss.tools.openshift.internal.ui.models.applicationexplorer;
 
 import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
-import io.fabric8.openshift.api.model.Project;
 
 /**
  * @author Red Hat Developers
  *
  */
-public class ProjectElement extends AbstractOpenshiftUIElement<Project, ApplicationExplorerUIModel, ApplicationExplorerUIModel> {
+public class ProjectElement extends AbstractOpenshiftUIElement<String, ApplicationExplorerUIModel, ApplicationExplorerUIModel> {
 	
 	public ProjectElement() {
 		super(null, null);
@@ -27,7 +26,7 @@ public class ProjectElement extends AbstractOpenshiftUIElement<Project, Applicat
 	 * @param project
 	 * @param parentElement
 	 */
-	public ProjectElement(Project project, ApplicationExplorerUIModel parentElement) {
+	public ProjectElement(String project, ApplicationExplorerUIModel parentElement) {
 		super(parentElement, project);
 	}
 

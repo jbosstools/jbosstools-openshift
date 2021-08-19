@@ -10,23 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
-import io.fabric8.openshift.api.model.Project;
-import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.BiConsumer;
 
 public interface Odo {
-    List<Project> getProjects();
+    List<String> getNamespaces() throws IOException;
     
-    Project getProject();
-
-    List<Project> getPreOdo10Projects();
-
-    List<Exception> migrateProjects(List<Project> projects, BiConsumer<String, String> reporter);
+    String getNamespace() throws IOException;
 
     void describeApplication(String project, String application) throws IOException;
 

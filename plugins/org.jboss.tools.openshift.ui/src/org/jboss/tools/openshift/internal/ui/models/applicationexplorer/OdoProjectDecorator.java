@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models.applicationexplorer;
 
-import io.fabric8.openshift.api.model.Project;
 import io.fabric8.servicecatalog.api.model.ServiceInstance;
 
 import org.apache.commons.io.FileUtils;
@@ -42,7 +41,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 
 public class OdoProjectDecorator implements Odo {
   private final Odo delegate;
@@ -54,13 +52,13 @@ public class OdoProjectDecorator implements Odo {
   }
 
   @Override
-  public List<io.fabric8.openshift.api.model.Project> getProjects() {
-    return delegate.getProjects();
+  public List<String> getNamespaces() throws IOException {
+    return delegate.getNamespaces();
   }
 
   @Override
-  public Project getProject() {
-    return delegate.getProject();
+  public String getNamespace() throws IOException {
+    return delegate.getNamespace();
   }
 
   @Override
@@ -350,17 +348,6 @@ public class OdoProjectDecorator implements Odo {
   @Override
   public DebugInfo debugInfo(String project, String application, String context, String component) throws IOException {
     return delegate.debugInfo(project, application, context, component);
-  }
-
-  @Override
-  public List<Project> getPreOdo10Projects() {
-    return delegate.getPreOdo10Projects();
-  }
-
-  @Override
-  public List<Exception> migrateProjects(List<Project> projects,
-      BiConsumer<String, String> reporter) {
-    return delegate.migrateProjects(projects, reporter);
   }
 
   @Override
