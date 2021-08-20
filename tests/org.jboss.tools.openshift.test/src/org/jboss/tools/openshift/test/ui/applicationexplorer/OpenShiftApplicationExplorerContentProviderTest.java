@@ -32,9 +32,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.openshift.api.model.Project;
-
 /**
  * @author jeff.cantrill
  */
@@ -59,13 +56,8 @@ public class OpenShiftApplicationExplorerContentProviderTest {
 		};
 	}
 
-  protected Project mockProject(String name) throws IOException {
-    Project project = mock(Project.class);
-    ObjectMeta meta = mock(ObjectMeta.class);
-    doReturn(name).when(meta).getName();
-    doReturn(meta).when(project).getMetadata();
-    doReturn(Collections.singletonList(project)).when(odo).getNamespaces();
-    return project;
+  protected void mockProject(String name) throws IOException {
+    doReturn(name).when(odo).getNamespace();
   }
 
   @Test
