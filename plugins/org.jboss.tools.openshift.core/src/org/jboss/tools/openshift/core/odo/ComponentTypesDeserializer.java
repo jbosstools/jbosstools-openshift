@@ -39,6 +39,10 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
   private static final String DEVFILE_DISPLAY_NAME_FIELD = "DisplayName";
 
   private static final String DEVFILE_DESCRIPTION_FIELD = "Description";
+  
+  private static final String DEVFILE_LANGUAGE_FIELD = "Language";
+  
+  private static final String DEVFILE_TAGS_FIELD = "Tags";
 
   public ComponentTypesDeserializer() {
     super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentType.class));
@@ -64,16 +68,25 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
     }
     return result;
   }
+  
+  private static String get(JsonNode node, String fieldName) {
+    return node.has(fieldName)?node.get(fieldName).asText():"";
+  }
 
   private List<ComponentType> parseDevfileItems(JsonNode items) {
     List<ComponentType> result = new ArrayList<>();
     if (items != null) {
       for (JsonNode item : items) {
-        String name = item.get(DEVFILE_NAME_FIELD).asText();
-        String displayName = item.get(DEVFILE_DISPLAY_NAME_FIELD).asText();
-        String description = item.get(DEVFILE_DESCRIPTION_FIELD).asText();
+        String name = get(item, DEVFILE_NAME_FIELD);
+        String displayName = get(item, DEVFILE_DISPLAY_NAME_FIELD);
+        String description = get(item, DEVFILE_DESCRIPTION_FIELD);
+        String language = get(item, DEVFILE_LANGUAGE_FIELD);
+        List<String> tags = new ArrayList<>();
+        if (item.has(DEVFILE_TAGS_FIELD)) {
+          item.get(DEVFILE_TAGS_FIELD).elements().forEachRemaining(node -> tags.add(node.asText()));
+        }
         DevfileRegistry registry = DevfileRegistriesDeserializer.getRegistry(item.get(DEVFILE_REGISTRY));
-        result.add(new DevfileComponentType(name, displayName, description, registry));
+        result.add(new DevfileComponentType(name, displayName, description, registry, language, tags));
       }
     }
     return result;

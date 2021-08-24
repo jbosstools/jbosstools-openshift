@@ -39,7 +39,7 @@ public class LinkComponentHandler extends ComponentHandler {
 	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
 			Odo odo = component.getRoot().getOdo();
-			String projectName = component.getParent().getParent().getWrapped().getMetadata().getName();
+			String projectName = component.getParent().getParent().getWrapped();
 			String applicationName = component.getParent().getWrapped().getName();
 			List<Component> targetComponents = odo.getComponents(projectName, applicationName).stream().filter(comp -> !comp.getName().equals(component.getWrapped().getName())).collect(Collectors.toList());
 			if (targetComponents.isEmpty()) {

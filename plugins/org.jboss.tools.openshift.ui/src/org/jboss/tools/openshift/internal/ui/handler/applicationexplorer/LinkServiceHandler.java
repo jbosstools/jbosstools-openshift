@@ -39,7 +39,7 @@ public class LinkServiceHandler extends ComponentHandler {
 	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
 			Odo odo = component.getRoot().getOdo();
-			String projectName = component.getParent().getParent().getWrapped().getMetadata().getName();
+			String projectName = component.getParent().getParent().getWrapped();
 			String applicationName = component.getParent().getWrapped().getName();
 			List<String> serviceNames = odo.getServices(projectName, applicationName).stream()
 			        .map(service -> KubernetesLabels.getComponentName(service)).collect(Collectors.toList());

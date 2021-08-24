@@ -25,7 +25,7 @@ public class PushHandler extends ComponentHandler {
 	@Override
 	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
-			component.getRoot().getOdo().push(component.getParent().getParent().getWrapped().getMetadata().getName(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
+			component.getRoot().getOdo().push(component.getParent().getParent().getWrapped(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
 			component.getWrapped().setState(ComponentState.PUSHED);
 			component.refresh();
 		} catch (IOException e) {

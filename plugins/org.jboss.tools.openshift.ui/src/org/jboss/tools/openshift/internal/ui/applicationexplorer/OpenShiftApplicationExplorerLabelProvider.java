@@ -60,7 +60,7 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
         return style("Error", "", limit);
       }
 		} else if (element instanceof ProjectElement) {
-			return style(((ProjectElement) element).getWrapped().getMetadata().getName(), "", limit);
+			return style(((ProjectElement) element).getWrapped(), "", limit);
 		} else if (element instanceof ApplicationElement) {
 			return style(((ApplicationElement) element).getWrapped().getName(), "", limit);
 		} else if (element instanceof ComponentElement) {

@@ -35,7 +35,7 @@ public class CreateStorageHandler extends ComponentHandler {
 	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
 		try {
 			Odo odo = component.getRoot().getOdo();
-			String projectName = component.getParent().getParent().getWrapped().getMetadata().getName();
+			String projectName = component.getParent().getParent().getWrapped();
 			String applicationName = component.getParent().getWrapped().getName();
 				final CreateStorageModel model = new CreateStorageModel(odo, projectName, applicationName,
 				        component.getWrapped().getName(), Storage.getSizes());

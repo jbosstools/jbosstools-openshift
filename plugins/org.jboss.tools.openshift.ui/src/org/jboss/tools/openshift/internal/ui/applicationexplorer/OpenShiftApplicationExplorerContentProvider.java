@@ -111,7 +111,10 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
   private Object[] getChildren(ApplicationExplorerUIModel parentElement) {
     List<Object> childs = new ArrayList<>();
     try {
-      parentElement.getOdo().getProjects().forEach(project -> childs.add(new ProjectElement(project, parentElement)));
+      String ns = parentElement.getOdo().getNamespace();
+      if (ns != null) {
+        childs.add(new ProjectElement(ns, parentElement));
+      }
     } catch (Exception e) {
       childs.add(new LoginMessageElement(parentElement));
     }
@@ -148,7 +151,7 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
   private Object[] getChildren(ProjectElement parentElement) {
     List<Object> childs = new ArrayList<>();
     try {
-      parentElement.getParent().getOdo().getApplications(parentElement.getWrapped().getMetadata().getName()).forEach(application -> childs.add(new ApplicationElement(application, parentElement)));
+      parentElement.getParent().getOdo().getApplications(parentElement.getWrapped()).forEach(application -> childs.add(new ApplicationElement(application, parentElement)));
     } catch (IOException e) {
       childs.add("Can't list applications");
     }
@@ -163,8 +166,8 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
     try {
       ProjectElement project = parentElement.getParent();
       ApplicationExplorerUIModel cluster = project.getParent();
-      cluster.getOdo().getComponents(project.getWrapped().getMetadata().getName(), parentElement.getWrapped().getName()).forEach(comp -> childs.add(new ComponentElement(comp,  parentElement)));
-      cluster.getOdo().getServices(project.getWrapped().getMetadata().getName(), parentElement.getWrapped().getName()).forEach(service -> childs.add(new ServiceElement(service, parentElement)));
+      cluster.getOdo().getComponents(project.getWrapped(), parentElement.getWrapped().getName()).forEach(comp -> childs.add(new ComponentElement(comp,  parentElement)));
+      cluster.getOdo().getServices(project.getWrapped(), parentElement.getWrapped().getName()).forEach(service -> childs.add(new ServiceElement(service, parentElement)));
     } catch (IOException|KubernetesClientException e) {
       if (childs.isEmpty()) {
         return new Object[] { "Can't list components" };
@@ -182,8 +185,8 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
       ApplicationElement application = parentElement.getParent();
       ProjectElement project = application.getParent();
       ApplicationExplorerUIModel cluster = project.getParent();
-      cluster.getOdo().getStorages(project.getWrapped().getMetadata().getName(), application.getWrapped().getName(), parentElement.getWrapped().getPath(), parentElement.getWrapped().getName()).forEach(storage -> childs.add(new StorageElement(storage, parentElement)));
-      cluster.getOdo().listURLs(project.getWrapped().getMetadata().getName(), application.getWrapped().getName(), parentElement.getWrapped().getPath(),  parentElement.getWrapped().getName()).forEach(url -> childs.add(new URLElement(url, parentElement)));
+      cluster.getOdo().getStorages(project.getWrapped(), application.getWrapped().getName(), parentElement.getWrapped().getPath(), parentElement.getWrapped().getName()).forEach(storage -> childs.add(new StorageElement(storage, parentElement)));
+      cluster.getOdo().listURLs(project.getWrapped(), application.getWrapped().getName(), parentElement.getWrapped().getPath(),  parentElement.getWrapped().getName()).forEach(url -> childs.add(new URLElement(url, parentElement)));
       return childs.toArray();
     } catch (IOException e) {
       return new Object[] { "Can't list storages or urls" };

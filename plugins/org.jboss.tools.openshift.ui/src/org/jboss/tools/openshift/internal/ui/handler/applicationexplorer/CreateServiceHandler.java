@@ -55,7 +55,7 @@ public class CreateServiceHandler extends AbstractHandler {
 				List<ServiceTemplate> templates = odo.getServiceTemplates();
 				if (!templates.isEmpty()) {
 					final IWizard createServiceWizard = new CreateServiceWizard(templates,
-							project.getWrapped().getMetadata().getName(),
+							project.getWrapped(),
 							application == null ? "" : application.getWrapped().getName(), odo);
 					WizardUtils.openWizardDialog(createServiceWizard, HandlerUtil.getActiveShell(event));
 				}

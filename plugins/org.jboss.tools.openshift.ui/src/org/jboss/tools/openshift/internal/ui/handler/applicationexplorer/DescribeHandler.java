@@ -60,12 +60,12 @@ public class DescribeHandler extends OdoHandler {
 	private void execute(Odo odo, ComponentElement component, ServiceElement service, ApplicationElement application) {
 		try {
 			if (component != null) {
-				odo.describeComponent(component.getParent().getParent().getWrapped().getMetadata().getName(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
+				odo.describeComponent(component.getParent().getParent().getWrapped(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
 			} else if (service != null) {
-				String template = odo.getServiceTemplate(service.getParent().getParent().getWrapped().getMetadata().getName(), service.getParent().getWrapped().getName(), service.getWrapped().getMetadata().getName());
+				String template = odo.getServiceTemplate(service.getParent().getParent().getWrapped(), service.getParent().getWrapped().getName(), service.getWrapped().getMetadata().getName());
 				odo.describeServiceTemplate(template);
 			} else {
-				odo.describeApplication(application.getParent().getWrapped().getMetadata().getName(), application.getWrapped().getName());
+				odo.describeApplication(application.getParent().getWrapped(), application.getWrapped().getName());
 			}
 		} catch (IOException e) {
 			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(),
