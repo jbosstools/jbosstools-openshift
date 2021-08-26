@@ -1,0 +1,1495 @@
+{
+  "kind": "List",
+  "apiVersion": "odo.dev/v1alpha1",
+  "metadata": {
+    "creationTimestamp": null
+  },
+  "services": {
+    "metadata": {},
+    "items": []
+  },
+  "operators": {
+    "metadata": {
+      "selfLink": "/apis/operators.coreos.com/v1alpha1/namespaces/demo/clusterserviceversions",
+      "resourceVersion": "248017"
+    },
+    "items": [
+      {
+        "kind": "ClusterServiceVersion",
+        "apiVersion": "operators.coreos.com/v1alpha1",
+        "metadata": {
+          "name": "strimzi-cluster-operator.v0.25.0",
+          "namespace": "demo",
+          "selfLink": "/apis/operators.coreos.com/v1alpha1/namespaces/demo/clusterserviceversions/strimzi-cluster-operator.v0.25.0",
+          "uid": "119902b8-61eb-4ca1-826a-337af1b78665",
+          "resourceVersion": "238423",
+          "generation": 1,
+          "creationTimestamp": "2021-08-11T16:03:27Z",
+          "labels": {
+            "olm.api.27140c72c390e717": "provided",
+            "olm.api.55485a8243562f77": "provided",
+            "olm.api.639af9e39bd31f95": "provided",
+            "olm.api.8223102f44696cc4": "provided",
+            "olm.api.8d0210e903c5ed79": "provided",
+            "olm.api.cf92f3958f182733": "provided",
+            "olm.api.e46f5f2db6650938": "provided",
+            "olm.api.ef7122acb77bae9b": "provided",
+            "olm.api.f01b87990a7cafcb": "provided",
+            "olm.copiedFrom": "openshift-operators"
+          },
+          "annotations": {
+            "alm-examples": "[\n  {\n    \"apiVersion\":\"kafka.strimzi.io/v1beta2\",\n    \"kind\":\"Kafka\",\n    \"metadata\":{\n      \"name\":\"my-cluster\"\n    },\n    \"spec\":{\n      \"kafka\":{\n          \"version\":\"2.8.0\",\n          \"replicas\":3,\n          \"listeners\": [\n            {\n              \"name\": \"plain\",\n              \"port\": 9092,\n              \"type\": \"internal\",\n              \"tls\": false\n            },\n            {\n              \"name\": \"tls\",\n              \"port\": 9093,\n              \"type\": \"internal\",\n              \"tls\": true\n            }\n          ],\n          \"config\":{\n            \"offsets.topic.replication.factor\":3,\n            \"transaction.state.log.replication.factor\":3,\n            \"transaction.state.log.min.isr\":2,\n            \"log.message.format.version\":\"2.8\",\n            \"inter.broker.protocol.version\":\"2.8\"\n          },\n          \"storage\":{\n            \"type\":\"ephemeral\"\n          }\n      },\n      \"zookeeper\":{\n          \"replicas\":3,\n          \"storage\":{\n            \"type\":\"ephemeral\"\n          }\n      },\n      \"entityOperator\":{\n          \"topicOperator\":{\n            },\n          \"userOperator\":{\n            }\n      }\n    }\n  },\n  {\n    \"apiVersion\":\"kafka.strimzi.io/v1beta2\",\n    \"kind\":\"KafkaConnect\",\n    \"metadata\":{\n      \"name\":\"my-connect-cluster\"\n    },\n    \"spec\":{\n      \"version\":\"2.8.0\",\n      \"replicas\":1,\n      \"bootstrapServers\":\"my-cluster-kafka-bootstrap:9093\",\n      \"tls\":{\n          \"trustedCertificates\":[\n            {\n                \"secretName\":\"my-cluster-cluster-ca-cert\",\n                \"certificate\":\"ca.crt\"\n            }\n          ]\n      },\n      \"config\": {\n          \"group.id\": \"connect-cluster\",\n          \"offset.storage.topic\": \"connect-cluster-offsets\",\n          \"config.storage.topic\": \"connect-cluster-configs\",\n          \"status.storage.topic\": \"connect-cluster-status\",\n          \"config.storage.replication.factor\": -1,\n          \"offset.storage.replication.factor\": -1,\n          \"status.storage.replication.factor\": -1\n      }\n    }\n  },\n  {\n    \"apiVersion\":\"kafka.strimzi.io/v1beta2\",\n    \"kind\":\"KafkaMirrorMaker\",\n    \"metadata\":{\n      \"name\":\"my-mirror-maker\"\n    },\n    \"spec\":{\n      \"version\":\"2.8.0\",\n      \"replicas\":1,\n      \"consumer\":{\n          \"bootstrapServers\":\"my-source-cluster-kafka-bootstrap:9092\",\n          \"groupId\":\"my-source-group-id\"\n      },\n      \"producer\":{\n          \"bootstrapServers\":\"my-target-cluster-kafka-bootstrap:9092\"\n      },\n      \"include\":\".*\"\n    }\n  },\n  {\n    \"apiVersion\":\"kafka.strimzi.io/v1beta2\",\n    \"kind\":\"KafkaBridge\",\n    \"metadata\":{\n      \"name\":\"my-bridge\"\n    },\n    \"spec\":{\n      \"replicas\":1,\n      \"bootstrapServers\":\"my-cluster-kafka-bootstrap:9092\",\n      \"http\":{\n          \"port\":8080\n      }\n    }\n  },\n  {\n    \"apiVersion\":\"kafka.strimzi.io/v1beta2\",\n    \"kind\":\"KafkaTopic\",\n    \"metadata\":{\n      \"name\":\"my-topic\",\n      \"labels\":{\n          \"strimzi.io/cluster\":\"my-cluster\"\n      }\n    },\n    \"spec\":{\n      \"partitions\":10,\n      \"replicas\":3,\n      \"config\":{\n          \"retention.ms\":604800000,\n          \"segment.bytes\":1073741824\n      }\n    }\n  },\n  {\n    \"apiVersion\":\"kafka.strimzi.io/v1beta2\",\n    \"kind\":\"KafkaUser\",\n    \"metadata\":{\n      \"name\":\"my-user\",\n      \"labels\":{\n          \"strimzi.io/cluster\":\"my-cluster\"\n      }\n    },\n    \"spec\":{\n      \"authentication\":{\n          \"type\":\"tls\"\n      },\n      \"authorization\":{\n          \"type\":\"simple\",\n          \"acls\":[\n            {\n                \"resource\":{\n                  \"type\":\"topic\",\n                  \"name\":\"my-topic\",\n                  \"patternType\":\"literal\"\n                },\n                \"operation\":\"Read\",\n                \"host\":\"*\"\n            },\n            {\n                \"resource\":{\n                  \"type\":\"topic\",\n                  \"name\":\"my-topic\",\n                  \"patternType\":\"literal\"\n                },\n                \"operation\":\"Describe\",\n                \"host\":\"*\"\n            },\n            {\n                \"resource\":{\n                  \"type\":\"group\",\n                  \"name\":\"my-group\",\n                  \"patternType\":\"literal\"\n                },\n                \"operation\":\"Read\",\n                \"host\":\"*\"\n            },\n            {\n                \"resource\":{\n                  \"type\":\"topic\",\n                  \"name\":\"my-topic\",\n                  \"patternType\":\"literal\"\n                },\n                \"operation\":\"Write\",\n                \"host\":\"*\"\n            },\n            {\n                \"resource\":{\n                  \"type\":\"topic\",\n                  \"name\":\"my-topic\",\n                  \"patternType\":\"literal\"\n                },\n                \"operation\":\"Create\",\n                \"host\":\"*\"\n            },\n            {\n                \"resource\":{\n                  \"type\":\"topic\",\n                  \"name\":\"my-topic\",\n                  \"patternType\":\"literal\"\n                },\n                \"operation\":\"Describe\",\n                \"host\":\"*\"\n            }\n          ]\n      }\n    }\n  },\n  {\n    \"apiVersion\": \"kafka.strimzi.io/v1beta2\",\n    \"kind\": \"KafkaConnector\",\n    \"metadata\": {\n      \"name\": \"my-source-connector\",\n      \"labels\": {\n        \"strimzi.io/cluster\": \"my-connect-cluster\"\n      }\n    },\n    \"spec\": {\n      \"class\": \"org.apache.kafka.connect.file.FileStreamSourceConnector\",\n      \"tasksMax\": 1,\n      \"config\": {\n        \"file\": \"/opt/kafka/LICENSE\",\n        \"topic\": \"my-topic\"\n      }\n    }\n  },\n  {\n    \"apiVersion\": \"kafka.strimzi.io/v1beta2\",\n    \"kind\": \"KafkaMirrorMaker2\",\n    \"metadata\": {\n      \"name\": \"my-mm2-cluster\"\n    },\n    \"spec\": {\n      \"version\":\"2.8.0\",\n      \"replicas\": 1,\n      \"connectCluster\": \"my-cluster-target\",\n      \"clusters\": [\n        {\n          \"alias\": \"my-cluster-source\",\n          \"bootstrapServers\": \"my-cluster-source-kafka-bootstrap:9092\"\n        },\n        {\n          \"alias\": \"my-cluster-target\",\n          \"bootstrapServers\": \"my-cluster-target-kafka-bootstrap:9092\",\n          \"config\": {\n            \"config.storage.replication.factor\": -1,\n            \"offset.storage.replication.factor\": -1,\n            \"status.storage.replication.factor\": -1\n          }\n        }\n      ],\n      \"mirrors\": [\n        {\n          \"sourceCluster\": \"my-cluster-source\",\n          \"targetCluster\": \"my-cluster-target\",\n          \"sourceConnector\": {\n            \"config\": {\n              \"replication.factor\": 1,\n              \"offset-syncs.topic.replication.factor\": 1,\n              \"sync.topic.acls.enabled\": \"false\"\n            }\n          },\n          \"heartbeatConnector\": {\n            \"config\": {\n              \"heartbeats.topic.replication.factor\": 1\n            }\n          },\n          \"checkpointConnector\": {\n            \"config\": {\n              \"checkpoints.topic.replication.factor\": 1\n            }\n          },\n          \"topicsPattern\": \".*\",\n          \"groupsPattern\": \".*\"\n        }\n      ]\n    }\n  },\n  {\n    \"apiVersion\": \"kafka.strimzi.io/v1beta2\",\n    \"kind\": \"KafkaRebalance\",\n    \"metadata\": {\n      \"name\": \"my-rebalance\",\n      \"labels\": {\n        \"strimzi.io/cluster\": \"my-cluster\"\n      }\n    },\n    \"spec\": {\n      \"goals\": [\n        \"CpuCapacityGoal\",\n        \"NetworkInboundCapacityGoal\",\n        \"DiskCapacityGoal\",\n        \"RackAwareGoal\",\n        \"MinTopicLeadersPerBrokerGoal\",\n        \"NetworkOutboundCapacityGoal\",\n        \"ReplicaCapacityGoal\"\n      ]\n    }\n  }\n]",
+            "alm-examples-metadata": "{\n  \"my-cluster\": {\n    \"description\": \"Example Kafka cluster with Ephemeral storage\"\n  },\n  \"my-connect-cluster\": {\n    \"description\": \"Example Kafka Connect cluster\"\n  },\n  \"my-connect-cluster\": {\n    \"description\": \"Example Kafka Connect cluster with S2I support\"\n  },\n  \"my-mirror-maker\": {\n    \"description\": \"Example Kafka Mirror Maker 1 deployment\"\n  },\n  \"my-mm2-cluster\": {\n    \"description\": \"Example Kafka Mirror Maker 2 deployment\"\n  },\n  \"my-bridge\": {\n    \"description\": \"Example Strimzi Kafka HTTP Bridge deployment\"\n  },\n  \"my-topic\": {\n    \"description\": \"Example KafkaTopic custom resource\"\n  },\n  \"my-user\": {\n    \"description\": \"Example KafkaUser custom resource\"\n  },\n  \"my-source-connector\": {\n    \"description\": \"Example Kafka Connect source connector\"\n  },\n  \"my-rebalance\": {\n    \"description\": \"Example Cruise Control rebalance request\"\n  }\n}",
+            "capabilities": "Deep Insights",
+            "categories": "Streaming \u0026 Messaging",
+            "certified": "false",
+            "containerImage": "quay.io/strimzi/operator@sha256:afaf1dd1f2f696ae80674d74159661ea239ae609f78a73a1423c7a17a39e5044",
+            "createdAt": "2021-06-24 13:13:13",
+            "description": "Strimzi provides a way to run an Apache Kafka cluster on Kubernetes or OpenShift in various deployment configurations.",
+            "olm.operatorGroup": "global-operators",
+            "olm.operatorNamespace": "openshift-operators",
+            "operatorframework.io/properties": "{\"properties\":[{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"KafkaMirrorMaker\",\"version\":\"v1beta2\"}},{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"KafkaTopic\",\"version\":\"v1alpha1\"}},{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"KafkaUser\",\"version\":\"v1beta2\"}},{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"KafkaConnect\",\"version\":\"v1beta2\"}},{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"KafkaUser\",\"version\":\"v1beta1\"}},{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"KafkaUser\",\"version\":\"v1alpha1\"}},{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"KafkaBridge\",\"version\":\"v1beta2\"}},{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"KafkaConnector\",\"version\":\"v1beta2\"}},{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"KafkaRebalance\",\"version\":\"v1beta2\"}},{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"KafkaTopic\",\"version\":\"v1beta2\"}},{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"Kafka\",\"version\":\"v1beta2\"}},{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"KafkaMirrorMaker2\",\"version\":\"v1beta2\"}},{\"type\":\"olm.gvk\",\"value\":{\"group\":\"kafka.strimzi.io\",\"kind\":\"KafkaTopic\",\"version\":\"v1beta1\"}},{\"type\":\"olm.package\",\"value\":{\"packageName\":\"strimzi-kafka-operator\",\"version\":\"0.25.0\"}}]}",
+            "operators.openshift.io/infrastructure-features": "[\"Disconnected\", \"Proxy\"]",
+            "repository": "https://github.com/strimzi/strimzi-kafka-operator",
+            "support": "Strimzi"
+          },
+          "managedFields": [
+            {
+              "manager": "olm",
+              "operation": "Update",
+              "apiVersion": "operators.coreos.com/v1alpha1",
+              "time": "2021-08-11T16:03:36Z",
+              "fieldsType": "FieldsV1",
+              "fieldsV1": {
+                "f:metadata": {
+                  "f:annotations": {
+                    ".": {},
+                    "f:alm-examples": {},
+                    "f:alm-examples-metadata": {},
+                    "f:capabilities": {},
+                    "f:categories": {},
+                    "f:certified": {},
+                    "f:containerImage": {},
+                    "f:createdAt": {},
+                    "f:description": {},
+                    "f:olm.operatorGroup": {},
+                    "f:olm.operatorNamespace": {},
+                    "f:olm.targetNamespaces": {},
+                    "f:operatorframework.io/properties": {},
+                    "f:operators.openshift.io/infrastructure-features": {},
+                    "f:repository": {},
+                    "f:support": {}
+                  },
+                  "f:labels": {
+                    ".": {},
+                    "f:olm.api.27140c72c390e717": {},
+                    "f:olm.api.55485a8243562f77": {},
+                    "f:olm.api.639af9e39bd31f95": {},
+                    "f:olm.api.8223102f44696cc4": {},
+                    "f:olm.api.8d0210e903c5ed79": {},
+                    "f:olm.api.cf92f3958f182733": {},
+                    "f:olm.api.e46f5f2db6650938": {},
+                    "f:olm.api.ef7122acb77bae9b": {},
+                    "f:olm.api.f01b87990a7cafcb": {},
+                    "f:olm.copiedFrom": {}
+                  }
+                },
+                "f:spec": {
+                  ".": {},
+                  "f:apiservicedefinitions": {},
+                  "f:customresourcedefinitions": {
+                    ".": {},
+                    "f:owned": {}
+                  },
+                  "f:description": {},
+                  "f:displayName": {},
+                  "f:icon": {},
+                  "f:install": {
+                    ".": {},
+                    "f:spec": {
+                      ".": {},
+                      "f:clusterPermissions": {},
+                      "f:deployments": {},
+                      "f:permissions": {}
+                    },
+                    "f:strategy": {}
+                  },
+                  "f:installModes": {},
+                  "f:keywords": {},
+                  "f:labels": {
+                    ".": {},
+                    "f:name": {}
+                  },
+                  "f:links": {},
+                  "f:maintainers": {},
+                  "f:maturity": {},
+                  "f:minKubeVersion": {},
+                  "f:provider": {
+                    ".": {},
+                    "f:name": {}
+                  },
+                  "f:replaces": {},
+                  "f:selector": {
+                    ".": {},
+                    "f:matchLabels": {
+                      ".": {},
+                      "f:name": {}
+                    }
+                  },
+                  "f:version": {}
+                },
+                "f:status": {
+                  ".": {},
+                  "f:conditions": {},
+                  "f:lastTransitionTime": {},
+                  "f:lastUpdateTime": {},
+                  "f:message": {},
+                  "f:phase": {},
+                  "f:reason": {},
+                  "f:requirementStatus": {}
+                }
+              }
+            }
+          ]
+        },
+        "spec": {
+          "install": {
+            "strategy": "deployment",
+            "spec": {
+              "deployments": [
+                {
+                  "name": "strimzi-cluster-operator-v0.25.0",
+                  "spec": {
+                    "replicas": 1,
+                    "selector": {
+                      "matchLabels": {
+                        "name": "strimzi-cluster-operator",
+                        "strimzi.io/kind": "cluster-operator"
+                      }
+                    },
+                    "template": {
+                      "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                          "name": "strimzi-cluster-operator",
+                          "strimzi.io/kind": "cluster-operator"
+                        }
+                      },
+                      "spec": {
+                        "volumes": [
+                          {
+                            "name": "strimzi-tmp",
+                            "emptyDir": {
+                              "medium": "Memory"
+                            }
+                          },
+                          {
+                            "name": "co-config-volume",
+                            "configMap": {
+                              "name": "strimzi-cluster-operator"
+                            }
+                          }
+                        ],
+                        "containers": [
+                          {
+                            "name": "strimzi-cluster-operator",
+                            "image": "quay.io/strimzi/operator@sha256:afaf1dd1f2f696ae80674d74159661ea239ae609f78a73a1423c7a17a39e5044",
+                            "args": [
+                              "/opt/strimzi/bin/cluster_operator_run.sh"
+                            ],
+                            "ports": [
+                              {
+                                "name": "http",
+                                "containerPort": 8080,
+                                "protocol": "TCP"
+                              }
+                            ],
+                            "env": [
+                              {
+                                "name": "STRIMZI_NAMESPACE",
+                                "valueFrom": {
+                                  "fieldRef": {
+                                    "fieldPath": "metadata.annotations['olm.targetNamespaces']"
+                                  }
+                                }
+                              },
+                              {
+                                "name": "STRIMZI_FULL_RECONCILIATION_INTERVAL_MS",
+                                "value": "120000"
+                              },
+                              {
+                                "name": "STRIMZI_OPERATION_TIMEOUT_MS",
+                                "value": "300000"
+                              },
+                              {
+                                "name": "STRIMZI_DEFAULT_TLS_SIDECAR_ENTITY_OPERATOR_IMAGE",
+                                "value": "quay.io/strimzi/kafka@sha256:56a33815f7d50a97ea9bb4cce1e3a6d04d918b841b5aa285f16b792d8930059e"
+                              },
+                              {
+                                "name": "STRIMZI_DEFAULT_KAFKA_EXPORTER_IMAGE",
+                                "value": "quay.io/strimzi/kafka@sha256:56a33815f7d50a97ea9bb4cce1e3a6d04d918b841b5aa285f16b792d8930059e"
+                              },
+                              {
+                                "name": "STRIMZI_DEFAULT_CRUISE_CONTROL_IMAGE",
+                                "value": "quay.io/strimzi/kafka@sha256:56a33815f7d50a97ea9bb4cce1e3a6d04d918b841b5aa285f16b792d8930059e"
+                              },
+                              {
+                                "name": "STRIMZI_DEFAULT_TLS_SIDECAR_CRUISE_CONTROL_IMAGE",
+                                "value": "quay.io/strimzi/kafka@sha256:56a33815f7d50a97ea9bb4cce1e3a6d04d918b841b5aa285f16b792d8930059e"
+                              },
+                              {
+                                "name": "STRIMZI_KAFKA_IMAGES",
+                                "value": "2.7.0=quay.io/strimzi/kafka@sha256:d8991608ec71f17e850c33714ee02ca87ba94bc0f077be62ad1ed127ca244823\n2.7.1=quay.io/strimzi/kafka@sha256:ee17eb3611019b0cfa5e9e196610edc1dbd7084471fb20990f055c89da8eef45\n2.8.0=quay.io/strimzi/kafka@sha256:56a33815f7d50a97ea9bb4cce1e3a6d04d918b841b5aa285f16b792d8930059e\n"
+                              },
+                              {
+                                "name": "STRIMZI_KAFKA_CONNECT_IMAGES",
+                                "value": "2.7.0=quay.io/strimzi/kafka@sha256:d8991608ec71f17e850c33714ee02ca87ba94bc0f077be62ad1ed127ca244823\n2.7.1=quay.io/strimzi/kafka@sha256:ee17eb3611019b0cfa5e9e196610edc1dbd7084471fb20990f055c89da8eef45\n2.8.0=quay.io/strimzi/kafka@sha256:56a33815f7d50a97ea9bb4cce1e3a6d04d918b841b5aa285f16b792d8930059e\n"
+                              },
+                              {
+                                "name": "STRIMZI_KAFKA_MIRROR_MAKER_IMAGES",
+                                "value": "2.7.0=quay.io/strimzi/kafka@sha256:d8991608ec71f17e850c33714ee02ca87ba94bc0f077be62ad1ed127ca244823\n2.7.1=quay.io/strimzi/kafka@sha256:ee17eb3611019b0cfa5e9e196610edc1dbd7084471fb20990f055c89da8eef45\n2.8.0=quay.io/strimzi/kafka@sha256:56a33815f7d50a97ea9bb4cce1e3a6d04d918b841b5aa285f16b792d8930059e\n"
+                              },
+                              {
+                                "name": "STRIMZI_KAFKA_MIRROR_MAKER_2_IMAGES",
+                                "value": "2.7.0=quay.io/strimzi/kafka@sha256:d8991608ec71f17e850c33714ee02ca87ba94bc0f077be62ad1ed127ca244823\n2.7.1=quay.io/strimzi/kafka@sha256:ee17eb3611019b0cfa5e9e196610edc1dbd7084471fb20990f055c89da8eef45\n2.8.0=quay.io/strimzi/kafka@sha256:56a33815f7d50a97ea9bb4cce1e3a6d04d918b841b5aa285f16b792d8930059e\n"
+                              },
+                              {
+                                "name": "STRIMZI_DEFAULT_TOPIC_OPERATOR_IMAGE",
+                                "value": "quay.io/strimzi/operator@sha256:afaf1dd1f2f696ae80674d74159661ea239ae609f78a73a1423c7a17a39e5044"
+                              },
+                              {
+                                "name": "STRIMZI_DEFAULT_USER_OPERATOR_IMAGE",
+                                "value": "quay.io/strimzi/operator@sha256:afaf1dd1f2f696ae80674d74159661ea239ae609f78a73a1423c7a17a39e5044"
+                              },
+                              {
+                                "name": "STRIMZI_DEFAULT_KAFKA_INIT_IMAGE",
+                                "value": "quay.io/strimzi/operator@sha256:afaf1dd1f2f696ae80674d74159661ea239ae609f78a73a1423c7a17a39e5044"
+                              },
+                              {
+                                "name": "STRIMZI_DEFAULT_KAFKA_BRIDGE_IMAGE",
+                                "value": "quay.io/strimzi/kafka-bridge@sha256:a005e20d7fbe04d6f587f2093e21a00556ec62b850df757b9f7d9d57e3141c40"
+                              },
+                              {
+                                "name": "STRIMZI_DEFAULT_JMXTRANS_IMAGE",
+                                "value": "quay.io/strimzi/jmxtrans@sha256:af5eb8459ac9a0acbca51e67c6e0217f62ba404cba9f2251968c927dcef75252"
+                              },
+                              {
+                                "name": "STRIMZI_DEFAULT_KANIKO_EXECUTOR_IMAGE",
+                                "value": "quay.io/strimzi/kaniko-executor@sha256:b0ca0b4fb16822e55ea1250c54c73c7c4248282908065422ededa49fa400436a"
+                              },
+                              {
+                                "name": "STRIMZI_OPERATOR_NAMESPACE",
+                                "valueFrom": {
+                                  "fieldRef": {
+                                    "fieldPath": "metadata.namespace"
+                                  }
+                                }
+                              },
+                              {
+                                "name": "STRIMZI_FEATURE_GATES"
+                              }
+                            ],
+                            "resources": {},
+                            "volumeMounts": [
+                              {
+                                "name": "strimzi-tmp",
+                                "mountPath": "/tmp"
+                              },
+                              {
+                                "name": "co-config-volume",
+                                "mountPath": "/opt/strimzi/custom-config/"
+                              }
+                            ],
+                            "livenessProbe": {
+                              "httpGet": {
+                                "path": "/healthy",
+                                "port": "http"
+                              },
+                              "initialDelaySeconds": 10,
+                              "periodSeconds": 30
+                            },
+                            "readinessProbe": {
+                              "httpGet": {
+                                "path": "/ready",
+                                "port": "http"
+                              },
+                              "initialDelaySeconds": 10,
+                              "periodSeconds": 30
+                            }
+                          }
+                        ],
+                        "serviceAccountName": "strimzi-cluster-operator"
+                      }
+                    },
+                    "strategy": {
+                      "type": "Recreate"
+                    }
+                  }
+                }
+              ],
+              "permissions": [
+                {
+                  "serviceAccountName": "strimzi-cluster-operator",
+                  "rules": [
+                    {
+                      "verbs": [
+                        "get",
+                        "list",
+                        "watch",
+                        "create",
+                        "delete",
+                        "patch",
+                        "update"
+                      ],
+                      "apiGroups": [
+                        "rbac.authorization.k8s.io"
+                      ],
+                      "resources": [
+                        "rolebindings"
+                      ]
+                    },
+                    {
+                      "verbs": [
+                        "get",
+                        "list",
+                        "watch",
+                        "create",
+                        "delete",
+                        "patch",
+                        "update"
+                      ],
+                      "apiGroups": [
+                        "rbac.authorization.k8s.io"
+                      ],
+                      "resources": [
+                        "roles"
+                      ]
+                    },
+                    {
+                      "verbs": [
+                        "get",
+                        "list",
+                        "watch",
+                        "create",
+                        "delete",
+                        "patch",
+                        "update"
+                      ],
+                      "apiGroups": [
+                        ""
+                      ],
+                      "resources": [
+                        "pods",
+                        "serviceaccounts",
+                        "configmaps",
+                        "services",
+                        "endpoints",
+                        "secrets",
+                        "persistentvolumeclaims"
+                      ]
+                    },
+                    {
+                      "verbs": [
+                        "get",
+                        "list",
+                        "watch",
+                        "create",
+                        "delete",
+                        "patch",
+                        "update"
+                      ],
+                      "apiGroups": [
+                        "kafka.strimzi.io"
+                      ],
+                      "resources": [
+                        "kafkas",
+                        "kafkas/status",
+                        "kafkaconnects",
+                        "kafkaconnects/status",
+                        "kafkaconnectors",
+                        "kafkaconnectors/status",
+                        "kafkamirrormakers",
+                        "kafkamirrormakers/status",
+                        "kafkabridges",
+                        "kafkabridges/status",
+                        "kafkamirrormaker2s",
+                        "kafkamirrormaker2s/status",
+                        "kafkarebalances",
+                        "kafkarebalances/status",
+                        "kafkatopics",
+                        "kafkatopics/status",
+                        "kafkausers",
+                        "kafkausers/status"
+                      ]
+                    },
+                    {
+                      "verbs": [
+                        "get",
+                        "list",
+                        "watch",
+                        "create",
+                        "delete",
+                        "patch",
+                        "update"
+                      ],
+                      "apiGroups": [
+                        "extensions"
+                      ],
+                      "resources": [
+                        "deployments",
+                        "deployments/scale",
+                        "replicasets",
+                        "replicationcontrollers",
+                        "networkpolicies",
+                        "ingresses"
+                      ]
+                    },
+                    {
+                      "verbs": [
+                        "get",
+                        "list",
+                        "watch",
+                        "create",
+                        "delete",
+                        "patch",
+                        "update"
+                      ],
+                      "apiGroups": [
+                        "apps"
+                      ],
+                      "resources": [
+                        "deployments",
+                        "deployments/scale",
+                        "deployments/status",
+                        "statefulsets",
+                        "replicasets"
+                      ]
+                    },
+                    {
+                      "verbs": [
+                        "create"
+                      ],
+                      "apiGroups": [
+                        ""
+                      ],
+                      "resources": [
+                        "events"
+                      ]
+                    },
+                    {
+                      "verbs": [
+                        "get",
+                        "list",
+                        "watch",
+                        "create",
+                        "delete",
+                        "patch",
+                        "update"
+                      ],
+                      "apiGroups": [
+                        "build.openshift.io"
+                      ],
+                      "resources": [
+                        "buildconfigs",
+                        "buildconfigs/instantiate",
+                        "builds"
+                      ]
+                    },
+                    {
+                      "verbs": [
+                        "get",
+                        "list",
+                        "watch",
+                        "create",
+                        "delete",
+                        "patch",
+                        "update"
+                      ],
+                      "apiGroups": [
+                        "networking.k8s.io"
+                      ],
+                      "resources": [
+                        "networkpolicies",
+                        "ingresses"
+                      ]
+                    },
+                    {
+                      "verbs": [
+                        "get",
+                        "list",
+                        "watch",
+                        "create",
+                        "delete",
+                        "patch",
+                        "update"
+                      ],
+                      "apiGroups": [
+                        "route.openshift.io"
+                      ],
+                      "resources": [
+                        "routes",
+                        "routes/custom-host"
+                      ]
+                    },
+                    {
+                      "verbs": [
+                        "get",
+                        "list",
+                        "watch",
+                        "create",
+                        "delete",
+                        "patch",
+                        "update"
+                      ],
+                      "apiGroups": [
+                        "policy"
+                      ],
+                      "resources": [
+                        "poddisruptionbudgets"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "clusterPermissions": [
+                {
+                  "serviceAccountName": "strimzi-cluster-operator",
+                  "rules": [
+                    {
+                      "verbs": [
+                        "get",
+                        "list",
+                        "watch",
+                        "create",
+                        "delete",
+                        "patch",
+                        "update"
+                      ],
+                      "apiGroups": [
+                        "rbac.authorization.k8s.io"
+                      ],
+                      "resources": [
+                        "clusterrolebindings"
+                      ]
+                    },
+                    {
+                      "verbs": [
+                        "get"
+                      ],
+                      "apiGroups": [
+                        "storage.k8s.io"
+                      ],
+                      "resources": [
+                        "storageclasses"
+                      ]
+                    },
+                    {
+                      "verbs": [
+                        "get",
+                        "list"
+                      ],
+                      "apiGroups": [
+                        ""
+                      ],
+                      "resources": [
+                        "nodes"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "version": "0.25.0",
+          "maturity": "stable",
+          "customresourcedefinitions": {
+            "owned": [
+              {
+                "name": "kafkas.kafka.strimzi.io",
+                "version": "v1beta2",
+                "kind": "Kafka",
+                "displayName": "Kafka",
+                "description": "Represents a Kafka cluster",
+                "resources": [
+                  {
+                    "name": "",
+                    "kind": "Route",
+                    "version": "route.openshift.io/v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "Service",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "StatefulSet",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "Deployment",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ReplicaSet",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "Pod",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "Secret",
+                    "version": "v1"
+                  }
+                ],
+                "statusDescriptors": [
+                  {
+                    "path": "conditions",
+                    "displayName": "Conditions",
+                    "description": "Kafka cluster conditions",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:io.kubernetes.conditions"
+                    ]
+                  }
+                ],
+                "specDescriptors": [
+                  {
+                    "path": "kafka.version",
+                    "displayName": "Version",
+                    "description": "Kafka version",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  },
+                  {
+                    "path": "kafka.replicas",
+                    "displayName": "Kafka Brokers",
+                    "description": "The desired number of Kafka brokers.",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:podCount"
+                    ]
+                  },
+                  {
+                    "path": "kafka.storage.type",
+                    "displayName": "Kafka storage",
+                    "description": "The type of storage used by Kafka brokers",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:select:ephemeral",
+                      "urn:alm:descriptor:com.tectonic.ui:select:persistent-claim",
+                      "urn:alm:descriptor:com.tectonic.ui:select:jbod"
+                    ]
+                  },
+                  {
+                    "path": "kafka.resources",
+                    "displayName": "Kafka Resource Requirements",
+                    "description": "Limits describes the minimum/maximum amount of compute resources required/allowed",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:resourceRequirements"
+                    ]
+                  },
+                  {
+                    "path": "zookeeper.replicas",
+                    "displayName": "Zookeeper Nodes",
+                    "description": "The desired number of Zookeeper nodes.",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:podCount"
+                    ]
+                  },
+                  {
+                    "path": "zookeeper.storage.type",
+                    "displayName": "Zookeeper storage",
+                    "description": "The type of storage used by Zookeeper nodes",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:select:ephemeral",
+                      "urn:alm:descriptor:com.tectonic.ui:select:persistent-claim",
+                      "urn:alm:descriptor:com.tectonic.ui:select:jbod"
+                    ]
+                  },
+                  {
+                    "path": "zookeeper.resources",
+                    "displayName": "Zookeeper Resource Requirements",
+                    "description": "Limits describes the minimum/maximum amount of compute resources required/allowed",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:resourceRequirements"
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "kafkaconnects.kafka.strimzi.io",
+                "version": "v1beta2",
+                "kind": "KafkaConnect",
+                "displayName": "Kafka Connect",
+                "description": "Represents a Kafka Connect cluster",
+                "resources": [
+                  {
+                    "name": "",
+                    "kind": "Service",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "Deployment",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ReplicaSet",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "Pod",
+                    "version": "v1"
+                  }
+                ],
+                "statusDescriptors": [
+                  {
+                    "path": "conditions",
+                    "displayName": "Conditions",
+                    "description": "Kafka Connect conditions",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:io.kubernetes.conditions"
+                    ]
+                  }
+                ],
+                "specDescriptors": [
+                  {
+                    "path": "replicas",
+                    "displayName": "Connect nodes",
+                    "description": "The desired number of Kafka Connect nodes.",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:podCount"
+                    ]
+                  },
+                  {
+                    "path": "version",
+                    "displayName": "Version",
+                    "description": "Kafka Connect version",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  },
+                  {
+                    "path": "bootstrapServers",
+                    "displayName": "Bootstrap server",
+                    "description": "The address of the bootstrap server",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  },
+                  {
+                    "path": "resources",
+                    "displayName": "Resource Requirements",
+                    "description": "Limits describes the minimum/maximum amount of compute resources required/allowed",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:resourceRequirements"
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "kafkamirrormakers.kafka.strimzi.io",
+                "version": "v1beta2",
+                "kind": "KafkaMirrorMaker",
+                "displayName": "Kafka Mirror Maker",
+                "description": "Represents a Kafka MirrorMaker cluster",
+                "resources": [
+                  {
+                    "name": "",
+                    "kind": "Deployment",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ReplicaSet",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "Pod",
+                    "version": "v1"
+                  }
+                ],
+                "statusDescriptors": [
+                  {
+                    "path": "conditions",
+                    "displayName": "Conditions",
+                    "description": "Kafka MirrorMaker conditions",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:io.kubernetes.conditions"
+                    ]
+                  }
+                ],
+                "specDescriptors": [
+                  {
+                    "path": "replicas",
+                    "displayName": "MirrorMaker nodes",
+                    "description": "The desired number of Kafka MirrorMaker nodes.",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:podCount"
+                    ]
+                  },
+                  {
+                    "path": "version",
+                    "displayName": "Version",
+                    "description": "Kafka Mirror Maker version",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  },
+                  {
+                    "path": "consumer.bootstrapServers",
+                    "displayName": "Source cluster",
+                    "description": "The bootstrap address of the Source cluster",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  },
+                  {
+                    "path": "producer.bootstrapServers",
+                    "displayName": "Target cluster",
+                    "description": "The bootstrap address of the Target cluster",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  },
+                  {
+                    "path": "include",
+                    "displayName": "Mirrored topics",
+                    "description": "Expression specifying the topics which should be mirrored",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  },
+                  {
+                    "path": "resources",
+                    "displayName": "Resource Requirements",
+                    "description": "Limits describes the minimum/maximum amount of compute resources required/allowed",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:resourceRequirements"
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "kafkabridges.kafka.strimzi.io",
+                "version": "v1beta2",
+                "kind": "KafkaBridge",
+                "displayName": "Kafka Bridge",
+                "description": "Represents a Kafka Bridge cluster",
+                "resources": [
+                  {
+                    "name": "",
+                    "kind": "Deployment",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ReplicaSet",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "Pod",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "Service",
+                    "version": "v1"
+                  }
+                ],
+                "statusDescriptors": [
+                  {
+                    "path": "conditions",
+                    "displayName": "Conditions",
+                    "description": "Kafka Bridge conditions",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:io.kubernetes.conditions"
+                    ]
+                  }
+                ],
+                "specDescriptors": [
+                  {
+                    "path": "replicas",
+                    "displayName": "Bridge nodes",
+                    "description": "The desired number of Kafka Bridge nodes.",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:podCount"
+                    ]
+                  },
+                  {
+                    "path": "bootstrapServers",
+                    "displayName": "Kafka cluster",
+                    "description": "The bootstrap address of the Kafka cluster",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  },
+                  {
+                    "path": "http.port",
+                    "displayName": "HTTP port",
+                    "description": "The port where the HTTP Bridge is listening",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:number"
+                    ]
+                  },
+                  {
+                    "path": "resources",
+                    "displayName": "Resource Requirements",
+                    "description": "Limits describes the minimum/maximum amount of compute resources required/allowed",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:resourceRequirements"
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "kafkatopics.kafka.strimzi.io",
+                "version": "v1beta2",
+                "kind": "KafkaTopic",
+                "displayName": "Kafka Topic",
+                "description": "Represents a topic inside a Kafka cluster",
+                "statusDescriptors": [
+                  {
+                    "path": "conditions",
+                    "displayName": "Conditions",
+                    "description": "Kafka topic conditions",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:io.kubernetes.conditions"
+                    ]
+                  }
+                ],
+                "specDescriptors": [
+                  {
+                    "path": "partitions",
+                    "displayName": "Partitions",
+                    "description": "The number of partitions",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  },
+                  {
+                    "path": "replicas",
+                    "displayName": "Replication factor",
+                    "description": "The number of replicas",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "kafkausers.kafka.strimzi.io",
+                "version": "v1beta2",
+                "kind": "KafkaUser",
+                "displayName": "Kafka User",
+                "description": "Represents a user inside a Kafka cluster",
+                "resources": [
+                  {
+                    "name": "",
+                    "kind": "Secret",
+                    "version": "v1"
+                  }
+                ],
+                "statusDescriptors": [
+                  {
+                    "path": "conditions",
+                    "displayName": "Conditions",
+                    "description": "Kafka user conditions",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:io.kubernetes.conditions"
+                    ]
+                  }
+                ],
+                "specDescriptors": [
+                  {
+                    "path": "authentication.type",
+                    "displayName": "Authentication type",
+                    "description": "Authentication type",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:select:tls",
+                      "urn:alm:descriptor:com.tectonic.ui:select:scram-sha-512"
+                    ]
+                  },
+                  {
+                    "path": "authorization.type",
+                    "displayName": "Authorization type",
+                    "description": "Authorization type",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:select:simple"
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "kafkaconnectors.kafka.strimzi.io",
+                "version": "v1beta2",
+                "kind": "KafkaConnector",
+                "displayName": "Kafka Connector",
+                "description": "Represents a Connector inside a Kafka Connect cluster",
+                "statusDescriptors": [
+                  {
+                    "path": "conditions",
+                    "displayName": "Conditions",
+                    "description": "Connector conditions",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:io.kubernetes.conditions"
+                    ]
+                  }
+                ],
+                "specDescriptors": [
+                  {
+                    "path": "class",
+                    "displayName": "Class",
+                    "description": "Class of the Kafka Connect connector",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  },
+                  {
+                    "path": "tasksMax",
+                    "displayName": "Max number of tasks",
+                    "description": "Maximum number of tasks used by the connector",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "kafkamirrormaker2s.kafka.strimzi.io",
+                "version": "v1beta2",
+                "kind": "KafkaMirrorMaker2",
+                "displayName": "Kafka MirrorMaker 2",
+                "description": "Represents a Kafka MirrorMaker 2 cluster",
+                "resources": [
+                  {
+                    "name": "",
+                    "kind": "Deployment",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ReplicaSet",
+                    "version": "v1"
+                  },
+                  {
+                    "name": "",
+                    "kind": "Pod",
+                    "version": "v1"
+                  }
+                ],
+                "statusDescriptors": [
+                  {
+                    "path": "conditions",
+                    "displayName": "Conditions",
+                    "description": "Kafka MirrorMaker conditions",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:io.kubernetes.conditions"
+                    ]
+                  }
+                ],
+                "specDescriptors": [
+                  {
+                    "path": "replicas",
+                    "displayName": "MirrorMaker2 nodes",
+                    "description": "The desired number of Kafka MirrorMaker 2 nodes.",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:podCount"
+                    ]
+                  },
+                  {
+                    "path": "version",
+                    "displayName": "Version",
+                    "description": "Kafka MirrorMaker 2 version",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  },
+                  {
+                    "path": "connectCluster",
+                    "displayName": "Connect cluster",
+                    "description": "The Kafka cluster where the underlying Kafka Connect connects",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:text"
+                    ]
+                  },
+                  {
+                    "path": "resources",
+                    "displayName": "Resource Requirements",
+                    "description": "Limits describes the minimum/maximum amount of compute resources required/allowed",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:resourceRequirements"
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "kafkarebalances.kafka.strimzi.io",
+                "version": "v1beta2",
+                "kind": "KafkaRebalance",
+                "displayName": "Kafka Rebalance",
+                "description": "Triggeres rebalance of replicas in a Kafka cluster",
+                "statusDescriptors": [
+                  {
+                    "path": "conditions",
+                    "displayName": "Conditions",
+                    "description": "Kafka Rebalance conditions",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:io.kubernetes.conditions"
+                    ]
+                  }
+                ],
+                "specDescriptors": [
+                  {
+                    "path": "skipHardGoalCheck",
+                    "displayName": "Skip hard goals",
+                    "description": "Skip hard Cruise Cotnrol goals",
+                    "x-descriptors": [
+                      "urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "apiservicedefinitions": {},
+          "minKubeVersion": "1.16.0",
+          "displayName": "Strimzi",
+          "description": "Strimzi provides a way to run an [Apache Kafka®](https://kafka.apache.org) cluster on  [Kubernetes](https://kubernetes.io/) or [OpenShift](https://www.openshift.com/) in various deployment configurations. See our [website](https://strimzi.io) for more details about the project.\n### CRD Upgrades\n**!!! IMPORTANT !!!**  This release supports only the API version `v1beta2` and CRD version `apiextensions.k8s.io/v1`.  If upgrading from Strimzi 0.22, migration to `v1beta2` needs to be completed for all Strimzi CRDs and CRs before the upgrade to 0.25 is done!  If upgrading from Strimzi version earlier than 0.22, you need to first install the CRDs from Strimzi 0.22 and complete the migration to `v1beta2` for all Strimzi CRDs and CRs before the upgrade to 0.25 is done!  For more details about the CRD upgrades, see the documentation.\n### New in 0.25\n* Move from Scala 2.12 to Scala 2.13\n* Open Policy Agent authorizer updated to a new version supporting Scala 2.13.\n  The new version of the authroizer uses different format of the input data sent to the OPA server and might require you to update your policies.\n  See [release notes](https://github.com/strimzi/strimzi-kafka-operator/releases/tag/0.25.0) for more details.\n\n* Allow a custom password to be set for SCRAM-SHA-512 users by referencing a secret in the `KafkaUser` resource\n* Add support for [EnvVar Configuration Provider for Apache Kafka](https://github.com/strimzi/kafka-env-var-config-provider)\n* Add support for `tls-external` authentication to User Operator to allow management of ACLs and Quotas for TLS users with user certificates generated externally\n* Support for disabling the automatic generation of network policies by the Cluster Operator\n* Configure fixed size limit for `emptyDir` volumes used for temporary files\n* Update Strimzi Kafka Bridge to 0.20.2\n* The `KafkaConnectS2I` resource has been removed and is no longer supported by the operator.\n  Please use the [migration guide](https://strimzi.io/docs/operators/0.24.0/full/using.html#proc-migrating-kafka-connect-s2i-str) to migrate your `KafkaConnectS2I` deployments to [`KafkaConnect` Build](https://strimzi.io/docs/operators/latest/full/deploying.html#creating-new-image-using-kafka-connect-build-str) instead.\n\n### Supported Features\n* **Manages the Kafka Cluster** - Deploys and manages all of the components of this complex application, including dependencies like Apache ZooKeeper® that are traditionally hard to administer.\n* **Includes Kafka Connect** - Allows for configuration of common data sources and sinks to move data into and out of the Kafka cluster.\n* **Topic Management** - Creates and manages Kafka Topics within the cluster.\n* **User Management** - Creates and manages Kafka Users within the cluster.\n* **Connector Management** - Creates and manages Kafka Connect connectors.\n* **Includes Kafka Mirror Maker 1 and 2** - Allows for morroring data between different Apache Kafka® clusters.\n* **Includes HTTP Kafka Bridge** - Allows clients to send and receive messages through an Apache Kafka® cluster via HTTP protocol.\n* **Cluster Rebalancing** - Uses built-in Cruise Control for redistributes partition replicas according to specified goals in order to achieve the best cluster performance.\n* **Monitoring** - Built-in support for monitoring using Prometheus and provided Grafana dashabords\n### Upgrading your Clusters\nThe Strimzi Operator understands how to run and upgrade between a set of Kafka versions. When specifying a new version in your config, check to make sure you aren't using any features that may have been removed. See [the upgrade guide](https://strimzi.io/docs/operators/latest/deploying.html#assembly-upgrading-kafka-versions-str) for more information.\n### Storage\nAn efficient data storage infrastructure is essential to the optimal performance of Apache Kafka®. Apache Kafka® deployed via Strimzi requires block storage. The use of file storage (for example, NFS) is not recommended.\nThe Strimzi Operator supports three types of data storage:\n* Ephemeral (Recommended for development only!)\n* Persistent\n* JBOD (Just a Bunch of Disks, suitable for Kafka only. Not supported in Zookeeper.)\nStrimzi also supports advanced operations such as adding or removing disks in Apache Kafka® brokers or resizing the persistent volumes (where supported by the infrastructure).\n### Documentation\nDocumentation to the current _main_ branch as well as all releases can be found on our [website](https://strimzi.io/documentation).\n### Getting help\nIf you encounter any issues while using Strimzi, you can get help using:\n* [Strimzi mailing list on CNCF](https://lists.cncf.io/g/cncf-strimzi-users/topics)\n* [Strimzi Slack channel on CNCF workspace](https://cloud-native.slack.com/messages/strimzi)\n### Contributing\nYou can contribute by:\n* Raising any issues you find using Strimzi\n* Fixing issues by opening Pull Requests\n* Improving documentation\n* Talking about Strimzi\n\nAll bugs, tasks or enhancements are tracked as [GitHub issues](https://github.com/strimzi/strimzi-kafka-operator/issues). Issues which  might be a good start for new contributors are marked with [\"good-start\"](https://github.com/strimzi/strimzi-kafka-operator/labels/good-start) label.\n\nThe [Development guide](https://github.com/strimzi/strimzi-kafka-operator/blob/main/development-docs/DEV_GUIDE.md) describes how to build Strimzi and how to  test your changes before submitting a patch or opening a PR.\n\nThe [Documentation Contributor Guide](https://strimzi.io/contributing/guide/) describes how to contribute to Strimzi documentation.\n\nIf you want to get in touch with us first before contributing, you can use:\n* [Strimzi mailing list on CNCF](https://lists.cncf.io/g/cncf-strimzi-users/topics)\n* [Strimzi Slack channel on CNCF workspace](https://cloud-native.slack.com/messages/strimzi)\n### License\nStrimzi is licensed under the [Apache License, Version 2.0](https://github.com/strimzi/strimzi-kafka-operator/blob/main/LICENSE).\n",
+          "keywords": [
+            "kafka",
+            "messaging",
+            "kafka-connect",
+            "kafka-streams",
+            "data-streaming",
+            "data-streams",
+            "streaming",
+            "streams"
+          ],
+          "maintainers": [
+            {
+              "name": "Strimzi",
+              "email": "cncf-strimzi-users@lists.cncf.io"
+            }
+          ],
+          "provider": {
+            "name": "Strimzi"
+          },
+          "links": [
+            {
+              "name": "Website",
+              "url": "https://strimzi.io/"
+            },
+            {
+              "name": "Documentation",
+              "url": "https://strimzi.io/documentation/"
+            },
+            {
+              "name": "Mailing list",
+              "url": "https://lists.cncf.io/g/cncf-strimzi-users/topics"
+            },
+            {
+              "name": "Slack",
+              "url": "https://cloud-native.slack.com/messages/strimzi"
+            },
+            {
+              "name": "GitHub",
+              "url": "https://github.com/strimzi/strimzi-kafka-operator"
+            }
+          ],
+          "icon": [
+            {
+              "base64data": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIyLjAuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA1MTIgNTk1IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1MTIgNTk1OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+Cgkuc3Qwe2ZpbGw6IzE5MkM0Nzt9Cgkuc3Qxe2ZpbGw6dXJsKCNTVkdJRF8xXyk7fQoJLnN0MntmaWxsOnVybCgjU1ZHSURfMl8pO30KCS5zdDN7ZmlsbDp1cmwoI1NWR0lEXzNfKTt9Cgkuc3Q0e2ZpbGw6dXJsKCNTVkdJRF80Xyk7fQoJLnN0NXtmaWxsOnVybCgjU1ZHSURfNV8pO30KCS5zdDZ7ZmlsbDp1cmwoI1NWR0lEXzZfKTt9Cjwvc3R5bGU+CjxnPgoJPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIyNTYsNSAxLDE1Mi4yIDEsNDQ2LjcgMjU2LDU5My45IDUxMSw0NDYuNyA1MTEsMTUyLjIgMjU2LDUgCSIvPgoJPGxpbmVhckdyYWRpZW50IGlkPSJTVkdJRF8xXyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIxMDkuNDk5NiIgeTE9Ijg0Ljk2MjIiIHgyPSI0NDAuOTUxNyIgeTI9Ijc5My44MTAyIj4KCQk8c3RvcCAgb2Zmc2V0PSIwIiBzdHlsZT0ic3RvcC1jb2xvcjojRkZGRkZGIi8+CgkJPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzU0QkFEOCIvPgoJPC9saW5lYXJHcmFkaWVudD4KCTxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yNTYsNTYxbDIyNi41LTEzMC44di0yNi4zYy0zNy42LTcuMy04NC45LTE0LjMtMTQzLjUtMTkuM2MtMTk5LjItMTcuMi0xNC44LTU2LjYsNjguOS0xMjcuMQoJCVMxMzAsMTY1LjcsMTMwLDE2NS43czE0Ny42LDMxLDEzMi44LDUwYy0xMC41LDEzLjUtMTM0LjMsNDMuNS0yMzMuMyw4OC4xdjEyNi41TDI1Niw1NjF6Ii8+CjwvZz4KPC9zdmc+Cg==",
+              "mediatype": "image/svg+xml"
+            }
+          ],
+          "installModes": [
+            {
+              "type": "OwnNamespace",
+              "supported": true
+            },
+            {
+              "type": "SingleNamespace",
+              "supported": true
+            },
+            {
+              "type": "MultiNamespace",
+              "supported": true
+            },
+            {
+              "type": "AllNamespaces",
+              "supported": true
+            }
+          ],
+          "replaces": "strimzi-cluster-operator.v0.24.0",
+          "labels": {
+            "name": "strimzi-cluster-operator"
+          },
+          "selector": {
+            "matchLabels": {
+              "name": "strimzi-cluster-operator"
+            }
+          }
+        },
+        "status": {
+          "phase": "Succeeded",
+          "message": "The operator is running in openshift-operators but is managing this namespace",
+          "reason": "Copied",
+          "lastUpdateTime": "2021-08-11T16:04:12Z",
+          "lastTransitionTime": "2021-08-11T16:04:12Z",
+          "conditions": [
+            {
+              "phase": "Pending",
+              "message": "requirements not yet checked",
+              "reason": "RequirementsUnknown",
+              "lastUpdateTime": "2021-08-11T16:03:23Z",
+              "lastTransitionTime": "2021-08-11T16:03:23Z"
+            },
+            {
+              "phase": "Pending",
+              "message": "one or more requirements couldn't be found",
+              "reason": "RequirementsNotMet",
+              "lastUpdateTime": "2021-08-11T16:03:24Z",
+              "lastTransitionTime": "2021-08-11T16:03:23Z"
+            },
+            {
+              "phase": "InstallReady",
+              "message": "all requirements found, attempting install",
+              "reason": "AllRequirementsMet",
+              "lastUpdateTime": "2021-08-11T16:03:28Z",
+              "lastTransitionTime": "2021-08-11T16:03:28Z"
+            },
+            {
+              "phase": "Installing",
+              "message": "waiting for install components to report healthy",
+              "reason": "InstallSucceeded",
+              "lastUpdateTime": "2021-08-11T16:03:29Z",
+              "lastTransitionTime": "2021-08-11T16:03:29Z"
+            },
+            {
+              "phase": "Installing",
+              "message": "installing: waiting for deployment strimzi-cluster-operator-v0.25.0 to become ready: deployment \"strimzi-cluster-operator-v0.25.0\" not available: Deployment does not have minimum availability.",
+              "reason": "InstallWaiting",
+              "lastUpdateTime": "2021-08-11T16:03:31Z",
+              "lastTransitionTime": "2021-08-11T16:03:29Z"
+            },
+            {
+              "phase": "Succeeded",
+              "message": "install strategy completed with no errors",
+              "reason": "InstallSucceeded",
+              "lastUpdateTime": "2021-08-11T16:04:12Z",
+              "lastTransitionTime": "2021-08-11T16:04:12Z"
+            }
+          ],
+          "requirementStatus": [
+            {
+              "group": "operators.coreos.com",
+              "version": "v1alpha1",
+              "kind": "ClusterServiceVersion",
+              "name": "strimzi-cluster-operator.v0.25.0",
+              "status": "Present",
+              "message": "CSV minKubeVersion (1.16.0) less than server version (v1.20.0+df9c838)"
+            },
+            {
+              "group": "apiextensions.k8s.io",
+              "version": "v1",
+              "kind": "CustomResourceDefinition",
+              "name": "kafkabridges.kafka.strimzi.io",
+              "status": "Present",
+              "message": "CRD is present and Established condition is true",
+              "uuid": "458d6f1c-6e65-4d55-be09-42eb214bc738"
+            },
+            {
+              "group": "apiextensions.k8s.io",
+              "version": "v1",
+              "kind": "CustomResourceDefinition",
+              "name": "kafkaconnectors.kafka.strimzi.io",
+              "status": "Present",
+              "message": "CRD is present and Established condition is true",
+              "uuid": "06585889-a602-4682-9c87-1cf7a072222b"
+            },
+            {
+              "group": "apiextensions.k8s.io",
+              "version": "v1",
+              "kind": "CustomResourceDefinition",
+              "name": "kafkaconnects.kafka.strimzi.io",
+              "status": "Present",
+              "message": "CRD is present and Established condition is true",
+              "uuid": "ad685c2e-af37-4d77-bb18-dc14f76b4e08"
+            },
+            {
+              "group": "apiextensions.k8s.io",
+              "version": "v1",
+              "kind": "CustomResourceDefinition",
+              "name": "kafkamirrormaker2s.kafka.strimzi.io",
+              "status": "Present",
+              "message": "CRD is present and Established condition is true",
+              "uuid": "6a02b9bd-5963-45e2-9842-84236da32b1c"
+            },
+            {
+              "group": "apiextensions.k8s.io",
+              "version": "v1",
+              "kind": "CustomResourceDefinition",
+              "name": "kafkamirrormakers.kafka.strimzi.io",
+              "status": "Present",
+              "message": "CRD is present and Established condition is true",
+              "uuid": "3d73efd7-c136-430d-b72a-52c30aefb21f"
+            },
+            {
+              "group": "apiextensions.k8s.io",
+              "version": "v1",
+              "kind": "CustomResourceDefinition",
+              "name": "kafkarebalances.kafka.strimzi.io",
+              "status": "Present",
+              "message": "CRD is present and Established condition is true",
+              "uuid": "58cf2632-895a-4095-bbc3-c976260eb9d5"
+            },
+            {
+              "group": "apiextensions.k8s.io",
+              "version": "v1",
+              "kind": "CustomResourceDefinition",
+              "name": "kafkas.kafka.strimzi.io",
+              "status": "Present",
+              "message": "CRD is present and Established condition is true",
+              "uuid": "50fb8381-da67-4f6a-b920-9c296d6bec81"
+            },
+            {
+              "group": "apiextensions.k8s.io",
+              "version": "v1",
+              "kind": "CustomResourceDefinition",
+              "name": "kafkatopics.kafka.strimzi.io",
+              "status": "Present",
+              "message": "CRD is present and Established condition is true",
+              "uuid": "415f3707-01e6-4892-9c69-055521baa24f"
+            },
+            {
+              "group": "apiextensions.k8s.io",
+              "version": "v1",
+              "kind": "CustomResourceDefinition",
+              "name": "kafkausers.kafka.strimzi.io",
+              "status": "Present",
+              "message": "CRD is present and Established condition is true",
+              "uuid": "c9ab0c23-399a-437b-8edf-9a347450bc78"
+            },
+            {
+              "group": "",
+              "version": "v1",
+              "kind": "ServiceAccount",
+              "name": "strimzi-cluster-operator",
+              "status": "Present",
+              "message": "",
+              "dependents": [
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "namespaced rule:{\"verbs\":[\"get\",\"list\",\"watch\",\"create\",\"delete\",\"patch\",\"update\"],\"apiGroups\":[\"rbac.authorization.k8s.io\"],\"resources\":[\"rolebindings\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "namespaced rule:{\"verbs\":[\"get\",\"list\",\"watch\",\"create\",\"delete\",\"patch\",\"update\"],\"apiGroups\":[\"rbac.authorization.k8s.io\"],\"resources\":[\"roles\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "namespaced rule:{\"verbs\":[\"get\",\"list\",\"watch\",\"create\",\"delete\",\"patch\",\"update\"],\"apiGroups\":[\"\"],\"resources\":[\"pods\",\"serviceaccounts\",\"configmaps\",\"services\",\"endpoints\",\"secrets\",\"persistentvolumeclaims\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "namespaced rule:{\"verbs\":[\"get\",\"list\",\"watch\",\"create\",\"delete\",\"patch\",\"update\"],\"apiGroups\":[\"kafka.strimzi.io\"],\"resources\":[\"kafkas\",\"kafkas/status\",\"kafkaconnects\",\"kafkaconnects/status\",\"kafkaconnectors\",\"kafkaconnectors/status\",\"kafkamirrormakers\",\"kafkamirrormakers/status\",\"kafkabridges\",\"kafkabridges/status\",\"kafkamirrormaker2s\",\"kafkamirrormaker2s/status\",\"kafkarebalances\",\"kafkarebalances/status\",\"kafkatopics\",\"kafkatopics/status\",\"kafkausers\",\"kafkausers/status\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "namespaced rule:{\"verbs\":[\"get\",\"list\",\"watch\",\"create\",\"delete\",\"patch\",\"update\"],\"apiGroups\":[\"extensions\"],\"resources\":[\"deployments\",\"deployments/scale\",\"replicasets\",\"replicationcontrollers\",\"networkpolicies\",\"ingresses\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "namespaced rule:{\"verbs\":[\"get\",\"list\",\"watch\",\"create\",\"delete\",\"patch\",\"update\"],\"apiGroups\":[\"apps\"],\"resources\":[\"deployments\",\"deployments/scale\",\"deployments/status\",\"statefulsets\",\"replicasets\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "namespaced rule:{\"verbs\":[\"create\"],\"apiGroups\":[\"\"],\"resources\":[\"events\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "namespaced rule:{\"verbs\":[\"get\",\"list\",\"watch\",\"create\",\"delete\",\"patch\",\"update\"],\"apiGroups\":[\"build.openshift.io\"],\"resources\":[\"buildconfigs\",\"buildconfigs/instantiate\",\"builds\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "namespaced rule:{\"verbs\":[\"get\",\"list\",\"watch\",\"create\",\"delete\",\"patch\",\"update\"],\"apiGroups\":[\"networking.k8s.io\"],\"resources\":[\"networkpolicies\",\"ingresses\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "namespaced rule:{\"verbs\":[\"get\",\"list\",\"watch\",\"create\",\"delete\",\"patch\",\"update\"],\"apiGroups\":[\"route.openshift.io\"],\"resources\":[\"routes\",\"routes/custom-host\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "namespaced rule:{\"verbs\":[\"get\",\"list\",\"watch\",\"create\",\"delete\",\"patch\",\"update\"],\"apiGroups\":[\"policy\"],\"resources\":[\"poddisruptionbudgets\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "cluster rule:{\"verbs\":[\"get\",\"list\",\"watch\",\"create\",\"delete\",\"patch\",\"update\"],\"apiGroups\":[\"rbac.authorization.k8s.io\"],\"resources\":[\"clusterrolebindings\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "cluster rule:{\"verbs\":[\"get\"],\"apiGroups\":[\"storage.k8s.io\"],\"resources\":[\"storageclasses\"]}"
+                },
+                {
+                  "group": "rbac.authorization.k8s.io",
+                  "version": "v1",
+                  "kind": "PolicyRule",
+                  "status": "Satisfied",
+                  "message": "cluster rule:{\"verbs\":[\"get\",\"list\"],\"apiGroups\":[\"\"],\"resources\":[\"nodes\"]}"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

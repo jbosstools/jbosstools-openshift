@@ -62,7 +62,7 @@ public class DescribeHandler extends OdoHandler {
 			if (component != null) {
 				odo.describeComponent(component.getParent().getParent().getWrapped(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
 			} else if (service != null) {
-				String template = odo.getServiceTemplate(service.getParent().getParent().getWrapped(), service.getParent().getWrapped().getName(), service.getWrapped().getMetadata().getName());
+				String template = odo.getServiceTemplate(service.getParent().getParent().getWrapped(), service.getParent().getWrapped().getName(), service.getWrapped().getName());
 				odo.describeServiceTemplate(template);
 			} else {
 				odo.describeApplication(application.getParent().getWrapped(), application.getWrapped().getName());

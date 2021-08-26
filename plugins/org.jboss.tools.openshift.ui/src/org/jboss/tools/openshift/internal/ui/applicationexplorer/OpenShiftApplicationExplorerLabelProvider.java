@@ -17,7 +17,6 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
-import org.jboss.tools.openshift.core.odo.KubernetesLabels;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
@@ -74,7 +73,7 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 							((URLElement) element).getWrapped().getState().toString()),
 					limit);
 		} else if (element instanceof ServiceElement) {
-			return style(KubernetesLabels.getComponentName(((ServiceElement) element).getWrapped()), "", limit);
+			return style(((ServiceElement) element).getWrapped().getName(), "", limit);
 		} else if (element instanceof MessageElement) {
 			return getStyledText((MessageElement) element);
 		} else if (element instanceof DevfileRegistriesElement) {
