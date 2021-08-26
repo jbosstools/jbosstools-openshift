@@ -53,6 +53,30 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 	public OpenShiftApplicationExplorerView() {
 		super("JBoss Tools", "OpenShift Application Explorer");
 	}
+	
+	public void open (boolean handleDownloadDialog) {
+		if (handleDownloadDialog) {
+			open();
+			handleOdoToolRequiredDialog();
+			try {
+				open();
+			} catch (RedDeerException ex) {
+				handleOdoToolRequiredDialog();
+			}
+		} else {
+			open();
+		}
+	}
+	
+	private void handleOdoToolRequiredDialog () {
+		try {
+			new WaitUntil(new ShellIsAvailable("odo tool required"));
+			new PushButton("Yes").click();
+			new WaitWhile(new ShellIsAvailable("Progress Information"), TimePeriod.LONG, false);
+		} catch (CoreLayerException ex) {
+			//swallow - dialog could not show up
+		}
+	}
 
 	/**
 	 * Opens a new connection shell through context menu in OpenShift explorer.
