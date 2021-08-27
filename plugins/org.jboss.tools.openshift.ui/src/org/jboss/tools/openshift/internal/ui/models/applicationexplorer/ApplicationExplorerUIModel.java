@@ -112,11 +112,13 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
 
   @Override
   public void refresh() {
+    odo = null;
     getWrapped().refresh();
     fireChanged(this);
   }
   
   public void reload() {
+    odo = null;
     getWrapped().reload();
     fireChanged(this);
   }
