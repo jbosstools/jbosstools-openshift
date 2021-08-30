@@ -10,14 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
-import io.fabric8.servicecatalog.api.model.ServiceInstance;
-
 import java.io.IOException;
 import java.util.List;
 
 public interface Odo {
     List<String> getNamespaces() throws IOException;
-    
+
     String getNamespace() throws IOException;
 
     void describeApplication(String project, String application) throws IOException;
@@ -36,16 +34,17 @@ public interface Odo {
 
     void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException;
 
-    void createService(String project, String application, String serviceTemplate, String servicePlan, String service, boolean wait) throws IOException;
+    void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD, String service,
+      boolean wait) throws IOException;
 
-    String getServiceTemplate(String project, String application, String service);
+    String getServiceTemplate(String project, String application, String service) throws IOException;
 
-    void deleteService(String project, String application, String service) throws IOException;
+    void deleteService(String project, String application, Service service) throws IOException;
 
     List<ComponentType> getComponentTypes() throws IOException;
-    
+
     List<DevfileComponentType> getComponentTypes(String registryName) throws IOException;
-    
+
     ComponentTypeInfo getComponentTypeInfo(String componentType, String registryName) throws IOException;
 
     List<ServiceTemplate> getServiceTemplates() throws IOException;
@@ -82,7 +81,7 @@ public interface Odo {
 
     List<Component> getComponents(String project, String application) throws IOException;
 
-    List<ServiceInstance> getServices(String project, String application);
+    List<Service> getServices(String project, String application) throws IOException;
 
     List<Storage> getStorages(String project, String application, String context, String component) throws IOException;
 
@@ -101,15 +100,13 @@ public interface Odo {
     String consoleURL() throws IOException;
 
     void debug(String project, String application, String context, String component, Integer port) throws IOException;
-    
+
     DebugInfo debugInfo(String project, String application, String context, String component) throws IOException;
-    
+
     List<ComponentDescriptor> discover(String path) throws IOException;
 
-    boolean isServiceCatalogAvailable();
-    
     java.net.URL getMasterUrl();
-    
+
     List<DevfileRegistry> listDevfileRegistries() throws IOException;
 
     void createDevfileRegistry(String name, String url, boolean secure) throws IOException;

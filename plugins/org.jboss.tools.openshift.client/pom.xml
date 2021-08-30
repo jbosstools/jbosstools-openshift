@@ -150,16 +150,6 @@
                             <version>${openshift-client.version}</version>
                         </artifactItem>
                         <artifactItem>
-                            <groupId>io.fabric8</groupId>
-                            <artifactId>servicecatalog-client</artifactId>
-                            <version>${openshift-client.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>io.fabric8</groupId>
-                            <artifactId>servicecatalog-model</artifactId>
-                            <version>${openshift-client.version}</version>
-                        </artifactItem>
-                        <artifactItem>
                             <groupId>com.fasterxml.jackson.dataformat</groupId>
                             <artifactId>jackson-dataformat-yaml</artifactId>
                             <version>${jackson.version}</version>

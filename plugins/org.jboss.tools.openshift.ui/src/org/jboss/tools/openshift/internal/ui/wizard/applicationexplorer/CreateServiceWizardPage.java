@@ -20,6 +20,7 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -33,6 +34,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.MandatoryStringValidator;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.core.odo.OperatorCRD;
 import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
@@ -70,7 +72,7 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(serviceNameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 
 		Label serviceTemplatesLabel = new Label(parent, SWT.NONE);
-		serviceTemplatesLabel.setText("Component type:");
+		serviceTemplatesLabel.setText("Service:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(serviceTemplatesLabel);
 		Combo serviceTemplatesCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
@@ -89,6 +91,26 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(serviceTemplatesBinding, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater());
 		
+		Label serviceCRDsLabel = new Label(parent, SWT.NONE);
+		serviceCRDsLabel.setText("Type:");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(serviceCRDsLabel);
+		Combo serviceCRDsCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+				.applyTo(serviceCRDsCombo);
+		ComboViewer serviceCRDsComboViewer = new ComboViewer(serviceCRDsCombo);
+		serviceCRDsComboViewer.setContentProvider(new ObservableListContentProvider<>());
+		serviceCRDsComboViewer.setLabelProvider(new ServiceTemplateCRDColumLabelProvider());
+		serviceCRDsComboViewer.setInput(BeanProperties.list(CreateServiceModel.PROPERTY_SELECTED_SERVICE_TEMPLATE_CRDS).observe(model));
+		Binding serviceCRDsBinding = ValueBindingBuilder
+				.bind(ViewerProperties.singleSelection().observe(serviceCRDsComboViewer))
+				.validatingAfterGet(new IsNotNullValidator(
+						ValidationStatus.cancel("You have to select a type.")))
+				.to(BeanProperties.value(CreateServiceModel.PROPERTY_SELECTED_SERVICE_TEMPLATE_CRD, OperatorCRD.class)
+						.observe(model))
+				.in(dbc);
+		ControlDecorationSupport.create(serviceCRDsBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater());
+
 		Label applicationLabel = new Label(parent, SWT.NONE);
 		applicationLabel.setText("Application:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(applicationLabel);
@@ -112,7 +134,7 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 	 */
 	public boolean finish() {
 		try {
-			model.getOdo().createService(model.getProjectName(), model.getApplicationName(), model.getSelectedServiceTemplate().getName(), model.getSelectedServiceTemplate().getPlans().get(0), model.getServiceName(), false);
+			model.getOdo().createService(model.getProjectName(), model.getApplicationName(), model.getSelectedServiceTemplate(), model.getSelectedServiceTemplateCRD(), model.getServiceName(), false);
 			return true;
 		} catch (IOException e) {
 			setErrorMessage(e.getLocalizedMessage());

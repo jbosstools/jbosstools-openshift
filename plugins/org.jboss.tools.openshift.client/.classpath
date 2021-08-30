@@ -27,8 +27,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/kubernetes-client-4.11.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-core-4.11.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/openshift-client-4.11.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/servicecatalog-client-4.11.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/servicecatalog-model-4.11.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/openshift-model-4.11.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/retrofit-2.9.0.jar" sourcepath="lib/retrofit-2.9.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/converter-jackson-2.9.0.jar" sourcepath="lib/converter-jackson-2.9.0-sources.jar"/>

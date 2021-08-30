@@ -21,7 +21,6 @@ public class ServiceTemplateColumLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		return String.join(" ", ((ServiceTemplate)element).getName(), ((ServiceTemplate)element).getPlans().get(0));
+		return ((ServiceTemplate)element).getDisplayName();
 	}
-
 }

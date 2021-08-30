@@ -11,7 +11,11 @@
 package org.jboss.tools.openshift.core.odo;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.jboss.tools.openshift.core.odo.Starter.Builder;
@@ -33,6 +37,13 @@ public class JSonParser {
     private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
     private static final String LOCAL_PORT_FIELD = "localPort";
     private static final String REGISTRY_NAME_FIELD = "RegistryName";
+    
+    private static final String PATHS_FIELD = "paths";
+    private static final String POST_FIELD = "post";
+    private static final String PARAMETERS_FIELD = "parameters";
+    private static final String BODY_VALUE = "body";
+    private static final String SCHEMA_FIELD = "schema";
+    private static final String DOLLAR_REF_FIELD = "$ref";
 
     private final JsonNode root;
 
@@ -137,5 +148,56 @@ public class JSonParser {
       }
       return info;
     }
+    
+    private JsonNode resolveRefs(JsonNode root, JsonNode node) throws IOException {
+      for (Iterator<String> it = node.fieldNames(); it.hasNext();) {
+        String name = it.next();
+        JsonNode child = node.get(name);
+        if (child.has(DOLLAR_REF_FIELD)) {
+          JsonNode replaced = resolve(root, child.get(DOLLAR_REF_FIELD).asText());
+          ((ObjectNode) node).set(name, replaced);
+        } else {
+          resolveRefs(root, child);
+        }
+      }
+      return node;
+    }
+
+  private JsonNode resolve(JsonNode root, String ref) throws IOException {
+    JsonNode node = null;
+    String[] ids = ref.split("/");
+    for (String id : ids) {
+      if ("#".equals(id)) {
+        if (node == null) {
+          node = root;
+        }
+      } else if (node != null && node.has(id)) {
+        node = node.get(id);
+      } else {
+        node = null;
+      }
+    }
+    return node;
   }
+
+  public JsonNode findSchema(String crd) throws IOException {
+    if (root.has(PATHS_FIELD)) {
+      JsonNode node = root.get(PATHS_FIELD).get(crd);
+      if (node != null && node.has(POST_FIELD) && node.get(POST_FIELD).has(PARAMETERS_FIELD)) {
+        for (JsonNode parameter : node.get(POST_FIELD).get(PARAMETERS_FIELD)) {
+          if (parameter.has(NAME_FIELD) && parameter.get(NAME_FIELD).asText().equals(BODY_VALUE)
+              && parameter.has(SCHEMA_FIELD)) {
+            JsonNode schema = parameter.get(SCHEMA_FIELD);
+            if (schema.has(DOLLAR_REF_FIELD)) {
+              return resolveRefs(root, resolve(root, schema.get(DOLLAR_REF_FIELD).asText()));
+            } else {
+              return resolveRefs(root, schema);
+            }
+          }
+        }
+      }
+    }
+    throw new IOException("Invalid data, no 'paths' field");
+  }
+}
 

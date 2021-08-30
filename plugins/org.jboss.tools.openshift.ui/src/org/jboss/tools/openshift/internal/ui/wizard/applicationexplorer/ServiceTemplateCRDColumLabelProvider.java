@@ -8,19 +8,19 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.models.applicationexplorer;
+package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
-import org.jboss.tools.openshift.core.odo.Service;
-import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.jboss.tools.openshift.core.odo.OperatorCRD;
 
 /**
  * @author Red Hat Developers
  *
  */
-public class ServiceElement extends AbstractOpenshiftUIElement<Service, ApplicationElement, ApplicationExplorerUIModel> {
-	
-	public ServiceElement(Service service, ApplicationElement parentElement) {
-		super(parentElement, service);
-	}
+public class ServiceTemplateCRDColumLabelProvider extends ColumnLabelProvider {
 
+	@Override
+	public String getText(Object element) {
+		return ((OperatorCRD)element).getDisplayName();
+	}
 }

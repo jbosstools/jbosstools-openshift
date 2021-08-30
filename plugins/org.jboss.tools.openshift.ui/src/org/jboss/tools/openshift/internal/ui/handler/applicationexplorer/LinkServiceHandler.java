@@ -23,8 +23,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.notification.LabelNotification;
-import org.jboss.tools.openshift.core.odo.KubernetesLabels;
 import org.jboss.tools.openshift.core.odo.Odo;
+import org.jboss.tools.openshift.core.odo.Service;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.LinkModel;
@@ -42,7 +42,7 @@ public class LinkServiceHandler extends ComponentHandler {
 			String projectName = component.getParent().getParent().getWrapped();
 			String applicationName = component.getParent().getWrapped().getName();
 			List<String> serviceNames = odo.getServices(projectName, applicationName).stream()
-			        .map(service -> KubernetesLabels.getComponentName(service)).collect(Collectors.toList());
+			        .map(Service::getName).collect(Collectors.toList());
 			final LinkModel<String> model = new LinkModel<>(odo, projectName, applicationName,
 			        component.getWrapped().getName(), serviceNames);
 			final IWizard linkServiceWizard = new LinkServiceWizard(model);

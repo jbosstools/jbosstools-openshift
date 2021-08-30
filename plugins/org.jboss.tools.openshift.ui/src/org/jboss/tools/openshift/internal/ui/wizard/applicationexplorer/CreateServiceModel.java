@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 import java.util.List;
 
 import org.jboss.tools.openshift.core.odo.Odo;
+import org.jboss.tools.openshift.core.odo.OperatorCRD;
 import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 
 /**
@@ -22,6 +23,8 @@ import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 public class CreateServiceModel extends ApplicationModel {
 	public static final String PROPERTY_SERVICE_NAME = "serviceName";
 	public static final String PROPERTY_SELECTED_SERVICE_TEMPLATE = "selectedServiceTemplate";
+	public static final String PROPERTY_SELECTED_SERVICE_TEMPLATE_CRDS = "selectedServiceTemplateCRDs";
+	public static final String PROPERTY_SELECTED_SERVICE_TEMPLATE_CRD = "selectedServiceTemplateCRD";
 	
 
 	private String serviceName = "";
@@ -29,6 +32,10 @@ public class CreateServiceModel extends ApplicationModel {
 	private final List<ServiceTemplate> serviceTemplates;
 	
 	private ServiceTemplate selectedServiceTemplate;
+	
+	private List<OperatorCRD> selectedServiceTemplateCRDs;
+	
+	private OperatorCRD selectedServiceTemplateCRD;
 	
 	/**
 	 * @param odo
@@ -67,6 +74,42 @@ public class CreateServiceModel extends ApplicationModel {
 	 */
 	public void setSelectedServiceTemplate(ServiceTemplate selectedServiceTemplate) {
 		firePropertyChange(PROPERTY_SELECTED_SERVICE_TEMPLATE, this.selectedServiceTemplate, this.selectedServiceTemplate = selectedServiceTemplate);
+		setSelectedServiceTemplateCRDs(selectedServiceTemplate.getCRDs());
+	}
+	
+	
+	
+	/**
+	 * @return the selectedServiceTemplateCRS
+	 */
+	public List<OperatorCRD> getSelectedServiceTemplateCRDs() {
+		return selectedServiceTemplateCRDs;
+	}
+
+	/**
+	 * @param selectedServiceTemplateCRS the selectedServiceTemplateCRS to set
+	 */
+	public void setSelectedServiceTemplateCRDs(List<OperatorCRD> selectedServiceTemplateCRDs) {
+		firePropertyChange(PROPERTY_SELECTED_SERVICE_TEMPLATE_CRDS, this.selectedServiceTemplateCRDs, this.selectedServiceTemplateCRDs = selectedServiceTemplateCRDs);
+		if (!selectedServiceTemplateCRDs.isEmpty()) {
+			setSelectedServiceTemplateCRD(selectedServiceTemplateCRDs.get(0));
+		} else {
+			setSelectedServiceTemplateCRD(null);
+		}
+	}
+
+	/**
+	 * @return the selectedServiceTemplateCRD
+	 */
+	public OperatorCRD getSelectedServiceTemplateCRD() {
+		return selectedServiceTemplateCRD;
+	}
+
+	/**
+	 * @param selectedServiceTemplateCRD the selectedServiceTemplateCRD to set
+	 */
+	public void setSelectedServiceTemplateCRD(OperatorCRD selectedServiceTemplateCRD) {
+		firePropertyChange(PROPERTY_SELECTED_SERVICE_TEMPLATE_CRD, this.selectedServiceTemplateCRD, this.selectedServiceTemplateCRD = selectedServiceTemplateCRD);
 	}
 
 	/**

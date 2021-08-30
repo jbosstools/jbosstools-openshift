@@ -19,6 +19,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.PlatformUI;
@@ -51,19 +52,18 @@ public class CreateServiceHandler extends AbstractHandler {
 		}
 		try {
 			Odo odo = project.getParent().getOdo();
-			if (odo.isServiceCatalogAvailable()) {
-				List<ServiceTemplate> templates = odo.getServiceTemplates();
-				if (!templates.isEmpty()) {
-					final IWizard createServiceWizard = new CreateServiceWizard(templates,
-							project.getWrapped(),
-							application == null ? "" : application.getWrapped().getName(), odo);
-					WizardUtils.openWizardDialog(createServiceWizard, HandlerUtil.getActiveShell(event));
+			List<ServiceTemplate> templates = odo.getServiceTemplates();
+			if (!templates.isEmpty()) {
+				final IWizard createServiceWizard = new CreateServiceWizard(templates,
+						project.getWrapped(),
+						application == null ? "" : application.getWrapped().getName(), odo);
+				if (WizardUtils.openWizardDialog(createServiceWizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
+				  if (application==null) {
+				    project.refresh();
+				  } else {
+				    application.refresh();
+				  }
 				}
-			} else {
-				String title = "Unable to create service";
-				String message = "Unable to create service because Service Catalog is not enabled in your cluster";
-				MessageDialog.open(MessageDialog.INFORMATION,
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), title, message, SWT.NONE);
 			}
 			return Status.OK_STATUS;
 

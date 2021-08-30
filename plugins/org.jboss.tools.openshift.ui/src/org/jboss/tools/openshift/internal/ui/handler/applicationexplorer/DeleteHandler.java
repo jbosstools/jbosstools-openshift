@@ -68,7 +68,7 @@ public class DeleteHandler extends OdoHandler {
 		} else if (element instanceof ComponentElement) {
 			return String.join(" ", "component", ((ComponentElement)element).getWrapped().getName());
 		} else if (element instanceof ServiceElement) {
-			return String.join(" ", "service", ((ServiceElement)element).getWrapped().getMetadata().getName());
+			return String.join(" ", "service", ((ServiceElement)element).getWrapped().getName());
 		} else if (element instanceof URLElement) {
 			return String.join(" ","url", ((URLElement)element).getWrapped().getName());
 		} else if (element instanceof StorageElement) {
@@ -102,7 +102,7 @@ public class DeleteHandler extends OdoHandler {
 				odo.deleteService(
 				        ((ServiceElement) element).getParent().getParent().getWrapped(),
 				        ((ServiceElement) element).getParent().getWrapped().getName(),
-				        ((ServiceElement) element).getWrapped().getMetadata().getName());
+				        ((ServiceElement) element).getWrapped());
 			} else if (element instanceof URLElement) {
 				odo.deleteURL(
 				        ((URLElement) element).getParent().getParent().getParent().getWrapped(),
