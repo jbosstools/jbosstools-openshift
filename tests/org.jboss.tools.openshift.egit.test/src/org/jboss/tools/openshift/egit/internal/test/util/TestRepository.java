@@ -92,7 +92,7 @@ public class TestRepository {
 		createFileRepository(gitDir);
 		// use repository instance from RepositoryCache!
 		this.gitDir = gitDir;
-		this.repository = Activator.getDefault().getRepositoryCache().lookupRepository(gitDir);
+		this.repository = RepositoryCache.INSTANCE.lookupRepository(gitDir);
 		this.workdirPrefix = getWorkdirPrefix(repository);
 	}
 
@@ -578,8 +578,7 @@ public class TestRepository {
 		CloneOperation clop = new CloneOperation(uri, true, null, path, Constants.R_HEADS + Constants.MASTER,
 				Constants.DEFAULT_REMOTE_NAME, 0);
 		clop.run(null);
-		RepositoryCache repositoryCache = Activator.getDefault().getRepositoryCache();
-		Repository clonedRepository = repositoryCache.lookupRepository(new File(path, Constants.DOT_GIT));
+		Repository clonedRepository = RepositoryCache.INSTANCE.lookupRepository(new File(path, Constants.DOT_GIT));
 		return new TestRepository(clonedRepository);
 	}
 
