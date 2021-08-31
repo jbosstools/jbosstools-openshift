@@ -34,6 +34,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.egit.core.Activator;
+import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.jgit.api.CheckoutResult;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.ConfigConstants;
@@ -69,7 +70,7 @@ public class EGitUtilsTest {
 
 	@Before
 	public void setUp() throws Exception {
-		Activator.getDefault().getRepositoryCache().clear();
+		RepositoryCache.INSTANCE.clear();
 
 		this.testProject = new TestProject(true);
 		this.testRepository = createTestRepository(testProject);
@@ -126,10 +127,10 @@ public class EGitUtilsTest {
 		if (testRepositoryClone != null) {
 			testRepositoryClone.dispose();
 		}
-		if (testRepository2 != null) {			
+		if (testRepository2 != null) {
 			testRepository2.dispose();
 		}
-		Activator.getDefault().getRepositoryCache().clear();
+		RepositoryCache.INSTANCE.clear();
 	}
 
 	@Test

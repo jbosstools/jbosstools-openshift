@@ -35,8 +35,7 @@ public class EGitUIUtils {
 
 		@Override
 		public void execute(Repository repository, IProgressMonitor monitor) throws CoreException {
-			RepositoryUtil repositoryUtil = Activator.getDefault().getRepositoryUtil();
-			repositoryUtil.addConfiguredRepository(repository.getDirectory());
+			RepositoryUtil.INSTANCE.addConfiguredRepository(repository.getDirectory());
 		}
 	};
 
