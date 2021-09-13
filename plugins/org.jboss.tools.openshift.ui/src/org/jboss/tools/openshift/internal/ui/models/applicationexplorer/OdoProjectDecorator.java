@@ -36,6 +36,8 @@ import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 import org.jboss.tools.openshift.core.odo.Storage;
 import org.jboss.tools.openshift.core.odo.URL;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -137,8 +139,8 @@ public class OdoProjectDecorator implements Odo {
 
   @Override
   public void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD,
-      String service, boolean wait) throws IOException {
-    delegate.createService(project, application, serviceTemplate, serviceCRD, service, wait);
+      String service, ObjectNode spec, boolean wait) throws IOException {
+    delegate.createService(project, application, serviceTemplate, serviceCRD, service, spec, wait);
   }
 
   @Override

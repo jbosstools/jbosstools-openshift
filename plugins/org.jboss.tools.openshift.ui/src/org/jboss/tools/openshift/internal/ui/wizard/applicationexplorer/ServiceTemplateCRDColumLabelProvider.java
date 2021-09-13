@@ -21,6 +21,6 @@ public class ServiceTemplateCRDColumLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		return ((OperatorCRD)element).getDisplayName();
+		return ((OperatorCRD)element).getKind();
 	}
 }

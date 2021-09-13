@@ -83,6 +83,9 @@ public class OpenShiftImages {
   public static final Image STARTER_IMG = repo.getImage("start-project-light.png"); //$NON-NLS-1$
   public static final ImageDescriptor REGISTRY = repo.create("registry.png"); //$NON-NLS-1$
   public static final Image REGISTRY_IMG = repo.getImage("registry.png"); //$NON-NLS-1$
+  public static final Image PLUS_IMG = repo.getImage("plus-solid-light.png");
+  public static final Image CHEVRON_DOWN_IMG = repo.getImage("chevron-down-solid-light.png");
+  
   
 	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<>();
 

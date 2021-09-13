@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.core.odo;
 import java.io.IOException;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public interface Odo {
     List<String> getNamespaces() throws IOException;
 
@@ -35,7 +37,7 @@ public interface Odo {
     void createComponentBinary(String project, String application, String context, String componentType, String componentVersion, String component, String source, boolean push) throws IOException;
 
     void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD, String service,
-      boolean wait) throws IOException;
+      ObjectNode spec, boolean wait) throws IOException;
 
     String getServiceTemplate(String project, String application, String service) throws IOException;
 

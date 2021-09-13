@@ -102,6 +102,7 @@ public class OdoCli implements Odo {
   private static final String METADATA_FIELD = "metadata";
   private static final String NAME_FIELD = "name";
   private static final String NAMESPACE_FIELD = "namespace";
+  private static final String SPEC_FIELD = "spec";
   
   /**
    * Home sub folder for the plugin
@@ -460,17 +461,22 @@ public class OdoCli implements Odo {
         .withPlural(service.getKind().toLowerCase() + "s").withVersion(version).build();
   }
   
-  private void ensureMetadata(JsonNode node, String project, String service) {
+  private void updatePayload(JsonNode node, JsonNode spec, String project, String service) {
     ((ObjectNode) node.get(METADATA_FIELD)).set(NAME_FIELD, JSON_MAPPER.getNodeFactory().textNode(service));
     ((ObjectNode) node.get(METADATA_FIELD)).set(NAMESPACE_FIELD, JSON_MAPPER.getNodeFactory().textNode(project));
+    if (spec != null) {
+      ((ObjectNode)node).set(SPEC_FIELD, spec);
+    }
   }  
 
   @Override
-  public void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD, String service, boolean wait) throws IOException {
+  public void createService(String project, String application, ServiceTemplate serviceTemplate, OperatorCRD serviceCRD, String service,
+      ObjectNode spec, boolean wait) throws IOException {
     try {
       CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(serviceCRD);
-      ensureMetadata(serviceCRD.getSample(), project, service);
-      client.customResource(context).create(project, JSON_MAPPER.writeValueAsString(serviceCRD.getSample()));
+      ObjectNode payload = serviceCRD.getSample().deepCopy();
+      updatePayload(payload, spec, project, service);
+      client.customResource(context).create(project, JSON_MAPPER.writeValueAsString(payload));
       UsageStats.getInstance().odoCommand("service create", true);
       UsageStats.getInstance().createService(serviceTemplate.getName(), true);
     } catch (IOException e) {
@@ -543,7 +549,7 @@ public class OdoCli implements Odo {
     }
 }
 
-private JsonNode findSchema(String crd) {
+private ObjectNode findSchema(String crd) {
     try {
         if (swaggerLoaded.compareAndSet(false, true)) {
             loadSwagger();
