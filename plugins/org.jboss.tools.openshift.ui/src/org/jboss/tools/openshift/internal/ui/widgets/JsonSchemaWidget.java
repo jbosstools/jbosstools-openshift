@@ -10,16 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.widgets;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ContainerNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -33,19 +33,17 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.function.Consumer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ContainerNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 /**
  * A widget whose content is driven by JSON schema. The widget is initially
@@ -56,18 +54,12 @@ import java.util.function.Consumer;
  */
 public class JsonSchemaWidget extends Composite {
 	private final class ControlConsumer implements Consumer<Boolean> {
-		private final Composite parent;
 		private Control control;
-
-		private ControlConsumer(Composite parent) {
-			this.parent = parent;
-		}
-
+		
 		@Override
 		public void accept(Boolean t) {
 			control.setVisible(t);
 			((GridData)control.getLayoutData()).exclude = !t;
-			parent.layout();
 		}
 
 		void setControl(Control control) {
@@ -86,11 +78,14 @@ public class JsonSchemaWidget extends Composite {
 	private static final String NAME_PROPERTY = JsonSchemaWidget.class.getName() + ".name";
 	private static final String REQUIRED_PROPERTY = JsonSchemaWidget.class.getName() + ".required";
 	
-	private static final Image PLUS_IMG = new Image(Display.getCurrent(), new ImageData("C:\\work\\src\\github.com\\jbosstools\\jbosstools-openshift\\plugins\\org.jboss.tools.openshift.ui\\icons\\plus-solid-light.png"));
-	private static final Image CHEVRON_DOWN_IMG = new Image(Display.getCurrent(), new ImageData("C:\\work\\src\\github.com\\jbosstools\\jbosstools-openshift\\plugins\\org.jboss.tools.openshift.ui\\icons\\chevron-down-solid-light.png")); 
+	private static final Image PLUS_IMG = new Image(Display.getCurrent(), new ImageData("/Users/andredietisheim/Documents/jboss-workspaces/jbosstools-github/jbosstools-openshift/plugins/org.jboss.tools.openshift.ui/icons/plus-solid-light.png"));
+	private static final Image CHEVRON_DOWN_IMG = new Image(Display.getCurrent(), new ImageData("/Users/andredietisheim/Documents/jboss-workspaces/jbosstools-github/jbosstools-openshift/plugins/org.jboss.tools.openshift.ui/icons/chevron-down-solid-light.png"));
 
-	public JsonSchemaWidget(Composite parent, int style) {
+	private final ScrolledComposite container; 
+	
+	public JsonSchemaWidget(Composite parent, int style, ScrolledComposite container) {
 		super(parent, style);
+		this.container = container;
 		GridLayout gridLayout = new GridLayout(1, false);
 		setLayout(gridLayout);
 	}
@@ -133,7 +128,7 @@ public class JsonSchemaWidget extends Composite {
 
 	private void createArrayItemWidget(String name, JsonNode node, JsonNode def, Composite panel) {
 		Composite itemPanel = new Composite(panel, SWT.NONE);
-		itemPanel.setLayout(new GridLayout(1, false));
+		GridLayoutFactory.fillDefaults().applyTo(itemPanel);
 		Button removeButton = new Button(itemPanel, SWT.NONE);
 		removeButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
 			itemPanel.dispose();
@@ -145,11 +140,13 @@ public class JsonSchemaWidget extends Composite {
 	}
 
 	private Composite getHeaderPanel(Composite parent, String name, Consumer<Boolean> sub) {
-		Label label;
 		Composite header = new Composite(parent, SWT.NONE);
-		header.setLayout(new GridLayout(2, false));
-		label = new Label(header, SWT.NONE);
+		GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 20).applyTo(header);
+		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(header);
+
+		Label label = new Label(header, SWT.NONE);
 		label.setText(name);
+		GridDataFactory.fillDefaults().applyTo(label);
 		Label sign = new Label(header, SWT.NONE);
 		sign.setImage(PLUS_IMG);
 		sign.setToolTipText("Click to expand");
@@ -165,8 +162,13 @@ public class JsonSchemaWidget extends Composite {
 					sign.setToolTipText("Click to expand");
 					sub.accept(false);
 				}
+				container.layout(true, true);
+				container.setMinSize(container.getContent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
 			}
+			
 		});
+		GridDataFactory.fillDefaults().grab(true,  true).applyTo(sign);
+
 		return header;
 	}
 
@@ -184,9 +186,10 @@ public class JsonSchemaWidget extends Composite {
 		case "integer":
 		case "number":
 			if (name != null) {
-				createNameLabel(parent, name, node);
+				Label label = createNameLabel(parent, name, node);
+				GridDataFactory.fillDefaults().exclude(true).applyTo(label);
 			}
-			Widget field;
+			Control field;
 			if (node.has(ENUM) && node.get(ENUM).isArray()) {
 				field = new Combo(parent, SWT.NONE);
 				for (JsonNode child : node.get(ENUM)) {
@@ -212,29 +215,31 @@ public class JsonSchemaWidget extends Composite {
 					}
 				}
 			}
+			GridDataFactory.fillDefaults().exclude(true).applyTo(field);
 			setMetadata(field, name, node.get(TYPE).asText(), required);
 			break;
 		case "boolean":
+			Label label = null;
 			if (name != null) {
-				createNameLabel(parent, name, node);
+				label = createNameLabel(parent, name, node);
+				GridDataFactory.fillDefaults().applyTo(label);
 			}
 			Button checkbox = new Button(parent, SWT.CHECK);
+			GridDataFactory.fillDefaults().grab(true, false).applyTo(checkbox);
 			if (def != null && def.has(name)) {
 				checkbox.setSelection(def.get(name).asBoolean());
 			}
 			setMetadata(checkbox, name, node.get(TYPE).asText(), required);
 			break;
 		case "object":
-			JsonSchemaWidget sub = null;
-			var acc = new ControlConsumer(parent);
+			var acc = new ControlConsumer();
 			if (name != null) {
 				getHeaderPanel(parent, getDisplayName(name, node), acc);
 			}
-			sub = new JsonSchemaWidget(parent, SWT.NONE);
-			sub.setLayoutData(GridDataFactory.fillDefaults().create());
+			JsonSchemaWidget sub = new JsonSchemaWidget(parent, SWT.NONE, container);
+			GridDataFactory.fillDefaults().applyTo(sub);
 			acc.setControl(sub);
 			if (name != null) {
-				sub.setVisible(false);
 				((GridData)sub.getLayoutData()).exclude = true;
 			}
 			sub.init((ObjectNode) node, def != null && name != null ? def.get(name) : def);
@@ -242,21 +247,21 @@ public class JsonSchemaWidget extends Composite {
 			break;
 		case "array":
 			if (node.has("items")) {
-				var acc1 = new ControlConsumer(parent);
+				var acc1 = new ControlConsumer();
 				if (name != null) {
 					getHeaderPanel(parent, getDisplayName(name, node), acc1);
 				}
 				Composite panel = new Composite(parent, SWT.NONE);
 				acc1.setControl(panel);
-				panel.setLayout(new GridLayout(1, false));
+				GridLayoutFactory.fillDefaults().numColumns(2).applyTo(panel);
+				GridDataFactory.fillDefaults()
+					.grab(true, false)
+					.exclude(true)
+					.applyTo(panel);
 				Button button = new Button(panel, SWT.NONE);
 				button.setText("Add " + getDisplayName(name, node));
-				button.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
-					createArrayItemWidget(name, node, null, panel);
-				}));
-				if (name != null) {
-					panel.setVisible(false);
-				}
+				button.addSelectionListener(
+						SelectionListener.widgetSelectedAdapter(e -> createArrayItemWidget(name, node, null, panel)));
 				setMetadata(panel, name, node.get(TYPE).asText(), required);
 				if (def != null && def.has(name) && def.get(name).isArray()) {
 					for (JsonNode item : def.withArray(name)) {
@@ -370,48 +375,23 @@ public class JsonSchemaWidget extends Composite {
 		Display display = Display.getCurrent();
 		Shell shell = new Shell(display);
 		shell.setText("Snippet 1");
+		GridLayoutFactory.fillDefaults().applyTo(shell);
+		shell.setSize(400, 400);
 		
         String kafkaSchema = Files.readString(Paths.get("kafka-schema.json"));
         ObjectNode schemaNode = new ObjectMapper().readValue(kafkaSchema, ObjectNode.class);
         String kafka = Files.readString(Paths.get("kafka.yaml"));
         ObjectNode sampleNode = new ObjectMapper(new YAMLFactory()).readValue(kafka, ObjectNode.class);
 
-        //Button b = new Button(shell, SWT.PUSH);
-        //b.setText("Click me");
-        
-        Composite parent = new Composite(shell, SWT.NONE);
-        parent.setLayout(new GridLayout(1, false));
-        parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        /*ScrolledComposite scrolled = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+        ScrolledComposite scrolled = new ScrolledComposite(shell, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(scrolled);
         scrolled.setExpandHorizontal(true);
         scrolled.setExpandVertical(true);
-        //scrolled.setMinSize(500, 500);
-        scrolled.setAlwaysShowScrollBars(true);
-        scrolled.setLayout(new GridLayout(1, false));
-        scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        scrolled.addListener(SWT.Resize, new Listener() {
-			
-			@Override
-			public void handleEvent(Event event) {
-				System.out.println("Resized");
-				
-			}
-		});*/
-        SashForm scrolled = new SashForm(parent, SWT.VERTICAL | SWT.BORDER);
-        scrolled.setLayout(new GridLayout(1, false));
-        
-        final JsonSchemaWidget jsonSchemaWidget = new JsonSchemaWidget(scrolled, SWT.NONE);
-        //scrolled.setContent(jsonSchemaWidget);
+        final JsonSchemaWidget jsonSchemaWidget = new JsonSchemaWidget(scrolled, SWT.NONE, scrolled);
         jsonSchemaWidget.init(schemaNode, sampleNode);
-        /*Button b = new Button(scrolled, SWT.PUSH);
-        b.setText("Push me");
-        scrolled.setContent(b);*/
-        //scrolled.setMinSize(jsonSchemaWidget.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        scrolled.setContent(jsonSchemaWidget);
+        scrolled.setMinSize(jsonSchemaWidget.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
-		shell.setLayout(new GridLayout(1, false));
-		
-		shell.pack ();
-		shell.setSize(400, shell.getSize().y);
 		shell.open ();
 		while (!shell.isDisposed ()) {
 			if (!display.readAndDispatch ()) display.sleep ();
