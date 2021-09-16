@@ -162,7 +162,7 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
               public JsonNode getSchema() {
                 if (schema == null) {
                   schema = schemaMapper.apply(getCRDPrefix(this) + "/namespaces/{namespace}/" + getCRDSuffix(this));
-                  if (schema == null) {
+                  if (schema != null) {
                     schema = SchemaHelper.getAnnotatedSchema(schema, getSpecDescriptors());
                   }
                 }
@@ -171,7 +171,7 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
 
               @Override
               public List<OperatorCRDSpecDescriptor> getSpecDescriptors() {
-                return Collections.emptyList();
+                return descriptors;
               }
             });
           }
