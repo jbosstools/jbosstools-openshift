@@ -479,6 +479,10 @@ public class OdoCli implements Odo {
       client.customResource(context).create(project, JSON_MAPPER.writeValueAsString(payload));
       UsageStats.getInstance().odoCommand("service create", true);
       UsageStats.getInstance().createService(serviceTemplate.getName(), true);
+    } catch (KubernetesClientException e) {
+        UsageStats.getInstance().odoCommand("service create", false);
+        UsageStats.getInstance().createService(serviceTemplate.getName(), false);
+        throw new IOException(e.getLocalizedMessage(), e);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("service create", false);
       UsageStats.getInstance().createService(serviceTemplate.getName(), false);
