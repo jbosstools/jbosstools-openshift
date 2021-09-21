@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.jboss.tools.openshift.core.odo.OperatorCRD;
+import org.jboss.tools.openshift.core.odo.OperatorCRDSpecDescriptor;
 import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 import org.jboss.tools.openshift.core.odo.ServiceTemplatesDeserializer;
 import org.junit.Assert;
@@ -102,6 +103,12 @@ public class ServiceTemplateTest {
     assertNotNull(crd.getSample());
     assertNull(crd.getSchema());
     assertNotNull(crd.getSpecDescriptors());
-    assertEquals(0, crd.getSpecDescriptors().size());
+    assertEquals(7, crd.getSpecDescriptors().size());
+    OperatorCRDSpecDescriptor descriptor = crd.getSpecDescriptors().get(0);
+    assertEquals("kafka.version", descriptor.getPath());
+    assertEquals("Version", descriptor.getDisplayName());
+    assertEquals("Kafka version", descriptor.getDescription());
+    assertEquals(1, descriptor.getDescriptors().size());
+    assertEquals("urn:alm:descriptor:com.tectonic.ui:text", descriptor.getDescriptors().get(0));
   }
 }

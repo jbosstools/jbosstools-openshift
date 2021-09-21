@@ -164,23 +164,21 @@ public class JSonParser {
     }
 
   private JsonNode resolve(JsonNode root, String ref) throws IOException {
-    JsonNode node = null;
+    JsonNode node = root;
     String[] ids = ref.split("/");
-    for (String id : ids) {
-      if ("#".equals(id)) {
-        if (node == null) {
-          node = root;
+    for(String id : ids) {
+        if (!"#".equals(id)) {
+            if (node.has(id)) {
+                node = node.get(id);
+            } else {
+                throw new IOException("Can't resolved reference '" + ref + "' element " + id + " not found");
+            }
         }
-      } else if (node != null && node.has(id)) {
-        node = node.get(id);
-      } else {
-        node = null;
-      }
     }
     return node;
   }
 
-  public JsonNode findSchema(String crd) throws IOException {
+  public ObjectNode findSchema(String crd) throws IOException {
     if (root.has(PATHS_FIELD)) {
       JsonNode node = root.get(PATHS_FIELD).get(crd);
       if (node != null && node.has(POST_FIELD) && node.get(POST_FIELD).has(PARAMETERS_FIELD)) {
@@ -189,9 +187,9 @@ public class JSonParser {
               && parameter.has(SCHEMA_FIELD)) {
             JsonNode schema = parameter.get(SCHEMA_FIELD);
             if (schema.has(DOLLAR_REF_FIELD)) {
-              return resolveRefs(root, resolve(root, schema.get(DOLLAR_REF_FIELD).asText()));
+              return (ObjectNode) resolveRefs(root, resolve(root, schema.get(DOLLAR_REF_FIELD).asText()));
             } else {
-              return resolveRefs(root, schema);
+              return (ObjectNode) resolveRefs(root, schema);
             }
           }
         }

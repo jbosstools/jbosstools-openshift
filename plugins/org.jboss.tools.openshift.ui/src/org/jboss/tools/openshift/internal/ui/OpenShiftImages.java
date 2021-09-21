@@ -78,11 +78,16 @@ public class OpenShiftImages {
 	public static final ImageDescriptor URL_SECURE = repo.create("url-node-secure.png"); //$NON-NLS-1$
 	public static final Image URL_SECURE_IMG = repo.getImage("url-node-secure.png"); //$NON-NLS-1$
 	public static final ImageDescriptor COMPONENT_TYPE = repo.create("component-type-light.png"); //$NON-NLS-1$
-  public static final Image COMPONENT_TYPE_IMG = repo.getImage("component-type-light.png"); //$NON-NLS-1$
-  public static final ImageDescriptor STARTER = repo.create("start-project-light.png"); //$NON-NLS-1$
-  public static final Image STARTER_IMG = repo.getImage("start-project-light.png"); //$NON-NLS-1$
-  public static final ImageDescriptor REGISTRY = repo.create("registry.png"); //$NON-NLS-1$
-  public static final Image REGISTRY_IMG = repo.getImage("registry.png"); //$NON-NLS-1$
+ 	public static final Image COMPONENT_TYPE_IMG = repo.getImage("component-type-light.png"); //$NON-NLS-1$
+ 	public static final ImageDescriptor STARTER = repo.create("start-project-light.png"); //$NON-NLS-1$
+	public static final Image STARTER_IMG = repo.getImage("start-project-light.png"); //$NON-NLS-1$
+	public static final ImageDescriptor REGISTRY = repo.create("registry.png"); //$NON-NLS-1$
+	public static final Image REGISTRY_IMG = repo.getImage("registry.png"); //$NON-NLS-1$
+	public static final ImageDescriptor PLUS = repo.create("plus-solid-light.png");
+	public static final Image PLUS_IMG = repo.getImage("plus-solid-light.png");
+	public static final ImageDescriptor CHEVRON_DOWN = repo.create("chevron-down-solid-light.png");
+	public static final Image CHEVRON_DOWN_IMG = repo.getImage("chevron-down-solid-light.png");
+  
   
 	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<>();
 

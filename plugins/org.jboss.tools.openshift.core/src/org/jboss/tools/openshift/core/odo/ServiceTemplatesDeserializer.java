@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.io.IOException;
@@ -39,12 +40,15 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
   private static final String DISPLAY_NAME_FIELD = "displayName";
   private static final String DESCRIPTION_FIELD = "description";
   private static final String API_VERSION_FIELD = "apiVersion";
-  
+  private static final String SPEC_DESCRIPTORS_FIELD = "specDescriptors";
+  private static final String PATH_FIELD = "path";
+  private static final String DESCRIPTORS_FIELD = "x-descriptors";
+    
   private static final ObjectMapper MAPPER = new ObjectMapper();
   
-  private final Function<String, JsonNode> schemaMapper;
+  private final Function<String, ObjectNode> schemaMapper;
 
-  public ServiceTemplatesDeserializer(Function<String, JsonNode> schemaMapper) {
+  public ServiceTemplatesDeserializer(Function<String, ObjectNode> schemaMapper) {
     super(TypeFactory.defaultInstance().constructCollectionType(List.class, ServiceTemplate.class));
     this.schemaMapper = schemaMapper;
   }
@@ -54,6 +58,46 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
     List<ServiceTemplate> result = new ArrayList<>();
     convertOperators(root, result);
     return result;
+  }
+  
+  private List<OperatorCRDSpecDescriptor> getSpecDescriptors(JsonNode node) {
+    List<OperatorCRDSpecDescriptor> descriptors = new ArrayList<>();
+    if (node.has(SPEC_DESCRIPTORS_FIELD) && node.get(SPEC_DESCRIPTORS_FIELD).isArray()) {
+      for (JsonNode item : node.withArray(SPEC_DESCRIPTORS_FIELD)) {
+        if (item.has(PATH_FIELD)) {
+          String displayName = item.has(DISPLAY_NAME_FIELD) ? item.get(DISPLAY_NAME_FIELD).asText() : "";
+          String description = item.has(DESCRIPTION_FIELD) ? item.get(DESCRIPTION_FIELD).asText() : "";
+          List<String> descs = new ArrayList<>();
+          if (item.has(DESCRIPTORS_FIELD) && item.get(DESCRIPTORS_FIELD).isArray()) {
+            for (JsonNode desc : item.withArray(DESCRIPTORS_FIELD)) {
+              descs.add(desc.asText());
+            }
+          }
+          descriptors.add(new OperatorCRDSpecDescriptor() {
+            @Override
+            public String getPath() {
+              return item.get(PATH_FIELD).asText();
+            }
+
+            @Override
+            public String getDisplayName() {
+              return displayName;
+            }
+
+            @Override
+            public String getDescription() {
+              return description;
+            }
+
+            @Override
+            public List<String> getDescriptors() {
+              return descs;
+            }
+          });
+        }
+      }
+    }
+    return descriptors;
   }
   
   private void convertOperators(JsonNode root, List<ServiceTemplate> result) throws JsonProcessingException {
@@ -76,7 +120,11 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
           List<OperatorCRD> crds = new ArrayList<>();
           for (JsonNode crd : item.get(SPEC_FIELD).get(CRD_FIELD).get(OWNED_FIELD)) {
             ArrayNode finalSamples = samples;
+            List<OperatorCRDSpecDescriptor> descriptors = getSpecDescriptors(crd);
             crds.add(new OperatorCRD() {
+              private ObjectNode sample;
+              private ObjectNode schema;
+                
               @Override
               public String getName() {
                 return crd.get(NAME_FIELD).asText();
@@ -104,20 +152,26 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
 
               @Override
               public JsonNode getSample() {
-                if (finalSamples != null) {
-                  return selectSample(finalSamples, this);
+                if (sample == null && finalSamples != null) {
+                  sample = selectSample(finalSamples, this);
                 }
-                return null;
+                return sample;
               }
 
               @Override
               public JsonNode getSchema() {
-                return schemaMapper.apply(getCRDPrefix(this) + "/namespaces/{namespace}/" + getCRDSuffix(this));
+                if (schema == null) {
+                  schema = schemaMapper.apply(getCRDPrefix(this) + "/namespaces/{namespace}/" + getCRDSuffix(this));
+                  if (schema != null) {
+                    schema = SchemaHelper.getAnnotatedSchema(schema, getSpecDescriptors());
+                  }
+                }
+                return schema;
               }
 
               @Override
               public List<OperatorCRDSpecDescriptor> getSpecDescriptors() {
-                return Collections.emptyList();
+                return descriptors;
               }
             });
           }
@@ -142,13 +196,13 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
     }
   }
 
-  private JsonNode selectSample(ArrayNode samples, OperatorCRD crd) {
+  private ObjectNode selectSample(ArrayNode samples, OperatorCRD crd) {
     String name = getCRDPrefix(crd);
-    JsonNode result = null;
+    ObjectNode result = null;
     for (JsonNode node : samples) {
       if (node.has(API_VERSION_FIELD) && node.get(API_VERSION_FIELD).asText().equals(name) && node.has(KIND_FIELD)
           && node.get(KIND_FIELD).asText().equals(crd.getKind())) {
-        result = node;
+        result = (ObjectNode) node;
         break;
       }
     }

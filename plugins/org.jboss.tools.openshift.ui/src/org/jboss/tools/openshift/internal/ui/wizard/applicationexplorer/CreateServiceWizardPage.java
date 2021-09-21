@@ -11,12 +11,19 @@
 package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
@@ -24,10 +31,12 @@ import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -39,6 +48,12 @@ import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.widgets.JsonSchemaWidget;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * @author Red Hat Developers
@@ -46,7 +61,13 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
  */
 public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 
+	private static final String PROPERTIES = "properties";
+	private static final String SPEC = "spec";
+	
 	private CreateServiceModel model;
+	private JsonSchemaWidget schemaWidget;
+	
+	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	protected CreateServiceWizardPage(IWizard wizard, CreateServiceModel model) {
 		super("Create service", "Specify a name for your service and choose a template to start from.", "Create service", wizard);
@@ -110,6 +131,20 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 		ControlDecorationSupport.create(serviceCRDsBinding, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater());
+		
+		ScrolledComposite schemaParentComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(3, 1)
+		.applyTo(schemaParentComposite);
+		schemaParentComposite.setExpandHorizontal(true);
+		schemaParentComposite.setExpandVertical(true);
+		schemaWidget = new JsonSchemaWidget(schemaParentComposite, ERROR, schemaParentComposite);
+		schemaParentComposite.setContent(schemaWidget);
+		schemaParentComposite.setMinHeight(250);
+		serviceCRDsComboViewer.addSelectionChangedListener(e -> {
+			initSchemaWidget();
+		});
+		initSchemaWidget();
+		
 
 		Label applicationLabel = new Label(parent, SWT.NONE);
 		applicationLabel.setText("Application:");
@@ -128,13 +163,58 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 			applicationNameText.setEnabled(false);
 		}
 }
+
+	private void initSchemaWidget() {
+		Job job = new Job("Loading schema for " + model.getSelectedServiceTemplateCRD().getKind()) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				JsonNode schema = model.getSelectedServiceTemplateCRD().getSchema();
+				schemaWidget.getDisplay().asyncExec(() -> {
+					if (schema.has(PROPERTIES) && schema.get(PROPERTIES).has(SPEC)) {
+						schemaWidget.setEnabled(true);
+						schemaWidget.init((ObjectNode) schema.get(PROPERTIES).get(SPEC),
+								model.getSelectedServiceTemplateCRD().getSample() != null
+										&& model.getSelectedServiceTemplateCRD().getSample().has(SPEC)
+												? model.getSelectedServiceTemplateCRD().getSample().get(SPEC)
+												: null);
+					} else {
+						schemaWidget.setEnabled(false);
+					}
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		try {
+			getContainer().run(true, true, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					job.addJobChangeListener(new JobChangeAdapter() {
+						@Override
+						public void done(IJobChangeEvent event) {
+							monitor.done();
+						}
+					});
+					monitor.beginTask(job.getName(), IProgressMonitor.UNKNOWN);
+					job.schedule();
+				}
+			});
+		} catch (InvocationTargetException | InterruptedException e) {
+			OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+		}
+	}
 	
 	/**
 	 * @return
 	 */
 	public boolean finish() {
 		try {
-			model.getOdo().createService(model.getProjectName(), model.getApplicationName(), model.getSelectedServiceTemplate(), model.getSelectedServiceTemplateCRD(), model.getServiceName(), false);
+			ObjectNode spec = null;
+			if (schemaWidget.isEnabled()) {
+				spec = MAPPER.createObjectNode();
+				schemaWidget.dump(spec);
+			}
+			model.getOdo().createService(model.getProjectName(), model.getApplicationName(), model.getSelectedServiceTemplate(),
+			    model.getSelectedServiceTemplateCRD(), model.getServiceName(), spec, false);
 			return true;
 		} catch (IOException e) {
 			setErrorMessage(e.getLocalizedMessage());
