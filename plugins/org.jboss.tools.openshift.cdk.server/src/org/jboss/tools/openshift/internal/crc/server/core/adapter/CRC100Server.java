@@ -73,10 +73,14 @@ public class CRC100Server extends ServerDelegate {
 		File homeF = new File(home);
 		if( !homeF.exists() || !homeF.isDirectory())
 			return false;
+		
+		// Verification of crc being initialized
+		// this is very unreliable check and should be improved in future
+		// https://issues.redhat.com/browse/JBIDE-27921
 		File bin = new File(homeF, "bin");
 		File json = new File(homeF, "crc.json");
 		File log = new File(homeF, "crc.log");
-		if (!bin.exists() || !json.exists() || !log.exists()) {
+		if (!json.exists() || !log.exists()) {
 			return false;
 		}
 		
@@ -84,6 +88,9 @@ public class CRC100Server extends ServerDelegate {
 		if( matchesCRC_1_24_OrGreater(getServer()))
 			return true;
 		
+		if (!bin.exists()) {
+			return false;
+		}
 		File oc = new File(bin, "oc");
 		File ocExe = new File(bin, "oc.exe");
 		if( !oc.exists() && !ocExe.exists()) 
