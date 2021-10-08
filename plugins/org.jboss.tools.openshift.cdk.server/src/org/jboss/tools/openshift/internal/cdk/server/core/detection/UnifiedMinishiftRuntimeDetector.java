@@ -291,11 +291,13 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 		String path = configJson.getAbsolutePath();
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(path)));
-			ModelNode mn = ModelNode.fromJSONString(content);
-			ModelNode o = mn.get(VM_DRIVER);
-			String val = (o == null ? null : o.asString());
-			if (val != null && Arrays.asList(validHypervisors).contains(val)) {
-				return val;
+			if (!content.isEmpty()) {
+				ModelNode mn = ModelNode.fromJSONString(content);
+				ModelNode o = mn.get(VM_DRIVER);
+				String val = (o == null ? null : o.asString());
+				if (val != null && Arrays.asList(validHypervisors).contains(val)) {
+					return val;
+				}
 			}
 		} catch (IOException e) {
 			CDKCoreActivator.pluginLog().logError("Error parsing " + path, e);
