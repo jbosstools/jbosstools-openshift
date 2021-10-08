@@ -27,7 +27,7 @@ public class DownloadContainerRuntimeDefaultSettingsTest extends DownloadContain
 	
 	@Test
 	public void testDownloadingCDK320RuntimeDefaults() {
-		downloadAndVerifyContainerRuntime(CDKVersion.CDK3160, USERNAME, PASSWORD, "", "", true, true);
+		downloadAndVerifyContainerRuntime(CDKVersion.CDK3170, USERNAME, PASSWORD, "", "", true, true);
 	}
 	
 	@Test

@@ -287,14 +287,16 @@ public class CDKTestUtils {
 	}
 	
 	public static void assertSameMessage(final NewMenuWizard dialog, final String message) {
+		new WaitUntil(new JobIsRunning(), TimePeriod.SHORT, false);
 		new WaitWhile(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
 		String description = dialog.getMessage();
 		assertTrue("Expected page description should contain text: '" + message + 
 				"' but has: '" + description + "'", 
-				description.contains(message));		
+				description.contains(message));
 	}
 	
 	public static void assertDiffMessage(final NewMenuWizard dialog, final String message) {
+		new WaitUntil(new JobIsRunning(), TimePeriod.SHORT, false);
 		new WaitWhile(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
 		String description = dialog.getMessage();
 		assertFalse("Page descrition should not contain: '" + message + "'", 
