@@ -27,7 +27,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.redhat.devtools.alizer.api.DevfileType;
 import com.redhat.devtools.alizer.api.LanguageRecognizer;
-import com.redhat.devtools.alizer.api.LanguageRecognizerBuilder;
+import com.redhat.devtools.alizer.api.RecognizerFactory;
 
 /**
  * @author Red Hat Developers
@@ -45,7 +45,7 @@ public class CreateComponentModel extends ComponentModel {
 	
 	public static final String DEVFILE_NAME = "devfile.yaml";
 	
-	private static final LanguageRecognizer recognizer = new LanguageRecognizerBuilder().build();
+	private static final LanguageRecognizer recognizer = new RecognizerFactory().createLanguageRecognizer();
 	
 
 	private IProject eclipseProject;
