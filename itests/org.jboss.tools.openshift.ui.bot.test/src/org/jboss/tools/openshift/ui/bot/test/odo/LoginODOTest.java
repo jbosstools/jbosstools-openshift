@@ -12,6 +12,13 @@ package org.jboss.tools.openshift.ui.bot.test.odo;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
+
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
@@ -22,6 +29,7 @@ import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
 import org.jboss.tools.openshift.ui.bot.test.AbstractODOTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionCredentialsExists;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -36,12 +44,24 @@ public class LoginODOTest extends AbstractODOTest  {
 	String username = DatastoreOS3.USERNAME;
 	String password = DatastoreOS3.PASSWORD;
 	String token = DatastoreOS3.TOKEN;
+	
+	@BeforeClass
+	public static void deleteODOBinary() {
+		try {
+		 Files.walk(Paths.get((System.getProperty("user.home") + System.getProperty("file.separator") + ".odo" + System.getProperty("file.separator") + "cache")))
+		    .sorted(Comparator.reverseOrder())
+		    .map(Path::toFile)
+		    .forEach(File::delete);
+		} catch (IOException ex) {
+			 ex.printStackTrace();
+		 }
+	}
 
 	@Test
 	@RunIf(conditionClass = ConnectionCredentialsExists.class)
 	public void testCreateNewODOBasicConnection() {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
-		explorer.open();
+		explorer.open(true);
 
 		explorer.connectToOpenShiftODOBasic(server, username, password);
 		try {
@@ -67,4 +87,5 @@ public class LoginODOTest extends AbstractODOTest  {
 		assertTrue("Connection does not exist in OpenShift Application Explorer view",
 				explorer.connectionExists());
 	}
+	
 }

@@ -22,6 +22,7 @@ import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.reddeer.jface.condition.WindowIsAvailable;
 import org.eclipse.reddeer.jface.wizard.WizardDialog;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
@@ -29,6 +30,7 @@ import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.jboss.tools.common.launcher.reddeer.wizards.NewLauncherProjectWizard;
 import org.jboss.tools.common.launcher.reddeer.wizards.NewLauncherProjectWizardPage;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.core.odo.URL;
 import org.jboss.tools.openshift.internal.ui.odo.OdoCliFactory;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -48,6 +50,7 @@ import org.junit.After;
  * 
  * @author jkopriva@redhat.com
  */
+@OpenPerspective(JBossPerspective.class)
 public abstract class AbstractODOTest {
 	
 	protected static String eclipseProject = "myservice";
