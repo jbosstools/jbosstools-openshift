@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
@@ -64,6 +65,8 @@ public class CreateServiceHandler extends AbstractHandler {
 				    application.refresh();
 				  }
 				}
+			} else {
+				MessageDialog.openWarning(HandlerUtil.getActiveShell(event), "Create service", "No operators installed on your cluster, can't create services");
 			}
 			return Status.OK_STATUS;
 
