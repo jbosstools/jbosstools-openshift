@@ -6,7 +6,6 @@ Bundle-Version: 3.17.0.qualifier
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
 Require-Bundle: org.jboss.tools.common.core;bundle-version="3.7.0",
- org.jboss.tools.locus.mockito;bundle-version="1.9.5",
  org.eclipse.core.resources;bundle-version="3.9.100",
  org.eclipse.core.filesystem;bundle-version="1.4.200",
  org.junit;bundle-version="4.8.2",
@@ -26,7 +25,8 @@ Require-Bundle: org.jboss.tools.common.core;bundle-version="3.7.0",
  org.jboss.ide.eclipse.as.core;bundle-version="3.1.1",
  org.jboss.tools.openshift.core;bundle-version="3.3.0",
  org.jboss.tools.runtime.core,
- org.jboss.tools.stacks.core
+ org.jboss.tools.stacks.core,
+ org.mockito;bundle-version="2.23.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.jboss.tools.openshift.cdk.server.test.CDKTestActivator
 Bundle-ActivationPolicy: lazy

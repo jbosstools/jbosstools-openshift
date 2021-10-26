@@ -12,7 +12,6 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.openshift.ui;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.common.core;bundle-version="3.7.0",
  org.jboss.tools.common.ui;bundle-version="3.7.1",
- org.jboss.tools.locus.mockito;bundle-version="1.9.5",
  org.jboss.ide.eclipse.as.core;bundle-version="3.1.1",
  org.jboss.ide.eclipse.as.wtp.core;bundle-version="3.1.1",
  org.eclipse.core.resources;bundle-version="3.9.100",
@@ -50,7 +49,8 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  com.fasterxml.jackson.core.jackson-databind,
  org.eclipse.text,
  org.eclipse.ui.editors,
- org.eclipse.ui.tests.harness
+ org.eclipse.ui.tests.harness,
+ org.mockito;bundle-version="2.23.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.jboss.tools.openshift.internal.test.OpenShiftTestActivator
 Bundle-ActivationPolicy: lazy
