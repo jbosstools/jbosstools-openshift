@@ -11,10 +11,10 @@
 package org.jboss.tools.openshift.test.core.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -31,21 +31,17 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.DockerImageLabels;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
-import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
@@ -96,15 +92,13 @@ public class DockerImageLabelsTest {
 		connection = ResourceMocks.createConnection("https://localhost:8686", "aUser");
 		dc = mockDeploymentConfig(DOCKER_IMAGE_TAG, DOCKER_IMAGE_TAG);
 		this.labelsThatFailsToLoadImageStreamTag = spy(new TestableDockerImageLabels(dc, connection));
-		doReturn(null)
-			.when(labelsThatFailsToLoadImageStreamTag)
-				.getImageStreamTag(any(DockerImageURI.class), anyString(), any(IProgressMonitor.class));
+		doReturn(null).when(labelsThatFailsToLoadImageStreamTag).getImageStreamTag(any(DockerImageURI.class),
+				anyString(), any(IProgressMonitor.class));
 	}
 
 	private IDeploymentConfig mockDeploymentConfig(String triggerImageUri, String containerImageUri) {
-		IDeploymentConfig withChangeTriggerAndContainerImage = 
-				ResourceMocks.createDeploymentConfig("dc", 
-						ResourceMocks.createProject("aProject"), null, null);
+		IDeploymentConfig withChangeTriggerAndContainerImage = ResourceMocks.createDeploymentConfig("dc",
+				ResourceMocks.createProject("aProject"), null, null);
 		mockImageChangeTrigger(triggerImageUri, withChangeTriggerAndContainerImage);
 		mockContainer(containerImageUri, withChangeTriggerAndContainerImage);
 		return withChangeTriggerAndContainerImage;
@@ -128,8 +122,8 @@ public class DockerImageLabelsTest {
 
 	private void mockImageStreamTag(String url, Connection connection) throws IOException {
 		IResource imageStreamTag = mockImageStreamTag(url);
-		doReturn(imageStreamTag)
-			.when(connection).getResource(eq(ResourceKind.IMAGE_STREAM_TAG), anyString(), anyString());
+		doReturn(imageStreamTag).when(connection).getResource(eq(ResourceKind.IMAGE_STREAM_TAG), anyString(),
+				anyString());
 	}
 
 	private IResource mockImageStreamTag(String url) throws IOException {
@@ -159,8 +153,8 @@ public class DockerImageLabelsTest {
 		// when
 		labelsThatHaveOnlyTrigger.load(new NullProgressMonitor());
 		// then
-		verify(labelsThatHaveOnlyTrigger).getImageStreamTag(
-				argThat(new DockerImageURIArgumentMatcher()), anyString(), any(IProgressMonitor.class));
+		verify(labelsThatHaveOnlyTrigger).getImageStreamTag(argThat(new DockerImageURIArgumentMatcher()), anyString(),
+				any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -169,8 +163,8 @@ public class DockerImageLabelsTest {
 		// when
 		labelsThatHaveOnlyContainer.load(new NullProgressMonitor());
 		// then
-		verify(labelsThatHaveOnlyContainer).getImageStreamTag(
-				argThat(new DockerImageURIArgumentMatcher()), anyString(), any(IProgressMonitor.class));
+		verify(labelsThatHaveOnlyContainer).getImageStreamTag(argThat(new DockerImageURIArgumentMatcher()), anyString(),
+				any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -271,18 +265,11 @@ public class DockerImageLabelsTest {
 		assertThat(podPath).isNull();
 	}
 
-	private final class DockerImageURIArgumentMatcher extends ArgumentMatcher<DockerImageURI> {
+	private final class DockerImageURIArgumentMatcher implements ArgumentMatcher<DockerImageURI> {
 
 		@Override
-		public boolean matches(Object argument) {
-			if (!(argument instanceof DockerImageURI)) {
-				return false;
-			}
-			return DOCKER_IMAGE_TAG.equals(((DockerImageURI) argument).getAbsoluteUri());
-		}
-
-		@Override
-		public void describeTo(Description description) {				
+		public boolean matches(DockerImageURI argument) {
+			return DOCKER_IMAGE_TAG.equals(argument.getAbsoluteUri());
 		}
 	}
 
