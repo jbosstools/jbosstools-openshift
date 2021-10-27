@@ -678,7 +678,7 @@ public class OpenShiftDebugModeTest {
 	}
 
 	private static ArgumentMatcher<Set<IPort>> aSetThatContainsPort(final int port) {
-		return new ArgumentMatcher<>() {
+		return new ArgumentMatcher<Set<IPort>>() {
 
 			@Override
 			public boolean matches(Set<IPort> set) {
@@ -692,7 +692,7 @@ public class OpenShiftDebugModeTest {
 	}
 
 	private static ArgumentMatcher<Set<IPort>> aSetEqualTo(final IPort... ports) {
-		return new ArgumentMatcher<>() {
+		return new ArgumentMatcher<Set<IPort>>() {
 
 			@Override
 			public boolean matches(Set<IPort> set) {
