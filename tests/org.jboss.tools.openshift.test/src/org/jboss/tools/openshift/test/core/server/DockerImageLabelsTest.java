@@ -47,7 +47,7 @@ import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class DockerImageLabelsTest {
 
 	private static final String DOCKER_IMAGE_TAG = "nodejs:latest";

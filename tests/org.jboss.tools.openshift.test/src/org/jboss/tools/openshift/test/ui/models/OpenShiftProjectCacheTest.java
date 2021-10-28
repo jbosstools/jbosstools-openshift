@@ -39,12 +39,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class OpenShiftProjectCacheTest {
 
 	private IConnectionWrapper connectionWrapper;

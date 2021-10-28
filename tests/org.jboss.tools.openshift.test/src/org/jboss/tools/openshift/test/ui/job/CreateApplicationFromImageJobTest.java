@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.IResourceFactory;
@@ -44,7 +44,7 @@ import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.build.IBuildConfigBuilder;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class CreateApplicationFromImageJobTest {
 
 	protected static final String PROJECT_NAME = "theProjectName";

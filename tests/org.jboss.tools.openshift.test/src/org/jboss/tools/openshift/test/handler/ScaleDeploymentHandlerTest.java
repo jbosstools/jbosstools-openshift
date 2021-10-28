@@ -10,10 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.handler;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -37,7 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IDeploymentConfig;
@@ -50,7 +50,7 @@ import com.openshift.restclient.model.IService;
  * @author Andre Dietisheim
  * @author Viacheslav Kabanovich
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ScaleDeploymentHandlerTest {
 
 	private static final String SCALE_DOWN_1 = "-1";

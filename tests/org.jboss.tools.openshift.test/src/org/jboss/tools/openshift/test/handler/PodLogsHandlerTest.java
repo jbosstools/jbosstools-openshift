@@ -30,13 +30,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IPod;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class PodLogsHandlerTest {
 
 	@Mock

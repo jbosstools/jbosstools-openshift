@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.openshift.restclient.IClient;
@@ -46,7 +46,7 @@ import com.openshift.restclient.model.template.ITemplate;
 /**
  * @author jeff.cantrill
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class CreateApplicationFromTemplateJobTest {
 
 	@Mock
