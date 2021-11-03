@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.server.util;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -59,15 +59,16 @@ public class OpenShiftServerTestUtils {
 
 	public static IServer createOpenshift3Server(String name, String profile, IService service,
 			IOpenShiftConnection connection) throws CoreException, UnsupportedEncodingException, MalformedURLException {
-		 return createOpenshift3Server(name, profile, service, connection, null);
+		return createOpenshift3Server(name, profile, service, connection, null);
 	}
 
 	public static IServer createOpenshift3Server(String name, String profile, IService service,
-			IOpenShiftConnection connection, IFile file) throws CoreException, UnsupportedEncodingException, MalformedURLException {
+			IOpenShiftConnection connection, IFile file)
+			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		IServerWorkingCopy workingCopy = createOpenshift3ServerWorkingCopy(name, profile, service, connection, file);
 		return workingCopy.save(true, null);
 	}
-	
+
 	public static IServerWorkingCopy createOpenshift3ServerWorkingCopy(String name, IFile file) throws CoreException {
 		IServerType type = OpenShiftServerUtils.getServerType();
 		return type.createServer(name, file, null);
@@ -83,7 +84,8 @@ public class OpenShiftServerTestUtils {
 	}
 
 	public static IServerWorkingCopy createOpenshift3ServerWorkingCopy(String name, String profile, IService service,
-			IOpenShiftConnection connection, IFile file) throws CoreException, UnsupportedEncodingException, MalformedURLException {
+			IOpenShiftConnection connection, IFile file)
+			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		IServerWorkingCopy wc = createOpenshift3ServerWorkingCopy(name, file);
 		String serviceId = service == null ? null : OpenShiftResourceUniqueId.get(service);
 		String connectionUrl = connection == null ? null : ConnectionURL.forConnection(connection).getUrl();
@@ -98,11 +100,12 @@ public class OpenShiftServerTestUtils {
 
 		if (connection != null) {
 			String connectionUrl = ConnectionURL.forConnection(connection).toString();
-			doReturn(connectionUrl).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_CONNECTIONURL), anyString());
+			doReturn(connectionUrl).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_CONNECTIONURL),
+					nullable(String.class));
 		}
 
 		String resourceUniqueId = OpenShiftResourceUniqueId.get(resource);
-		doReturn(resourceUniqueId).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
+		doReturn(resourceUniqueId).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), nullable(String.class));
 		doReturn(workingCopy).when(server).createWorkingCopy();
 		return server;
 	}

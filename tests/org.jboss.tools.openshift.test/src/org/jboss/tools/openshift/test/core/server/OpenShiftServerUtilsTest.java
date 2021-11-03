@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -117,7 +118,7 @@ public class OpenShiftServerUtilsTest {
 	@Test
 	public void should_not_return_connection_from_server_given_malformed_url() {
 		// given
-		doReturn("htt:/bogus").when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_CONNECTIONURL), anyString());
+		doReturn("htt:/bogus").when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_CONNECTIONURL), nullable(String.class));
 		// when
 		Connection connection = OpenShiftServerUtils.getConnection(server);
 		// then

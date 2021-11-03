@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -269,11 +270,11 @@ public class ScaleDeploymentHandlerTest {
 	}
 
 	private void givenAUserConfirmsStoppingAllPods() {
-		doReturn(true).when(handler).showStopDeploymentWarning(anyString(), any(Shell.class));
+		doReturn(true).when(handler).showStopDeploymentWarning(anyString(), nullable(Shell.class));
 	}
 
 	private void givenAUserDoesNotConfirmStopAllPods() {
-		doReturn(false).when(handler).showStopDeploymentWarning(anyString(), any(Shell.class));
+		doReturn(false).when(handler).showStopDeploymentWarning(anyString(), nullable(Shell.class));
 	}
 
 	private void givenNoDeploymentConfigExist() {

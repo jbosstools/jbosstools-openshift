@@ -11,6 +11,7 @@ package org.jboss.tools.openshift.test.core;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -51,9 +52,9 @@ public class LazySSLCertificateCallbackTest {
 	public void setup() {
 		lazyCallback = spy(new LazySSLCertificateCallback());
 		when(permissiveExtensionCallback.allowCertificate(any(X509Certificate[].class))).thenReturn(true);
-		//when(permissiveExtensionCallback.allowHostname(any(String.class), any(SSLSession.class))).thenReturn(true);
+		when(permissiveExtensionCallback.allowHostname(nullable(String.class), nullable(SSLSession.class))).thenReturn(true);
 		when(denyingExtensionCallback.allowCertificate(any(X509Certificate[].class))).thenReturn(false);
-		//when(denyingExtensionCallback.allowHostname(any(String.class), any(SSLSession.class))).thenReturn(false);
+		when(denyingExtensionCallback.allowHostname(any(String.class), any(SSLSession.class))).thenReturn(false);
 	}
 
 	@Test
@@ -84,8 +85,8 @@ public class LazySSLCertificateCallbackTest {
 	public void testVerifyHostnameCertificateWhenHasCallback() {
 		when(lazyCallback.getExtension()).thenReturn(permissiveExtensionCallback);
 
-		assertTrue("Exp. to allow certs", lazyCallback.allowHostname(any(), any()));
-		verify(permissiveExtensionCallback, times(1)).allowHostname(any((String.class)), any(SSLSession.class));
+		assertTrue("Exp. to allow certs", lazyCallback.allowHostname(nullable(String.class), nullable(SSLSession.class)));
+		verify(permissiveExtensionCallback, times(1)).allowHostname(any(), any());
 	}
 
 	@Test

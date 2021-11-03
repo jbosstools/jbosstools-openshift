@@ -14,6 +14,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang.math.NumberUtils.toInt;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.not;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createConnection;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createContainer;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createDeploymentConfig;
@@ -26,12 +27,11 @@ import static org.jboss.tools.openshift.test.util.ResourceMocks.createService;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.mockGetContainers;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.mockGetEnvironmentVariables;
 import static org.mockito.AdditionalMatchers.and;
-import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -39,6 +39,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -53,8 +54,12 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -68,7 +73,6 @@ import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IContainer;
@@ -96,7 +100,7 @@ public class OpenShiftDebugModeTest {
 	private TestableDebugMode debugMode;
 
 	@Before
-	public void setUp() throws CoreException, UnsupportedEncodingException, MalformedURLException {
+	public void setUp() throws UnsupportedEncodingException, MalformedURLException {
 		this.connection = createConnection("https://localhost:8181", "aUser");
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 		this.project = createProject("someProject");
@@ -109,7 +113,7 @@ public class OpenShiftDebugModeTest {
 		this.serverWorkingCopy = OpenShiftServerTestUtils.mockServerWorkingCopy();
 		this.server = OpenShiftServerTestUtils.mockServer(serverWorkingCopy, dc, connection);
 		this.context = new TestableDebugContext(server, KEY_DEVMODE, KEY_DEBUGPORT, VALUE_DEBUGPORT);
-		this.debugMode = spy((TestableDebugMode) new TestableDebugMode(context));
+		this.debugMode = spy(new TestableDebugMode(context));
 	}
 
 	@After
@@ -564,7 +568,7 @@ public class OpenShiftDebugModeTest {
 		// given
 		int initialDelay = 42;
 		doReturn(String.valueOf(initialDelay)).when(server)
-				.getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY), anyString());
+				.getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY), nullable(String.class));
 		IProbe livenessProbe = createProbe(110, 111, 112, 113, 114);
 		mockGetContainers(Arrays.asList(createContainer("someDc-container1", Collections.singleton(createPort(42)),
 				livenessProbe, createProbe(20, 21, 22, 23, 24))), dc);
@@ -676,29 +680,37 @@ public class OpenShiftDebugModeTest {
 		// send updated dc
 		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
-
-	private static ArgumentMatcher<Set<IPort>> aSetThatContainsPort(final int port) {
-		return new ArgumentMatcher<Set<IPort>>() {
+	
+	private static Matcher<Set<IPort>> aSetThatContainsPort(final int port) {
+		return new TypeSafeMatcher<Set<IPort>>() {
 
 			@Override
-			public boolean matches(Set<IPort> set) {
+			protected boolean matchesSafely(Set<IPort> set) {
 				if (CollectionUtils.isEmpty(set)) {
 					return false;
 				}
 				return set.stream().anyMatch(portSpec -> portSpec.getContainerPort() == port);
 			}
 
+			@Override
+			public void describeTo(Description description) {
+				description.appendText(NLS.bind("Set of ports that contains the port {0}", port));
+			}
 		};
 	}
 
-	private static ArgumentMatcher<Set<IPort>> aSetEqualTo(final IPort... ports) {
-		return new ArgumentMatcher<Set<IPort>>() {
+	private static Matcher<Set<IPort>> aSetEqualTo(final IPort... ports) {
+		return new TypeSafeMatcher<Set<IPort>>() {
 
 			@Override
-			public boolean matches(Set<IPort> set) {
+			protected boolean matchesSafely(Set<IPort> set) {
 				return CollectionUtils.disjunction(Arrays.asList(ports), set).isEmpty();
 			}
 
+			@Override
+			public void describeTo(Description description) {
+				description.appendText("Set of ports that contains exactly the given ports.");
+			}
 		};
 	}
 
