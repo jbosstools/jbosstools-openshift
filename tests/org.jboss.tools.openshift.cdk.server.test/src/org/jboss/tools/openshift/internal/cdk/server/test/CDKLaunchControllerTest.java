@@ -51,7 +51,7 @@ public class CDKLaunchControllerTest {
 		verify(wc).setAttribute(CDKLaunchController.FLAG_INITIALIZED, true);
 		verify(wc).setAttribute(eq(IExternalLaunchConstants.ENVIRONMENT_VARS_KEY), eq(env));
 		verify(wc).setAttribute(IExternalLaunchConstants.ATTR_ARGS, "up --no-color");
-		verify(wc).setAttribute(eq(IExternalLaunchConstants.ATTR_LOCATION), anyString());
+		verify(wc).setAttribute(eq(IExternalLaunchConstants.ATTR_LOCATION), (String)any());
 	}
 
 	private IServer mockServer() {

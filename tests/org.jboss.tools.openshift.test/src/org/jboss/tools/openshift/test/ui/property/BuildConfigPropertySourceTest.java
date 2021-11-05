@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuildConfig;
@@ -35,7 +35,7 @@ import com.openshift.restclient.model.build.IDockerBuildStrategy;
 import com.openshift.restclient.model.build.IGitBuildSource;
 import com.openshift.restclient.model.build.ISourceBuildStrategy;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class BuildConfigPropertySourceTest {
 
 	@Mock

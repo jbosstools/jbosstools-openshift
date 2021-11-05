@@ -27,11 +27,11 @@ import static org.jboss.tools.openshift.test.util.ResourceMocks.createService;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.mockGetContainers;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.mockGetEnvironmentVariables;
 import static org.mockito.AdditionalMatchers.and;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -39,6 +39,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -99,7 +100,7 @@ public class OpenShiftDebugModeTest {
 	private TestableDebugMode debugMode;
 
 	@Before
-	public void setUp() throws CoreException, UnsupportedEncodingException, MalformedURLException {
+	public void setUp() throws UnsupportedEncodingException, MalformedURLException {
 		this.connection = createConnection("https://localhost:8181", "aUser");
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 		this.project = createProject("someProject");
@@ -112,7 +113,7 @@ public class OpenShiftDebugModeTest {
 		this.serverWorkingCopy = OpenShiftServerTestUtils.mockServerWorkingCopy();
 		this.server = OpenShiftServerTestUtils.mockServer(serverWorkingCopy, dc, connection);
 		this.context = new TestableDebugContext(server, KEY_DEVMODE, KEY_DEBUGPORT, VALUE_DEBUGPORT);
-		this.debugMode = spy((TestableDebugMode) new TestableDebugMode(context));
+		this.debugMode = spy(new TestableDebugMode(context));
 	}
 
 	@After
@@ -567,7 +568,7 @@ public class OpenShiftDebugModeTest {
 		// given
 		int initialDelay = 42;
 		doReturn(String.valueOf(initialDelay)).when(server)
-				.getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY), anyString());
+				.getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY), nullable(String.class));
 		IProbe livenessProbe = createProbe(110, 111, 112, 113, 114);
 		mockGetContainers(Arrays.asList(createContainer("someDc-container1", Collections.singleton(createPort(42)),
 				livenessProbe, createProbe(20, 21, 22, 23, 24))), dc);

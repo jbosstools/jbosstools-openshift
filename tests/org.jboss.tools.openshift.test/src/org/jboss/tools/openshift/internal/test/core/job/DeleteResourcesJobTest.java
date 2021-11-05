@@ -22,7 +22,7 @@ import java.util.List;
 import org.jboss.tools.openshift.internal.core.job.DeleteResourcesJob;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
@@ -33,7 +33,7 @@ import com.openshift.restclient.model.secret.ISecret;
 /**
  * @author Andre Dietisheim
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class DeleteResourcesJobTest {
 
 	private IDeploymentConfig dc1 = createDeploymentConfig("dc1", null, null, null);

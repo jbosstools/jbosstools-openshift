@@ -52,7 +52,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.openshift.restclient.ResourceKind;
@@ -74,7 +74,7 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Andre Dietisheim
  * @author Dmitrii Bocharov
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 @SuppressWarnings("serial")
 public class ResourceUtilsTest {
 

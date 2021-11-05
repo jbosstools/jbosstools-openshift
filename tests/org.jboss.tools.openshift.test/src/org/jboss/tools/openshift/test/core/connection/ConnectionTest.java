@@ -14,9 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -45,7 +45,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.openshift.restclient.ClientBuilder;
@@ -61,7 +61,7 @@ import com.openshift.restclient.model.IResource;
  * @author Jeff Cantrill
  * @author Andre Dietisheim
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ConnectionTest {
 
 	private Connection connection;
@@ -423,7 +423,7 @@ public class ConnectionTest {
 		// when
 		testableConnection.connect();
 		// then
-		verify(prompter).promptAndAuthenticate(eq(testableConnection), any(IAuthorizationContext.class));
+		verify(prompter).promptAndAuthenticate(eq(testableConnection), any());
 	}
 
 	@Test
@@ -451,7 +451,7 @@ public class ConnectionTest {
 		// when
 		testableConnection.connect();
 		// then
-		verify(prompter).promptAndAuthenticate(eq(testableConnection), any(IAuthorizationContext.class));
+		verify(prompter).promptAndAuthenticate(eq(testableConnection), any());
 	}
 
 	@Test(expected = com.openshift.restclient.authorization.UnauthorizedException.class)
@@ -545,7 +545,7 @@ public class ConnectionTest {
 		// when
 		testableConnection.refresh();
 		// then
-		verify(prompter).promptAndAuthenticate(eq(testableConnection), any(IAuthorizationContext.class));
+		verify(prompter).promptAndAuthenticate(eq(testableConnection), any());
 	}
 
 	@Test

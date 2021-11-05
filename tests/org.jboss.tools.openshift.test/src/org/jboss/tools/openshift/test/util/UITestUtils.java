@@ -57,7 +57,6 @@ public class UITestUtils {
 			if (count++ > 1000) {
 				throw new TimeoutException();
 			}
-			;
 		}
 	}
 

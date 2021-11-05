@@ -33,12 +33,12 @@ import org.jboss.tools.openshift.internal.ui.preferences.SSLCertificatesPreferen
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * @author Andre Dietisheim
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class SSLCertificatePreferencesTest {
 
 	private TestableSSLCertificatesPreference preference;

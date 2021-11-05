@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.jboss.tools.openshift.internal.core.portforwarding.PortForwardingUtils;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.openshift.restclient.capability.CapabilityVisitor;
@@ -65,7 +66,7 @@ public class PortForwardingUtilsTest {
 		final IPod pod = Mockito.mock(IPod.class);
 		final PortPair port = Mockito.mock(PortPair.class);
 		final IPortForwardable portForwardable = Mockito.mock(IPortForwardable.class);
-		Mockito.when(pod.accept(Mockito.any(CapabilityVisitor.class), Mockito.any(IPortForwardable.class)))
+		Mockito.when(pod.accept(ArgumentMatchers.any(CapabilityVisitor.class), ArgumentMatchers.any()))
 				.thenReturn(portForwardable);
 		Mockito.when(portForwardable.isForwarding()).thenReturn(true);
 		// when
@@ -82,7 +83,7 @@ public class PortForwardingUtilsTest {
 		final IPod pod = Mockito.mock(IPod.class);
 		final PortPair port = Mockito.mock(PortPair.class);
 		final IPortForwardable portForwardable = Mockito.mock(IPortForwardable.class);
-		Mockito.when(pod.accept(Mockito.any(CapabilityVisitor.class), Mockito.any(IPortForwardable.class)))
+		Mockito.when(pod.accept(ArgumentMatchers.any(CapabilityVisitor.class), ArgumentMatchers.any()))
 				.thenReturn(portForwardable);
 		Mockito.when(portForwardable.isForwarding()).thenReturn(true);
 		Mockito.when(portForwardable.getPortPairs()).thenReturn(Arrays.asList(port));
@@ -103,7 +104,7 @@ public class PortForwardingUtilsTest {
 		final PortPair port = Mockito.mock(PortPair.class);
 		final IPortForwardable portForwardable = Mockito.mock(IPortForwardable.class);
 		Mockito.when(portForwardable.getPortPairs()).thenReturn(Arrays.asList(port));
-		Mockito.when(pod.accept(Mockito.any(CapabilityVisitor.class), Mockito.any(IPortForwardable.class)))
+		Mockito.when(pod.accept(ArgumentMatchers.any(CapabilityVisitor.class), ArgumentMatchers.any()))
 				.thenReturn(portForwardable);
 		PortForwardingUtils.startPortForwarding(pod, port);
 		// when
@@ -117,7 +118,6 @@ public class PortForwardingUtilsTest {
 		// given
 		final IPod pod = Mockito.mock(IPod.class);
 		final IPort port = Mockito.mock(IPort.class);
-		final IPortForwardable portForwardable = Mockito.mock(IPortForwardable.class);
 		Mockito.when(pod.getContainerPorts()).thenReturn(toSet(port));
 		// when
 		final Set<PortPair> forwardablePorts = PortForwardingUtils.getForwardablePorts(pod);

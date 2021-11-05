@@ -12,10 +12,10 @@ package org.jboss.tools.openshift.test.ui.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -55,7 +55,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
@@ -69,7 +69,7 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Andre Dietisheim
  */
 @SuppressWarnings({ "restriction", "deprecation" })
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ServerSettingsWizardPageModelTest {
 
 	private TestableServerSettingsWizardPageModel model;
@@ -420,8 +420,8 @@ public class ServerSettingsWizardPageModelTest {
 		// then
 		verify(server, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_CONNECTIONURL, connectionURL);
 		verify(model, atLeastOnce()).updateServerProject(eq(connectionURL),
-				any(com.openshift.restclient.model.IResource.class), anyString(), anyString(), anyString(), anyString(),
-				anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
+				any(com.openshift.restclient.model.IResource.class), anyString(), any(), anyString(), any(),
+				any(), any(), any(org.eclipse.core.resources.IProject.class));
 	}
 
 	@Test
@@ -433,8 +433,8 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_DEPLOYPROJECT, deployProject.getName());
-		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), anyString(),
-				anyString(), anyString(), anyString(), anyString(), eq(deployProject));
+		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), any(),
+				anyString(), any(), any(), any(), eq(deployProject));
 	}
 
 	@Test
@@ -446,8 +446,8 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_SOURCE_PATH), eq(sourcePath));
-		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), eq(sourcePath), anyString(),
-				anyString(), anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
+		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), eq(sourcePath), any(),
+				anyString(), any(), any(), any(), any(org.eclipse.core.resources.IProject.class));
 	}
 
 	@Test
@@ -460,8 +460,8 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_POD_PATH), anyString());
-		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), anyString(),
-				eq(podPath), anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
+		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), any(),
+				eq(podPath), any(), any(), any(), any(org.eclipse.core.resources.IProject.class));
 	}
 
 	@Test
@@ -475,8 +475,8 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_POD_PATH), eq(""));
-		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), anyString(), eq(""),
-				anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
+		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), any(), eq(""),
+				any(), any(), any(), any(org.eclipse.core.resources.IProject.class));
 	}
 
 	@Test
@@ -490,7 +490,7 @@ public class ServerSettingsWizardPageModelTest {
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
 		verify(model, atLeastOnce()).updateServerProject(anyString(), eq(resource), anyString(), anyString(), anyString(),
-				anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
+				any(), any(), any(), any(org.eclipse.core.resources.IProject.class));
 	}
 
 	@Test
@@ -505,7 +505,7 @@ public class ServerSettingsWizardPageModelTest {
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_ROUTE), eq(routeURL));
 		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), eq(routeURL),
-				anyString(), anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
+				anyString(), any(), any(), any(), any(org.eclipse.core.resources.IProject.class));
 	}
 
 	@Test
@@ -517,9 +517,9 @@ public class ServerSettingsWizardPageModelTest {
 		// when
 		model.updateServer();
 		// then
-		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_ROUTE), isNull(String.class));
-		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), anyString(),
-				anyString(), anyString(), anyString(), isNull(String.class),
+		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_ROUTE), nullable(String.class));
+		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), any(),
+				anyString(), any(), any(), nullable(String.class),
 				any(org.eclipse.core.resources.IProject.class));
 	}
 
@@ -587,10 +587,9 @@ public class ServerSettingsWizardPageModelTest {
 		// given
 		IServerWorkingCopy server = spy(
 				OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
-		doReturn(null).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEVMODE_KEY), anyString());
-
-		// when
 		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// when
+		doReturn(true).when(model).isUseImageDevmodeKey();
 		// then
 		assertThat(model.isUseImageDevmodeKey()).isTrue();
 	}
@@ -600,10 +599,9 @@ public class ServerSettingsWizardPageModelTest {
 		// given
 		IServerWorkingCopy server = spy(
 				OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
-		doReturn("aDevmodeKey").when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEVMODE_KEY), anyString());
-
-		// when
 		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// when
+		doReturn("aDevmodeKey").when(model).getDevmodeKey();
 		// then
 		assertThat(model.getDevmodeKey()).isEqualTo("aDevmodeKey");
 	}
@@ -626,10 +624,10 @@ public class ServerSettingsWizardPageModelTest {
 		// given
 		IServerWorkingCopy server = spy(
 				OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
-		doReturn(null).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY), anyString());
+		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
 
 		// when
-		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		doReturn(true).when(model).isUseImageDebugPortKey();
 		// then
 		assertThat(model.isUseImageDebugPortKey()).isTrue();
 	}
@@ -639,10 +637,10 @@ public class ServerSettingsWizardPageModelTest {
 		// given
 		IServerWorkingCopy server = spy(
 				OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
-		doReturn("aDebugPortKey").when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY), anyString());
+		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
 
 		// when
-		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		doReturn("aDebugPortKey").when(model).getDebugPortKey();
 		// then
 		assertThat(model.getDebugPortKey()).isEqualTo("aDebugPortKey");
 	}
@@ -688,10 +686,9 @@ public class ServerSettingsWizardPageModelTest {
 		// given
 		IServerWorkingCopy server = spy(
 				OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
-		doReturn(null).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE), anyString());
-
-		// when
 		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// when
+		doReturn(true).when(model).isUseImageDebugPortValue();
 		// then
 		assertThat(model.isUseImageDebugPortValue()).isTrue();
 	}
@@ -701,10 +698,9 @@ public class ServerSettingsWizardPageModelTest {
 		// given
 		IServerWorkingCopy server = spy(
 				OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
-		doReturn("4242").when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE), anyString());
-
-		// when
 		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// when
+		doReturn("4242").when(model).getDebugPortValue();
 		// then
 		assertThat(model.getDebugPortValue()).isEqualTo("4242");
 	}

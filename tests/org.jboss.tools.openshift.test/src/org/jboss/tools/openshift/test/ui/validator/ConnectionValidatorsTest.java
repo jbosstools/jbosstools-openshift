@@ -36,7 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.openshift.restclient.authorization.IAuthorizationContext;
 
@@ -45,7 +45,7 @@ import com.openshift.restclient.authorization.IAuthorizationContext;
  * @author Viacheslav Kabanovich
  *
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ConnectionValidatorsTest {
 	static final String HOST1 = "http://host1";
 	static final String HOST2 = "http://host2";

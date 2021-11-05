@@ -17,14 +17,14 @@ import org.jboss.tools.openshift.internal.ui.wizard.deployimage.ServicePortAdapt
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * 
  * @author Viacheslav Kabanovich
  *
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class PodPortValidatorTest extends AbstractValidatorTest {
 	static final String CURRENT_VALUE = "999";
 

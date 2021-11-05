@@ -47,7 +47,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.openshift.internal.restclient.ResourceFactory;
 import com.openshift.restclient.IApiTypeMapper;
@@ -71,7 +71,7 @@ import com.openshift.restclient.model.deploy.IDeploymentTrigger;
  * @author jeff.cantrill
  *
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class DeployImageJobTest {
 
 	private static final String NAMESPACE = "aProjectName";

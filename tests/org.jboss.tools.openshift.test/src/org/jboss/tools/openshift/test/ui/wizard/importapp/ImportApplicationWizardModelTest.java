@@ -33,7 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
@@ -43,7 +43,7 @@ import com.openshift.restclient.model.IProject;
  * @author Fred Bricon
  * @author Andre Dietisheim
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ImportApplicationWizardModelTest {
 
 	private ImportApplicationWizardModel model;
