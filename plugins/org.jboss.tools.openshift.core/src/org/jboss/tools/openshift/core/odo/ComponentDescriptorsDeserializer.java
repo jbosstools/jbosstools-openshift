@@ -31,8 +31,6 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
 
   private static final String CONTEXT_FIELD = "context";
 
-  private static final String S2I_COMPONENTS_FIELD = "s2iComponents";
-  
   private static final String DEVFILE_COMPONENTS_FIELD = "devfileComponents";
 
   private static final String NAMESPACE_FIELD = "namespace";
@@ -53,7 +51,6 @@ public class ComponentDescriptorsDeserializer extends StdNodeBasedDeserializer<L
   public List<ComponentDescriptor> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
     List<ComponentDescriptor> result = new ArrayList<>();
     parseComponents(result, root.get(DEVFILE_COMPONENTS_FIELD), ComponentKind.DEVFILE);
-    parseComponents(result, root.get(S2I_COMPONENTS_FIELD), ComponentKind.S2I);
     return result;
   }
 

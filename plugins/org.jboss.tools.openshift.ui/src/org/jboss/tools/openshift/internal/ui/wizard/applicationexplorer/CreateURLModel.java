@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
-import java.util.List;
-
 import org.jboss.tools.openshift.core.odo.Odo;
 
 /**
@@ -25,16 +23,10 @@ public class CreateURLModel extends ComponentModel {
 
 	private String urlName;
 	private int port = 1024;
-	private List<Integer> ports;
 	private boolean secure;
 
-	public CreateURLModel(Odo odo, String projectName, String applicationName, String componentName,
-			List<Integer> ports) {
+	public CreateURLModel(Odo odo, String projectName, String applicationName, String componentName) {
 		super(odo, projectName, applicationName, componentName);
-		this.ports = ports;
-		if (!ports.isEmpty()) {
-			setPort(ports.get(0));
-		}
 	}
 
 	/**
@@ -63,13 +55,6 @@ public class CreateURLModel extends ComponentModel {
 	 */
 	public void setPort(int port) {
 		firePropertyChange(PROPERTY_PORT, this.port, this.port = port);
-	}
-
-	/**
-	 * @return the ports
-	 */
-	public List<Integer> getPorts() {
-		return ports;
 	}
 
 	public boolean isSecure() {

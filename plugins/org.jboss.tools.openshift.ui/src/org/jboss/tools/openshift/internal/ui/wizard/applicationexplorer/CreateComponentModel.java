@@ -21,7 +21,6 @@ import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.core.odo.ComponentType;
 import org.jboss.tools.openshift.core.odo.DevfileComponentType;
 import org.jboss.tools.openshift.core.odo.Odo;
-import org.jboss.tools.openshift.core.odo.S2iComponentType;
 import org.jboss.tools.openshift.core.odo.Starter;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
@@ -38,7 +37,6 @@ public class CreateComponentModel extends ComponentModel {
 	public static final String PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE = "eclipseProjectHasDevfile";
 	public static final String PROPERTY_ECLIPSE_PROJECT_EMPTY = "eclipseProjectEmpty";
 	public static final String PROPERTY_SELECTED_COMPONENT_TYPE = "selectedComponentType";
-	public static final String PROPERTY_SELECTED_COMPONENT_VERSION = "selectedComponentVersion";
 	public static final String PROPERTY_SELECTED_COMPONENT_STARTERS = "selectedComponentStarters";
 	public static final String PROPERTY_SELECTED_COMPONENT_STARTER = "selectedComponentStarter";
 	public static final String PROPERTY_PUSH_AFTER_CREATE = "pushAfterCreate";
@@ -61,8 +59,6 @@ public class CreateComponentModel extends ComponentModel {
 	private List<Starter> selectedComponentStarters;
 	
 	private Starter selectedComponentStarter;
-	
-	private String selectedComponentVersion;
 	
 	private boolean pushAfterCreate = true;
 	
@@ -181,9 +177,6 @@ public class CreateComponentModel extends ComponentModel {
 	 */
 	public void setSelectedComponentType(ComponentType selectedComponentType) {
 		firePropertyChange(PROPERTY_SELECTED_COMPONENT_TYPE, this.selectedComponentType, this.selectedComponentType = selectedComponentType);
-		if (selectedComponentType instanceof S2iComponentType && !((S2iComponentType)selectedComponentType).getVersions().isEmpty()) {
-			setSelectedComponentVersion(((S2iComponentType)selectedComponentType).getVersions().get(0));
-		}
 		if (selectedComponentType instanceof DevfileComponentType) {
 		  try {
         setSelectedComponentStarters(getOdo().getComponentTypeInfo(selectedComponentType.getName(), ((DevfileComponentType) selectedComponentType).getDevfileRegistry().getName()).getStarters());
@@ -192,20 +185,6 @@ public class CreateComponentModel extends ComponentModel {
       }
 		  setSelectedComponentStarter(null);
 		}
-	}
-
-	/**
-	 * @return the selectedComponentVersion
-	 */
-	public String getSelectedComponentVersion() {
-		return selectedComponentVersion;
-	}
-
-	/**
-	 * @param selectedComponentVersion the selectedComponentVersion to set
-	 */
-	public void setSelectedComponentVersion(String selectedComponentVersion) {
-		firePropertyChange(PROPERTY_SELECTED_COMPONENT_VERSION, this.selectedComponentVersion, this.selectedComponentVersion = selectedComponentVersion);
 	}
 
 	/**

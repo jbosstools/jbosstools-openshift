@@ -688,9 +688,6 @@ private ObjectNode findSchema(String crd) {
       if (deleteConfig) {
           args.add("-a");
       }
-      if (kind.equals(ComponentKind.S2I)) {
-          args.add("--s2i");
-      }
       if (context != null) {
           execute(new File(context), command, envVars, args.toArray(new String[0]));
       } else {
@@ -715,7 +712,7 @@ private ObjectNode findSchema(String crd) {
 
   @Override
   public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
-    undeployComponent(project, application, context, component, true, kind);
+    undeployComponent(project, application, context, component, context != null, kind);
   }
 
   @Override
