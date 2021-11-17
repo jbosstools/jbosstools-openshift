@@ -1,30 +1,54 @@
 {
-  "kind": "List",
-  "apiVersion": "odo.dev/v1alpha1",
-  "metadata": {},
-  "s2iComponents": [
-  {
-    "kind": "Component",
-    "apiVersion": "odo.dev/v1alpha1",
-    "metadata": {
-      "name": "sbcomp",
-      "namespace": "testodo",
-      "creationTimestamp": null
-    },
-    "spec": {
-      "app": "sbapp",
-      "type": "java:8",
-      "sourceType": "local",
-      "ports": [
-        "8080/TCP",
-        "8443/TCP",
-        "8778/TCP"
-      ]
-    },
-    "status": {
-      "context": "C:\\work\\src\\tmp\\springboot-rest",
-      "state": "Not Pushed"
-    }
-  }
-  ]
-}                                                                                                                
+        "kind": "List",
+        "apiVersion": "odo.dev/v1alpha1",
+        "metadata": {},
+        "devfileComponents": [
+                {
+                        "kind": "Component",
+                        "apiVersion": "odo.dev/v1alpha1",
+                        "metadata": {
+                                "name": "q1-maven",
+                                "namespace": "demo",
+                                "creationTimestamp": null,
+                                "labels": {
+                                        "app": "app",
+                                        "app.kubernetes.io/instance": "q1-maven",
+                                        "app.kubernetes.io/managed-by": "odo",
+                                        "app.kubernetes.io/managed-by-version": "v2.4.1",
+                                        "app.kubernetes.io/name": "",
+                                        "app.kubernetes.io/part-of": "app",
+                                        "component": "q1-maven"
+                                },
+                                "annotations": {
+                                        "deployment.kubernetes.io/revision": "1",
+                                        "odo.dev/project-type": "quarkus"
+                                }
+                        },
+                        "spec": {
+                                "app": "app",
+                                "type": "quarkus",
+                                "storage": [
+                                        "m2"
+                                ],
+                                "env": [
+                                        {
+                                                "name": "PROJECTS_ROOT",
+                                                "value": "/projects"
+                                        },
+                                        {
+                                                "name": "PROJECT_SOURCE",
+                                                "value": "/projects"
+                                        },
+                                        {
+                                                "name": "DEBUG_PORT",
+                                                "value": "5858"
+                                        }
+                                ]
+                        },
+                        "status": {
+                                "state": "Pushed"
+                        }
+                }
+        ],
+        "otherComponents": []
+}
