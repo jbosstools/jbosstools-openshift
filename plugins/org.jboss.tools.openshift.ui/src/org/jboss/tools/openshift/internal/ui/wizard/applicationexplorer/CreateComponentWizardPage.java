@@ -132,7 +132,7 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 		Label componentTypesLabel = new Label(parent, SWT.NONE);
 		componentTypesLabel.setText("Component type:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).applyTo(componentTypesLabel);
-		org.eclipse.swt.widgets.List componentTypesList = new org.eclipse.swt.widgets.List(parent, SWT.SINGLE | SWT.BORDER);
+		org.eclipse.swt.widgets.List componentTypesList = new org.eclipse.swt.widgets.List(parent, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL);
     GridDataFactory.fillDefaults().
         span(2, 1).
         align(SWT.FILL, SWT.CENTER).
