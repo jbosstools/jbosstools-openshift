@@ -912,9 +912,9 @@ private ObjectNode findSchema(String crd) {
     UsageStats.getInstance().link();
     try {
       if (port != null) {
-        execute(new File(context), command, envVars, "link", source, "--port", port.toString(), "--wait");
+        execute(new File(context), command, envVars, "link", source, "--port", port.toString());
       } else {
-        execute(new File(context), command, envVars, "link", source, "--wait");
+        execute(new File(context), command, envVars, "link", source);
       }
       UsageStats.getInstance().odoCommand("link", true);
     } catch (IOException e) {
