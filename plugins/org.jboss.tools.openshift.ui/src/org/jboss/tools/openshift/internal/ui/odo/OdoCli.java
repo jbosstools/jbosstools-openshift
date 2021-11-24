@@ -718,7 +718,7 @@ private ObjectNode findSchema(String crd) {
   @Override
   public void follow(String project, String application, String context, String component) throws IOException {
     try {
-      ExecHelper.executeWithTerminal(new File(context), false, envVars, command, "log", "-f");
+      ExecHelper.executeWithTerminal(new File(context!=null?context:HOME_FOLDER), false, envVars, command, "log", "-f");
       UsageStats.getInstance().odoCommand("log", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("log", false);
@@ -729,7 +729,7 @@ private ObjectNode findSchema(String crd) {
   @Override
   public void log(String project, String application, String context, String component) throws IOException {
     try {
-      ExecHelper.executeWithTerminal(new File(context), envVars, command, "log");
+      ExecHelper.executeWithTerminal(new File(context!=null?context:HOME_FOLDER), envVars, command, "log");
       UsageStats.getInstance().odoCommand("log", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("log", false);
