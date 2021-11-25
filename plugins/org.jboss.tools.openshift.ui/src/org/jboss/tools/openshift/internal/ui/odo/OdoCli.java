@@ -908,14 +908,10 @@ private ObjectNode findSchema(String crd) {
   }
 
   @Override
-  public void link(String project, String application, String component, String context, String source, Integer port) throws IOException {
+  public void link(String project, String application, String component, String context, String source) throws IOException {
     UsageStats.getInstance().link();
     try {
-      if (port != null) {
-        execute(new File(context), command, envVars, "link", source, "--port", port.toString());
-      } else {
-        execute(new File(context), command, envVars, "link", source);
-      }
+      execute(new File(context), command, envVars, "link", source);
       UsageStats.getInstance().odoCommand("link", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("link", false);

@@ -97,7 +97,7 @@ public interface Odo {
 
     void deleteStorage(String project, String application, String context, String component, String storage) throws IOException;
 
-    void link(String project, String application, String component, String context, String source, Integer port) throws IOException;
+    void link(String project, String application, String component, String context, String source) throws IOException;
 
     String consoleURL() throws IOException;
 

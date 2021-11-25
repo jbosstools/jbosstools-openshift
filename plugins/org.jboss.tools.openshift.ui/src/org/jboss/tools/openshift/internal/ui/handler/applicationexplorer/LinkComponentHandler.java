@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,8 +26,8 @@ import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
-import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.LinkComponentModel;
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.LinkComponentWizard;
+import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.LinkModel;
 
 /**
  * @author Red Hat Developers
@@ -45,9 +44,8 @@ public class LinkComponentHandler extends ComponentHandler {
 			if (targetComponents.isEmpty()) {
 				MessageDialog.openError(shell, "Link component", "No component available to link to.");
 			} else {
-				final LinkComponentModel model = new LinkComponentModel(odo, projectName, applicationName,
-				        component.getWrapped().getName(), Collections.emptyList());
-				model.setTargets(targetComponents);
+				final LinkModel<Component> model = new LinkModel<>(odo, projectName, applicationName,
+				        component.getWrapped().getName(), targetComponents);
 				final IWizard linkComponentWizard = new LinkComponentWizard(model);
 				if (WizardUtils.openWizardDialog(linkComponentWizard, shell) == Window.OK) {
 					executeInJob("Link component", monitor -> execute(shell, model, component));
@@ -59,11 +57,11 @@ public class LinkComponentHandler extends ComponentHandler {
 		}
 	}
 
-	private void execute(Shell shell, LinkComponentModel model, ComponentElement component) {
+	private void execute(Shell shell, LinkModel<Component> model, ComponentElement component) {
 		LabelNotification notification = LabelNotification.openNotification(shell, "Linking component " + model.getComponentName() + " to " + model.getTarget().getName());
 		try {
 			model.getOdo().link(model.getProjectName(), model.getApplicationName(), component.getWrapped().getName(),
-			        component.getWrapped().getPath(), model.getTarget().getName(), model.getPort());
+			        component.getWrapped().getPath(), model.getTarget().getName());
 			LabelNotification.openNotification(notification, shell, "Component " + model.getComponentName() + " linked to " + model.getTarget().getName());
 		} catch (IOException e) {
 			shell.getDisplay().asyncExec(() -> {

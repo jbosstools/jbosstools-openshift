@@ -59,7 +59,7 @@ public class LinkServiceHandler extends ComponentHandler {
 		        "Linking component " + model.getComponentName() + " to service " + model.getTarget());
 		try {
 			model.getOdo().link(model.getProjectName(), model.getApplicationName(), component.getWrapped().getName(),
-			        component.getWrapped().getPath(), model.getTarget().getKind() + '/' +model.getTarget().getName(), null);
+			        component.getWrapped().getPath(), model.getTarget().getKind() + '/' +model.getTarget().getName());
 			LabelNotification.openNotification(notification, shell,
 			        "Component " + model.getComponentName() + " linked to service " + model.getTarget());
 		} catch (IOException e) {

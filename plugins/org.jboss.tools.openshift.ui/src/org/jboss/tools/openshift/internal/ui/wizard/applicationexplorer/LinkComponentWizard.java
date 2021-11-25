@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
 import org.eclipse.jface.wizard.Wizard;
+import org.jboss.tools.openshift.core.odo.Component;
 
 /**
  * @author Red Hat Developers
@@ -18,7 +19,7 @@ import org.eclipse.jface.wizard.Wizard;
  */
 public class LinkComponentWizard extends Wizard {
 	
-	public LinkComponentWizard(LinkComponentModel model) {
+	public LinkComponentWizard(LinkModel<Component> model) {
 		this.addPage(new LinkComponentWizardPage(this, model));
 		setNeedsProgressMonitor(true);
 		setWindowTitle("Link component");
