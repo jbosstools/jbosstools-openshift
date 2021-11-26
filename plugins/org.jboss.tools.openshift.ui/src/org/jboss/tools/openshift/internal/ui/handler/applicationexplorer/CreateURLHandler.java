@@ -11,9 +11,6 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -22,7 +19,6 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.core.odo.ComponentKind;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
@@ -40,17 +36,11 @@ public class CreateURLHandler extends ComponentHandler {
 			Odo odo = component.getRoot().getOdo();
 			String projectName = component.getParent().getParent().getWrapped();
 			String applicationName = component.getParent().getWrapped().getName();
-			List<Integer> ports = component.getWrapped().getInfo().getComponentKind() == ComponentKind.S2I ?odo.getServicePorts(projectName, applicationName,
-					component.getWrapped().getName()) : Collections.emptyList();
-			if (component.getWrapped().getInfo().getComponentKind() == ComponentKind.S2I && ports.isEmpty()) {
-				MessageDialog.openWarning(shell, "Create url", "No ports defined for this components to bind to.");
-			} else {
-				final CreateURLModel model = new CreateURLModel(odo, projectName, applicationName,
-						component.getWrapped().getName(), ports);
-				final IWizard createURLWizard = new CreateURLWizard(model);
-				if (WizardUtils.openWizardDialog(createURLWizard, shell) == Window.OK) {
-					executeInJob("Create url", monitor -> execute(model, component));
-				}
+			final CreateURLModel model = new CreateURLModel(odo, projectName, applicationName,
+						component.getWrapped().getName());
+			final IWizard createURLWizard = new CreateURLWizard(model);
+			if (WizardUtils.openWizardDialog(createURLWizard, shell) == Window.OK) {
+				executeInJob("Create url", monitor -> execute(model, component));
 			}
 			return Status.OK_STATUS;
 		} catch (IOException e) {

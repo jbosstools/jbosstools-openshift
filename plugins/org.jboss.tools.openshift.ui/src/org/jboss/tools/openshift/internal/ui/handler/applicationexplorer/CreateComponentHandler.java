@@ -114,7 +114,7 @@ public class CreateComponentHandler extends OdoHandler {
 		LabelNotification notification = LabelNotification.openNotification(shell, "Creating component " + model.getComponentName());
 		try {
 			model.getOdo().createComponentLocal(model.getProjectName(), model.getApplicationName(),
-			        model.getSelectedComponentType().getName(), model.getSelectedComponentVersion(),
+			        model.getSelectedComponentType().getName(), null,
 			        model.getSelectedComponentType().getKind() == ComponentKind.DEVFILE?((DevfileComponentType)model.getSelectedComponentType()).getDevfileRegistry().getName():null,
 			        model.getComponentName(), model.getEclipseProject().getLocation().toOSString(),
 			        model.isEclipseProjectHasDevfile()?CreateComponentModel.DEVFILE_NAME:null, 

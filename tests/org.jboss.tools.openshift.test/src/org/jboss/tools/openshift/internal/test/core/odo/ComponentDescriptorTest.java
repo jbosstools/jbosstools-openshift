@@ -58,14 +58,8 @@ public class ComponentDescriptorTest {
     Assert.assertEquals(1, descriptors.size());
     ComponentDescriptor descriptor = descriptors.get(0);
     Assert.assertNotNull(descriptor);
-    Assert.assertEquals("sbapp", descriptor.getApplication());
-    Assert.assertEquals("testodo", descriptor.getProject());
-    Assert.assertEquals("sbcomp", descriptor.getName());
-    Assert.assertNotNull(descriptor.getPorts());
-    List<Integer> ports = descriptor.getPorts();
-    Assert.assertEquals(3, ports.size());
-    Assert.assertEquals(8080, ports.get(0).intValue());
-    Assert.assertEquals(8443, ports.get(1).intValue());
-    Assert.assertEquals(8778, ports.get(2).intValue());
+    Assert.assertEquals("app", descriptor.getApplication());
+    Assert.assertEquals("demo", descriptor.getProject());
+    Assert.assertEquals("q1-maven", descriptor.getName());
   }
 }

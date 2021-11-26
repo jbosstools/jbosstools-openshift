@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.core.odo;
 
 public enum ComponentKind {
-    S2I("s2i"),
     DEVFILE("devfile");
 
     private final String label;
@@ -26,12 +25,6 @@ public enum ComponentKind {
     }
 
     public static ComponentKind fromAnnotation(String annotation) {
-        switch (annotation) {
-            case "DevfileComponent":
-                return DEVFILE;
-            case "Component":
-            default:
-                return S2I;
-        }
+        return DEVFILE;
     }
 }

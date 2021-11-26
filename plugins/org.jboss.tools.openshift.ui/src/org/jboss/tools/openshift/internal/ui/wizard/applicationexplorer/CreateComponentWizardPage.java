@@ -10,14 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
-import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -31,10 +29,10 @@ import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.BaseLabelProvider;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -46,15 +44,12 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.MandatoryStringValidator;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.core.odo.ComponentKind;
 import org.jboss.tools.openshift.core.odo.ComponentType;
-import org.jboss.tools.openshift.core.odo.S2iComponentType;
 import org.jboss.tools.openshift.core.odo.Starter;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
@@ -87,24 +82,6 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
     }
   }
   
-  private class ComponentVersionValidator extends IsNotNullValidator {
-
-    /**
-     * @param invalidStatus
-     */
-    public ComponentVersionValidator(IStatus invalidStatus) {
-      super(invalidStatus);
-    }
-
-    @Override
-    public IStatus validate(Object value) {
-      if (model.getSelectedComponentType().getKind() == ComponentKind.S2I) {
-        return super.validate(value);
-      }
-      return ValidationStatus.ok();
-    }
-  }
-
 	private CreateComponentModel model;
 	
 	private static final Image INFORMATION_IMAGE = WorkbenchPlugin.getDefault().getSharedImages().getImage(ISharedImages.IMG_OBJS_INFO_TSK);
@@ -155,19 +132,19 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 		Label componentTypesLabel = new Label(parent, SWT.NONE);
 		componentTypesLabel.setText("Component type:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).applyTo(componentTypesLabel);
-		Tree componentTypesTree = new Tree(parent, SWT.SINGLE | SWT.BORDER);
+		org.eclipse.swt.widgets.List componentTypesList = new org.eclipse.swt.widgets.List(parent, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL);
     GridDataFactory.fillDefaults().
         span(2, 1).
         align(SWT.FILL, SWT.CENTER).
         grab(true, false).
         hint(SWT.DEFAULT, 150).
-        applyTo(componentTypesTree);
-		TreeViewer componentTypesTreeViewer = new TreeViewer(componentTypesTree);
-    componentTypesTreeViewer.setContentProvider(new ComponentTypeContentProvider(model.getComponentTypes()));
-		componentTypesTreeViewer.setLabelProvider(new ComponentTypeColumLabelProvider());
-		componentTypesTreeViewer.setInput(model.getComponentTypes());
+        applyTo(componentTypesList);
+		ListViewer componentTypesListViewer = new ListViewer(componentTypesList);
+		componentTypesListViewer.setContentProvider(ArrayContentProvider.getInstance());
+		componentTypesListViewer.setLabelProvider(new ComponentTypeColumLabelProvider());
+		componentTypesListViewer.setInput(model.getComponentTypes());
     Binding componentTypesBinding = ValueBindingBuilder
-        .bind(ViewerProperties.singleSelection().observe(componentTypesTreeViewer))
+        .bind(ViewerProperties.singleSelection().observe(componentTypesListViewer))
         .validatingAfterGet(new ComponentTypeValidator(
             ValidationStatus.cancel("You have to select a component type.")))
         .to(BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_TYPE, ComponentType.class)
@@ -175,34 +152,11 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
         .in(dbc);
     ControlDecorationSupport.create(componentTypesBinding, SWT.LEFT | SWT.TOP, null,
         new RequiredControlDecorationUpdater());
-    ValueBindingBuilder.bind(WidgetProperties.enabled().observe(componentTypesTree))
+    ValueBindingBuilder.bind(WidgetProperties.enabled().observe(componentTypesList))
         .to(BeanProperties.value(CreateComponentModel.PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE).observe(model))
         .converting(new InvertingBooleanConverter())
         .in(dbc);
 
-		IObservableValue<ComponentType> componentTypeObservable = BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_TYPE, ComponentType.class).observe(model);
-		Label componentVersionsLabel = new Label(parent, SWT.NONE);
-		componentVersionsLabel.setText("Component version:");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(componentVersionsLabel);
-		Combo componentVersionsCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(componentVersionsCombo);
-		ComboViewer componentVersionsComboViewer = new ComboViewer(componentVersionsCombo);
-		componentVersionsComboViewer.setContentProvider(new ObservableListContentProvider<>());
-		componentVersionsComboViewer.setInput(PojoProperties.list("versions").observeDetail(componentTypeObservable));
-		Binding componentVersionsBinding = ValueBindingBuilder
-				.bind(ViewerProperties.singleSelection().observe(componentVersionsComboViewer))
-				.validatingAfterGet(new ComponentVersionValidator(
-						ValidationStatus.cancel("You have to select a component version.")))
-				.to(BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_VERSION).observe(model))
-				.in(dbc);
-		ControlDecorationSupport.create(componentVersionsBinding, SWT.LEFT | SWT.TOP, null,
-				new RequiredControlDecorationUpdater());
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(componentVersionsCombo))
-		    .to(BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_TYPE).observe(model))
-		    .converting(IConverter.create(type -> type instanceof S2iComponentType))
-		    .in(dbc);
-		
 		Label componentStartersLabel = new Label(parent, SWT.NONE);
 		componentStartersLabel.setText("Project starter:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(componentStartersLabel);

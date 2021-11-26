@@ -688,9 +688,6 @@ private ObjectNode findSchema(String crd) {
       if (deleteConfig) {
           args.add("-a");
       }
-      if (kind.equals(ComponentKind.S2I)) {
-          args.add("--s2i");
-      }
       if (context != null) {
           execute(new File(context), command, envVars, args.toArray(new String[0]));
       } else {
@@ -715,13 +712,13 @@ private ObjectNode findSchema(String crd) {
 
   @Override
   public void deleteComponent(String project, String application, String context, String component, ComponentKind kind) throws IOException {
-    undeployComponent(project, application, context, component, true, kind);
+    undeployComponent(project, application, context, component, context != null, kind);
   }
 
   @Override
   public void follow(String project, String application, String context, String component) throws IOException {
     try {
-      ExecHelper.executeWithTerminal(new File(context), false, envVars, command, "log", "-f");
+      ExecHelper.executeWithTerminal(new File(context!=null?context:HOME_FOLDER), false, envVars, command, "log", "-f");
       UsageStats.getInstance().odoCommand("log", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("log", false);
@@ -732,7 +729,7 @@ private ObjectNode findSchema(String crd) {
   @Override
   public void log(String project, String application, String context, String component) throws IOException {
     try {
-      ExecHelper.executeWithTerminal(new File(context), envVars, command, "log");
+      ExecHelper.executeWithTerminal(new File(context!=null?context:HOME_FOLDER), envVars, command, "log");
       UsageStats.getInstance().odoCommand("log", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("log", false);
@@ -911,14 +908,10 @@ private ObjectNode findSchema(String crd) {
   }
 
   @Override
-  public void link(String project, String application, String component, String context, String source, Integer port) throws IOException {
+  public void link(String project, String application, String component, String context, String source) throws IOException {
     UsageStats.getInstance().link();
     try {
-      if (port != null) {
-        execute(new File(context), command, envVars, "link", source, "--port", port.toString(), "--wait");
-      } else {
-        execute(new File(context), command, envVars, "link", source, "--wait");
-      }
+      execute(new File(context), command, envVars, "link", source);
       UsageStats.getInstance().odoCommand("link", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("link", false);

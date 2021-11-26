@@ -22,21 +22,16 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
-import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.MandatoryStringValidator;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNullValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
@@ -95,7 +90,6 @@ public class CreateURLWizardPage extends AbstractOpenShiftWizardPage {
 		portLabel.setText("Port:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(portLabel);
 		
-		if (model.getPorts().isEmpty()) {
 		  Text portText = new Text(parent, SWT.SINGLE);
       GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
       .applyTo(portText);
@@ -108,24 +102,6 @@ public class CreateURLWizardPage extends AbstractOpenShiftWizardPage {
           .in(dbc);
       ControlDecorationSupport.create(portBinding, SWT.LEFT | SWT.TOP, null,
           new RequiredControlDecorationUpdater());
-		  
-		} else {
-	    Combo portCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
-	    GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-	        .applyTo(portCombo);
-	    ComboViewer portComboViewer = new ComboViewer(portCombo);
-	    portComboViewer.setContentProvider(ArrayContentProvider.getInstance());
-	    portComboViewer.setInput(model.getPorts());
-	    Binding portBinding = ValueBindingBuilder
-	        .bind(ViewerProperties.singleSelection().observe(portComboViewer))
-	        .validatingAfterGet(new IsNotNullValidator(
-	            ValidationStatus.cancel("You have to select a port.")))
-	        .to(BeanProperties.value(CreateURLModel.PROPERTY_PORT)
-	            .observe(model))
-	        .in(dbc);
-	    ControlDecorationSupport.create(portBinding, SWT.LEFT | SWT.TOP, null,
-	        new RequiredControlDecorationUpdater());
-		}
 		
 		Label secureLabel = new Label(parent, SWT.NONE);
 		secureLabel.setText("Secure:");

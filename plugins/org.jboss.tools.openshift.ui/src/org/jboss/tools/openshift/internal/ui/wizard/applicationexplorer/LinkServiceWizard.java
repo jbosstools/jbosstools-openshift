@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 
 import org.eclipse.jface.wizard.Wizard;
+import org.jboss.tools.openshift.core.odo.Service;
 
 /**
  * @author Red Hat Developers
@@ -18,7 +19,7 @@ import org.eclipse.jface.wizard.Wizard;
  */
 public class LinkServiceWizard extends Wizard {
 	
-	public LinkServiceWizard(LinkModel<String> model) {
+	public LinkServiceWizard(LinkModel<Service> model) {
 		this.addPage(new LinkServiceWizardPage(this, model));
 		setNeedsProgressMonitor(true);
 		setWindowTitle("Link service");

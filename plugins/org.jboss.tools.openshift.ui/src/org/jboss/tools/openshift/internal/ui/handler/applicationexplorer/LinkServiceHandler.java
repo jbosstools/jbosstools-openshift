@@ -41,9 +41,8 @@ public class LinkServiceHandler extends ComponentHandler {
 			Odo odo = component.getRoot().getOdo();
 			String projectName = component.getParent().getParent().getWrapped();
 			String applicationName = component.getParent().getWrapped().getName();
-			List<String> serviceNames = odo.getServices(projectName, applicationName).stream()
-			        .map(Service::getName).collect(Collectors.toList());
-			final LinkModel<String> model = new LinkModel<>(odo, projectName, applicationName,
+			List<Service> serviceNames = odo.getServices(projectName, applicationName);
+			final LinkModel<Service> model = new LinkModel<>(odo, projectName, applicationName,
 			        component.getWrapped().getName(), serviceNames);
 			final IWizard linkServiceWizard = new LinkServiceWizard(model);
 			if (WizardUtils.openWizardDialog(linkServiceWizard, shell) == Window.OK) {
@@ -55,14 +54,14 @@ public class LinkServiceHandler extends ComponentHandler {
 		}
 	}
 
-	private void execute(Shell shell, LinkModel<String> model, ComponentElement component) {
+	private void execute(Shell shell, LinkModel<Service> model, ComponentElement component) {
 		LabelNotification notification = LabelNotification.openNotification(shell,
-		        "Linking component " + model.getComponentName() + " to service " + model.getTarget());
+		        "Linking component " + model.getComponentName() + " to service " + model.getTarget().getName());
 		try {
 			model.getOdo().link(model.getProjectName(), model.getApplicationName(), component.getWrapped().getName(),
-			        component.getWrapped().getPath(), model.getTarget(), null);
+			        component.getWrapped().getPath(), model.getTarget().getKind() + '/' +model.getTarget().getName());
 			LabelNotification.openNotification(notification, shell,
-			        "Component " + model.getComponentName() + " linked to service " + model.getTarget());
+			        "Component " + model.getComponentName() + " linked to service " + model.getTarget().getName());
 		} catch (IOException e) {
 			shell.getDisplay().asyncExec(() -> {
 				notification.close();
