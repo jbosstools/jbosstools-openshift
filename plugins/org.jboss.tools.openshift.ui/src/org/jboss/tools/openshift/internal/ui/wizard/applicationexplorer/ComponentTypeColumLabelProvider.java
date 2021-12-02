@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 import java.util.Objects;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.jboss.tools.openshift.core.odo.ComponentType;
 import org.jboss.tools.openshift.core.odo.DevfileComponentType;
 
 /**
@@ -24,12 +23,10 @@ public class ComponentTypeColumLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public String getText(Object element) {
-	  if (element instanceof ComponentType) {
-	    String text = ((ComponentType)element).getName();
+	  if (element instanceof DevfileComponentType) {
 	    if (element instanceof DevfileComponentType) {
-	      text += " (from " + ((DevfileComponentType)element).getDevfileRegistry().getName() + ")";
+	      return ((DevfileComponentType)element).getDisplayName() +" (from " + ((DevfileComponentType)element).getDevfileRegistry().getName() + ")";
 	    }
-	    return text;
 	  }
 	  return Objects.toString(element);
 	}
