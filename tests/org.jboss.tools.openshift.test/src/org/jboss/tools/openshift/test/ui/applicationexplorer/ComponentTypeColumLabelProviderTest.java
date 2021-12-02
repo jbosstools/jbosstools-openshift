@@ -34,10 +34,7 @@ public class ComponentTypeColumLabelProviderTest {
 	public void checkDisplayNameIsUsed() {
 		DevfileRegistry registry = mock(DevfileRegistry.class);
 		when(registry.getName()).thenReturn("registry name");
-		DevfileComponentType type = mock(DevfileComponentType.class);
-		when(type.getName()).thenReturn("myname");
-		when(type.getDisplayName()).thenReturn("my display name");
-		when(type.getDevfileRegistry()).thenReturn(registry);
+		DevfileComponentType type = new DevfileComponentType("my name", "my display name", "my description", registry, null, null);
 		String result = provider.getText(type);
 		assertTrue(result.equals("my display name (from registry name)"));
 	}
