@@ -59,7 +59,7 @@ public class BaseOpenShiftExplorerView extends CommonNavigator {
 
 		@Override
 		public void mouseUp(MouseEvent e) {
-			if (SWT.BUTTON1 != e.button) {
+			if (e.button != 1) {
 				return;
 			}
 			final ILink link = getLink(e);
