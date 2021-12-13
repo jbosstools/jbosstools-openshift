@@ -16,9 +16,9 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-compress-1.21.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-io-2.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang-2.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j-api-2.13.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j-core-2.13.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j-slf4j18-impl-2.13.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j-api-2.15.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j-core-2.15.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j-slf4j18-impl-2.15.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-2.0.0-alpha1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-dataformat-yaml-2.10.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-datatype-jsr310-2.10.3.jar"/>
