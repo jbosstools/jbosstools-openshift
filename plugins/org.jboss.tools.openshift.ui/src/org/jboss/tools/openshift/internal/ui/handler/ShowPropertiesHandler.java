@@ -38,6 +38,7 @@ public class ShowPropertiesHandler extends AbstractHandler {
 					IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 					IWorkbenchPart active = page.getActivePart();
 					IWorkbenchPart part = page.showView("org.eclipse.ui.views.PropertySheet");
+					part.getSite().setSelectionProvider(active.getSite().getSelectionProvider());
 					page.activate(active);
 					page.activate(part);
 				} catch (PartInitException e) {

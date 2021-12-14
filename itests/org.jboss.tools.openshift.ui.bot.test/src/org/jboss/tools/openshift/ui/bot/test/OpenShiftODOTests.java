@@ -15,7 +15,6 @@ import org.jboss.tools.openshift.ui.bot.test.odo.ConnectionODOCommandsTests;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateDevfileComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreatePythonDevfileComponentWithStarterODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateS2IComponentODOTest;
-import org.jboss.tools.openshift.ui.bot.test.odo.CreateServiceODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateVertxDevfileComponentWithLocalDevfileODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.DebugNodeDevfileComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.DebugNodeS2IComponentODOTest;
@@ -38,7 +37,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	LoginODOTest.class,
 	ProjectManagementODOTest.class,
-	ConnectionODOCommandsTests.class, 
+	ConnectionODOCommandsTests.class,
 	CreateS2IComponentODOTest.class,
 	CreateVertxDevfileComponentWithLocalDevfileODOTest.class,
 	CreateDevfileComponentODOTest.class,

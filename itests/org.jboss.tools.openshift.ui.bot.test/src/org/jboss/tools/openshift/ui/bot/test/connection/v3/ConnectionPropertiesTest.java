@@ -12,10 +12,23 @@ package org.jboss.tools.openshift.ui.bot.test.connection.v3;
 
 import static org.junit.Assert.assertEquals;
 
+import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.util.Display;
+import org.eclipse.reddeer.common.util.ResultRunnable;
+import org.eclipse.reddeer.core.handler.WidgetHandler;
 import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheet;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.swt.api.CTabItem;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.keyboard.Keyboard;
+import org.eclipse.reddeer.swt.keyboard.KeyboardFactory;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Widget;
 import org.jboss.tools.openshift.reddeer.enums.AuthenticationMethod;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
@@ -40,6 +53,9 @@ public class ConnectionPropertiesTest extends AbstractTest {
 	public void testConnectionProperties() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
+		
+		Keyboard keyboard = KeyboardFactory.getKeyboard();
+		keyboard.invokeKeyCombination(SWT.F3);
 
 		OpenShift3Connection connection = explorer.getOpenShift3Connection(connectionReq.getConnection());
 		connection.select();
@@ -66,5 +82,23 @@ public class ConnectionPropertiesTest extends AbstractTest {
 							+ connectionReq.getConnection().getUsername() + "'",
 							connectionReq.getConnection().getUsername(), propertiesView.getProperty(PROPERTY_USERNAME).getPropertyValue());
 		}
+	}
+	
+	public void click(final Point point, Widget swtWidget) {
+		Event e = createEvent(swtWidget);
+		Point p = point;
+		e.x = p.x;
+		e.y = p.y;
+		WidgetHandler.getInstance().notifyWidget(SWT.MouseDoubleClick, e, swtWidget);
+	}
+	
+	private Event createEvent(Widget widget) {
+		Event event = new Event();
+		event.time = (int) System.currentTimeMillis();
+		event.widget = widget;
+		event.display = Display.getDisplay();
+		event.type = SWT.MouseUp;
+		event.button = 1;
+		return event;
 	}
 }

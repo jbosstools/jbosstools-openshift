@@ -22,7 +22,12 @@ import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheet;
 import org.eclipse.reddeer.junit.execution.annotation.RunIf;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.swt.api.CTabFolder;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.ctab.DefaultCTabFolder;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.toolbar.DefaultToolItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.reddeer.enums.AuthenticationMethod;
@@ -128,12 +133,32 @@ public class SetOCForNewConnectionTest extends AbstractTest {
 		OpenShift3Connection connection = explorer.getOpenShift3Connection(DatastoreOS3.SERVER, DatastoreOS3.USERNAME);
 		connection.select();
 
+		PropertiesOverload propertiesView = new PropertiesOverload();
+		propertiesView.open();
+//		propertiesView.getContextMenu().getItem("Detach");
+		new ContextMenuItem("Detach").select();
+		DefaultShell shell = new DefaultShell();
+		System.out.println(shell.getText());
+		
+		explorer.activate();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.PROPERTIES).select();
-
-		PropertySheet propertiesView = new PropertySheet();
+		
+//		PropertiesOverload propertiesView = new PropertiesOverload();
+		if (!propertiesView.isOpen()) {
+			propertiesView.open();
+		}
 		propertiesView.activate();
+		propertiesView.togglePinToSelection(true);
+//		if (!propertiesView.isOpen()) {
+//			propertiesView.open();
+//		}
+//		propertiesView.activate();
+//		new DefaultToolItem(propertiesView.getCTabItem().getFolder(), "Pin to Selection").toggle(true);
 
 		assertEquals(expectedLocation, propertiesView.getProperty(PROPERTY_OC_LOCATION).getPropertyValue());
+
+		propertiesView.activate();
+		new DefaultToolItem(propertiesView.getCTabItem().getFolder(), "Pin to Selection").toggle(false);
 	}
 
 	private void checkConnectionIsWorking() {
@@ -198,6 +223,16 @@ public class SetOCForNewConnectionTest extends AbstractTest {
 	@After
 	public void cleanUpConnections() {
 		ConnectionsRegistrySingleton.getInstance().clear();
+	}
+	
+	private class PropertiesOverload extends PropertySheet {
+		
+		public void togglePinToSelection(boolean toggle){
+			activate();
+			
+			DefaultToolItem item = new DefaultToolItem(cTabItem.getFolder(), "Pins this property view to the current selection");
+			item.toggle(toggle);
+		}
 	}
 
 }

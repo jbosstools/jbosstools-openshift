@@ -60,6 +60,7 @@ public class LoginODOTest extends AbstractODOTest  {
 	@Test
 	@RunIf(conditionClass = ConnectionCredentialsExists.class)
 	public void testCreateNewODOBasicConnection() {
+		System.out.println(System.getenv("PATH")); 
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open(true);
 

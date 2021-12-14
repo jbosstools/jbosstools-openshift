@@ -74,7 +74,7 @@ public class OSExplorerResourceTest extends AbstractTest {
 
 	@Before
 	public void setUp() {
-		TestUtils.setUpOcBinary();
+		TestUtils.setUpOcBinary();	
 		TestUtils.cleanupGitFolder(OpenShiftResources.NODEJS_GIT_NAME);
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
