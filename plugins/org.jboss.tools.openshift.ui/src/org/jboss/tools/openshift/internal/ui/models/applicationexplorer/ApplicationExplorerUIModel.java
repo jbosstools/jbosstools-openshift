@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IProject;
@@ -62,28 +63,9 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
     private Odo odo;
     
     public Odo getOdo() throws IOException {
-      if (odo == null) {
-        loadClient();
-      }
       return odo;
     }
     
-    public OdoCliFactory getFactory() {
-      return OdoCliFactory.getInstance();
-    }
-
-    private void loadClient() {
-      odo = getFactory().getOdo();
-    }
-
-    void reload() {
-      loadClient();
-    }
-    
-    void refresh() {
-      loadClient();
-    }
-     
   }
   
     private final Map<String, ComponentDescriptor> components = new HashMap<>();
@@ -98,33 +80,48 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
     
     protected ApplicationExplorerUIModel(ClusterClient clusterClient) {
       super(null, clusterClient);
-      loadProjects();
       watcherJob = Job.createSystem("Watching kubeconfig", this::startWatcher);
       watcherJob.schedule();
       this.config = loadConfig();
       ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
+      refresh();
     }
 
   private ApplicationExplorerUIModel() {
     this(new ClusterClient());
   }
+  
+  protected OdoCliFactory getFactory() {
+	  return OdoCliFactory.getInstance();
+  }
+  
+  private CompletableFuture<Odo> initializeOdo() {
+	  return getFactory().getOdo().whenComplete((odo, err) -> {
+			  this.odo = odo;
+			  loadProjects();
+	  });
+  }
 
 
   @Override
   public void refresh() {
-    odo = null;
-    getWrapped().refresh();
-    fireChanged(this);
+    initializeOdo().thenAccept(odo -> {
+        getWrapped().odo = odo;
+        ApplicationExplorerUIModel.this.odo = null;
+        fireChanged(this);
+    });
   }
   
   public void reload() {
-    odo = null;
-    getWrapped().reload();
-    fireChanged(this);
+	    initializeOdo().thenAccept(odo -> {
+	        getWrapped().odo = odo;
+	        ApplicationExplorerUIModel.this.odo = null;
+	        fireChanged(this);
+	    });
   }
   
   public Odo getOdo() throws IOException {
-    if (odo == null) {
+    if (odo == null && getWrapped().getOdo() != null) {
       odo = new OdoProjectDecorator(getWrapped().getOdo(), this);
     }
     return odo;

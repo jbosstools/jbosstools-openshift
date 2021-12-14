@@ -40,21 +40,13 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.URLEleme
 public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabelProvider {
 
 	@Override
-	public String getText(Object element) {
-		if (element instanceof ApplicationExplorerUIModel) {
-			try {
-        return ((ApplicationExplorerUIModel) element).getOdo().getMasterUrl().toString();
-      } catch (IOException e) {
-      }
-		}
-		return super.getText(element);
-	}
-
-	@Override
 	public StyledString getStyledText(Object element, int limit) {
 		if (element instanceof ApplicationExplorerUIModel) {
 			try {
-        return style(((ApplicationExplorerUIModel) element).getOdo().getMasterUrl().toString(), "", limit);
+				if (((ApplicationExplorerUIModel) element).getOdo() != null) {
+			        return style(((ApplicationExplorerUIModel) element).getOdo().getMasterUrl().toString(), "", limit);
+				}
+				return style("Loading", "", limit);
       } catch (IOException e) {
         return style("Error", "", limit);
       }
