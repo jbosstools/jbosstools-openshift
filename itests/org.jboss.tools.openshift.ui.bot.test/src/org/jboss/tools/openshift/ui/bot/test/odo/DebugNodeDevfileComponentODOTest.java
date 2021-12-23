@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.ui.bot.test.odo;
 
 import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
@@ -68,7 +69,7 @@ public class DebugNodeDevfileComponentODOTest extends AbstractODOTest {
 	
 	@Test
 	@Ignore("Launcher projects do not specify debug script")
-	public void checkBreakpointReached() throws CoreException, IOException {
+	public void checkBreakpointReached() throws CoreException, IOException, InterruptedException, ExecutionException {
 		ProjectExplorer pe = new ProjectExplorer();
 		pe.open();
 		pe.getProject(ECLIPSE_PROJECT).getProjectItem(APP_SOURCE).open();

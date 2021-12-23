@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.ui.bot.test;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.reddeer.common.wait.TimePeriod;
@@ -65,9 +66,9 @@ public abstract class AbstractODOTest {
 		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 	}
 	
-	public static void triggerDebugSession(String eclipseProjectName, String project, String application, String component, String urlSuffix) throws IOException {
+	public static void triggerDebugSession(String eclipseProjectName, String project, String application, String component, String urlSuffix) throws IOException, InterruptedException, ExecutionException {
 		String path = ResourcesPlugin.getWorkspace().getRoot().getProject(eclipseProjectName).getLocation().toOSString();
-		List<URL> urls = OdoCliFactory.getInstance().getOdo().listURLs(project, application, path, component);
+		List<URL> urls = OdoCliFactory.getInstance().getOdo().get().listURLs(project, application, path, component);
 		java.net.URL url = new java.net.URL("http://" + urls.get(0).getHost() + urlSuffix);
 		new Thread(new Runnable() {
 			public void run() {
