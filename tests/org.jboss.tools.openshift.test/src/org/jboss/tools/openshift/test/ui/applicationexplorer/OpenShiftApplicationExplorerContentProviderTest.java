@@ -15,6 +15,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
 import org.jboss.tools.openshift.core.odo.Application;
@@ -48,9 +49,13 @@ public class OpenShiftApplicationExplorerContentProviderTest {
 	  ClusterClient info = mock(ClusterClient.class);
 	  doReturn(odo).when(info).getOdo();
 	  OdoCliFactory factory = mock(OdoCliFactory.class);
-	  doReturn(odo).when(factory).getOdo();
-	  doReturn(factory).when(info).getFactory();
+	  doReturn(CompletableFuture.completedFuture(odo)).when(factory).getOdo();
 		this.model = new ApplicationExplorerUIModel(info) {
+
+			@Override
+			protected OdoCliFactory getFactory() {
+				return factory;
+			}
 		};
 		this.provider = new OpenShiftApplicationExplorerContentProvider(model) {
 		};

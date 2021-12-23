@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.odo;
 
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import org.jboss.tools.common.util.DownloadHelper;
 import org.jboss.tools.openshift.core.odo.Odo;
@@ -30,31 +30,15 @@ public class OdoCliFactory {
     return INSTANCE;
   }
   
-  private String command;
+  private CompletableFuture<String> future;
   
   private OdoCliFactory() {
   }
   
-  public Odo getOdo() {
-    if (command == null) {
-      try {
-        command = getCommand();
-      } catch (IOException e) {
-      }
+  public CompletableFuture<Odo> getOdo() {
+    if (future == null) {
+    	future = DownloadHelper.getInstance().downloadIfRequiredAsync("odo", OdoCli.class.getResource("/tools.json"));
     }
-    return new OdoCli(command);
+    return future.thenApply(command -> new OdoCli(command));
   }
-  
-  private String getCommand() throws IOException {
-    if (command == null) {
-      command = getOdoCommand();
-    }
-    return command;
-  }
-
-  private String getOdoCommand() throws IOException {
-    return DownloadHelper.getInstance().downloadIfRequired("odo", OdoCli.class.getResource("/tools.json"));
-  }
-
-
 }
