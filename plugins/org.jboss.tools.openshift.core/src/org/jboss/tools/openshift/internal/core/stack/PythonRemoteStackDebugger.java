@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.Socket;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -44,10 +45,12 @@ import com.google.gson.stream.JsonWriter;
 public class PythonRemoteStackDebugger implements RemoteStackDebugger, IDebugProtocolClient {
 
 	private static final String ID_REMOTE_DSP_APPLICATION = "org.eclipse.lsp4e.debug.launchType";
+	
+	private static final List<String> SUPPORTED = List.of("python", "django");
 
 	@Override
 	public boolean isValid(String stackType, String stackVersion) {
-		return stackType.contains("python");
+		return SUPPORTED.contains(stackType.toLowerCase());
 	}
 
 	@Override
