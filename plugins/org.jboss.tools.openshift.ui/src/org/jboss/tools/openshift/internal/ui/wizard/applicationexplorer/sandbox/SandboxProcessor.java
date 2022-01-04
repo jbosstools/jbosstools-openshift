@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.sandbox
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 import org.jboss.tools.foundation.core.properties.PropertiesHelper;
 
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -75,9 +77,14 @@ public class SandboxProcessor {
    */
   public SandboxProcessor(String token, String url) {
     this.token = "Bearer " + token;
+    OkHttpClient client = new OkHttpClient.Builder().
+    		callTimeout(1, TimeUnit.MINUTES).
+    		readTimeout(30, TimeUnit.SECONDS).
+    		build();
     this.api = new Retrofit.Builder().
         baseUrl(url).
         addConverterFactory(JacksonConverterFactory.create()).
+        client(client).
         build().create(SandboxAPI.class);
   }
   
