@@ -19,6 +19,7 @@ import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
@@ -54,7 +55,7 @@ public class CreateResourcesTest extends AbstractTest  {
 	private String testProject;
 	private OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 
-	public static final String RESOURCES_LOCATION = System.getProperty("user.dir") + File.separator + "resources";
+	public static final String RESOURCES_LOCATION = System.getProperty("user.dir") + File.separator + "resources" + File.separator + "os4templates";
 	private static final String POD_NAME = "hello-openshift";
 	private static final String SERVICE_NAME = POD_NAME;
 	private static final String ROUTE_NAME = POD_NAME;
@@ -115,7 +116,7 @@ public class CreateResourcesTest extends AbstractTest  {
 	@Test
 	public void testCreateResourceFromURL() {
 		createResource(
-				"https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/hello-pod.json");
+				"https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/os4templates/hello-pod.json");
 		
 		new WaitUntil(new OpenShiftResourceExists(Resource.POD, POD_NAME, ResourceState.RUNNING, testProject, connectionReq.getConnection()),
 				TimePeriod.LONG);
@@ -135,9 +136,9 @@ public class CreateResourcesTest extends AbstractTest  {
 
 		new LabeledText(OpenShiftLabel.TextLabels.RESOURCE_LOCATION).setText(pathToResource);
 		new FinishButton().click();
-
+		
 		new DefaultShell(OpenShiftLabel.Shell.CREATE_RESOURCE_SUMMARY);
-
+		
 		assertTrue("Resource is not listed in created resources summary", new DefaultTree().getAllItems().size() == 1);
 
 		new OkButton().click();

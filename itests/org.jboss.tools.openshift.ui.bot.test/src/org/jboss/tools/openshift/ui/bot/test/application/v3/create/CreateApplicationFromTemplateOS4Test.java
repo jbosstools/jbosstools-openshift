@@ -32,17 +32,17 @@ public class CreateApplicationFromTemplateOS4Test extends CreateApplicationFromT
 
 	@Override
 	protected String getTemplateURL() {
-		return "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/os4templates/eap72-basic-s2i-helloworld.json";
+		return "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/os4templates/eap73-basic-s2i-helloworld.json";
 	}
 	
 	@Override
 	protected void importTestsProject() {
-		importTestsProject(new File("resources" + File.separator + "os4templates" + File.separator + TESTS_PROJECT).getAbsolutePath());
+		importTestsProject(new File("resources" + File.separator + TESTS_PROJECT).getAbsolutePath());
 	}
 	
 	@Override
 	protected String getFilesystemTemplatePath() {
-		return new File("resources" + File.separator + "os4templates" + File.separator + TESTS_PROJECT).getAbsolutePath() + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME;
+		return new File("resources" + File.separator + TESTS_PROJECT).getAbsolutePath() + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME;
 	}
 	
 	@Override

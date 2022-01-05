@@ -19,6 +19,7 @@ import org.eclipse.reddeer.eclipse.ui.browser.BrowserEditor;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.jboss.ide.eclipse.as.reddeer.server.requirement.InternalBrowserRequirement.UseInternalBrowser;
 import org.jboss.tools.openshift.reddeer.condition.AmountOfResourcesExists;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
@@ -39,6 +40,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(RedDeerSuite.class)
 @OCBinary
+@UseInternalBrowser
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE_RESOURCES_PATH)

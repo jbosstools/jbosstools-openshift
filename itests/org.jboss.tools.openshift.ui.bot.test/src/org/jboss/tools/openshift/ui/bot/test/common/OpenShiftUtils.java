@@ -182,6 +182,7 @@ public class OpenShiftUtils {
 			}
 		});
 		OpenShiftUtils.handleCheatSheetCreateServerAdapter();
+		// handle maven dep installation
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
 	}
 	

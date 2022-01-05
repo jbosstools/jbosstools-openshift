@@ -45,7 +45,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject
+@RequiredODOProject(name="test-project7")
 public class DebugVertxDevfileComponentODOTest extends AbstractODOTest {
 	
 	/**
@@ -65,7 +65,7 @@ public class DebugVertxDevfileComponentODOTest extends AbstractODOTest {
 	@BeforeClass
 	public static void setupWorkspace() {
 		importLauncherProject(ECLIPSE_PROJECT, "vert.x community");
-		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "java-maven", null, true);
+		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "maven java", null, true);
 	}
 	
 	@Test

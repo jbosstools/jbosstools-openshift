@@ -34,7 +34,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject
+@RequiredODOProject(name="test-project2")
 public class CreateVertxDevfileComponentWithLocalDevfileODOTest extends AbstractODOTest {
 	
 

@@ -82,7 +82,7 @@ public class ServerAdapterWizardHandlingTest extends AbstractTest  {
 	}
 	
 	private static void cloneGitRepoAndImportProject() {
-		OpenShiftUtils.cloneGitRepository(GIT_REPO_DIRECTORY, GIT_REPO_URL , true);
+		OpenShiftUtils.cloneGitRepository(GIT_REPO_DIRECTORY, GIT_REPO_URL, "7.3.x", true);
 		OpenShiftUtils.importProjectUsingSmartImport(GIT_REPO_DIRECTORY, PROJECT_NAME);	}
 
 	@Test

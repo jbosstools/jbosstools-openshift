@@ -85,7 +85,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	private String helloworldProject = "helloworld";
 	private String kitchensinkProject = "kitchensink";
 
-	protected static final String TESTS_PROJECT = "osProjectWithResources";
+	protected static final String TESTS_PROJECT = "os4templates";
 	
 	private String genericWebhookURL;
 	private String githubWebhookURL;
@@ -104,7 +104,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	}
 	
 	protected String getTemplateURL() {
-		return "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/eap72-basic-s2i-helloworld.json";
+		return "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/os4templates/eap73-basic-s2i-helloworld.json";
 	}
 	
 	protected String getFilesystemTemplatePath() {
@@ -113,14 +113,13 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	
 	protected String getWorkspaceTemplatePath() {
 		return "${workspace_loc:"
-				+ File.separator + TESTS_PROJECT + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME +"}";
+				+ File.separator + "os4templates" + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME +"}";
 	}
 	
 	protected void importTestsProject(String pathToProject) {
 		new ExternalProjectImportWizardDialog().open();
 		new DefaultCombo().setText(pathToProject);
 		new PushButton("Refresh").click();
-
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.LONG);
 
 		new FinishButton().click();
@@ -315,17 +314,17 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 
 		List<OpenShiftResource> buildConfig = project.getOpenShiftResources(Resource.BUILD_CONFIG);
 		assertTrue("There should be precisely 1 build config for created application, but there is following amount"
-				+ " of build configs: " + buildConfig.size(), buildConfig.size() == 1);
+				+ " of build configs: " + buildConfig.size(), buildConfig.size() == 2);
 		assertTrue(
 				"There should be application name and git URI in build config tree item, but they are not."
 						+ "Application name is '" + applicationName + "' and git URI is '" + srcRepoURI
 						+ "', but build " + "config has name '" + buildConfig.get(0).getName() + "'",
 				buildConfig.get(0).getPropertyValue("Labels", "application").equals(applicationName)
-						&& buildConfig.get(0).getPropertyValue("Source", "URI").equals(srcRepoURI));
+						&& buildConfig.get(1).getPropertyValue("Source", "URI").equals(srcRepoURI));
 
 		List<OpenShiftResource> imageStream = project.getOpenShiftResources(Resource.IMAGE_STREAM);
-		assertTrue("There should be precisely 1 image stream for created application, but there is following amount"
-				+ " of image streams: " + imageStream.size(), imageStream.size() == 1);
+		assertTrue("There should be precisely 2 image streams for created application, but there is following amount"
+				+ " of image streams: " + imageStream.size(), imageStream.size() == 2);
 
 		List<OpenShiftResource> routes = project.getOpenShiftResources(Resource.ROUTE);
 		assertTrue("There should be precisely 1 route for created application, but there is following amount"

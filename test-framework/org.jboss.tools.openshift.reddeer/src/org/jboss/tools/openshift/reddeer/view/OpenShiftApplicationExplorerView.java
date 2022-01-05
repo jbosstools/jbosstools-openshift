@@ -70,7 +70,9 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 	
 	private void handleOdoToolRequiredDialog () {
 		try {
-			new WaitUntil(new ShellIsAvailable("odo tool required"));
+			ShellIsAvailable odoToolDownload = new ShellIsAvailable("odo tool required");
+			new WaitUntil(odoToolDownload);
+			new DefaultShell(odoToolDownload.getResult());
 			new PushButton("Yes").click();
 			new WaitWhile(new ShellIsAvailable("Progress Information"), TimePeriod.LONG, false);
 		} catch (CoreLayerException ex) {

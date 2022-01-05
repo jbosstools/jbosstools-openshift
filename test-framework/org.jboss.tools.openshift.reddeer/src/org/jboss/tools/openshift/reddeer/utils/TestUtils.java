@@ -20,6 +20,8 @@ import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.CheckBox;
@@ -201,16 +203,17 @@ public class TestUtils {
 	}
 	
 	public static void acceptSSLCertificate() {
-		try {
-			new DefaultShell(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
+		acceptShellDialog(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
+		acceptShellDialog(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
+	}
+	
+	public static void acceptShellDialog(String shell) {
+		ShellIsAvailable sslDialogIsAvailable = new ShellIsAvailable(shell);
+		new WaitUntil(sslDialogIsAvailable, TimePeriod.MEDIUM, false);
+		if (sslDialogIsAvailable.getResult() != null) {
+			new DefaultShell(shell);
 			new YesButton().click();
-			new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE));
-			//Try it once again for OpenShift4
-			new DefaultShell(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
-			new YesButton().click();
-			new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE));
-		} catch (RedDeerException ex) {
-			// no dialog was presented
+			new WaitWhile(sslDialogIsAvailable, TimePeriod.MEDIUM, false);
 		}
 	}
 }

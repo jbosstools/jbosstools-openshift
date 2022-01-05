@@ -47,7 +47,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject
+@RequiredODOProject(name="test-project5")
 public class DebugNodeDevfileComponentODOTest extends AbstractODOTest {
   
 	private static final String APP_SOURCE = "app.js";

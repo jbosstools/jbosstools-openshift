@@ -28,6 +28,7 @@ import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.impl.editor.TextEditor;
+import org.jboss.ide.eclipse.as.reddeer.server.requirement.InternalBrowserRequirement.UseInternalBrowser;
 import org.jboss.tools.openshift.reddeer.condition.ApplicationPodIsRunning;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
@@ -61,6 +62,7 @@ import org.junit.runner.RunWith;
 @CleanOpenShiftExplorer
 @RequiredBasicConnection
 @CleanConnection
+@UseInternalBrowser
 @RequiredProject
 @RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE_RESOURCES_PATH)
 public class PublishChangesTest extends AbstractTest  {
@@ -120,7 +122,7 @@ public class PublishChangesTest extends AbstractTest  {
 		ProjectExplorer projectExplorer = new ProjectExplorer();
 		projectExplorer.open();
 		projectExplorer.getProject(PROJECT_NAME).select();
-		ProjectItem projectItem = projectExplorer.getProject(PROJECT_NAME).getProjectItem("Java Resources", "src/main/java",
+		ProjectItem projectItem = projectExplorer.getProject(PROJECT_NAME).getProjectItem("src/main/java",
 				"org.jboss.as.quickstarts.helloworld", "HelloService.java");
 		projectItem.select();
 		projectItem.open();
@@ -129,7 +131,7 @@ public class PublishChangesTest extends AbstractTest  {
 		textEditor.setText(PUBLISHED_CODE);
 		textEditor.close(true);
 		
-		new WaitWhile(new JobIsRunning(), TimePeriod.DEFAULT);
+		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 		new WaitUntil(new ConsoleHasNoChange(), TimePeriod.VERY_LONG);
 	
 		assertTrue("Local changes performed to project have not been autopublished, or at least rsync "

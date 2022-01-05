@@ -107,7 +107,7 @@ public class EditResourcesTest extends AbstractTest {
 		
 		assertTrue("Changes from updating of a build config should be shown "
 				+ "in Properties view, but it is not.", 
-				getBuildConfig().getPropertyValue("Source", "URI").equals(customRepo));
+				getBuildConfig(1).getPropertyValue("Source", "URI").equals(customRepo));
 	}
 
 	@Test
@@ -136,13 +136,17 @@ public class EditResourcesTest extends AbstractTest {
 	}
 	
 	private OpenShiftResource getBuildConfig() {
+		return getBuildConfig(0);
+	}
+	
+	private OpenShiftResource getBuildConfig(int index) {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		return explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(DatastoreOS3.TEST_PROJECT).
-				getOpenShiftResources(Resource.BUILD_CONFIG).get(0);
+				getOpenShiftResources(Resource.BUILD_CONFIG).get(index);
 	}
 
 	private TextEditor getBuildConfigTextEditor() {
-		getBuildConfig().select();
+		getBuildConfig(1).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.EDIT).select();
 		System.out.println("TESTING:" + BUILD_CONFIG_EDITOR);
 		

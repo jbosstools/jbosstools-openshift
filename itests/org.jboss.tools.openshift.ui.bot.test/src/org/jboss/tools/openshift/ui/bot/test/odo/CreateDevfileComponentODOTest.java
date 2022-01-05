@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject
+@RequiredODOProject(name="test-project3")
 public class CreateDevfileComponentODOTest extends AbstractODOTest {
 	
 
@@ -43,7 +43,7 @@ public class CreateDevfileComponentODOTest extends AbstractODOTest {
 	
 	@Test
 	public void testCreateComponent() {
-		createComponent(projectReq.getProjectName(), "java-vertx", null, true);
+		createComponent(projectReq.getProjectName(), "vert.x java", null, true);
 	}
 
 }

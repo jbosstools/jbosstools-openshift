@@ -90,6 +90,7 @@ public abstract class AbstractOpenShiftApplicationWizard {
 
 		new NextButton().click();
 		processUntrustedSSLCertificate();
+		processUntrustedSSLCertificate();
 
 		new WaitWhile(new JobIsRunning(), TimePeriod.getCustom(240));
 		new WaitUntil(new ControlIsEnabled(new BackButton()), TimePeriod.LONG);
@@ -97,7 +98,7 @@ public abstract class AbstractOpenShiftApplicationWizard {
 
 	private void processUntrustedSSLCertificate() {
 		try {
-			new WaitUntil(new ShellIsAvailable("Untrusted SSL Certificate"), TimePeriod.LONG, false);
+			new WaitUntil(new ShellIsAvailable("Untrusted SSL Certificate"), TimePeriod.DEFAULT, false);
 			new DefaultShell("Untrusted SSL Certificate");
 			new YesButton().click();
 		} catch (CoreLayerException ex) {
