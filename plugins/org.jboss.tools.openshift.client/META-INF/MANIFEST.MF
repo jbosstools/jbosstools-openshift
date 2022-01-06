@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.client;singleton:=true
-Bundle-Version: 3.16.0.qualifier
+Bundle-Version: 3.17.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
@@ -16,9 +16,9 @@ Bundle-ClassPath: .,
  lib/commons-compress-1.21.jar,
  lib/commons-io-2.7.jar,
  lib/commons-lang-2.6.jar,
- lib/log4j-api-2.13.3.jar,
- lib/log4j-core-2.13.3.jar,
- lib/log4j-slf4j18-impl-2.13.3.jar,
+ lib/log4j-api-2.17.1.jar,
+ lib/log4j-core-2.17.1.jar,
+ lib/log4j-slf4j18-impl-2.17.1.jar,
  lib/slf4j-api-2.0.0-alpha1.jar,
  lib/jackson-dataformat-yaml-2.10.3.jar,
  lib/jackson-datatype-jsr310-2.10.3.jar,

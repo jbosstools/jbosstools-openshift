@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CDK UI bot tests
 Bundle-SymbolicName: org.jboss.tools.cdk.ui.bot.test
-Bundle-Version: 3.16.0.qualifier
+Bundle-Version: 3.17.1.qualifier
 Bundle-Vendor: Red Hat
 Require-Bundle: org.junit,
  org.eclipse.reddeer.go;bundle-version="3.0.0",
