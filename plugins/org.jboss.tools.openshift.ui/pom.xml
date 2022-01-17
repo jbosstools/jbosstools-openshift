@@ -12,7 +12,7 @@
 	
     <properties>
         <commons-validator.version>1.7</commons-validator.version>
-        <alizer.version>0.1.0-SNAPSHOT</alizer.version>
+        <alizer.version>0.1.0</alizer.version>
     </properties>
 
     <build>
