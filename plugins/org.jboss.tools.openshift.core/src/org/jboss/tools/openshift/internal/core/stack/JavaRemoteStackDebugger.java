@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.core.stack;
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
@@ -29,10 +30,11 @@ import org.jboss.tools.openshift.core.stack.RemoteStackDebugger;
  *
  */
 public class JavaRemoteStackDebugger implements RemoteStackDebugger {
+	private static final List<String> SUPPORTED = List.of("maven", "openliberty", "websphereliberty", "quarkus", "spring", "vertx", "wildfly", "java");
 
 	@Override
 	public boolean isValid(String stackType, String stackVersion) {
-		return stackType.contains("java");
+		return SUPPORTED.contains(stackType.toLowerCase());
 	}
 
 	@Override

@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.core.stack;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
@@ -34,10 +35,13 @@ import com.google.gson.stream.JsonWriter;
 public class NodeRemoteStackDebugger implements RemoteStackDebugger {
 
 	private static final String ID_REMOTE_NODE_APPLICATION = "org.eclipse.wildwebdeveloper.launchConfiguration.nodeDebugAttach";
+	
+	private static final List<String> SUPPORTED = List.of("nodejs", "angular", "nextjs", "nuxtjs", "react", "svelte", "vue", "javascript", "typescript");
+
 
 	@Override
 	public boolean isValid(String stackType, String stackVersion) {
-		return "nodejs".equals(stackType);
+		return SUPPORTED.contains(stackType.toLowerCase());
 	}
 
 	@Override
