@@ -104,7 +104,7 @@ Export-Package: com.redhat.devtools.alizer.api;x-friends:="org.jboss.tools.opens
  org.jboss.tools.openshift.internal.ui.wizard.resource;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer"
 Bundle-ClassPath: lib/commons-validator-1.7.jar,
  .,
- lib/alizer-api-0.1.0-SNAPSHOT.jar
+ lib/alizer-api-0.1.0.jar
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.content,
  org.eclipse.core.runtime.jobs,
