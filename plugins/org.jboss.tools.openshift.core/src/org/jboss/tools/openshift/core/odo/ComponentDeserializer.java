@@ -22,6 +22,7 @@ import java.util.List;
 public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Component>> {
 
     public static final String DEVFILE_FIELD = "devfileComponents";
+    public static final String OTHER_FIELD = "otherComponents";
     public static final String METADATA_FIELD = "metadata";
     public static final String STATUS_FIELD = "status";
     public static final String STATE_FIELD = "state";
@@ -34,8 +35,9 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
     @Override
     public List<Component> convert(JsonNode root, DeserializationContext context) {
         List<Component> result = new ArrayList<>();
-        // two roots, s2i and devfiles
+        // two roots, devfileComponents and otherComponents
         result.addAll(parseComponents(root.get(DEVFILE_FIELD), ComponentKind.DEVFILE));
+        result.addAll(parseComponents(root.get(OTHER_FIELD), ComponentKind.DEVFILE));
         return result;
     }
 
