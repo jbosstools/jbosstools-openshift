@@ -94,6 +94,8 @@ public class CreateComponentModel extends ComponentModel {
     }
 	}
 	
+	private boolean defaultApplication;
+	
 	/**
 	 * @param odo
 	 */
@@ -107,6 +109,7 @@ public class CreateComponentModel extends ComponentModel {
 		if (getSelectedComponentType() == null && !componentTypes.isEmpty()) {
 			setSelectedComponentType(componentTypes.get(0));
 		}
+		defaultApplication = applicationName == null;
 	}
 
 	/**
@@ -234,5 +237,9 @@ public class CreateComponentModel extends ComponentModel {
 	 */
 	public List<ComponentType> getComponentTypes() {
 		return componentTypes;
+	}
+
+	public boolean isDefaultApplication() {
+		return defaultApplication;
 	}
 }
