@@ -211,7 +211,7 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 				.to(BeanProperties.value(CreateComponentModel.PROPERTY_APPLICATION_NAME).observe(model))
 				.in(dbc);
 		ControlDecorationSupport.create(applicationNameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-		if (StringUtils.isNotBlank(model.getApplicationName())) {
+		if (!model.isDefaultApplication()) {
 			applicationNameText.setEnabled(false);
 		}
 

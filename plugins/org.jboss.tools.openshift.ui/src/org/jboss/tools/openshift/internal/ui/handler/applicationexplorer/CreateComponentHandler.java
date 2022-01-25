@@ -93,7 +93,7 @@ public class CreateComponentHandler extends OdoHandler {
     IProject eclipseProject = getOpenedProject();
     final CreateComponentModel model = new CreateComponentModel(odo, odo.getComponentTypes(),
             projectName,
-            application == null ? "app" : application.getWrapped().getName(), eclipseProject);
+            application == null ? null : application.getWrapped().getName(), eclipseProject);
     if (componentType != null) {
       model.setSelectedComponentType(componentType.getWrapped());
     }
