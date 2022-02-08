@@ -13,7 +13,6 @@
 	<packaging>pom</packaging>
 	<properties>
 		<tycho.scmUrl>scm:git:https://github.com/jbosstools/jbosstools-openshift.git</tycho.scmUrl>
-		<enforceExcludePatternExtras>|alizer.version</enforceExcludePatternExtras>
 	</properties>
 	<modules>
 		<module>plugins</module>
