@@ -55,9 +55,9 @@ public class CDKStackRuntimeTest {
 	private static List<Object> results = new ArrayList<Object>();
     private static Log log = LogFactory.getLog(CDKStackRuntimeTest.class);
     
-    private static Predicate<Integer> nonAuthenticated = code -> code == 302;
+    private static Predicate<Integer> authenticated = code -> code == 302;
     
-    private static Predicate<Integer> authenticated = code -> code == 301 || code == 401;
+    private static Predicate<Integer> nonAuthenticated = code -> code == 301 || code == 401;
 	
     static {
     	USERNAME = System.getProperty(CREDENTIALS_USERNAME_KEY);
@@ -94,7 +94,7 @@ public class CDKStackRuntimeTest {
 	@Test
 	public void testMinishiftRemoteYamlURLAvailability() {
 		testJBossStackRuntimeURLsAvailability(
-				loadURLFromString(MINISHIFT_YAML_URL), "minishift", nonAuthenticated,
+				loadURLFromString(MINISHIFT_YAML_URL), "minishift", authenticated,
 				x -> getHttpHeadRequestStatusCode(x));
 	}
 	
@@ -102,11 +102,11 @@ public class CDKStackRuntimeTest {
 	public void testCDKRemoteYamlURLAvailability() {
 		if (useCredentials) {
 			testJBossStackRuntimeURLsAvailability(
-					loadURLFromString(MINISHIFT_YAML_URL), "cdk", nonAuthenticated,
+					loadURLFromString(MINISHIFT_YAML_URL), "cdk", authenticated,
 					x -> getAuthorizedHttpHeadRequestStatusCode(x));			
 		} else {
 			testJBossStackRuntimeURLsAvailability(
-					loadURLFromString(MINISHIFT_YAML_URL), "cdk", authenticated,
+					loadURLFromString(MINISHIFT_YAML_URL), "cdk", nonAuthenticated,
 					x -> getHttpHeadRequestStatusCode(x));
 		}
 	}
@@ -114,7 +114,7 @@ public class CDKStackRuntimeTest {
 	@Test
 	public void testMinishiftBundledYamlURLAvailability() {
 		testJBossStackRuntimeURLsAvailability(
-				loadURLFromFile(BUNDLED_YAML_PATH), "minishift", nonAuthenticated,
+				loadURLFromFile(BUNDLED_YAML_PATH), "minishift", authenticated,
 				x -> getHttpHeadRequestStatusCode(x));
 	}
 	
@@ -122,11 +122,11 @@ public class CDKStackRuntimeTest {
 	public void testCDKBundledYamlURLAvailability() {
 		if (useCredentials) {
 			testJBossStackRuntimeURLsAvailability(
-					loadURLFromFile(BUNDLED_YAML_PATH), "cdk", nonAuthenticated,
+					loadURLFromFile(BUNDLED_YAML_PATH), "cdk", authenticated,
 					x -> getAuthorizedHttpHeadRequestStatusCode(x));			
 		} else {
 			testJBossStackRuntimeURLsAvailability(
-					loadURLFromFile(BUNDLED_YAML_PATH), "cdk", authenticated,
+					loadURLFromFile(BUNDLED_YAML_PATH), "cdk", nonAuthenticated,
 					x -> getHttpHeadRequestStatusCode(x));
 		}
 	}
