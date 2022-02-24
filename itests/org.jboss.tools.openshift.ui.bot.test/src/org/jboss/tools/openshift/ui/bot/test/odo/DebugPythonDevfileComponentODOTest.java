@@ -15,6 +15,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.wait.AbstractWait;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.eclipse.core.resources.ProjectItem;
@@ -47,7 +48,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject
+@RequiredODOProject(name="test-project9")
 public class DebugPythonDevfileComponentODOTest extends AbstractODOTest {
 	
 	/**
@@ -92,6 +93,7 @@ public class DebugPythonDevfileComponentODOTest extends AbstractODOTest {
 
 		try {
 			new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE), TimePeriod.LONG);
+			AbstractWait.sleep(TimePeriod.DEFAULT);
 			new WaitUntil(new CursorPositionIsOnLine(editor, BREAKPOINT_LINE + 1));
 		} catch (WaitTimeoutExpiredException e) {
 			Assert.fail("Debugger hasn't stopped on breakpoint");

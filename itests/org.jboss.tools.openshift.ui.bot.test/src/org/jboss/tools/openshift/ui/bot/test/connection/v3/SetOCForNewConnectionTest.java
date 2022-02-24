@@ -128,12 +128,19 @@ public class SetOCForNewConnectionTest extends AbstractTest {
 		OpenShift3Connection connection = explorer.getOpenShift3Connection(DatastoreOS3.SERVER, DatastoreOS3.USERNAME);
 		connection.select();
 
-		new ContextMenuItem(OpenShiftLabel.ContextMenu.PROPERTIES).select();
-
 		PropertySheet propertiesView = new PropertySheet();
+		propertiesView.open();
+		
+		explorer.activate();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.PROPERTIES).select();
+		
+		if (!propertiesView.isOpen()) {
+			propertiesView.open();
+		}
 		propertiesView.activate();
-
 		assertEquals(expectedLocation, propertiesView.getProperty(PROPERTY_OC_LOCATION).getPropertyValue());
+
+		propertiesView.activate();
 	}
 
 	private void checkConnectionIsWorking() {

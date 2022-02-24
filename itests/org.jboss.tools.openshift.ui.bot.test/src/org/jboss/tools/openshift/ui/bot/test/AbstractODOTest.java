@@ -19,6 +19,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.reddeer.jface.condition.WindowIsAvailable;
@@ -135,7 +136,11 @@ public abstract class AbstractODOTest {
 		  componentWizardPage.selectStarter(starter);
 		}
 		if (!devfile) {
-			componentWizardPage.selectComponentVersion("latest");
+			try {
+				componentWizardPage.selectComponentVersion("latest");
+			} catch (CoreLayerException exc) {
+				// nothing
+			}
 		}
 		componentWizardPage.setApplication("myapp");
 		componentWizard.finish(TimePeriod.getCustom(600L)); //Maven builds may take more than 5mn

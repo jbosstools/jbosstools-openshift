@@ -101,7 +101,7 @@ public class OpenShiftODOConnectionRequirement implements Requirement<RequiredOD
 			}
 
 		} catch (Exception s) {
-			throw new OpenShiftToolsException("Cannot fulfill requirement");
+			throw new OpenShiftToolsException(s);
 		}
 
 	}

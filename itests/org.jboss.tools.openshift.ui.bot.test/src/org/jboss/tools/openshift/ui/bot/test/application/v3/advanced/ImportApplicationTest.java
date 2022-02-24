@@ -82,7 +82,7 @@ public class ImportApplicationTest extends AbstractTest {
 		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD_CONFIG,(Matcher<String>) null, ResourceState.UNSPECIFIED,
 				projectReq.getProjectName(), connectionReq.getConnection()), TimePeriod.LONG);
 		
-		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getOpenShiftResources(Resource.BUILD_CONFIG).get(0).select();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getOpenShiftResources(Resource.BUILD_CONFIG).get(1).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
 		
 		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION), TimePeriod.LONG);
@@ -116,12 +116,15 @@ public class ImportApplicationTest extends AbstractTest {
 		new WaitUntil(new ButtonWithTextIsAvailable("Refresh"), TimePeriod.VERY_LONG);
 		new WaitUntil(new TreeHasChildren(new DefaultTree()), TimePeriod.DEFAULT);
 
-		new DefaultTreeItem(projectReq.getProjectName() + " " + projectReq.getProjectName()).getItems().get(0).select();
+		new DefaultTreeItem(projectReq.getProjectName() + " " + projectReq.getProjectName()).getItems().get(1).select();
 
 		new WaitUntil(new ControlIsEnabled(new NextButton()), TimePeriod.DEFAULT);
 
 		new NextButton().click();
-		new FinishButton().click();
+		new CheckBox("Use default clone destination").toggle(false);
+		File gitRepo = new File(GIT_REPO_DIRECTORY);
+		new LabeledText("Git Clone Location:").setText(gitRepo.getAbsolutePath());
+		new FinishButton().click(); // add not default location
 
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION), TimePeriod.VERY_LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);

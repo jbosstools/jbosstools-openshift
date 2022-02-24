@@ -10,12 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.wizard.page;
 
+import java.util.Arrays;
+
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.core.matcher.TreeItemRegexMatcher;
 import org.eclipse.reddeer.core.matcher.WithLabelMatcher;
 import org.eclipse.reddeer.core.reference.ReferencedComposite;
 import org.eclipse.reddeer.jface.wizard.WizardPage;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
+import org.eclipse.reddeer.swt.impl.list.DefaultList;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -52,11 +56,22 @@ public class CreateComponentWizadPage extends WizardPage {
 
 	@SuppressWarnings("unchecked")
 	public void selectComponentType(String componentType, boolean devfile) {
-		DefaultTree tree = new DefaultTree(new WithLabelMatcher(OpenShiftLabel.TextLabels.COMPONENT_TYPE));
-		if (devfile) {
-			tree.selectItems(tree.getItem(new TreeItemRegexMatcher(".*" + componentType + ".*")));
-		} else {
-			tree.selectItems(tree.getItem(OpenShiftLabel.TextLabels.S2I_NODE, componentType));
+		try {
+			DefaultTree tree = new DefaultTree(new WithLabelMatcher(OpenShiftLabel.TextLabels.COMPONENT_TYPE));
+			if (devfile) {
+				tree.selectItems(tree.getItem(new TreeItemRegexMatcher(".*" + componentType + ".*")));
+			} else {
+				tree.selectItems(tree.getItem(OpenShiftLabel.TextLabels.S2I_NODE, componentType));
+			}
+		} catch (CoreLayerException exc) {
+			DefaultList list = new DefaultList(new WithLabelMatcher(OpenShiftLabel.TextLabels.COMPONENT_TYPE));
+			String filter = "";
+			if (devfile) {
+				filter = Arrays.asList(list.getListItems()).stream().filter(item -> item.toLowerCase().contains(componentType)).findFirst().get();				
+			} else {
+				filter = Arrays.asList(list.getListItems()).stream().filter(item -> item.toLowerCase().contains(componentType)).findFirst().get();
+			}
+			list.select(filter);
 		}
 	}
 

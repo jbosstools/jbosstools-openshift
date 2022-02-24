@@ -11,9 +11,18 @@
 package org.jboss.tools.openshift.ui.bot.test;
 
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ImportApplicationWizardGitTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ImportApplicationWizardTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.PublishChangesOS4Test;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapterWizardHandlingOS4Test;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.CreateResourcesOS4Test;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.DeleteResourceOS4Test;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourceLimitsOS4Test;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourcesOS4Test;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.HandleCustomTemplateOS4Test;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.ImportApplicationOS4Test;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.InteligentDeleteResourceOS4Test;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.LogsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.OSExplorerResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.PortForwardingOS4Test;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.ScalingOS4Test;
@@ -23,6 +32,7 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.LabelsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.NewApplicationWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.OpenNewApplicationWizardTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.TemplateParametersTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.create.CreateApplicationFromTemplateOS4Test;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.create.CreateApplicationOnBuilderImageTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.create.DeploymentOS4Test;
 import org.jboss.tools.openshift.ui.bot.test.common.OCBinaryLocationTest;
@@ -51,61 +61,61 @@ import org.junit.runners.Suite.SuiteClasses;
 		//not yet stable is added in commented line to easily track not stable tests
 	
 		// General
-		OCBinaryLocationTest.class, 
-		SetOCForNewConnectionTest.class,
+		OCBinaryLocationTest.class, // pass
+		SetOCForNewConnectionTest.class, // pass
 
 		// Connection/
-		OpenNewConnectionWizardTest.class, 
-		CreateNewConnectionTest.class, 
-		RemoveConnectionTest.class,
-		ConnectionWizardHandlingTest.class, 
-		StoreConnectionTest.class, 
-		ConnectionPropertiesTest.class,
+		OpenNewConnectionWizardTest.class, // pass
+		CreateNewConnectionTest.class, // pass
+		RemoveConnectionTest.class,// pass
+		ConnectionWizardHandlingTest.class, // pass
+		StoreConnectionTest.class, // failed
+		ConnectionPropertiesTest.class, // pass
 
 		// Project
-		ProjectNameValidationTest.class, 
-		LinkToCreateNewProjectTest.class,
-		CreateNewProjectTest.class, 
-		DeleteProjectTest.class, 
-		ResourcesTest.class,
+		ProjectNameValidationTest.class, // pass
+		LinkToCreateNewProjectTest.class, // failed
+		CreateNewProjectTest.class, // pass
+		DeleteProjectTest.class, // pass
+		ResourcesTest.class, // pass 
 		//not yet stable ProjectPropertiesTest.class,
 
 		// Application wizard handling
-		OpenNewApplicationWizardTest.class, 
-		//not yet stable OpenNewApplicationWizardWithNoProjectTest.class,
-		NewApplicationWizardHandlingTest.class, 
-		TemplateParametersTest.class,
-		LabelsTest.class, 
-		BuilderImageApplicationWizardHandlingTest.class,
+		OpenNewApplicationWizardTest.class,  // pass
+// 		not yet stable OpenNewApplicationWizardWithNoProjectTest.class,
+		NewApplicationWizardHandlingTest.class, // pass
+		TemplateParametersTest.class, // pass 
+		LabelsTest.class, // pass
+		BuilderImageApplicationWizardHandlingTest.class, // pass
 
 		// Application handling
 		//not yet stable DeleteResourceOS4Test.class,
 		//not yet stable InteligentDeleteResourceOS4Test.class,
-		OSExplorerResourceTest.class,
-		TriggerBuildOS4Test.class,
-		ImportApplicationOS4Test.class,
-		PortForwardingOS4Test.class, 
-		//not yet stable LogsTest.class, 
-		//not yet stable EditResourcesOS4Test.class, 
-		HandleCustomTemplateOS4Test.class,
-		//not yet stable ImportApplicationWizard.class,
-		//not yet stable ImportApplicationWizardGitTest.class,
+		OSExplorerResourceTest.class, // pass 
+		TriggerBuildOS4Test.class, // pass
+		ImportApplicationOS4Test.class, // pass 
+		PortForwardingOS4Test.class,  // pass
+		LogsTest.class, // pass
+		EditResourcesOS4Test.class, // pass
+		HandleCustomTemplateOS4Test.class, // pass
+		ImportApplicationWizardTest.class, // pass
+		ImportApplicationWizardGitTest.class, // pass	
 	
 		// Creation of a new application
-		//not yet stable CreateApplicationFromTemplateOS4Test.class,
-		CreateApplicationOnBuilderImageTest.class,
-		DeploymentOS4Test.class,
+		CreateApplicationFromTemplateOS4Test.class, // pass 
+		CreateApplicationOnBuilderImageTest.class, // pass
+		DeploymentOS4Test.class, // pass
 
 		// Advanced application testing
-		//not yet stable CreateResourcesOS4Test.class,
-		ScalingOS4Test.class,
-		EditResourceLimitsOS4Test.class,
+		CreateResourcesOS4Test.class, // pass
+		ScalingOS4Test.class, // pass
+		EditResourceLimitsOS4Test.class, // pass 
 
 		// Server adapter
-		//not yet stable ServerAdapterWizardHandlingOS4Test.class, 
+		ServerAdapterWizardHandlingOS4Test.class, // pass
 		//not yet stable CreateServerAdapterTest.class,
 		//not yet stable ServerAdapterFromResourceOS4Test.class,
-		//not yet stable PublishChangesOS4Test.class,
+		PublishChangesOS4Test.class,
 		//not yet stable SpringBootTest.class,
 
 })

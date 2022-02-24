@@ -148,18 +148,18 @@ public class OpenShiftResourceExists extends AbstractWaitCondition {
 		return false;
 	}
 
-		private List<OpenShiftResource> getResources() {
-			List<OpenShiftResource> resources;
-			try {
-				resources = project.getOpenShiftResources(resource);
-			} catch (CoreLayerException ex) {
-				// In case widget is still disposed... what the heck?!
-				OpenShift3Connection openshiftConnection = explorer.getOpenShift3Connection(this.connection);
-				openshiftConnection.refresh();
-				resources = openshiftConnection.getProject(project.getName()).getOpenShiftResources(resource);
-			}
-			return resources;
+	private List<OpenShiftResource> getResources() {
+		List<OpenShiftResource> resources;
+		try {
+			resources = project.getOpenShiftResources(resource);
+		} catch (CoreLayerException ex) {
+			// In case widget is still disposed... what the heck?!
+			OpenShift3Connection openshiftConnection = explorer.getOpenShift3Connection(this.connection);
+			openshiftConnection.refresh();
+			resources = openshiftConnection.getProject(project.getName()).getOpenShiftResources(resource);
 		}
+		return resources;
+	}
 
 	@Override
 	public String description() {

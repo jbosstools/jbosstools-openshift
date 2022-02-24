@@ -45,7 +45,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject
+@RequiredODOProject(name="test-project6")
 public class DebugVertxS2IComponentODOTest extends AbstractODOTest {
 	private static final String APP_SOURCE = "HttpApplication.java";
 
@@ -81,6 +81,7 @@ public class DebugVertxS2IComponentODOTest extends AbstractODOTest {
 		view.activate();
 		view.getOpenShiftODOConnection().getProject(projectReq.getProjectName()).getApplication(APPLICATION_NAME).getComponent(ECLIPSE_PROJECT).debug();
     
+		// Debug dialog - Debugging is not supported for this type of component
 		AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "/api/greeting");
 
 		try {

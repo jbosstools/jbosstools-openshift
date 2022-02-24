@@ -46,7 +46,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject
+@RequiredODOProject(name="test-project4")
 public class DebugNodeS2IComponentODOTest extends AbstractODOTest {
 	private static final String APP_SOURCE = "app.js";
 
@@ -63,7 +63,7 @@ public class DebugNodeS2IComponentODOTest extends AbstractODOTest {
 	@BeforeClass
 	public static void setupWorkspace() {
 		importLauncherProject(ECLIPSE_PROJECT, "nodejs v14-community");
-		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "nodejs", null, false);
+		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "node.js", null, false);
 		createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080);
 	}
 	

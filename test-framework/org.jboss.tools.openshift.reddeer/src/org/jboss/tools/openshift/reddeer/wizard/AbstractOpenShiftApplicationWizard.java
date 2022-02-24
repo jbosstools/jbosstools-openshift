@@ -68,8 +68,10 @@ public abstract class AbstractOpenShiftApplicationWizard {
 		new WorkbenchShell().setFocus();
 
 		new NewWizard().open();
-
-		new DefaultShell("New").setFocus();
+		
+		ShellIsAvailable newShell = new ShellIsAvailable("Select a wizard");
+		
+		new WaitUntil(newShell, TimePeriod.DEFAULT);
 
 		new DefaultTreeItem("OpenShift", "OpenShift Application").select();
 
@@ -88,14 +90,15 @@ public abstract class AbstractOpenShiftApplicationWizard {
 
 		new NextButton().click();
 		processUntrustedSSLCertificate();
+		processUntrustedSSLCertificate();
 
-		new WaitWhile(new JobIsRunning(), TimePeriod.getCustom(120));
+		new WaitWhile(new JobIsRunning(), TimePeriod.getCustom(240));
 		new WaitUntil(new ControlIsEnabled(new BackButton()), TimePeriod.LONG);
 	}
 
 	private void processUntrustedSSLCertificate() {
 		try {
-			new WaitUntil(new ShellIsAvailable("Untrusted SSL Certificate"), TimePeriod.LONG, false);
+			new WaitUntil(new ShellIsAvailable("Untrusted SSL Certificate"), TimePeriod.DEFAULT, false);
 			new DefaultShell("Untrusted SSL Certificate");
 			new YesButton().click();
 		} catch (CoreLayerException ex) {

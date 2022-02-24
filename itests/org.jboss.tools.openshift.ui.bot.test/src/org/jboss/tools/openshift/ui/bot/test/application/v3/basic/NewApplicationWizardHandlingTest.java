@@ -214,6 +214,7 @@ public class NewApplicationWizardHandlingTest extends AbstractTest {
 		new DefaultTabItem(OpenShiftLabel.TextLabels.SERVER_TEMPLATE).activate();
 		OpenShiftUtils.selectEAPTemplate();
 		
+		System.out.println("");
 		verifyDefinedResourcesForTemplate();
 	}
 	
@@ -236,13 +237,13 @@ public class NewApplicationWizardHandlingTest extends AbstractTest {
 		assertTrue("There should be build config item in tree describing resources", 
 				items.get(0).getText().contains("BuildConfig"));
 		assertTrue("There should be deployment config item in tree describing resources", 
-				items.get(1).getText().contains("DeploymentConfig"));
+				items.get(2).getText().contains("DeploymentConfig")); // ToDo
 		assertTrue("There should be image stream item in tree describing resources", 
-				items.get(2).getText().contains("ImageStream"));
+				items.get(3).getText().contains("ImageStream"));
 		assertTrue("There should be route item in tree describing resources", 
-				items.get(3).getText().contains("Route"));
+				items.get(5).getText().contains("Route"));
 		assertTrue("There should be service item in tree describing resources", 
-				items.get(4).getText().contains("Service"));
+				items.get(6).getText().contains("Service"));
 		
 		new OkButton().click();
 		

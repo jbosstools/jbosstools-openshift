@@ -66,7 +66,7 @@ import org.junit.runner.RunWith;
 @CleanOpenShiftExplorer
 @RequiredBasicConnection
 @CleanConnection
-@RequiredProject(name="fuse-on-openshift")
+@RequiredProject(name="fuse-springboot")
 
 /*
  * See: https://issues.jboss.org/browse/JBIDE-25303
@@ -91,8 +91,8 @@ public class SpringBootTest extends AbstractTest  {
 			"\n" + 
 			"}";
 	
-	private static final String PROJECT_NAME = "fuse-on-openshift";
-	private static final String FUSE_SERVICE_NAME = PROJECT_NAME;
+	private static final String PROJECT_NAME = "fuse-springboot";
+	private static final String FUSE_SERVICE_NAME = "camel-ose-springboot-xml";
 	
 	@InjectRequirement
 	private static OpenShiftConnectionRequirement connectionReq;
@@ -139,7 +139,8 @@ public class SpringBootTest extends AbstractTest  {
 		pexplorer.getProject(PROJECT_NAME).select();
 		new ContextMenuItem(new WithTextMatcher("Run As"), new RegexMatcher(".*(Maven build...).*")).select();
 		new WaitUntil(new ShellIsAvailable("Edit Configuration"));
-		new LabeledText("Goals:").setText("clean install fabric8:deploy");
+		new LabeledText("Goals:").setText("clean install oc:deploy");
+		new LabeledText("Profiles:").setText("openshift");
 		new DefaultCTabItem("JRE").activate();
 		new DefaultText(1).setText("-Dkubernetes.master="+ connectionReq.getConnection().getHost() + "\n" + 
 				"-Dkubernetes.namespace=" + projectReq.getProjectName() + "\n" + 
@@ -149,7 +150,7 @@ public class SpringBootTest extends AbstractTest  {
 				"-Dkubernetes.trust.certificates=true\n" + 
 				"-Dfabric8.build.strategy=s2i\n" + 
 				"-Dkubernetes.auth.tryServiceAccount=false\n" + 
-				"-Dfabric8.generator.from=fabric8/s2i-java\n" + 
+				"-Dfabric8.generator.from=registry.access.redhat.com/jboss-fuse-7/fuse-java-openshift\n" + 
 				"-Dfabric8.generator.fromMode=docker\n" + 
 				"-Dkubernetes.auth.tryKubeConfig=false");
 		new PushButton("Run").click();
@@ -158,7 +159,7 @@ public class SpringBootTest extends AbstractTest  {
 	}
 	
 	private void podIsRunningAndCheckLog(String expectedString) {
-		OpenShiftResource pod  = OpenShiftUtils.getOpenShiftPod(projectReq.getProjectName(),new StringStartsWith("fuse"), connectionReq.getConnection());
+		OpenShiftResource pod  = OpenShiftUtils.getOpenShiftPod(projectReq.getProjectName(),new StringStartsWith("camel"), connectionReq.getConnection());
 		waitForLog(pod, OpenShiftLabel.ContextMenu.POD_LOG);
 		
 		ConsoleView consoleView = new ConsoleView();

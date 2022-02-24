@@ -28,8 +28,8 @@ public class OpenShiftResources {
 	public static final String EAP_SERVICE_PING = "eap-app-ping";
 	public static final String EAP_APP_REPLICATION_CONTROLLER = "eap-app-1";
 	public static final String EAP_APP_GIT_NAME = "jboss-eap-quickstarts";
-	public static final String EAP_TEMPLATE_RESOURCES_PATH = "resources/eap72-basic-s2i-helloworld.json";
-	public static final String EAP_TEMPLATE_RESOURCES_FILENAME = "eap72-basic-s2i-helloworld.json";
+	public static final String EAP_TEMPLATE_RESOURCES_PATH = "resources/eap73-basic-s2i-helloworld.json";
+	public static final String EAP_TEMPLATE_RESOURCES_FILENAME = "eap73-basic-s2i-helloworld.json";
 	public static final String EAP_TEMPLATE_RESOURCES_PATH_OS4 = "resources/os4templates/eap73-basic-s2i-helloworld.json";
 	public static final String EAP_TEMPLATE_RESOURCES_FILENAME_OS4 = "eap73-basic-s2i-helloworld.json";
 	

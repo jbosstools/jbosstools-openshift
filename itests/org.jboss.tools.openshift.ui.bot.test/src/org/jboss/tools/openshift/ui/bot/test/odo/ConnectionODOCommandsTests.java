@@ -10,9 +10,17 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test.odo;
 
+import org.eclipse.reddeer.common.util.Display;
+import org.eclipse.reddeer.common.util.ResultRunnable;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.swt.graphics.Point;
+import org.jboss.ide.eclipse.as.reddeer.server.requirement.InternalBrowserRequirement.UseInternalBrowser;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOConnectionRequirement.RequiredODOConnection;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
@@ -29,6 +37,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
+@UseInternalBrowser
 public class ConnectionODOCommandsTests {
 
 	private OpenShiftODOConnection connection;
@@ -54,13 +63,40 @@ public class ConnectionODOCommandsTests {
 
 	@Test
 	public void testOpenConsole() {
-		connection.openConsole();
-		new WaitUntil(new BrowserContainsText("Console"));
+		connection.openConsole(); // prepare requirement for using internal browser
+
+		closeSSLDialog("");
+		closeSSLDialog("");
+		new WaitUntil(new BrowserContainsText("oauth"));
 	}
 
 	@Test
 	public void testAbout() {
 		connection.about();
 		new WaitUntil(new TerminalContainsText("Server"), TimePeriod.LONG);
+	}
+	
+	private void closeSSLDialog(String text) {
+		ShellIsAvailable sslDialog = new ShellIsAvailable(text);
+		new WaitUntil(sslDialog, TimePeriod.MEDIUM, false);
+		try {
+			Display.syncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					DefaultShell ssl = new DefaultShell();
+					if (ssl.getText().toLowerCase().contains("certificate")) {
+						new PushButton("Yes").click();
+					}
+				}
+			});
+
+		} catch (CoreLayerException exc) {
+			// no dialog
+		}
+		if(sslDialog.getResult() != null) {
+			new DefaultShell(sslDialog.getResult());
+			new PushButton("Yes").click();
+		}
 	}
 }

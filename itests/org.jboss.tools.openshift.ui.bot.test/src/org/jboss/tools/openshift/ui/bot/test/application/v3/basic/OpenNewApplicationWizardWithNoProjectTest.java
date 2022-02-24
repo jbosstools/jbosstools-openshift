@@ -77,7 +77,7 @@ public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {
 		
 		new ShellMenuItem("File", "New", "Other...").select();
 		
-		new DefaultShell("New").setFocus();
+		new DefaultShell("Select a wizard").setFocus();
 		
 		new DefaultTreeItem("OpenShift", "OpenShift Application").select();
 		
