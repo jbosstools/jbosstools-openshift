@@ -24,6 +24,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
@@ -53,6 +54,10 @@ public class CDKStackRuntimeTest {
 
 	private static List<Object> results = new ArrayList<Object>();
     private static Log log = LogFactory.getLog(CDKStackRuntimeTest.class);
+    
+    private static Predicate<Integer> authenticated = code -> code == 302;
+    
+    private static Predicate<Integer> nonAuthenticated = code -> code == 301 || code == 401;
 	
     static {
     	USERNAME = System.getProperty(CREDENTIALS_USERNAME_KEY);
@@ -89,7 +94,7 @@ public class CDKStackRuntimeTest {
 	@Test
 	public void testMinishiftRemoteYamlURLAvailability() {
 		testJBossStackRuntimeURLsAvailability(
-				loadURLFromString(MINISHIFT_YAML_URL), "minishift", 302,
+				loadURLFromString(MINISHIFT_YAML_URL), "minishift", authenticated,
 				x -> getHttpHeadRequestStatusCode(x));
 	}
 	
@@ -97,11 +102,11 @@ public class CDKStackRuntimeTest {
 	public void testCDKRemoteYamlURLAvailability() {
 		if (useCredentials) {
 			testJBossStackRuntimeURLsAvailability(
-					loadURLFromString(MINISHIFT_YAML_URL), "cdk", 302,
+					loadURLFromString(MINISHIFT_YAML_URL), "cdk", authenticated,
 					x -> getAuthorizedHttpHeadRequestStatusCode(x));			
 		} else {
 			testJBossStackRuntimeURLsAvailability(
-					loadURLFromString(MINISHIFT_YAML_URL), "cdk", 401,
+					loadURLFromString(MINISHIFT_YAML_URL), "cdk", nonAuthenticated,
 					x -> getHttpHeadRequestStatusCode(x));
 		}
 	}
@@ -109,7 +114,7 @@ public class CDKStackRuntimeTest {
 	@Test
 	public void testMinishiftBundledYamlURLAvailability() {
 		testJBossStackRuntimeURLsAvailability(
-				loadURLFromFile(BUNDLED_YAML_PATH), "minishift", 302,
+				loadURLFromFile(BUNDLED_YAML_PATH), "minishift", authenticated,
 				x -> getHttpHeadRequestStatusCode(x));
 	}
 	
@@ -117,11 +122,11 @@ public class CDKStackRuntimeTest {
 	public void testCDKBundledYamlURLAvailability() {
 		if (useCredentials) {
 			testJBossStackRuntimeURLsAvailability(
-					loadURLFromFile(BUNDLED_YAML_PATH), "cdk", 302,
+					loadURLFromFile(BUNDLED_YAML_PATH), "cdk", authenticated,
 					x -> getAuthorizedHttpHeadRequestStatusCode(x));			
 		} else {
 			testJBossStackRuntimeURLsAvailability(
-					loadURLFromFile(BUNDLED_YAML_PATH), "cdk", 401,
+					loadURLFromFile(BUNDLED_YAML_PATH), "cdk", nonAuthenticated,
 					x -> getHttpHeadRequestStatusCode(x));
 		}
 	}
@@ -214,7 +219,7 @@ public class CDKStackRuntimeTest {
 	}
 	
 	private void testJBossStackRuntimeURLsAvailability(URL yamlUrl, String idFilter, 
-			int expectedStatusCode, ProcessingHttpRequest request) {
+			Predicate<Integer> statusCodeChecker, ProcessingHttpRequest request) {
 		Stacks stacks = loadStacksFromYaml(yamlUrl);
     	for (org.jboss.jdf.stacks.model.Runtime runtime : stacks.getAvailableRuntimes()) {
     		if (runtime.getId().contains(idFilter)) {
@@ -229,10 +234,10 @@ public class CDKStackRuntimeTest {
 	    		for (Object key : allUrls.keySet()) {
 	    			String url = allUrls.get(key).toString();
 	    			int resp = request.process(url);
-	    			if (resp != expectedStatusCode) {
+	    			if (!statusCodeChecker.test(resp)) {
 	    				results.add("Verifying " + runtimeName 
 	    						+ ": HTTP response status code for " + url + " does not match. "
-	    						+ "Expected: " + expectedStatusCode + " but was: " + resp);
+	    						+ "Expected: " + statusCodeChecker + " but was: " + resp);
 	    			}
 	    		}
     		}
