@@ -50,6 +50,7 @@ import org.jboss.tools.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.common.util.SwtUtil;
 import org.jboss.tools.openshift.core.odo.utils.KubernetesClusterHelper;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimTrailingSlashConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.OCCommandUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
@@ -69,7 +70,7 @@ import com.openshift.restclient.authorization.IAuthorizationContext;
 public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 
 	private LoginModel model;
-	
+
 	private Text txtURL;
 	private Text txtUsername;
 	private Text txtPassword;
@@ -83,41 +84,46 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 		super("Sign in to OpenShift", "Please sign in to your OpenShift server.", "Server Connection", wizard);
 		this.model = model;
 	}
-	
+
 	private void onSandboxClicked(Composite parent) {
-	  SandboxModel sandboxModel = new SandboxModel();
-	  SandboxWizard wizard = new SandboxWizard(sandboxModel);
-	  Point size = SwtUtil.getOptimumSizeFromTopLevelShell(getShell());
-	  WizardDialog dialog = new WizardDialog(getShell(), wizard);
-	  dialog.setMinimumPageSize(size);
-	  if (dialog.open() == Window.OK) {
-	    model.setUrl(sandboxModel.getClusterURL());
-	    model.setToken(sandboxModel.getClusterToken());
-	  }
+		SandboxModel sandboxModel = new SandboxModel();
+		SandboxWizard wizard = new SandboxWizard(sandboxModel);
+		Point size = SwtUtil.getOptimumSizeFromTopLevelShell(getShell());
+		WizardDialog dialog = new WizardDialog(getShell(), wizard);
+		dialog.setMinimumPageSize(size);
+		if (dialog.open() == Window.OK) {
+			UsageStats.getInstance().devsandboxLogin(true);
+			model.setUrl(sandboxModel.getClusterURL());
+			model.setToken(sandboxModel.getClusterToken());
+		} else {
+			UsageStats.getInstance().devsandboxLogin(false);
+		}
 	}
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
 
-    StyledText expLabel = StyledTextUtils.emulateLinkWidget("Enter the cluster URL and the required credentials. You can also bootstrap a <a>Red Hat Developer Sandbox</a> cluster using your Red Hat account", new StyledText(parent, SWT.WRAP));
-    GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(expLabel);
-    StyledTextUtils.emulateLinkAction(expLabel, r -> onSandboxClicked(parent));
+		StyledText expLabel = StyledTextUtils.emulateLinkWidget(
+				"Enter the cluster URL and the required credentials. You can also bootstrap a <a>Red Hat Developer Sandbox</a> cluster using your Red Hat account",
+				new StyledText(parent, SWT.WRAP));
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(expLabel);
+		StyledTextUtils.emulateLinkAction(expLabel, r -> onSandboxClicked(parent));
 
-    Label urlLabel = new Label(parent, SWT.NONE);
+		Label urlLabel = new Label(parent, SWT.NONE);
 		urlLabel.setText("URL:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(urlLabel);
 		txtURL = new Text(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1).applyTo(txtURL);
-		
+
 		Button pasteButton = new Button(parent, SWT.NONE);
 		pasteButton.setText("Paste login command");
 		pasteButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(this::onPasteLoginCommand));
 
 		ISWTObservableValue<String> urlObservable = WidgetProperties.text(SWT.Modify).observe(txtURL);
 		Binding urlBinding = ValueBindingBuilder.bind(urlObservable)
-		        .validatingAfterConvert(new URLValidator("url", true)).converting(new TrimTrailingSlashConverter())
-		        .to(BeanProperties.value(LoginModel.PROPERTY_URL).observe(model)).in(dbc);
+				.validatingAfterConvert(new URLValidator("url", true)).converting(new TrimTrailingSlashConverter())
+				.to(BeanProperties.value(LoginModel.PROPERTY_URL).observe(model)).in(dbc);
 		ControlDecorationSupport.create(urlBinding, SWT.LEFT | SWT.TOP);
 
 		Label userLabel = new Label(parent, SWT.NONE);
@@ -127,8 +133,8 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(txtUsername);
 
 		ISWTObservableValue<String> userObservable = WidgetProperties.text(SWT.Modify).observe(txtUsername);
-		ValueBindingBuilder.bind(userObservable)
-		        .to(BeanProperties.value(LoginModel.PROPERTY_USERNAME).observe(model)).in(dbc);
+		ValueBindingBuilder.bind(userObservable).to(BeanProperties.value(LoginModel.PROPERTY_USERNAME).observe(model))
+				.in(dbc);
 		ControlDecoration usernameDecoration = new ControlDecoration(txtUsername, SWT.LEFT | SWT.TOP);
 
 		Label passwordLabel = new Label(parent, SWT.NONE);
@@ -140,9 +146,8 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 
 		ISWTObservableValue<String> passwordObservable = WidgetProperties.text(SWT.Modify).observe(txtPassword);
 		ValueBindingBuilder.bind(passwordObservable)
-		        .to(BeanProperties.value(LoginModel.PROPERTY_PASSWORD).observe(model)).in(dbc);
+				.to(BeanProperties.value(LoginModel.PROPERTY_PASSWORD).observe(model)).in(dbc);
 		ControlDecoration passwordDecoration = new ControlDecoration(txtPassword, SWT.LEFT | SWT.TOP);
-
 
 		Label tokenLabel = new Label(parent, SWT.NONE);
 		tokenLabel.setText("Token:");
@@ -152,8 +157,8 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(txtToken);
 
 		ISWTObservableValue<String> tokenObservable = WidgetProperties.text(SWT.Modify).observe(txtToken);
-		ValueBindingBuilder.bind(tokenObservable)
-		        .to(BeanProperties.value(LoginModel.PROPERTY_TOKEN).observe(model)).in(dbc);
+		ValueBindingBuilder.bind(tokenObservable).to(BeanProperties.value(LoginModel.PROPERTY_TOKEN).observe(model))
+				.in(dbc);
 		ControlDecoration tokenDecoration = new ControlDecoration(txtToken, SWT.LEFT | SWT.TOP);
 
 		Button retrieveTokenButton = new Button(parent, SWT.NONE);
@@ -161,66 +166,66 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(retrieveTokenButton);
 		retrieveTokenButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(this::onRetrieveToken));
 
-		dbc.addValidationStatusProvider(new LoginFormValidator(
-				userObservable, usernameDecoration,
-				passwordObservable, passwordDecoration,
-				tokenObservable, tokenDecoration));
+		dbc.addValidationStatusProvider(new LoginFormValidator(userObservable, usernameDecoration, passwordObservable,
+				passwordDecoration, tokenObservable, tokenDecoration));
 	}
-	
-  private void onPasteLoginCommand(SelectionEvent e) {
-    Clipboard clipboard = new Clipboard(Display.getDefault());
-    String clipboardText = (String) clipboard.getContents(TextTransfer.getInstance());
-    if (clipboardText == null) {
-      MessageDialog.openError(getWizard().getContainer().getShell(), "Error when parsing login command",
-          "Cannot paste clipboard into the login dialog. Only text is accepted.");
-    } else if (OCCommandUtils.isValidCommand(clipboardText)) {
-      txtURL.setText(OCCommandUtils.getServer(clipboardText));
-      if (IAuthorizationContext.AUTHSCHEME_BASIC.equals(OCCommandUtils.getAuthMethod(clipboardText))) {
-        txtUsername.setText(OCCommandUtils.getUsername(clipboardText));
-        txtPassword.setText(OCCommandUtils.getPassword(clipboardText));
-      } else if (IAuthorizationContext.AUTHSCHEME_OAUTH.equals(OCCommandUtils.getAuthMethod(clipboardText))) {
-        txtToken.setText(OCCommandUtils.getToken(clipboardText));
-      }
-    } else {
-      MessageDialog.openError(getWizard().getContainer().getShell(), "Error when parsing login command",
-          "Login command pasted from clipboard is not valid:\n" + clipboardText);
-    }
-  }
-	
+
+	private void onPasteLoginCommand(SelectionEvent e) {
+		Clipboard clipboard = new Clipboard(Display.getDefault());
+		String clipboardText = (String) clipboard.getContents(TextTransfer.getInstance());
+		if (clipboardText == null) {
+			MessageDialog.openError(getWizard().getContainer().getShell(), "Error when parsing login command",
+					"Cannot paste clipboard into the login dialog. Only text is accepted.");
+		} else if (OCCommandUtils.isValidCommand(clipboardText)) {
+			txtURL.setText(OCCommandUtils.getServer(clipboardText));
+			if (IAuthorizationContext.AUTHSCHEME_BASIC.equals(OCCommandUtils.getAuthMethod(clipboardText))) {
+				txtUsername.setText(OCCommandUtils.getUsername(clipboardText));
+				txtPassword.setText(OCCommandUtils.getPassword(clipboardText));
+			} else if (IAuthorizationContext.AUTHSCHEME_OAUTH.equals(OCCommandUtils.getAuthMethod(clipboardText))) {
+				txtToken.setText(OCCommandUtils.getToken(clipboardText));
+			}
+		} else {
+			MessageDialog.openError(getWizard().getContainer().getShell(), "Error when parsing login command",
+					"Login command pasted from clipboard is not valid:\n" + clipboardText);
+		}
+	}
+
 	private void onRetrieveToken(SelectionEvent event) {
-	  String[] tokenEndpoint = new String[1];
-	  String url = txtURL.getText();
-	  Job job = Job.create("Retrieving token endpoint from cluster", monitor -> {
-	    try {
-	      tokenEndpoint[0] = KubernetesClusterHelper.getTokenRequest(url);
-	      return Status.OK_STATUS;
-	    } catch (IOException e) {
-	      return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage(), e);
-	    }
-	  });
-	  try {
-      WizardUtils.runInWizard(job,getContainer(), getDataBindingContext());
-      if (JobUtils.isOk(job.getResult()) && tokenEndpoint[0] != null) {
-        OAuthDialog dialog = new OAuthDialog(getShell(), tokenEndpoint[0], true);
-        if (dialog.open() == Window.OK && dialog.getToken() != null) {
-          txtToken.setText(dialog.getToken());
-        }
-      } else {
-        MessageDialog.openError(getWizard().getContainer().getShell(), "Error when launching web based authentication",
-            "Can't retrieve the token endpoint from cluster to start from");
-      }
-    } catch (InvocationTargetException | InterruptedException e) {
-      MessageDialog.openError(getWizard().getContainer().getShell(), "Error when launching web browser",
-          "Can't create the web browser to login");
-      if (e instanceof InterruptedException) {
-        Thread.currentThread().interrupt();
-      }
-    }
+		String[] tokenEndpoint = new String[1];
+		String url = txtURL.getText();
+		Job job = Job.create("Retrieving token endpoint from cluster", monitor -> {
+			try {
+				tokenEndpoint[0] = KubernetesClusterHelper.getTokenRequest(url);
+				return Status.OK_STATUS;
+			} catch (IOException e) {
+				return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage(), e);
+			}
+		});
+		try {
+			WizardUtils.runInWizard(job, getContainer(), getDataBindingContext());
+			if (JobUtils.isOk(job.getResult()) && tokenEndpoint[0] != null) {
+				OAuthDialog dialog = new OAuthDialog(getShell(), tokenEndpoint[0], true);
+				if (dialog.open() == Window.OK && dialog.getToken() != null) {
+					txtToken.setText(dialog.getToken());
+				}
+			} else {
+				MessageDialog.openError(getWizard().getContainer().getShell(),
+						"Error when launching web based authentication",
+						"Can't retrieve the token endpoint from cluster to start from");
+			}
+		} catch (InvocationTargetException | InterruptedException e) {
+			MessageDialog.openError(getWizard().getContainer().getShell(), "Error when launching web browser",
+					"Can't create the web browser to login");
+			if (e instanceof InterruptedException) {
+				Thread.currentThread().interrupt();
+			}
+		}
 	}
-	
+
 	private static class LoginFormValidator extends MultiValidator {
-		
-		private static final IStatus requiredStatus = ValidationStatus.cancel("Token or Username and Password are required");
+
+		private static final IStatus requiredStatus = ValidationStatus
+				.cancel("Token or Username and Password are required");
 
 		private IObservableValue<String> userObservable;
 		private ControlDecoration userDecoration;
@@ -253,14 +258,13 @@ public class LoginWizardPage extends AbstractOpenShiftWizardPage {
 			if (token.isEmpty() && user.isEmpty() && password.isEmpty()) {
 				updateDecorations(requiredStatus, requiredStatus, requiredStatus);
 				return requiredStatus;
-			}
-			else if (!token.isEmpty() && (!user.isEmpty() || !password.isEmpty())) {
+			} else if (!token.isEmpty() && (!user.isEmpty() || !password.isEmpty())) {
 				IStatus error = ValidationStatus.error("Can't use token authentication with user or password");
 				updateDecorations(ValidationStatus.ok(), error, error);
 				return error;
-			}
-			else if (!user.isEmpty() && (password.isEmpty() || !token.isEmpty())) {
-				IStatus error = ValidationStatus.error("Can't use user authentication without a password or with a token");
+			} else if (!user.isEmpty() && (password.isEmpty() || !token.isEmpty())) {
+				IStatus error = ValidationStatus
+						.error("Can't use user authentication without a password or with a token");
 				updateDecorations(error, ValidationStatus.ok(), error);
 				return error;
 			} else {

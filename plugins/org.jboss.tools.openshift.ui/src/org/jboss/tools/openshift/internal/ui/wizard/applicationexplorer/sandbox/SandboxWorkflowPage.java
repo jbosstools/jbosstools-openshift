@@ -42,8 +42,8 @@ import org.jboss.tools.common.oauth.core.CommonOAuthCoreConstants;
 import org.jboss.tools.common.oauth.core.TokenProvider;
 import org.jboss.tools.common.oauth.core.exception.OAuthException;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.ui.validator.CountryCodeValidator;
@@ -56,228 +56,238 @@ import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.sandbox.
  */
 public class SandboxWorkflowPage extends AbstractOpenShiftWizardPage {
 
-  private final SandboxModel model;
-  
-  private SandboxProcessor processor;
-  
-  private CLabel messageLabel;
-  
-  private Group verificationGroup;
-  
-  private Group confirmVerificationGroup;
-  
-  private final WritableValue<IStatus> status = new WritableValue<>(ValidationStatus.cancel("Login to Red Hat SSO required"), IStatus.class);
-  
-  /**
-   * @param title
-   * @param description
-   * @param pageName
-   * @param wizard
-   */
-  public SandboxWorkflowPage(IWizard wizard, SandboxModel model) {
-    super("Login to Red Hat Developer Sandbox", "Please login to Red Hat SSO if required, then provide required information to bootstrap your Red Hat Developer Sandbox.", "SandboxSSO", wizard);
-    this.model = model;
-  }
-  
-  private void reportMessage(String message, int type) {
-	  getControl().getDisplay().asyncExec(() -> {
-		  if (type == ERROR) {
-			messageLabel.setImage(OpenShiftCommonImages.ERROR);
-		  } else {
-			  messageLabel.setImage(null);
-		  }
-		  messageLabel.setText(message);
-	  });
-  }
-  
-  private void ssoLogin(IProgressMonitor monitor) {
-    try {
-      reportMessage("Login to Red Hat SSO", NONE);
-      model.setIDToken(TokenProvider.get().getToken(CommonOAuthCoreConstants.REDHAT_SSO_SERVER_ID, TokenProvider.ID_TOKEN, getControl()));
-    } catch (OAuthException e) {
-      reportMessage("Failed to login to Red Hat SSO", ERROR);
-      setStatus(ValidationStatus.error("Failed to login to Red Hat SSO", e));
-    }
-  }
-  
-  private void retrieveState(IProgressMonitor monitor) {
-    if (model.getIDToken() == null) {
-      ssoLogin(monitor);
-    }
-    if (model.getIDToken() != null) {
-      checkSandbox(monitor);
-    }
-  }
-  
-  private void reportState(State state) {
-    switch (state) {
-    case NONE:
-      setStatus(ValidationStatus.cancel("Checking Red Hat Developer Sandbox signup state"));
-      break;
-    case NEEDS_SIGNUP:
-      setStatus(ValidationStatus.cancel("Checking Red Hat Developer Sandbox needs signup"));
-      break;
-    case NEEDS_APPROVAL:
-      setStatus(ValidationStatus.cancel("Your Red Hat Developer Sandbox needs to be approved, you should wait or retry later"));
-      break;
-    case NEEDS_VERIFICATION:
-      setStatus(ValidationStatus.cancel("Your Red Hat Developer Sandbox needs to be verified, enter your country code and phone number and click 'Verify'"));
-      break;
-    case CONFIRM_VERIFICATION:
-      setStatus(ValidationStatus.cancel("You need to send the verification code received on your phone, enter the verification code and phone number and click 'Verify'"));
-      break;
-    case READY:
-      reportMessage("Your Red Hat Developer Sandbox is ready, let's login now !!!", NONE);
-      setStatus(ValidationStatus.ok());
-      model.setClusterURL(processor.getClusterURL());
-      break;
-    }
-  }
+	private final SandboxModel model;
 
-  private void checkSandbox(IProgressMonitor monitor) {
-    reportMessage("Checking Developer Sandbox account", NONE);
-    if (processor == null) {
-      processor = new SandboxProcessor(model.getIDToken());
-    }
-    boolean stop = false;
-    try {
-      while (!monitor.isCanceled() && !stop) {
-        processor.advance(model.getCountryCode(), model.getPhoneNumber(), model.getVerificationCode());
-        reportState(processor.getState());
-        stop = processor.getState().isNeedsInteraction();
-        if (!stop) {
-          try {
-            Thread.sleep(5000);
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-          }
-        }
-      }
-    } catch (IOException e) {
-      String message = "Error accessing the Red Hat Developer Sandbox API: " + e.getLocalizedMessage();
-      reportMessage(message, ERROR);
-      setStatus(ValidationStatus.error(message, e));
-    }
-  }
+	private SandboxProcessor processor;
 
-  private void setStatus(IStatus status) {
-	  this.status.getRealm().asyncExec(() -> this.status.setValue(status));
-  }
+	private CLabel messageLabel;
 
-  private void launchJob() {
-    try {
-      Job job = Job.create("Retrieving Red Hat Developer Sandbox state", this::retrieveState);
-      WizardUtils.runInWizard(job, getContainer(), getDatabindingContext());
-      updateGroups();
-    } catch (InvocationTargetException e) {
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
-  }
-  
-  private void updateGroups() {
-    ((GridData)verificationGroup.getLayoutData()).exclude = true;
-    verificationGroup.setVisible(false);
-    verificationGroup.setEnabled(false);
-    ((GridData)confirmVerificationGroup.getLayoutData()).exclude = true;
-    confirmVerificationGroup.setVisible(false);
-    confirmVerificationGroup.setEnabled(false);
-    if (processor != null && processor.getState() == State.NEEDS_VERIFICATION) {
-      ((GridData)verificationGroup.getLayoutData()).exclude = false;
-      verificationGroup.setVisible(true);
-      verificationGroup.setEnabled(true);
-    } else if (processor != null && processor.getState() == State.CONFIRM_VERIFICATION) {
-      ((GridData)confirmVerificationGroup.getLayoutData()).exclude = false;
-      confirmVerificationGroup.setVisible(true);
-      confirmVerificationGroup.setEnabled(true);
-    }
-    confirmVerificationGroup.getParent().layout(true, true);
-  }
+	private Group verificationGroup;
 
-  @Override
-  protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-    
-    GridLayoutFactory.fillDefaults().numColumns(1).margins(10, 10).applyTo(parent);
+	private Group confirmVerificationGroup;
 
-    messageLabel = new CLabel(parent, SWT.NONE);
-    messageLabel.setAlignment(SWT.CENTER);
-    GridDataFactory.fillDefaults().grab(true, true).applyTo(messageLabel);
-    
-    verificationGroup = new Group(parent, SWT.NONE);
-    GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(verificationGroup);
-    GridDataFactory.fillDefaults().grab(true, true).applyTo(verificationGroup);
-    
-    Label countryCodeLabel = new Label(verificationGroup, SWT.NONE);
-    countryCodeLabel.setText("Country code:");
-    Text countryCodeText = new Text(verificationGroup, SWT.SINGLE | SWT.BORDER);
-    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).span(2, 1).grab(true, false).applyTo(countryCodeText);
-    ISWTObservableValue<String> countryCodeObservable = WidgetProperties.text(SWT.Modify).observe(countryCodeText);
-    Binding countryCodeBinding = ValueBindingBuilder.bind(countryCodeObservable)
-        .validatingAfterGet(new CountryCodeValidator() {
-          @Override
-          public IStatus validate(String countryCode) {
-            if (verificationGroup.isVisible()) {
-              return super.validate(countryCode);
-            }
-            return ValidationStatus.ok();
-          }
-        })
-        .to(BeanProperties.value(SandboxModel.PROPERTY_COUNTRY_CODE).observe(model)).in(dbc);
-    ControlDecorationSupport.create(countryCodeBinding, SWT.LEFT | SWT.TOP);
+	private final WritableValue<IStatus> status = new WritableValue<>(
+			ValidationStatus.cancel("Login to Red Hat SSO required"), IStatus.class);
 
-    Label phoneNumberLabel = new Label(verificationGroup, SWT.NONE);
-    phoneNumberLabel.setText("Phone number:");
-    Text phoneNumberText = new Text(verificationGroup, SWT.SINGLE | SWT.BORDER);
-    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).span(2, 1).grab(true, false).applyTo(phoneNumberText);
-    ISWTObservableValue<String> phoneNumberObservable = WidgetProperties.text(SWT.Modify).observe(phoneNumberText);
-    Binding phoneNumberBinding = ValueBindingBuilder.bind(phoneNumberObservable)
-        .validatingAfterGet(new PhoneNumberValidator() {
-          @Override
-          public IStatus validate(String phoneNumber) {
-            if (verificationGroup.isVisible()) {
-              return super.validate(phoneNumber);
-            }
-            return ValidationStatus.ok();
-          }
-        })
-        .to(BeanProperties.value(SandboxModel.PROPERTY_PHONE_NUMBER).observe(model)).in(dbc);
-    ControlDecorationSupport.create(phoneNumberBinding, SWT.LEFT | SWT.TOP);
+	/**
+	 * @param title
+	 * @param description
+	 * @param pageName
+	 * @param wizard
+	 */
+	public SandboxWorkflowPage(IWizard wizard, SandboxModel model) {
+		super("Login to Red Hat Developer Sandbox",
+				"Please login to Red Hat SSO if required, then provide required information to bootstrap your Red Hat Developer Sandbox.",
+				"SandboxSSO", wizard);
+		this.model = model;
+	}
 
+	private void reportMessage(String message, int type) {
+		getControl().getDisplay().asyncExec(() -> {
+			if (type == ERROR) {
+				messageLabel.setImage(OpenShiftCommonImages.ERROR);
+			} else {
+				messageLabel.setImage(null);
+			}
+			messageLabel.setText(message);
+		});
+	}
 
-    Button sendVerificationButton = new Button(verificationGroup, SWT.PUSH);
-    sendVerificationButton.setText("Verify");
-    sendVerificationButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> launchJob()));
+	private void ssoLogin(IProgressMonitor monitor) {
+		try {
+			reportMessage("Login to Red Hat SSO", NONE);
+			model.setIDToken(TokenProvider.get().getToken(CommonOAuthCoreConstants.REDHAT_SSO_SERVER_ID,
+					TokenProvider.ID_TOKEN, getControl()));
+			UsageStats.getInstance().devsandboxRedHatSsoGetToken(model.getIDToken() != null);
+		} catch (OAuthException e) {
+			reportMessage("Failed to login to Red Hat SSO", ERROR);
+			setStatus(ValidationStatus.error("Failed to login to Red Hat SSO", e));
+		}
+	}
 
-    confirmVerificationGroup = new Group(parent, SWT.NONE);
-    GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(confirmVerificationGroup);
-    GridDataFactory.fillDefaults().grab(true, true).applyTo(confirmVerificationGroup);
-    
-    Label verificationCodeLabel = new Label(confirmVerificationGroup, SWT.NONE);
-    verificationCodeLabel.setText("Verification code:");
-    Text verifictionCodeText = new Text(confirmVerificationGroup, SWT.SINGLE | SWT.BORDER);
-    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).span(2, 1).grab(true, false).applyTo(verifictionCodeText);
-    ISWTObservableValue<String> verificationCodeObservable = WidgetProperties.text(SWT.Modify).observe(verifictionCodeText);
-    Binding verificationCodeBinding = ValueBindingBuilder.bind(verificationCodeObservable)
-            .to(BeanProperties.value(SandboxModel.PROPERTY_VERIFICATION_CODE).observe(model)).in(dbc);
-    ControlDecorationSupport.create(verificationCodeBinding, SWT.LEFT | SWT.TOP);
-    
-    Button confirmVerificationButton = new Button(confirmVerificationGroup, SWT.PUSH);
-    confirmVerificationButton.setText("Verify");
-    confirmVerificationButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> launchJob()));
+	private void retrieveState(IProgressMonitor monitor) {
+		if (model.getIDToken() == null) {
+			ssoLogin(monitor);
+		}
+		if (model.getIDToken() != null) {
+			checkSandbox(monitor);
+		}
+	}
 
-    MultiValidator validator = new MultiValidator() {
-      
-      @Override
-      protected IStatus validate() {
-        return status.getValue();
-      }
-    };
-    dbc.addValidationStatusProvider(validator);
-    updateGroups();
-}
+	private void reportState(State state) {
+		UsageStats.getInstance().devsandboxAPIState(state.name());
+		switch (state) {
+		case NONE:
+			setStatus(ValidationStatus.cancel("Checking Red Hat Developer Sandbox signup state"));
+			break;
+		case NEEDS_SIGNUP:
+			setStatus(ValidationStatus.cancel("Checking Red Hat Developer Sandbox needs signup"));
+			break;
+		case NEEDS_APPROVAL:
+			setStatus(ValidationStatus
+					.cancel("Your Red Hat Developer Sandbox needs to be approved, you should wait or retry later"));
+			break;
+		case NEEDS_VERIFICATION:
+			setStatus(ValidationStatus.cancel(
+					"Your Red Hat Developer Sandbox needs to be verified, enter your country code and phone number and click 'Verify'"));
+			break;
+		case CONFIRM_VERIFICATION:
+			setStatus(ValidationStatus.cancel(
+					"You need to send the verification code received on your phone, enter the verification code and phone number and click 'Verify'"));
+			break;
+		case READY:
+			reportMessage("Your Red Hat Developer Sandbox is ready, let's login now !!!", NONE);
+			setStatus(ValidationStatus.ok());
+			model.setClusterURL(processor.getClusterURL());
+			break;
+		}
+	}
 
-  @Override
-  protected void onPageActivated(DataBindingContext dbc) {
-    Display.getCurrent().asyncExec(() -> launchJob());
-  }
+	private void checkSandbox(IProgressMonitor monitor) {
+		reportMessage("Checking Developer Sandbox account", NONE);
+		if (processor == null) {
+			processor = new SandboxProcessor(model.getIDToken());
+		}
+		boolean stop = false;
+		try {
+			while (!monitor.isCanceled() && !stop) {
+				processor.advance(model.getCountryCode(), model.getPhoneNumber(), model.getVerificationCode());
+				reportState(processor.getState());
+				stop = processor.getState().isNeedsInteraction();
+				if (!stop) {
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}
+			}
+		} catch (IOException e) {
+			String message = "Error accessing the Red Hat Developer Sandbox API: " + e.getLocalizedMessage();
+			reportMessage(message, ERROR);
+			setStatus(ValidationStatus.error(message, e));
+		}
+	}
+
+	private void setStatus(IStatus status) {
+		this.status.getRealm().asyncExec(() -> this.status.setValue(status));
+	}
+
+	private void launchJob() {
+		try {
+			Job job = Job.create("Retrieving Red Hat Developer Sandbox state", this::retrieveState);
+			WizardUtils.runInWizard(job, getContainer(), getDatabindingContext());
+			updateGroups();
+		} catch (InvocationTargetException e) {
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private void updateGroups() {
+		((GridData) verificationGroup.getLayoutData()).exclude = true;
+		verificationGroup.setVisible(false);
+		verificationGroup.setEnabled(false);
+		((GridData) confirmVerificationGroup.getLayoutData()).exclude = true;
+		confirmVerificationGroup.setVisible(false);
+		confirmVerificationGroup.setEnabled(false);
+		if (processor != null && processor.getState() == State.NEEDS_VERIFICATION) {
+			((GridData) verificationGroup.getLayoutData()).exclude = false;
+			verificationGroup.setVisible(true);
+			verificationGroup.setEnabled(true);
+		} else if (processor != null && processor.getState() == State.CONFIRM_VERIFICATION) {
+			((GridData) confirmVerificationGroup.getLayoutData()).exclude = false;
+			confirmVerificationGroup.setVisible(true);
+			confirmVerificationGroup.setEnabled(true);
+		}
+		confirmVerificationGroup.getParent().layout(true, true);
+	}
+
+	@Override
+	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+
+		GridLayoutFactory.fillDefaults().numColumns(1).margins(10, 10).applyTo(parent);
+
+		messageLabel = new CLabel(parent, SWT.NONE);
+		messageLabel.setAlignment(SWT.CENTER);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(messageLabel);
+
+		verificationGroup = new Group(parent, SWT.NONE);
+		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(verificationGroup);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(verificationGroup);
+
+		Label countryCodeLabel = new Label(verificationGroup, SWT.NONE);
+		countryCodeLabel.setText("Country code:");
+		Text countryCodeText = new Text(verificationGroup, SWT.SINGLE | SWT.BORDER);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).span(2, 1).grab(true, false)
+				.applyTo(countryCodeText);
+		ISWTObservableValue<String> countryCodeObservable = WidgetProperties.text(SWT.Modify).observe(countryCodeText);
+		Binding countryCodeBinding = ValueBindingBuilder.bind(countryCodeObservable)
+				.validatingAfterGet(new CountryCodeValidator() {
+					@Override
+					public IStatus validate(String countryCode) {
+						if (verificationGroup.isVisible()) {
+							return super.validate(countryCode);
+						}
+						return ValidationStatus.ok();
+					}
+				}).to(BeanProperties.value(SandboxModel.PROPERTY_COUNTRY_CODE).observe(model)).in(dbc);
+		ControlDecorationSupport.create(countryCodeBinding, SWT.LEFT | SWT.TOP);
+
+		Label phoneNumberLabel = new Label(verificationGroup, SWT.NONE);
+		phoneNumberLabel.setText("Phone number:");
+		Text phoneNumberText = new Text(verificationGroup, SWT.SINGLE | SWT.BORDER);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).span(2, 1).grab(true, false)
+				.applyTo(phoneNumberText);
+		ISWTObservableValue<String> phoneNumberObservable = WidgetProperties.text(SWT.Modify).observe(phoneNumberText);
+		Binding phoneNumberBinding = ValueBindingBuilder.bind(phoneNumberObservable)
+				.validatingAfterGet(new PhoneNumberValidator() {
+					@Override
+					public IStatus validate(String phoneNumber) {
+						if (verificationGroup.isVisible()) {
+							return super.validate(phoneNumber);
+						}
+						return ValidationStatus.ok();
+					}
+				}).to(BeanProperties.value(SandboxModel.PROPERTY_PHONE_NUMBER).observe(model)).in(dbc);
+		ControlDecorationSupport.create(phoneNumberBinding, SWT.LEFT | SWT.TOP);
+
+		Button sendVerificationButton = new Button(verificationGroup, SWT.PUSH);
+		sendVerificationButton.setText("Verify");
+		sendVerificationButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> launchJob()));
+
+		confirmVerificationGroup = new Group(parent, SWT.NONE);
+		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(confirmVerificationGroup);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(confirmVerificationGroup);
+
+		Label verificationCodeLabel = new Label(confirmVerificationGroup, SWT.NONE);
+		verificationCodeLabel.setText("Verification code:");
+		Text verifictionCodeText = new Text(confirmVerificationGroup, SWT.SINGLE | SWT.BORDER);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).span(2, 1).grab(true, false)
+				.applyTo(verifictionCodeText);
+		ISWTObservableValue<String> verificationCodeObservable = WidgetProperties.text(SWT.Modify)
+				.observe(verifictionCodeText);
+		Binding verificationCodeBinding = ValueBindingBuilder.bind(verificationCodeObservable)
+				.to(BeanProperties.value(SandboxModel.PROPERTY_VERIFICATION_CODE).observe(model)).in(dbc);
+		ControlDecorationSupport.create(verificationCodeBinding, SWT.LEFT | SWT.TOP);
+
+		Button confirmVerificationButton = new Button(confirmVerificationGroup, SWT.PUSH);
+		confirmVerificationButton.setText("Verify");
+		confirmVerificationButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> launchJob()));
+
+		MultiValidator validator = new MultiValidator() {
+
+			@Override
+			protected IStatus validate() {
+				return status.getValue();
+			}
+		};
+		dbc.addValidationStatusProvider(validator);
+		updateGroups();
+	}
+
+	@Override
+	protected void onPageActivated(DataBindingContext dbc) {
+		Display.getCurrent().asyncExec(() -> launchJob());
+	}
 }
