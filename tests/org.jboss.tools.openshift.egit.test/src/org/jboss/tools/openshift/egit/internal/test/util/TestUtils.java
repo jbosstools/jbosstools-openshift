@@ -16,7 +16,6 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -80,26 +79,6 @@ public class TestUtils {
 		File rootDir = new File(userHome, "EGitCoreTestTempDir");
 		if (rootDir.exists())
 			FileUtils.delete(rootDir, FileUtils.RECURSIVE | FileUtils.RETRY);
-	}
-
-	/**
-	 * Read the stream into a String
-	 * 
-	 * @param inputStream
-	 * @return the contents of the stream
-	 * @throws IOException
-	 */
-	public String slurpAndClose(InputStream inputStream) throws IOException {
-		StringBuilder stringBuilder = new StringBuilder();
-		try {
-			int ch;
-			while ((ch = inputStream.read()) != -1) {
-				stringBuilder.append((char) ch);
-			}
-		} finally {
-			inputStream.close();
-		}
-		return stringBuilder.toString();
 	}
 
 	/**

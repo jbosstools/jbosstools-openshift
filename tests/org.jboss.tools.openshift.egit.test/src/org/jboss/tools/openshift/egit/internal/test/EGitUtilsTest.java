@@ -32,6 +32,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.egit.core.Activator;
 import org.eclipse.egit.core.RepositoryCache;
@@ -114,11 +115,12 @@ public class EGitUtilsTest {
 
 	@After
 	public void tearDown() throws Exception {
+		IProgressMonitor monitor = new NullProgressMonitor();
 		if (testProject != null) {
-			testProject.dispose();
+			testProject.dispose(monitor);
 		}
 		if (testProject2 != null) {
-			testProject2.dispose();
+			testProject2.dispose(monitor);
 		}
 
 		if (testRepository != null) {

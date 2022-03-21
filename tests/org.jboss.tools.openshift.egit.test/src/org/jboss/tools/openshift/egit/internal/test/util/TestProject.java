@@ -10,32 +10,22 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.egit.internal.test.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jgit.util.FileUtils;
 
 public class TestProject {
 	public IProject project;
 
 	private String location;
-	private TestUtils testUtils = new TestUtils();
-
-	/**
-	 * @throws CoreException
-	 *             If project already exists
-	 */
-	public TestProject() throws CoreException {
-		this(false);
-	}
 
 	public TestProject(boolean remove) throws CoreException {
 		this(remove, "Project-" + System.currentTimeMillis());
@@ -61,41 +51,18 @@ public class TestProject {
 		return project;
 	}
 
-	public IFile createFile(String name, byte[] content) throws Exception {
-		IFile file = project.getFile(name);
-		InputStream inputStream = new ByteArrayInputStream(content);
-		file.create(inputStream, true, null);
-
-		return file;
-	}
-
-	public IFolder createFolder(String name) throws Exception {
-		IFolder folder = project.getFolder(name);
-		folder.create(true, true, null);
-
-		IFile keep = project.getFile(name + "/keep");
-		keep.create(new ByteArrayInputStream(new byte[] { 0 }), true, null);
-
-		return folder;
-	}
-
-	public void dispose() throws CoreException, IOException {
-		if (project.exists())
-			project.delete(true, true, null);
-		else {
-			File f = new File(location);
-			if (f.exists())
-				FileUtils.delete(f, FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.SKIP_MISSING);
+	public void dispose(IProgressMonitor monitor) throws CoreException, IOException {
+		if (project.exists()) {
+			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+			project.close(monitor);
+			project.delete(true, true, monitor);
 		}
+		File f = new File(location);
+		if (f.exists())
+			FileUtils.delete(f, FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.SKIP_MISSING);
 	}
 
 	public IFile getFile(String filepath) throws Exception {
 		return project.getFile(filepath);
-	}
-
-	public String getFileContent(String filepath) throws Exception {
-		IFile file = project.getFile(filepath);
-		InputStream stream = file.getContents();
-		return testUtils.slurpAndClose(stream);
 	}
 }
