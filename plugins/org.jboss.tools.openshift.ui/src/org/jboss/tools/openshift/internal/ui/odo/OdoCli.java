@@ -22,6 +22,7 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
 import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.Config;
@@ -204,7 +205,7 @@ public class OdoCli implements Odo {
   private ObjectMapper configureObjectMapper(final JsonDeserializer deserializer) {
     final SimpleModule module = new SimpleModule();
     module.addDeserializer(List.class, deserializer);
-    return JSON_MAPPER.registerModule(module);
+    return JSON_MAPPER.copy().registerModule(module);
   }
 
   @Override
@@ -679,26 +680,63 @@ private ObjectNode findSchema(String crd) {
       throw e;
     }
   }
+  
+  /*
+   * We should emulate oc delete all -l app.kubernetes.io/component=comp_name but as the Kubernetes client does not allow
+   * to retrieve all APIGroups we reduce the scope to:
+   * - Deployment
+   * - Service
+   * - Route
+   * - BuildConfig
+   * - ImageStreams
+   */
+  private void deleteDeployment(String project, String application, String deployment) throws IOException {
+		try {
+			client.apps().deployments().inNamespace(project).withName(deployment)
+					.withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
+			client.services().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment).list()
+					.getItems().forEach(service -> client.services().withName(service.getMetadata().getName())
+							.withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
+			if (client.isAdaptable(OpenShiftClient.class)) {
+				OpenShiftClient oclient = client.adapt(OpenShiftClient.class);
+				oclient.routes().inNamespace(project).withLabelIn(KubernetesLabels.COMPONENT_LABEL, deployment).list()
+						.getItems().forEach(route -> oclient.routes().withName(route.getMetadata().getName())
+								.withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
+				oclient.buildConfigs().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment)
+						.list().getItems().forEach(bc -> oclient.buildConfigs().withName(bc.getMetadata().getName())
+								.withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
+				oclient.imageStreams().inNamespace(project).withLabel(KubernetesLabels.COMPONENT_LABEL, deployment)
+						.list().getItems().forEach(is -> oclient.imageStreams().withName(is.getMetadata().getName())
+								.withPropagationPolicy(DeletionPropagation.BACKGROUND).delete());
+			}
+		} catch (KubernetesClientException e) {
+			throw new IOException(e.getLocalizedMessage(), e);
+		}
+	  }
 
   private void undeployComponent(String project, String application, String context, String component, boolean deleteConfig, ComponentKind kind) throws IOException {
     try {
-      List<String> args = new ArrayList<>();
-      args.add("delete");
-      args.add("-f");
-      if (deleteConfig) {
-          args.add("-a");
-      }
-      if (context != null) {
-          execute(new File(context), command, envVars, args.toArray(new String[0]));
-      } else {
-          args.add("--project");
-          args.add(project);
-          args.add("--app");
-          args.add(application);
-          args.add(component);
-          execute(command, envVars, args.toArray(new String[0]));
-      }
-      UsageStats.getInstance().odoCommand("delete", true);
+      if (kind != ComponentKind.OTHER) {
+		List<String> args = new ArrayList<>();
+		args.add("delete");
+		args.add("-f");
+		if (deleteConfig) {
+			args.add("-a");
+		}
+		if (context != null) {
+			execute(new File(context), command, envVars, args.toArray(new String[0]));
+		} else {
+			args.add("--project");
+			args.add(project);
+			args.add("--app");
+			args.add(application);
+			args.add(component);
+			execute(command, envVars, args.toArray(new String[0]));
+		} 
+	} else {
+		deleteDeployment(project, application, component);
+	}
+	UsageStats.getInstance().odoCommand("delete", true);
     } catch (IOException e) {
       UsageStats.getInstance().odoCommand("delete", false);
       throw e;

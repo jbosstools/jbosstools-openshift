@@ -11,7 +11,8 @@
 package org.jboss.tools.openshift.core.odo;
 
 public enum ComponentKind {
-    DEVFILE("devfile");
+    DEVFILE("devfile"),
+    OTHER("other");
 
     private final String label;
 
