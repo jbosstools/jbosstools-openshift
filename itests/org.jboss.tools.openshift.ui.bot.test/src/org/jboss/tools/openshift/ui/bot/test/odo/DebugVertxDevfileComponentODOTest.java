@@ -48,15 +48,13 @@ import org.junit.runner.RunWith;
 @RequiredODOProject(name="test-project7")
 public class DebugVertxDevfileComponentODOTest extends AbstractODOTest {
 	
-	/**
-	 * 
-	 */
 	private static final String APP_SOURCE = "HttpApplication.java";
 	
 	private static final String ECLIPSE_PROJECT = "vertxproject" + new Random().nextInt();
 	
 	private static final int BREAKPOINT_LINE = 41;
 	
+	private static final String APPLICATION_NAME = "myapp";
 
 	@InjectRequirement
 	private static OpenShiftODOProjectRequirement projectReq;
@@ -66,6 +64,7 @@ public class DebugVertxDevfileComponentODOTest extends AbstractODOTest {
 	public static void setupWorkspace() {
 		importLauncherProject(ECLIPSE_PROJECT, "vert.x community");
 		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "maven java", null, true);
+		createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080);
 	}
 	
 	@Test

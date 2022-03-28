@@ -87,7 +87,10 @@ public class ImportApplicationTest extends AbstractTest {
 		
 		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION), TimePeriod.LONG);
 		
+		
 		new DefaultShell(OpenShiftLabel.Shell.IMPORT_APPLICATION);
+		// choose eap-app-build-artifacts build config
+		new NextButton().click();
 		new CheckBox("Use default clone destination").toggle(false);
 		File gitRepo = new File(GIT_REPO_DIRECTORY);
 		new LabeledText("Git Clone Location:").setText(gitRepo.getAbsolutePath());

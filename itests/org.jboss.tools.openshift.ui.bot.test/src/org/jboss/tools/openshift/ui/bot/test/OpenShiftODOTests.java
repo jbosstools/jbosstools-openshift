@@ -14,13 +14,11 @@ import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.openshift.ui.bot.test.odo.ConnectionODOCommandsTests;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateDevfileComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreatePythonDevfileComponentWithStarterODOTest;
-import org.jboss.tools.openshift.ui.bot.test.odo.CreateS2IComponentODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.CreateServiceODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.CreateVertxDevfileComponentWithLocalDevfileODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.DebugNodeDevfileComponentODOTest;
-import org.jboss.tools.openshift.ui.bot.test.odo.DebugNodeS2IComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.DebugPythonDevfileComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.DebugVertxDevfileComponentODOTest;
-import org.jboss.tools.openshift.ui.bot.test.odo.DebugVertxS2IComponentODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.LoginODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.ProjectManagementODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.RegistryODOTest;
@@ -38,16 +36,13 @@ import org.junit.runners.Suite.SuiteClasses;
 	LoginODOTest.class, // pass
 	ProjectManagementODOTest.class, // pass 
 	ConnectionODOCommandsTests.class,
-	CreateS2IComponentODOTest.class, //  pass
-	CreateVertxDevfileComponentWithLocalDevfileODOTest.class, // pass  
+	CreateVertxDevfileComponentWithLocalDevfileODOTest.class, // pass
 	CreateDevfileComponentODOTest.class, // pass 
-	DebugNodeS2IComponentODOTest.class, // failed - issue
+	CreatePythonDevfileComponentWithStarterODOTest.class, // pass
 	DebugNodeDevfileComponentODOTest.class, // pass - ignored
-	DebugVertxS2IComponentODOTest.class, //  failed
-	DebugVertxDevfileComponentODOTest.class, //  
-	CreatePythonDevfileComponentWithStarterODOTest.class, // pass 
+	DebugVertxDevfileComponentODOTest.class, //   
 	DebugPythonDevfileComponentODOTest.class,
-	//CreateServiceODOTest.class - disable this suite for now, depends on service catalog (which is not supported on newer OpenShift)
+	CreateServiceODOTest.class, // disable this suite for now, depends on service catalog (which is not supported on newer OpenShift)
 	RegistryODOTest.class // pass
 })
 public class OpenShiftODOTests {
