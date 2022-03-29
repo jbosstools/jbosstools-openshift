@@ -163,6 +163,9 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	}
 	
 	private File findBinary(File folder) {
+		if( folder == null || !folder.exists()) {
+			return null;
+		}
 		try(Stream<Path> paths = Files.list(folder.toPath())) {
 			return paths.filter(file -> {
 				String filename = file.getFileName().toString();

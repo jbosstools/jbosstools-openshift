@@ -37,7 +37,7 @@ public class ComponentDeserializer extends StdNodeBasedDeserializer<List<Compone
         List<Component> result = new ArrayList<>();
         // two roots, devfileComponents and otherComponents
         result.addAll(parseComponents(root.get(DEVFILE_FIELD), ComponentKind.DEVFILE));
-        result.addAll(parseComponents(root.get(OTHER_FIELD), ComponentKind.DEVFILE));
+        result.addAll(parseComponents(root.get(OTHER_FIELD), ComponentKind.OTHER));
         return result;
     }
 

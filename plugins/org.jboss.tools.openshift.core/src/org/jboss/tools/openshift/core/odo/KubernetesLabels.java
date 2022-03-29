@@ -17,6 +17,8 @@ public final class KubernetesLabels {
   public static final String APP_LABEL = "app.kubernetes.io/part-of";
 
   public static final String COMPONENT_NAME_LABEL = "app.kubernetes.io/instance";
+  
+  public static final String COMPONENT_LABEL = "app.kubernetes.io/component";
 
   /**
    * Labels used for components prior to odo 1.0
