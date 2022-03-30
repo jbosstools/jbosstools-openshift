@@ -17,22 +17,22 @@ import org.eclipse.jface.wizard.Wizard;
  *
  */
 public class SandboxWizard extends Wizard {
-  
-  private final SandboxModel model;
-	
+
+	private final SandboxModel model;
+
 	public SandboxWizard(SandboxModel model) {
-	  this.model = model;
+		this.model = model;
 		setNeedsProgressMonitor(true);
 		setWindowTitle("Red Hat Developer Sandbox");
 	}
 
 	@Override
-  public void addPages() {
-    addPage(new SandboxWorkflowPage(this, model));
-    addPage(new SandboxLoginPage(this, model));
-  }
+	public void addPages() {
+		addPage(new SandboxWorkflowPage(this, model));
+		addPage(new SandboxLoginPage(this, model));
+	}
 
-  @Override
+	@Override
 	public boolean performFinish() {
 		return true;
 	}

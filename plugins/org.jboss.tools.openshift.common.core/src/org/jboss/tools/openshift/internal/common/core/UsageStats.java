@@ -46,6 +46,11 @@ public class UsageStats {
 	private UsageEventType odoKubernetesVersion;
 	private UsageEventType odoIsOpenshift;
 	private UsageEventType odoOpenshiftVersion;
+	
+	private UsageEventType odoDevsandboxLogin;
+	private UsageEventType odoDevsandboxTokenRetrieved;
+	private UsageEventType odoDevsandboxRedHatSsoGetToken;
+	private UsageEventType odoDdevsandboxAPIState;
 
 	public static UsageStats getInstance() {
 		if (INSTANCE == null) {
@@ -88,6 +93,10 @@ public class UsageStats {
 		this.odoKubernetesVersion = createEventType("odo_kubernetes_version", "Kubernetes version", null);
 		this.odoIsOpenshift = createEventType("odo_is_openshift", "Is Cluster Openshift?", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 		this.odoOpenshiftVersion = createEventType("odo_openshift_version", "Openshift version", null);
+		this.odoDevsandboxLogin = createEventType("odo_devsandbox_login", "Openshift Devsandbox Login", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoDevsandboxTokenRetrieved = createEventType("odo_devsandbox_token_retrieved", "Openshift Devsandbox Token Retrieved", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoDevsandboxRedHatSsoGetToken = createEventType("odo_devsandbox_redhat_sso_get_token", "Openshift Devsandbox Red hat SSO Get Token", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoDdevsandboxAPIState = createEventType("odo_devsandbox_api_state", "Openshift Devsandbox API state", null);
 	}
 
 	private UsageEventType createEventType(String actionName, String labelDescription, String valueDescription) {
@@ -191,5 +200,21 @@ public class UsageStats {
 
 	public void isOpenShift(boolean isOpenShift) {
 		UsageReporter.getInstance().trackEvent(odoIsOpenshift.event("is openshift?", isOpenShift ? SUCCESS : FAILURE));
+	}
+
+	public void devsandboxLogin(boolean success) {
+		UsageReporter.getInstance().trackEvent(odoDevsandboxLogin.event("completed wizard rate", success ? SUCCESS : FAILURE)); //$NON-NLS-1$
+	}
+	
+	public void devsandboxTokenRetrieved() {
+		UsageReporter.getInstance().trackEvent(odoDevsandboxTokenRetrieved.event("Devsandbox token retrieved rate", SUCCESS)); //$NON-NLS-1$
+	}
+
+	public void devsandboxRedHatSsoGetToken(boolean success) {
+		UsageReporter.getInstance().trackEvent(odoDevsandboxRedHatSsoGetToken.event("RedHat SSO get token rate", success ? SUCCESS : FAILURE)); //$NON-NLS-1$
+	}
+
+	public void devsandboxAPIState(String state) {
+		UsageReporter.getInstance().trackEvent(odoDdevsandboxAPIState.event(state));
 	}
 }

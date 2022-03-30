@@ -22,6 +22,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.openshift.core.odo.utils.KubernetesClusterHelper;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.connection.OAuthBrowser;
@@ -34,59 +35,62 @@ import org.jboss.tools.openshift.internal.ui.wizard.connection.OAuthBrowser.Toke
  */
 public class SandboxLoginPage extends AbstractOpenShiftWizardPage {
 
-  private final SandboxModel model;
-  
-  private OAuthBrowser browser;
-  
-  private final WritableValue<IStatus> status = new WritableValue<>(
-		  ValidationStatus.cancel("Log in to Red Hat Developer Sandbox"), IStatus.class);
-  /**
-   * @param title
-   * @param description
-   * @param pageName
-   * @param wizard
-   */
-  public SandboxLoginPage(IWizard wizard, SandboxModel model) {
-    super("Login to Red Hat Developer Sandbox", "Please login to Red Hat Developer Sandbox.", "SandboxLogin", wizard);
-    this.model = model;
-  }
-  
-  @Override
-  protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-    
-    GridLayoutFactory.fillDefaults().numColumns(1).margins(10, 10).applyTo(parent);
-    
-    browser = new OAuthBrowser(parent, SWT.NONE);
-    browser.setLayoutData(new GridData( GridData.FILL_BOTH));
-    browser.addTokenListener(new TokenListener() {
-      @Override
-      public void tokenReceived(TokenEvent event) {
-        model.setClusterToken(event.getToken());
-        status.setValue(ValidationStatus.ok());
-      }
-    });
-    dbc.addValidationStatusProvider(new MultiValidator() {
-      @Override
-      protected IStatus validate() {
-        return status.getValue();
-      }
-    });
-}
+	private final SandboxModel model;
 
-  @Override
-  protected void onPageActivated(DataBindingContext dbc) {
-    try {
-      if (model.getClusterToken() != null) {
-        status.setValue(ValidationStatus.ok());
-      } else if (model.getClusterURL() != null){
-        browser.setUrl(KubernetesClusterHelper.getTokenRequest(model.getClusterURL()));
-        status.setValue(ValidationStatus.cancel("Please complete login"));
-      } else {
-    	  status.setValue(ValidationStatus.error("Failed to login"));
-      }
-    } catch (IOException e) {
-      OpenShiftUIActivator.log(ERROR, e.getLocalizedMessage(), e);
-    }
-  }
+	private OAuthBrowser browser;
+
+	private final WritableValue<IStatus> status = new WritableValue<>(
+			ValidationStatus.cancel("Log in to Red Hat Developer Sandbox"), IStatus.class);
+
+	/**
+	 * @param title
+	 * @param description
+	 * @param pageName
+	 * @param wizard
+	 */
+	public SandboxLoginPage(IWizard wizard, SandboxModel model) {
+		super("Login to Red Hat Developer Sandbox", "Please login to Red Hat Developer Sandbox.", "SandboxLogin",
+				wizard);
+		this.model = model;
+	}
+
+	@Override
+	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+
+		GridLayoutFactory.fillDefaults().numColumns(1).margins(10, 10).applyTo(parent);
+
+		browser = new OAuthBrowser(parent, SWT.NONE);
+		browser.setLayoutData(new GridData(GridData.FILL_BOTH));
+		browser.addTokenListener(new TokenListener() {
+			@Override
+			public void tokenReceived(TokenEvent event) {
+				UsageStats.getInstance().devsandboxTokenRetrieved();
+				model.setClusterToken(event.getToken());
+				status.setValue(ValidationStatus.ok());
+			}
+		});
+		dbc.addValidationStatusProvider(new MultiValidator() {
+			@Override
+			protected IStatus validate() {
+				return status.getValue();
+			}
+		});
+	}
+
+	@Override
+	protected void onPageActivated(DataBindingContext dbc) {
+		try {
+			if (model.getClusterToken() != null) {
+				status.setValue(ValidationStatus.ok());
+			} else if (model.getClusterURL() != null) {
+				browser.setUrl(KubernetesClusterHelper.getTokenRequest(model.getClusterURL()));
+				status.setValue(ValidationStatus.cancel("Please complete login"));
+			} else {
+				status.setValue(ValidationStatus.error("Failed to login"));
+			}
+		} catch (IOException e) {
+			OpenShiftUIActivator.log(ERROR, e.getLocalizedMessage(), e);
+		}
+	}
 
 }
