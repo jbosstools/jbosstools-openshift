@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -100,6 +99,63 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
     return descriptors;
   }
   
+  private OperatorCRD getOperatorCRD(JsonNode crd, ArrayNode samples, List<OperatorCRDSpecDescriptor> descriptors) {
+		return new OperatorCRD() {
+			private ObjectNode sample;
+			private ObjectNode schema;
+
+			@Override
+			public String getName() {
+				return crd.get(NAME_FIELD).asText();
+			}
+
+			@Override
+			public String getVersion() {
+				return crd.get(VERSION_FIELD).asText();
+			}
+
+			@Override
+			public String getKind() {
+				return crd.get(KIND_FIELD).asText();
+			}
+
+			@Override
+			public String getDisplayName() {
+				return crd.get(DISPLAY_NAME_FIELD).asText();
+			}
+
+			@Override
+			public String getDescription() {
+				return crd.get(DESCRIPTION_FIELD).asText();
+			}
+
+			@Override
+			public JsonNode getSample() {
+				if (sample == null && samples != null) {
+					sample = selectSample(samples, this);
+				}
+				return sample;
+			}
+
+			@Override
+			public JsonNode getSchema() {
+				if (schema == null) {
+					schema = schemaMapper
+							.apply(getCRDPrefix(this) + "/namespaces/{namespace}/" + getCRDSuffix(this));
+					if (schema != null) {
+						schema = SchemaHelper.getAnnotatedSchema(schema, getSpecDescriptors());
+					}
+				}
+				return schema;
+			}
+
+			@Override
+			public List<OperatorCRDSpecDescriptor> getSpecDescriptors() {
+				return descriptors;
+			}
+		};
+	}
+
   private void convertOperators(JsonNode root, List<ServiceTemplate> result) throws JsonProcessingException {
     JsonNode operators = root.get(OPERATORS_FIELD);
     if (operators != null) {
@@ -118,83 +174,36 @@ public class ServiceTemplatesDeserializer extends StdNodeBasedDeserializer<List<
 
           }
           List<OperatorCRD> crds = new ArrayList<>();
-          for (JsonNode crd : item.get(SPEC_FIELD).get(CRD_FIELD).get(OWNED_FIELD)) {
-            ArrayNode finalSamples = samples;
-            List<OperatorCRDSpecDescriptor> descriptors = getSpecDescriptors(crd);
-            crds.add(new OperatorCRD() {
-              private ObjectNode sample;
-              private ObjectNode schema;
-                
-              @Override
-              public String getName() {
-                return crd.get(NAME_FIELD).asText();
-              }
+          if (item.get(SPEC_FIELD).get(CRD_FIELD).has(OWNED_FIELD)) {
+			for (JsonNode crd : item.get(SPEC_FIELD).get(CRD_FIELD).get(OWNED_FIELD)) {
+				ArrayNode finalSamples = samples;
+				List<OperatorCRDSpecDescriptor> descriptors = getSpecDescriptors(crd);
+				crds.add(getOperatorCRD(crd, finalSamples, descriptors));
+			} 
+		}
+		if (!crds.isEmpty()) {
+			result.add(new ServiceTemplate() {
+				@Override
+				public String getName() {
+					return name;
+				}
 
-              @Override
-              public String getVersion() {
-                return crd.get(VERSION_FIELD).asText();
-              }
+				@Override
+				public String getDisplayName() {
+					return displayName;
+				}
 
-              @Override
-              public String getKind() {
-                return crd.get(KIND_FIELD).asText();
-              }
-
-              @Override
-              public String getDisplayName() {
-                return crd.get(DISPLAY_NAME_FIELD).asText();
-              }
-
-              @Override
-              public String getDescription() {
-                return crd.get(DESCRIPTION_FIELD).asText();
-              }
-
-              @Override
-              public JsonNode getSample() {
-                if (sample == null && finalSamples != null) {
-                  sample = selectSample(finalSamples, this);
-                }
-                return sample;
-              }
-
-              @Override
-              public JsonNode getSchema() {
-                if (schema == null) {
-                  schema = schemaMapper.apply(getCRDPrefix(this) + "/namespaces/{namespace}/" + getCRDSuffix(this));
-                  if (schema != null) {
-                    schema = SchemaHelper.getAnnotatedSchema(schema, getSpecDescriptors());
-                  }
-                }
-                return schema;
-              }
-
-              @Override
-              public List<OperatorCRDSpecDescriptor> getSpecDescriptors() {
-                return descriptors;
-              }
-            });
-          }
-          result.add(new ServiceTemplate() {
-            @Override
-            public String getName() {
-              return name;
-            }
-
-            @Override
-            public String getDisplayName() {
-              return displayName;
-            }
-
-            @Override
-            public List<OperatorCRD> getCRDs() {
-              return crds;
-            }
-          });
+				@Override
+				public List<OperatorCRD> getCRDs() {
+					return crds;
+				}
+			});
+		}
         }
       }
     }
   }
+
 
   private ObjectNode selectSample(ArrayNode samples, OperatorCRD crd) {
     String name = getCRDPrefix(crd);
