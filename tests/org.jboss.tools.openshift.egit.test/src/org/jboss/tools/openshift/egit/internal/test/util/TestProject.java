@@ -15,11 +15,13 @@ import java.io.IOException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jgit.util.FileUtils;
 
 public class TestProject {
@@ -34,34 +36,56 @@ public class TestProject {
 	/**
 	 * @param remove
 	 *            should project be removed if already exists
-	 * @param projectName
+	 * @param path
 	 * @throws CoreException
 	 */
-	public TestProject(final boolean remove, String projectName) throws CoreException {
+	public TestProject(final boolean remove, String path) throws CoreException {
+		IProgressMonitor monitor = new NullProgressMonitor();
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		project = root.getProject(projectName);
-		if (remove)
-			project.delete(true, null);
-		project.create(null);
-		project.open(null);
-		location = project.getLocation().toOSString();
+		IProjectDescription description = createDescription(path, root);
+		project = root.getProject(description.getName());
+		if (remove) {
+			TestUtils.deleteProject(project);
+		}
+		location = root.getRawLocation().append(path).toOSString();
+		project.create(description, monitor);
+		project.open(monitor);
+	}
+
+	private IProjectDescription createDescription(String path, IWorkspaceRoot root) {
+		Path ppath = new Path(path);
+		String projectName = ppath.lastSegment();
+		IProjectDescription description = ResourcesPlugin.getWorkspace()
+				.newProjectDescription(projectName);
+
+		description.setName(projectName);
+		return description;
 	}
 
 	public IProject getProject() {
 		return project;
 	}
 
-	public void dispose(IProgressMonitor monitor) throws CoreException, IOException {
-		if (project.exists()) {
-			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-			project.close(monitor);
-			project.delete(true, true, monitor);
+	public void dispose() throws CoreException, IOException {
+		try {
+			if (project.exists()) {
+				TestUtils.deleteProject(project);
+			} else {
+				File f = new File(location);
+				if (f.exists()) {
+					FileUtils.delete(f, FileUtils.RECURSIVE | FileUtils.RETRY);
+				}
+			}
+		} catch (CoreException | IOException e) {
+			System.err.println(e.toString());
+			TestUtils.listDirectory(new File(location), true);
+			throw e;
 		}
-		File f = new File(location);
-		if (f.exists())
-			FileUtils.delete(f, FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.SKIP_MISSING);
 	}
 
+	public String getLocation() {
+		return location;
+	}
 	public IFile getFile(String filepath) throws Exception {
 		return project.getFile(filepath);
 	}

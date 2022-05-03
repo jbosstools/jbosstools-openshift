@@ -28,7 +28,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.egit.core.Activator;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.core.op.CloneOperation;
 import org.eclipse.egit.core.op.ConnectProviderOperation;
@@ -528,10 +527,11 @@ public class TestRepository {
 		return iFile;
 	}
 
-	public void dispose() throws IOException {
-		repository.close();
-		remove();
-		repository = null;
+	public void dispose() {
+		if (repository != null) {
+			repository.close();
+			repository = null;
+		}
 	}
 
 	public void remove() throws IOException {

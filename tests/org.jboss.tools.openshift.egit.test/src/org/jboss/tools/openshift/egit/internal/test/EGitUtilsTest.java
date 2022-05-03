@@ -11,14 +11,13 @@
 package org.jboss.tools.openshift.egit.internal.test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -32,9 +31,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.egit.core.Activator;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.jgit.api.CheckoutResult;
 import org.eclipse.jgit.api.Git;
@@ -115,12 +112,11 @@ public class EGitUtilsTest {
 
 	@After
 	public void tearDown() throws Exception {
-		IProgressMonitor monitor = new NullProgressMonitor();
 		if (testProject != null) {
-			testProject.dispose(monitor);
+			testProject.dispose();
 		}
 		if (testProject2 != null) {
-			testProject2.dispose(monitor);
+			testProject2.dispose();
 		}
 
 		if (testRepository != null) {
@@ -595,11 +591,11 @@ public class EGitUtilsTest {
 		testRepository.createAndCheckoutBranch(Constants.HEAD, REPO_BRANCH);
 		RemoteConfig remoteConfig = EGitUtils.getRemoteByName("origin", testRepositoryClone.getRepository());
 		String fullRef = Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME + "/" + REPO_BRANCH;
-		assertThat(testRepositoryClone.getRepository().findRef(fullRef), is(nullValue()));
+		assertThat(testRepositoryClone.getRepository().findRef(fullRef), nullValue());
 		// when
 		EGitUtils.fetch(remoteConfig, testRepositoryClone.getRepository(), new NullProgressMonitor());
 		// then
-		assertThat(testRepositoryClone.getRepository().findRef(fullRef), is(not(nullValue())));
+		assertThat(testRepositoryClone.getRepository().findRef(fullRef), notNullValue());
 	}
 
 	@Test
