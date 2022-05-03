@@ -59,7 +59,7 @@ public class CreateServiceODOTest extends AbstractODOTest {
 		OpenShiftODOProject project = explorer.getOpenShiftODOConnection().getProject(projectReq.getProjectName());
 		project.openCreateServiceWizard();
 		try {
-			new DefaultShell("Unable to create service");
+			new DefaultShell("Create service");
 			new OkButton().click();
 			fail("Service catalog is not installed");
 		} catch (RedDeerException ex) {
