@@ -10,32 +10,24 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.egit.internal.test.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jgit.util.FileUtils;
 
 public class TestProject {
 	public IProject project;
 
 	private String location;
-	private TestUtils testUtils = new TestUtils();
-
-	/**
-	 * @throws CoreException
-	 *             If project already exists
-	 */
-	public TestProject() throws CoreException {
-		this(false);
-	}
 
 	public TestProject(boolean remove) throws CoreException {
 		this(remove, "Project-" + System.currentTimeMillis());
@@ -44,58 +36,57 @@ public class TestProject {
 	/**
 	 * @param remove
 	 *            should project be removed if already exists
-	 * @param projectName
+	 * @param path
 	 * @throws CoreException
 	 */
-	public TestProject(final boolean remove, String projectName) throws CoreException {
+	public TestProject(final boolean remove, String path) throws CoreException {
+		IProgressMonitor monitor = new NullProgressMonitor();
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		project = root.getProject(projectName);
-		if (remove)
-			project.delete(true, null);
-		project.create(null);
-		project.open(null);
-		location = project.getLocation().toOSString();
+		IProjectDescription description = createDescription(path, root);
+		project = root.getProject(description.getName());
+		if (remove) {
+			TestUtils.deleteProject(project);
+		}
+		location = root.getRawLocation().append(path).toOSString();
+		project.create(description, monitor);
+		project.open(monitor);
+	}
+
+	private IProjectDescription createDescription(String path, IWorkspaceRoot root) {
+		Path ppath = new Path(path);
+		String projectName = ppath.lastSegment();
+		IProjectDescription description = ResourcesPlugin.getWorkspace()
+				.newProjectDescription(projectName);
+
+		description.setName(projectName);
+		return description;
 	}
 
 	public IProject getProject() {
 		return project;
 	}
 
-	public IFile createFile(String name, byte[] content) throws Exception {
-		IFile file = project.getFile(name);
-		InputStream inputStream = new ByteArrayInputStream(content);
-		file.create(inputStream, true, null);
-
-		return file;
-	}
-
-	public IFolder createFolder(String name) throws Exception {
-		IFolder folder = project.getFolder(name);
-		folder.create(true, true, null);
-
-		IFile keep = project.getFile(name + "/keep");
-		keep.create(new ByteArrayInputStream(new byte[] { 0 }), true, null);
-
-		return folder;
-	}
-
 	public void dispose() throws CoreException, IOException {
-		if (project.exists())
-			project.delete(true, true, null);
-		else {
-			File f = new File(location);
-			if (f.exists())
-				FileUtils.delete(f, FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.SKIP_MISSING);
+		try {
+			if (project.exists()) {
+				TestUtils.deleteProject(project);
+			} else {
+				File f = new File(location);
+				if (f.exists()) {
+					FileUtils.delete(f, FileUtils.RECURSIVE | FileUtils.RETRY);
+				}
+			}
+		} catch (CoreException | IOException e) {
+			System.err.println(e.toString());
+			TestUtils.listDirectory(new File(location), true);
+			throw e;
 		}
 	}
 
+	public String getLocation() {
+		return location;
+	}
 	public IFile getFile(String filepath) throws Exception {
 		return project.getFile(filepath);
-	}
-
-	public String getFileContent(String filepath) throws Exception {
-		IFile file = project.getFile(filepath);
-		InputStream stream = file.getContents();
-		return testUtils.slurpAndClose(stream);
 	}
 }
