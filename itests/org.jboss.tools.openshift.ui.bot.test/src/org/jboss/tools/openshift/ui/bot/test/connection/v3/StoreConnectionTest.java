@@ -70,6 +70,10 @@ public class StoreConnectionTest extends AbstractTest {
 			}
 		}
 		preferences.ok();
+		// handle new eclipse dialog
+		// new DefaultShell().close();
+		// handle second dialog
+		// new DefaultShell().close();
 	}
 	
 	@Test

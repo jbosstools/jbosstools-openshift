@@ -35,7 +35,6 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.debug.NodeJSAppDebug
 import org.jboss.tools.openshift.ui.bot.test.application.v3.debug.NodeJSAppDebugTest.CursorPositionIsOnLine;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 /**
@@ -47,15 +46,15 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject(name="test-project5")
+@RequiredODOProject(name="test-project4")
 public class DebugNodeDevfileComponentODOTest extends AbstractODOTest {
-  
 	private static final String APP_SOURCE = "app.js";
 
 	private static final String ECLIPSE_PROJECT = "nodeproject" + new Random().nextInt();
   
 	private static final int BREAKPOINT_LINE = 34;
 	
+	private static final String APPLICATION_NAME = "myapp";
 
 	@InjectRequirement
 	private static OpenShiftODOProjectRequirement projectReq;
@@ -63,12 +62,12 @@ public class DebugNodeDevfileComponentODOTest extends AbstractODOTest {
 	
 	@BeforeClass
 	public static void setupWorkspace() {
-		importLauncherProject(ECLIPSE_PROJECT, "nodejs v10-community");
-		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "nodejs", true);
+		importLauncherProject(ECLIPSE_PROJECT, "nodejs v14-community");
+		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "node.js", null, false);
+		createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080);
 	}
 	
 	@Test
-	@Ignore("Launcher projects do not specify debug script")
 	public void checkBreakpointReached() throws CoreException, IOException, InterruptedException, ExecutionException {
 		ProjectExplorer pe = new ProjectExplorer();
 		pe.open();
@@ -79,9 +78,9 @@ public class DebugNodeDevfileComponentODOTest extends AbstractODOTest {
     
 		OpenShiftApplicationExplorerView view = new OpenShiftApplicationExplorerView();
 		view.activate();
-		view.getOpenShiftODOConnection().getProject(projectReq.getProjectName()).getApplication("myapp").getComponent(ECLIPSE_PROJECT).debug();
+		view.getOpenShiftODOConnection().getProject(projectReq.getProjectName()).getApplication(APPLICATION_NAME).getComponent(ECLIPSE_PROJECT).debug();
     
-		AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), "myapp", ECLIPSE_PROJECT, "/api/greeting");
+		AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "/api/greeting");
 
 		try {
 			new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE), TimePeriod.LONG);

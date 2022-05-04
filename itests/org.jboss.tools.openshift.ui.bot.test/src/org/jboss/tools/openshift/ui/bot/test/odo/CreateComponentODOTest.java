@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 @RequiredODOConnection
 @CleanODOConnection
 @RequiredODOProject(name="test-project1")
-public class CreateS2IComponentODOTest extends AbstractODOTest {
+public class CreateComponentODOTest extends AbstractODOTest {
 	
 
 	@InjectRequirement

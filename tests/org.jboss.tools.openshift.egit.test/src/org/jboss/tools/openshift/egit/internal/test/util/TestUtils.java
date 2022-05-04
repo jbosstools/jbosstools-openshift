@@ -2,11 +2,13 @@
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2010, Jens Baumgart <jens.baumgart@sap.com>
  * Copyright (C) 2010, Mathias Kinzler <mathias.kinzler@sap.com>
+ * Copyright (C) 2012, François Rey <eclipse.org_@_francois_._rey_._name>
  *
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
  *******************************************************************************/
 package org.jboss.tools.openshift.egit.internal.test.util;
 
@@ -16,7 +18,10 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,7 +37,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.jgit.lib.Constants;
@@ -48,6 +56,13 @@ public class TestUtils {
 
 	public final static String COMMITTER = "The Commiter <The.committer@some.com>";
 
+	private static final int MAX_DELETE_RETRY = 5;
+
+	private static final int DELETE_RETRY_DELAY = 1000; // ms
+
+	public TestUtils() {
+	}
+	
 	/**
 	 * Create a "temporary" directory
 	 * 
@@ -66,7 +81,7 @@ public class TestUtils {
 		return result;
 	}
 
-	public static File createGitDir(TestProject testProject) throws IOException {
+	public static File createGitDir(TestProject testProject) {
 		return new File(testProject.getProject().getLocation().toFile(), Constants.DOT_GIT);
 	}
 
@@ -81,25 +96,57 @@ public class TestUtils {
 		if (rootDir.exists())
 			FileUtils.delete(rootDir, FileUtils.RECURSIVE | FileUtils.RETRY);
 	}
-
+	
 	/**
-	 * Read the stream into a String
-	 * 
-	 * @param inputStream
-	 * @return the contents of the stream
-	 * @throws IOException
+	 * Produce a simple directory listing.
+	 *
+	 * @param directory
+	 *            to list
+	 * @param recursive
+	 *            whether to descend into sub-directories
 	 */
-	public String slurpAndClose(InputStream inputStream) throws IOException {
-		StringBuilder stringBuilder = new StringBuilder();
+	public static void listDirectory(File directory, boolean recursive) {
 		try {
-			int ch;
-			while ((ch = inputStream.read()) != -1) {
-				stringBuilder.append((char) ch);
-			}
-		} finally {
-			inputStream.close();
+			java.nio.file.Path top = directory.toPath();
+			Files.walkFileTree(top,
+				new SimpleFileVisitor<java.nio.file.Path>() {
+
+					private void print(java.nio.file.Path path,
+							BasicFileAttributes attrs) {
+						StringBuilder b = new StringBuilder();
+						b.append(attrs.lastModifiedTime().toString());
+						b.append(' ');
+						b.append(path.toString());
+						if (attrs.isSymbolicLink()) {
+							b.append(" (symlink)");
+						} else if (attrs.isDirectory()) {
+							b.append('/');
+						}
+						System.out.println(b.toString());
+					}
+
+					@Override
+					public FileVisitResult preVisitDirectory(
+							java.nio.file.Path dir,
+							BasicFileAttributes attrs) throws IOException {
+						print(dir, attrs);
+						return (recursive || top.equals(dir))
+								? FileVisitResult.CONTINUE
+								: FileVisitResult.SKIP_SUBTREE;
+					}
+
+					@Override
+					public FileVisitResult visitFile(
+							java.nio.file.Path file,
+							BasicFileAttributes attrs) throws IOException {
+						print(file, attrs);
+						return FileVisitResult.CONTINUE;
+					}
+				});
+		} catch (Exception e) {
+			System.err.println("[ERROR] Error listing directory: " + directory);
+			e.printStackTrace();
 		}
-		return stringBuilder.toString();
 	}
 
 	/**
@@ -373,4 +420,44 @@ public class TestUtils {
 		return mapping.getRepoRelativePath(resource);
 	}
 
+
+	/**
+	 * Delete a project and repeat multiple times in case of resource deletion
+	 * errors. A {@link ICoreRunnable} is used to avoid concurrent activities
+	 * disturbing the deletion.
+	 *
+	 * @param project
+	 *
+	 * @throws CoreException
+	 */
+	public static void deleteProject(IProject project) throws CoreException {
+		ResourcesPlugin.getWorkspace().run(monitor -> {
+			// Following code inspired by {@link
+			// org.eclipse.jdt.testplugin.JavaProjectHelper#delete(IResource)}.
+			// Sometimes resource deletion may fail due to concurrently held
+			// locks.
+			for (int i = 0; i < MAX_DELETE_RETRY; i++) {
+				try {
+					project.delete(
+							IResource.FORCE
+									| IResource.ALWAYS_DELETE_PROJECT_CONTENT,
+							null);
+					break;
+				} catch (CoreException e) {
+					if (i == MAX_DELETE_RETRY - 1) {
+						throw e;
+					}
+					try {
+						// Give other threads the time to close and release
+						// the resource.
+						Thread.sleep(DELETE_RETRY_DELAY);
+					} catch (InterruptedException e1) {
+						// Ignore and retry to delete
+					}
+				}
+			}
+		}, new NullProgressMonitor());
+	}
+
 }
+
