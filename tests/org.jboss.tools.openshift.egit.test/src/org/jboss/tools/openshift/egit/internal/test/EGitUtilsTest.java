@@ -85,6 +85,7 @@ public class EGitUtilsTest {
 		testRepository.setUserAndEmail(GIT_USER, GIT_EMAIL);
 		testRepository.connect(project.getProject());
 		testRepository.add(project.getFile(".project"));
+		testRepository.add(project.getFile(".settings/org.eclipse.core.resources.prefs"));
 		testRepository.initialCommit();
 		return testRepository;
 	}
