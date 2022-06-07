@@ -109,6 +109,8 @@ public class MinishiftVersionLoader {
 			String key = "crc version";
 			if (p.containsKey("CodeReady Containers version")) {
 				key = "CodeReady Containers version";
+			} else if (p.containsKey("CRC version")) {
+				key = "CRC version";
 			}
 			String v = p.getProperty(key);
 			return cleanVersion(v);
