@@ -49,7 +49,7 @@ public class StyledTextUtils {
 	private static void configureLinkWidget(StyledText styledText) {
 		setTransparent(styledText);
 		styledText.setEditable(false);
-		styledText.setCursor(new Cursor(styledText.getShell().getDisplay(), SWT.CURSOR_HAND));
+		styledText.setCursor(styledText.getShell().getDisplay().getSystemCursor(SWT.CURSOR_HAND));
 
 		//emulate disablement
 		styledText.setCaret(null);
