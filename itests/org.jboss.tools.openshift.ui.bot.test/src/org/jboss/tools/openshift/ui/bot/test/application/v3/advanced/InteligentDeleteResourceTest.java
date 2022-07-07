@@ -154,7 +154,7 @@ public class InteligentDeleteResourceTest extends AbstractTest {
 	}
 	
 	@Test
-	public void testDeleteEReplicationController() {
+	public void testDeleteeReplicationController() {
 		deleteResource(ResourceOpenShift.REPLICATION_CONTROLLER);
 		checkDeletedResource(ResourceOpenShift.REPLICATION_CONTROLLER);
 	}

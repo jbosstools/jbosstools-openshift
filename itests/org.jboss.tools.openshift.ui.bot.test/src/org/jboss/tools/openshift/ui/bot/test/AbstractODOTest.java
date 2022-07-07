@@ -40,8 +40,8 @@ import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOApplication;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOComponent;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODODevfile;
-import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOProject;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODODevfileRegistry;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOProject;
 import org.jboss.tools.openshift.reddeer.widget.terminal.TerminalHasNoChange;
 import org.jboss.tools.openshift.reddeer.wizard.CreateComponentWizard;
 import org.jboss.tools.openshift.reddeer.wizard.page.CreateComponentWizadPage;
@@ -50,25 +50,27 @@ import org.junit.After;
 /**
  * Abstract class for ODO Tests
  * 
- * @author jkopriva@redhat.com
+ * @author jkopriva@redhat.com, odockal@redhat.com
  */
 @OpenPerspective(JBossPerspective.class)
 public abstract class AbstractODOTest {
-	
+
 	protected static String eclipseProject = "myservice";
-	
+
 	@After
 	public void cleanUp() {
-		//delete all projects - test could fail and interfere next test
+		// delete all projects - test could fail and interfere next test
 		ProjectExplorer pe = new ProjectExplorer();
 		pe.open();
 		pe.deleteAllProjects();
-		//Cleanup notifications
+		// Cleanup notifications
 		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 	}
-	
-	public static void triggerDebugSession(String eclipseProjectName, String project, String application, String component, String urlSuffix) throws IOException, InterruptedException, ExecutionException {
-		String path = ResourcesPlugin.getWorkspace().getRoot().getProject(eclipseProjectName).getLocation().toOSString();
+
+	public static void triggerDebugSession(String eclipseProjectName, String project, String application,
+			String component, String urlSuffix) throws IOException, InterruptedException, ExecutionException {
+		String path = ResourcesPlugin.getWorkspace().getRoot().getProject(eclipseProjectName).getLocation()
+				.toOSString();
 		List<URL> urls = OdoCliFactory.getInstance().getOdo().get().listURLs(project, application, path, component);
 		java.net.URL url = new java.net.URL("http://" + urls.get(0).getHost() + urlSuffix);
 		new Thread(new Runnable() {
@@ -83,29 +85,29 @@ public abstract class AbstractODOTest {
 			}
 		}).start();
 	}
-	
-  protected static void importEmptyProject(String projectName) {
-    BasicNewProjectResourceWizard wizard = new BasicNewProjectResourceWizard();
-    wizard.open();
-    new LabeledText("Project name:").setText(projectName);
-    wizard.finish();
-  }
 
-  protected static void importEmptyProject() {
-    importEmptyProject(eclipseProject);
+	protected static void importEmptyProject(String projectName) {
+		BasicNewProjectResourceWizard wizard = new BasicNewProjectResourceWizard();
+		wizard.open();
+		new LabeledText("Project name:").setText(projectName);
+		wizard.finish();
+	}
+
+	protected static void importEmptyProject() {
+		importEmptyProject(eclipseProject);
 	}
 
 	protected static void importVertxLauncherProject() {
-		importLauncherProject(eclipseProject, "vert.x community");
+		importLauncherProject(eclipseProject, "rest-http", "vert.x community");
 	}
-	
-	public static void importLauncherProject(String projectName, String stack) {
+
+	public static void importLauncherProject(String projectName, String mission, String stack) {
 		NewLauncherProjectWizard wizard = new NewLauncherProjectWizard();
 		wizard.openWizardFromShellMenu();
 
 		NewLauncherProjectWizardPage wizardPage = new NewLauncherProjectWizardPage(wizard);
 		if (!wizardPage.getTargetMissions().isEmpty() && !wizardPage.getTargetRuntimes().isEmpty()) {
-			wizardPage.setTargetMission("rest-http");
+			wizardPage.setTargetMission(mission);
 			wizardPage.setTargetRuntime(stack);
 			wizardPage.setProjectName(projectName);
 			wizardPage.toggleUseDefaultLocationCheckBox(true);
@@ -115,12 +117,13 @@ public abstract class AbstractODOTest {
 		wizard.finish(TimePeriod.getCustom(2500));
 
 	}
-	
+
 	protected static void createComponent(String projectName, String componentType, String starter, boolean devfile) {
 		createComponent(eclipseProject, projectName, componentType, starter, devfile);
 	}
-	
-  public static void createComponent(String eclipseProjectName, String projectName, String componentType, String starter, boolean devfile) {
+
+	public static void createComponent(String eclipseProjectName, String projectName, String componentType,
+			String starter, boolean devfile) {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();
 		OpenShiftODOProject project = explorer.getOpenShiftODOConnection().getProject(projectName);
@@ -133,7 +136,7 @@ public abstract class AbstractODOTest {
 			componentWizardPage.selectComponentType(componentType, devfile);
 		}
 		if (starter != null) {
-		  componentWizardPage.selectStarter(starter);
+			componentWizardPage.selectStarter(starter);
 		}
 		if (!devfile) {
 			try {
@@ -143,38 +146,39 @@ public abstract class AbstractODOTest {
 			}
 		}
 		componentWizardPage.setApplication("myapp");
-		componentWizard.finish(TimePeriod.getCustom(600L)); //Maven builds may take more than 5mn
-			
+		componentWizard.finish(TimePeriod.getCustom(600L)); // Maven builds may take more than 5mn
+
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
 		new WaitWhile(new TerminalHasNoChange(), TimePeriod.VERY_LONG);
 	}
-  
-  protected static void createComponentFromRegistry(String registryName, String componentType, String starter) {
-    createComponentFromRegistry(eclipseProject, registryName, componentType, starter);
-  }
 
-  public static void createComponentFromRegistry(String eclipseProjectName, String registryName, String componentType, String starter) {
-    OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
-    explorer.open();
-    OpenShiftODODevfileRegistry registry = explorer.getOpenShiftODORegistries().getRegistry(registryName);
-    OpenShiftODODevfile devfile = registry.getDevfile(componentType);
-    devfile.openCreateComponentWizard();
-    CreateComponentWizard componentWizard = new CreateComponentWizard();
-    CreateComponentWizadPage componentWizardPage = new CreateComponentWizadPage(componentWizard);
-    componentWizardPage.setComponentName(eclipseProjectName);
-    componentWizardPage.setEclipseProject(eclipseProjectName);
-    if (starter != null) {
-      componentWizardPage.selectStarter(starter);
-    }
-    componentWizardPage.setApplication("myapp");
-    componentWizard.finish(TimePeriod.getCustom(600L)); //Maven builds may take more than 5mn
-      
-    new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
-    new WaitWhile(new TerminalHasNoChange(), TimePeriod.VERY_LONG);
-  }
+	protected static void createComponentFromRegistry(String registryName, String componentType, String starter) {
+		createComponentFromRegistry(eclipseProject, registryName, componentType, starter);
+	}
 
+	public static void createComponentFromRegistry(String eclipseProjectName, String registryName, String componentType,
+			String starter) {
+		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
+		explorer.open();
+		OpenShiftODODevfileRegistry registry = explorer.getOpenShiftODORegistries().getRegistry(registryName);
+		OpenShiftODODevfile devfile = registry.getDevfile(componentType);
+		devfile.openCreateComponentWizard();
+		CreateComponentWizard componentWizard = new CreateComponentWizard();
+		CreateComponentWizadPage componentWizardPage = new CreateComponentWizadPage(componentWizard);
+		componentWizardPage.setComponentName(eclipseProjectName);
+		componentWizardPage.setEclipseProject(eclipseProjectName);
+		if (starter != null) {
+			componentWizardPage.selectStarter(starter);
+		}
+		componentWizardPage.setApplication("myapp");
+		componentWizard.finish(TimePeriod.getCustom(600L)); // Maven builds may take more than 5mn
 
-	public static void createURL(String projectName, String applicationName, String componentName, String urlName, int port) {
+		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+		new WaitWhile(new TerminalHasNoChange(), TimePeriod.VERY_LONG);
+	}
+
+	public static void createURL(String projectName, String applicationName, String componentName, String urlName,
+			int port) {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();
 		OpenShiftODOProject project = explorer.getOpenShiftODOConnection().getProject(projectName);
@@ -183,9 +187,9 @@ public abstract class AbstractODOTest {
 		component.openCreateURLWizard();
 		WizardDialog dialog = new WizardDialog(OpenShiftLabel.Shell.CREATE_URL);
 		new LabeledText(OpenShiftLabel.TextLabels.NAME).setText(urlName);
-			new LabeledText(OpenShiftLabel.TextLabels.PORT).setText(String.valueOf(port));
+		new LabeledText(OpenShiftLabel.TextLabels.PORT).setText(String.valueOf(port));
 		new FinishButton(dialog).click();
-		 
+
 		new WaitWhile(new WindowIsAvailable(dialog), TimePeriod.VERY_LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
 		component.select();

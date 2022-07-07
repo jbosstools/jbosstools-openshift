@@ -11,16 +11,14 @@
 package org.jboss.tools.openshift.ui.bot.test.odo;
 
 import org.eclipse.reddeer.common.util.Display;
-import org.eclipse.reddeer.common.util.ResultRunnable;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.browser.InternalBrowserRequirement.UseInternalBrowser;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
-import org.eclipse.swt.graphics.Point;
-import org.jboss.ide.eclipse.as.reddeer.server.requirement.InternalBrowserRequirement.UseInternalBrowser;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOConnectionRequirement.RequiredODOConnection;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;

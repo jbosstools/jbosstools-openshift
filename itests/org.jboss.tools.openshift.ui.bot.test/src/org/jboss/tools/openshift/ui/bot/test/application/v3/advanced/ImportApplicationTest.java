@@ -14,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
@@ -21,6 +22,7 @@ import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.condition.TreeHasChildren;
@@ -90,6 +92,8 @@ public class ImportApplicationTest extends AbstractTest {
 		
 		new DefaultShell(OpenShiftLabel.Shell.IMPORT_APPLICATION);
 		// choose eap-app-build-artifacts build config
+		DefaultTree tree = new DefaultTree();
+		tree.getAllItems().get(1).select();
 		new NextButton().click();
 		new CheckBox("Use default clone destination").toggle(false);
 		File gitRepo = new File(GIT_REPO_DIRECTORY);

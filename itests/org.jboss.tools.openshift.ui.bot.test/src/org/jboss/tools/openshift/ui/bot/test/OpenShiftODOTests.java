@@ -34,15 +34,15 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(RedDeerSuite.class)
 @SuiteClasses({
 	LoginODOTest.class, // pass
-	ProjectManagementODOTest.class, // pass 
-	ConnectionODOCommandsTests.class,
-	CreateVertxDevfileComponentWithLocalDevfileODOTest.class, // pass
-	CreateDevfileComponentODOTest.class, // pass 
+	ProjectManagementODOTest.class, //  pass
+	ConnectionODOCommandsTests.class, // pass
+	CreateVertxDevfileComponentWithLocalDevfileODOTest.class, // pass 
+	CreateDevfileComponentODOTest.class, //  pass
 	CreatePythonDevfileComponentWithStarterODOTest.class, // pass
-	DebugNodeDevfileComponentODOTest.class, // pass - ignored
-	DebugVertxDevfileComponentODOTest.class, //   
-	DebugPythonDevfileComponentODOTest.class,
-	CreateServiceODOTest.class, // disable this suite for now, depends on service catalog (which is not supported on newer OpenShift)
+	DebugNodeDevfileComponentODOTest.class, // failed - odo project does not have debug option
+	DebugVertxDevfileComponentODOTest.class, // pass  
+	DebugPythonDevfileComponentODOTest.class, // failed
+	CreateServiceODOTest.class, // pass
 	RegistryODOTest.class // pass
 })
 public class OpenShiftODOTests {

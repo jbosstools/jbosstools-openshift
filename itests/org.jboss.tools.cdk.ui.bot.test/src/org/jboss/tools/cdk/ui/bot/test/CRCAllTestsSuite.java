@@ -26,8 +26,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(RedDeerSuite.class)
 @Suite.SuiteClasses({
-	CRCRuntimeDetectionTest.class,
-	CRCDownloadRuntimeTest.class,
+//	CRCRuntimeDetectionTest.class,
+//	CRCDownloadRuntimeTest.class,
 	CRCServerWizardTest.class,
 	CRCServerEditorTest.class,
 	CRCIntegrationTest.class

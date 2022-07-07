@@ -182,6 +182,13 @@ public class OpenShiftUtils {
 			}
 		});
 		OpenShiftUtils.handleCheatSheetCreateServerAdapter();
+		ShellIsAvailable m2eConnectors = new ShellIsAvailable("Discover m2e connectors");
+		new WaitUntil(m2eConnectors, TimePeriod.DEFAULT, false);
+		if (m2eConnectors.getResult() != null) {
+			new DefaultShell(m2eConnectors.getResult());
+			new PushButton("Cancel").click();
+			new WaitWhile(m2eConnectors, TimePeriod.MEDIUM, false);
+		}
 		// handle maven dep installation
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
 	}

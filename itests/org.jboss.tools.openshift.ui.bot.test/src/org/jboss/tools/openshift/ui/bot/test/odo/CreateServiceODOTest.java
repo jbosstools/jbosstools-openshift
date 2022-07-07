@@ -12,11 +12,14 @@ package org.jboss.tools.openshift.ui.bot.test.odo;
 
 import static org.junit.Assert.fail;
 
+import java.util.List;
+
 import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftODOConnectionRequirement.CleanODOConnection;
@@ -24,6 +27,8 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOConnectionRequi
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOProjectRequirement.RequiredODOProject;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOApplication;
+import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOComponent;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOProject;
 import org.jboss.tools.openshift.reddeer.widget.terminal.TerminalHasNoChange;
 import org.jboss.tools.openshift.reddeer.wizard.CreateServiceWizard;
@@ -43,13 +48,19 @@ import org.junit.runner.RunWith;
 @CleanODOConnection
 @RequiredODOProject
 public class CreateServiceODOTest extends AbstractODOTest {
+	
+	private static final String ECLIPSE_PROJECT = "myservice"; 
+	
+	private static final String APPLICATION_NAME = "myapp";
+	
 	@InjectRequirement
 	private static OpenShiftODOProjectRequirement projectReq;
 	
 	
 	@BeforeClass
 	public static void setupWorkspace() {
-		importVertxLauncherProject();
+		importLauncherProject(ECLIPSE_PROJECT, "rest-http", "nodejs v14-community");
+		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "node.js", null, false);
 	}
 	
 	@Test
@@ -68,10 +79,14 @@ public class CreateServiceODOTest extends AbstractODOTest {
 		CreateServiceWizard serviceWizard = new CreateServiceWizard();
 		CreateServiceWizadPage serviceWizardPage = new CreateServiceWizadPage(serviceWizard);
 		serviceWizardPage.setServiceName("myapp");
-		serviceWizardPage.setComponentType("mongodb-persistent default");
+		serviceWizardPage.setService("MongoDB Operator");
+		serviceWizardPage.setComponentType("MongoDB");
 		serviceWizardPage.setApplication("myapp");
-		serviceWizard.finish(TimePeriod.VERY_LONG);
+		serviceWizard.finish(TimePeriod.LONG);
 		
+		OpenShiftODOApplication application = project.getApplication(APPLICATION_NAME);
+		application.expand();
+		List<TreeItem> items = application.getTreeItem().getItems();
 		new WaitWhile(new TerminalHasNoChange(), TimePeriod.VERY_LONG);
 	}
 

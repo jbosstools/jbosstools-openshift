@@ -37,7 +37,7 @@ public class CreateApplicationFromTemplateOS4Test extends CreateApplicationFromT
 	
 	@Override
 	protected void importTestsProject() {
-		importTestsProject(new File("resources" + File.separator + TESTS_PROJECT).getAbsolutePath());
+		importTestsProject(new File("resources" + File.separator + TEST_PROJECT).getAbsolutePath());
 	}
 	
 	@Override

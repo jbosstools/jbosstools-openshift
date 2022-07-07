@@ -25,7 +25,8 @@ Require-Bundle: org.eclipse.ui.ide,
  org.eclipse.linuxtools.docker.reddeer,
  org.jboss.tools.common.launcher.reddeer,
  org.jboss.tools.central,
- org.jboss.tools.common.launcher.ui
+ org.jboss.tools.common.launcher.ui,
+ org.eclipse.reddeer.requirements
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: jar
 Bundle-Localization: plugin

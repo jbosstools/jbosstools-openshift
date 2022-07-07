@@ -62,7 +62,7 @@ public class DebugNodeDevfileComponentODOTest extends AbstractODOTest {
 	
 	@BeforeClass
 	public static void setupWorkspace() {
-		importLauncherProject(ECLIPSE_PROJECT, "nodejs v14-community");
+		importLauncherProject(ECLIPSE_PROJECT, "rest-http", "nodejs v14-community");
 		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "node.js", null, false);
 		createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080);
 	}
