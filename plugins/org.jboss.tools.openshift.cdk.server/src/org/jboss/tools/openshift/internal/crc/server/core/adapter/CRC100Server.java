@@ -84,6 +84,11 @@ public class CRC100Server extends ServerDelegate {
 			return false;
 		}
 		
+		// Check for crc 2.0.+
+		if (matchesCRC_2_0_OrGreater(getServer())) {
+			return true;
+		}
+		
 		// OC only present for pre-1.24.0 crc
 		if( matchesCRC_1_24_OrGreater(getServer()))
 			return true;
@@ -99,29 +104,35 @@ public class CRC100Server extends ServerDelegate {
 	}
 
 	public static boolean matchesCRC_1_24_OrGreater(IServer server) {
-		return matchesCRC_1_x_OrGreater(server, 24);
+		return matchesCRC_x_y_OrGreater(server, "1", 24);
 	}
 
 	public static boolean matchesCRC_1_21_OrGreater(IServer server) {
-		return matchesCRC_1_x_OrGreater(server, 21);
+		return matchesCRC_x_y_OrGreater(server, "1", 21);
+	}
+	
+	public static boolean matchesCRC_2_0_OrGreater(IServer server) {
+		return matchesCRC_x_y_OrGreater(server, "2", 0);
 	}
 
-	public static boolean matchesCRC_1_x_OrGreater(IServer server, int minor) {
+	public static boolean matchesCRC_x_y_OrGreater(IServer server, String major, int minor) {
 		String binLoc = getCRCBinaryLocation(server);
 		MinishiftVersions minishiftVersionProps = MinishiftVersionLoader.getVersionProperties(binLoc);
 		String crcVersion = minishiftVersionProps.getCRCVersion();
-		if( matchesCRC_1_x_OrGreater(crcVersion, minor))
+		if( matchesCRCversion_x_y_OrGreater(crcVersion, major, minor))
 			return true;
 		return false;
 	}
-	public static boolean matchesCRC_1_x_OrGreater(String version, int minor) {
+	
+	
+	public static boolean matchesCRCversion_x_y_OrGreater(String version, String major, int minor) {
 		String prefix = version;
 		if (version.contains("+")) {
 			prefix = version.substring(0, version.indexOf("+"));
 		}
 		
 		String[] segments = prefix.split("\\.");
-		if ("1".equals(segments[0]) && Integer.parseInt(segments[1]) >= minor) {
+		if (major.equals(segments[0]) && Integer.parseInt(segments[1]) >= minor) {
 			return true;
 		}
 		return false;
