@@ -8,9 +8,9 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/openshift-restclient-java-9.0.4.Final.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/okhttp-4.9.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/okio-2.8.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/kotlin-stdlib-1.4.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/okhttp-4.10.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/okio-3.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kotlin-stdlib-1.6.20.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-dmr-1.6.1.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.15.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-compress-1.21.jar"/>
@@ -23,7 +23,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/jackson-dataformat-yaml-2.12.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-datatype-jsr310-2.12.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/snakeyaml-1.30.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/logging-interceptor-4.9.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/logging-interceptor-4.10.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/kubernetes-client-4.11.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-core-4.11.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-apps-4.11.2.jar"/>
