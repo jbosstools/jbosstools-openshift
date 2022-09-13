@@ -21,16 +21,46 @@
    </license>
 
    <requires>
-      <import feature="org.eclipse.m2e.feature" version="1.2.0.20120903-1050" match="greaterOrEqual"/>
+      <import feature="org.eclipse.m2e.feature" version="2.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.linuxtools.docker.feature"/>
       <import plugin="org.jboss.tools.maven.springboot"/>
       <import plugin="org.jboss.tools.maven.core" version="1.9.0" match="greaterOrEqual"/>
       <import feature="org.jboss.tools.common.oauth.feature"/>
    </requires>
 
-   <plugin id="org.jboss.tools.openshift.client" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
-   <plugin id="org.jboss.tools.openshift.ui" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
-   <plugin id="org.jboss.tools.openshift.core" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
-   <plugin id="org.jboss.tools.openshift.common.core" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
-   <plugin id="org.jboss.tools.openshift.common.ui" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
+   <plugin
+         id="org.jboss.tools.openshift.client"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.jboss.tools.openshift.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.jboss.tools.openshift.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.jboss.tools.openshift.common.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.jboss.tools.openshift.common.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

@@ -34,8 +34,8 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.apache.commons.collections,
  org.apache.commons.lang;bundle-version="2.6.0",
  org.eclipse.jst.jee,
- org.eclipse.m2e.core;bundle-version="1.9.1",
- org.eclipse.m2e.profiles.core;bundle-version="1.9.1",
+ org.eclipse.m2e.core;bundle-version="2.0.0",
+ org.eclipse.m2e.profiles.core;bundle-version="2.0.0",
  com.fasterxml.jackson.core.jackson-annotations,
  org.yaml.snakeyaml,
  org.eclipse.wildwebdeveloper,
@@ -122,3 +122,4 @@ Export-Package: org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.reddeer"
 Service-Component: META-INF/connectionFactory.xml
 Bundle-ClassPath: .
+Import-Package: javax.inject

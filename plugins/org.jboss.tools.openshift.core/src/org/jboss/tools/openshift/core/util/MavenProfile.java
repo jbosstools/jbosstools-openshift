@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.core.util;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -21,7 +23,6 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.profiles.core.internal.IProfileManager;
-import org.eclipse.m2e.profiles.core.internal.MavenProfilesCoreActivator;
 import org.eclipse.m2e.profiles.core.internal.ProfileData;
 import org.eclipse.m2e.profiles.core.internal.ProfileState;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
@@ -38,6 +39,9 @@ public class MavenProfile {
 
 	private final String profileId;
 	private final IProject project;
+	
+	@Inject
+	private IProfileManager profileManager;
 
 	/**
 	 * Creates a maven profile for a given profile id and project
@@ -76,7 +80,6 @@ public class MavenProfile {
 	    }
 
 		IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(pom, true, monitor);
-		final IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
 
 		List<ProfileData> profiles = profileManager.getProfileDatas(facade, monitor);
 		List<String> activeProfiles = getActiveProfiles(profiles);
@@ -114,7 +117,6 @@ public class MavenProfile {
             return false;
         }
         IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().create(pom, true, monitor);
-        final IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
 
         List<ProfileData> profiles = profileManager.getProfileDatas(facade, monitor);
         List<String> activeProfiles = getActiveProfiles(profiles);
