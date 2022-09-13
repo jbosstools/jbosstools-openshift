@@ -18,14 +18,16 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
-import org.eclipse.m2e.core.internal.MavenPluginActivator;
+import org.eclipse.m2e.core.internal.project.ProjectConfigurationManager;
 import org.eclipse.m2e.core.project.IMavenProjectImportResult;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.LocalProjectScanner;
@@ -53,9 +55,8 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 	}
 
 	public List<IProject> importToWorkspace(IProgressMonitor monitor) throws CoreException, InterruptedException {
-		MavenPluginActivator mavenPlugin = MavenPluginActivator.getDefault();
-		IProjectConfigurationManager configurationManager = mavenPlugin.getProjectConfigurationManager();
-		MavenModelManager modelManager = mavenPlugin.getMavenModelManager();
+		IProjectConfigurationManager configurationManager = MavenPlugin.getProjectConfigurationManager();
+		MavenModelManager modelManager = MavenPlugin.getMavenModelManager();
 		Set<MavenProjectInfo> projectInfos = getMavenProjects(getProjectDirectory(), filters, modelManager, monitor);
 		ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration();
 		if (overwriteMavenProjects(projectInfos, projectImportConfiguration, monitor)) {
@@ -70,7 +71,7 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 	private boolean overwriteMavenProjects(Collection<MavenProjectInfo> projectInfos,
 			final ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
 		final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		Set<IProject> s1 = projectInfos.stream().map(project -> configuration.getProjectName(project.getModel()))
+		Set<IProject> s1 = projectInfos.stream().map(project -> ProjectConfigurationManager.getProjectName(configuration, project.getModel()))
 				.map(root::getProject).filter(project -> project.exists()).collect(Collectors.toSet());
 		boolean overwrite = true;
 		if (!s1.isEmpty()) {
@@ -130,7 +131,7 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 
 	private Set<MavenProjectInfo> scan(File directory, MavenModelManager modelManager, IProgressMonitor monitor)
 			throws InterruptedException {
-		LocalProjectScanner scanner = new LocalProjectScanner(directory.getParentFile(), directory.toString(), false,
+		LocalProjectScanner scanner = new LocalProjectScanner(Collections.singletonList(directory.toString()), false,
 				modelManager);
 		scanner.run(monitor);
 		return collectProjects(scanner.getProjects());
