@@ -30,7 +30,7 @@
 		<commons-io.version>2.11.0</commons-io.version>
 		<openshift-client.version>4.11.2</openshift-client.version>
 		<jackson.version>2.12.1</jackson.version>
-		<snakeyaml.version>1.30</snakeyaml.version>
+		<snakeyaml.version>1.31</snakeyaml.version>
 		<retrofit.version>2.9.0</retrofit.version>
 	</properties>
 
