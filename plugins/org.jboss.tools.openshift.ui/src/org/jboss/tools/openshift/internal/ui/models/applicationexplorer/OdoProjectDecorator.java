@@ -226,6 +226,12 @@ public class OdoProjectDecorator implements Odo {
   @Override
   public void deleteComponent(String project, String application, String context, String component, ComponentKind kind)
       throws IOException {
+	model.getComponents().forEach((path,desc) -> {
+		if (desc.getProject().equals(project) && desc.getApplication().equals(application) &&
+				desc.getName().equals(component)) {
+			model.getComponents().remove(path);
+		}
+	});
     delegate.deleteComponent(project, application, context, component, kind);
   }
 

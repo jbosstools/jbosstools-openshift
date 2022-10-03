@@ -12,10 +12,10 @@ package org.jboss.tools.openshift.internal.ui.models.applicationexplorer;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IProject;
@@ -68,7 +68,7 @@ public class ApplicationExplorerUIModel extends AbstractOpenshiftUIModel<Applica
     
   }
   
-    private final Map<String, ComponentDescriptor> components = new HashMap<>();
+    private final Map<String, ComponentDescriptor> components = new ConcurrentHashMap<>();
 
     private Odo odo;
     
