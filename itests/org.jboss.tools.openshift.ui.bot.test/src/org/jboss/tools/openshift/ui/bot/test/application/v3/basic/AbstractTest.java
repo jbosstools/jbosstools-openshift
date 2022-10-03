@@ -15,6 +15,7 @@ import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
+import org.eclipse.reddeer.requirements.preferences.OomphRecorderRequirement.DisableOomphRecorder;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
@@ -29,6 +30,7 @@ import org.junit.AfterClass;
  * @author jkopriva@redhat.com
  *
  */
+@DisableOomphRecorder
 public abstract class AbstractTest {
 	
 	@AfterClass

@@ -24,9 +24,7 @@ import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.api.TableItem;
 import org.eclipse.reddeer.swt.impl.button.CancelButton;
-import org.eclipse.reddeer.swt.keyboard.KeyboardFactory;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
-import org.eclipse.swt.SWT;
 import org.jboss.tools.openshift.reddeer.condition.AmountOfResourcesExists;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
@@ -103,38 +101,38 @@ public class InteligentDeleteResourceTest extends AbstractTest {
 	}
 
 	@Test
-	public void testDeleteABuild() {
+	public void testDeleteBuild() {
 		deleteResource(ResourceOpenShift.BUILD);
 		checkDeletedResource(ResourceOpenShift.BUILD);
 	}
 
 	@Test
-	public void testDeleteBBuildConfig() {
+	public void testDeleteBuildConfig() {
 		deleteResource(ResourceOpenShift.BUILD_CONFIG);
 		checkDeletedResource(ResourceOpenShift.BUILD_CONFIG);
 	}
 
 	@Test
-	public void testDeleteCDeploymentConfig() {
+	public void testDeleteDeploymentConfig() {
 		deleteResource(ResourceOpenShift.DEPLOYMENT_CONFIG);
 		checkDeletedResource(ResourceOpenShift.DEPLOYMENT_CONFIG);
 	}
 
 	@Test
-	public void testDeleteGImageStream() {
+	public void testDeleteImageStream() {
 		deleteResource(ResourceOpenShift.IMAGE_STREAM);
 		checkDeletedResource(ResourceOpenShift.IMAGE_STREAM);
 	}
 
 	@Test
-	public void testDeleteDService() {
+	public void testDeleteService() {
 		deleteResource(ResourceOpenShift.SERVICE); //eap-app
 		deleteResource(ResourceOpenShift.SERVICE); //eap-app-ping
 		checkDeletedResource(ResourceOpenShift.SERVICE);
 	}
 
 	@Test
-	public void testDeleteFPod() {
+	public void testDeletePod() {
 		deleteResource(ResourceOpenShift.POD);
 
 		new WaitWhile(new OpenShiftResourceExists(Resource.POD, POD_NAME, ResourceState.RUNNING, projectReq.getProjectName(), connectionReq.getConnection()),
@@ -148,13 +146,13 @@ public class InteligentDeleteResourceTest extends AbstractTest {
 	}
 
 	@Test
-	public void testDeleteIRoute() {
+	public void testDeleteRoute() {
 		deleteResource(ResourceOpenShift.ROUTE);
 		checkDeletedResource(ResourceOpenShift.ROUTE);
 	}
 	
 	@Test
-	public void testDeleteeReplicationController() {
+	public void testDeleteReplicationController() {
 		deleteResource(ResourceOpenShift.REPLICATION_CONTROLLER);
 		checkDeletedResource(ResourceOpenShift.REPLICATION_CONTROLLER);
 	}

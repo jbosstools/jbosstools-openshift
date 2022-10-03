@@ -101,7 +101,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	private CleanOpenShiftConnectionRequirement cleanReq;
 	
 	protected void importTestsProject() {
-		importTestsProject(new File("resources" + File.separator + TESTS_PROJECT).getAbsolutePath());
+		importTestsProject(new File("resources" + File.separator + TEST_PROJECT).getAbsolutePath());
 	}
 	
 	protected String getTemplateURL() {
@@ -109,7 +109,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	}
 	
 	protected String getFilesystemTemplatePath() {
-		return new File("resources" + File.separator + TESTS_PROJECT).getAbsolutePath() + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME;
+		return new File("resources" + File.separator + TEST_PROJECT).getAbsolutePath() + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME;
 	}
 	
 	protected String getWorkspaceTemplatePath() {
@@ -176,10 +176,10 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 //		assertTrue("Defined resource button should be enabled",
 //				new PushButton(OpenShiftLabel.Button.DEFINED_RESOURCES).isEnabled());
 
-		completeApplicationCreationAndVerify(helloworldProject, 2);
+		completeApplicationCreationAndVerify(kitchensinkProject, 2);
 	}
 
-//	@Test
+	@Test
 	public void createApplicationFromLocalFileSystemTemplate() {
 		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		new DefaultTabItem(OpenShiftLabel.TextLabels.CUSTOM_TEMPLATE).activate();
@@ -192,7 +192,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 		completeApplicationCreationAndVerify(helloworldProject, 2);
 	}
 
-//	@Test
+	@Test
 	public void createApplicationFromTemplateProvidedByURL() {
 		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		new DefaultTabItem(OpenShiftLabel.TextLabels.CUSTOM_TEMPLATE).activate();
@@ -205,7 +205,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 		completeApplicationCreationAndVerify(helloworldProject, 2);
 	}
 
-//	@Test
+	@Test
 	public void testCreateApplicationFromServerTemplate() {
 		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		OpenShiftUtils.selectEAPTemplate();

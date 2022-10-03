@@ -20,6 +20,9 @@ import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.core.handler.ShellHandler;
+import org.eclipse.reddeer.core.lookup.ShellLookup;
+import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.reddeer.jface.condition.WindowIsAvailable;
@@ -27,9 +30,12 @@ import org.eclipse.reddeer.jface.wizard.WizardDialog;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.text.DefaultText;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
+import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.launcher.reddeer.wizards.NewLauncherProjectWizard;
 import org.jboss.tools.common.launcher.reddeer.wizards.NewLauncherProjectWizardPage;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
@@ -46,6 +52,7 @@ import org.jboss.tools.openshift.reddeer.widget.terminal.TerminalHasNoChange;
 import org.jboss.tools.openshift.reddeer.wizard.CreateComponentWizard;
 import org.jboss.tools.openshift.reddeer.wizard.page.CreateComponentWizadPage;
 import org.junit.After;
+import org.junit.Assert;
 
 /**
  * Abstract class for ODO Tests
@@ -65,6 +72,7 @@ public abstract class AbstractODOTest {
 		pe.deleteAllProjects();
 		// Cleanup notifications
 		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
+		new WaitWhile(new JobIsRunning(new WithTextMatcher("Refresh cluster")), TimePeriod.DEFAULT, false);
 	}
 
 	public static void triggerDebugSession(String eclipseProjectName, String project, String application,

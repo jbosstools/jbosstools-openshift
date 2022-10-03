@@ -66,7 +66,7 @@ import org.junit.runner.RunWith;
 @RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE_RESOURCES_PATH)
 public class ImportApplicationTest extends AbstractTest {
 	
-	public static String PROJECT_NAME = "helloworld";
+	public static String PROJECT_NAME = "kitchensink";
 	
 	private static final String GIT_REPO_DIRECTORY = "target/git_repo";
 	

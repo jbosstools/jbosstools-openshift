@@ -26,9 +26,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * <b>OpenShift Abstract class for Tests suites</b>
+ * <b>OpenShift ODO based tooling Tests suite</b>
  * 
- * @author jkopriva@redhat.com
+ * @author jkopriva@redhat.com, odockal@redhat.com
  */
 
 @RunWith(RedDeerSuite.class)
@@ -39,10 +39,10 @@ import org.junit.runners.Suite.SuiteClasses;
 	CreateVertxDevfileComponentWithLocalDevfileODOTest.class, // pass 
 	CreateDevfileComponentODOTest.class, //  pass
 	CreatePythonDevfileComponentWithStarterODOTest.class, // pass
-	DebugNodeDevfileComponentODOTest.class, // failed - odo project does not have debug option
+	DebugNodeDevfileComponentODOTest.class, // pass
 	DebugVertxDevfileComponentODOTest.class, // pass  
 	DebugPythonDevfileComponentODOTest.class, // failed
-	CreateServiceODOTest.class, // pass
+	CreateServiceODOTest.class, // passed
 	RegistryODOTest.class // pass
 })
 public class OpenShiftODOTests {

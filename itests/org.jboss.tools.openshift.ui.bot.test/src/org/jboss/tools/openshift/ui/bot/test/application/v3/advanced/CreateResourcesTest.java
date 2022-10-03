@@ -71,7 +71,7 @@ public class CreateResourcesTest extends AbstractTest  {
 		explorer.getOpenShift3Connection(connectionReq.getConnection()).createNewProject(testProject);
 	}
 
-//	@Test
+	@Test
 	public void testOpenCreateResourceWizardViaContextMenuOfConnection() {
 		explorer.getOpenShift3Connection(connectionReq.getConnection()).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_RESOURCE).select();
@@ -79,7 +79,7 @@ public class CreateResourcesTest extends AbstractTest  {
 		assertResourceShellIsAvailable();
 	}
 
-//	@Test
+	@Test
 	public void testOpenCreateResourceWizardViaContextMenuOfProject() {
 		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(testProject).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_RESOURCE).select();

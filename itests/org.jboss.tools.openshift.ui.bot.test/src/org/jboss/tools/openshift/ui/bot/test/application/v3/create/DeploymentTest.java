@@ -76,8 +76,8 @@ public class DeploymentTest extends AbstractTest {
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.SHOW_IN_WEB_BROWSER).select();
 
 		try {
-			new WaitUntil(new BrowserContainsText("Hello World!"), TimePeriod.VERY_LONG);
-			new BrowserEditor("helloworld").close();
+			new WaitUntil(new BrowserContainsText("Welcome"), TimePeriod.VERY_LONG);
+			new BrowserEditor("kitchensink").close();
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("Application was not deployed successfully because it is not shown in web browser properly.\n"
 					+ ex.getMessage());

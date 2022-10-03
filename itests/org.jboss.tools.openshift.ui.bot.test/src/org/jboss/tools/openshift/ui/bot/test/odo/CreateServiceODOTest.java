@@ -28,7 +28,6 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOProjectRequirem
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOProjectRequirement.RequiredODOProject;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOApplication;
-import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOComponent;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOProject;
 import org.jboss.tools.openshift.reddeer.widget.terminal.TerminalHasNoChange;
 import org.jboss.tools.openshift.reddeer.wizard.CreateServiceWizard;
@@ -46,7 +45,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject
+@RequiredODOProject(name = "test-project7", cleanup = true)
 public class CreateServiceODOTest extends AbstractODOTest {
 	
 	private static final String ECLIPSE_PROJECT = "myservice"; 
@@ -59,8 +58,8 @@ public class CreateServiceODOTest extends AbstractODOTest {
 	
 	@BeforeClass
 	public static void setupWorkspace() {
-		importLauncherProject(ECLIPSE_PROJECT, "rest-http", "nodejs v14-community");
-		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "node.js", null, false);
+		importEmptyProject(ECLIPSE_PROJECT);
+		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "node.js", "nodejs-starter", true);
 	}
 	
 	@Test

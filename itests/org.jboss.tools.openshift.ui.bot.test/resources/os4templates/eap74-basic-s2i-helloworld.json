@@ -5,10 +5,10 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss",
-            "version": "7.4",
-            "openshift.io/display-name": "JBoss EAP 7.4 (OpenJDK 11)",
+            "version": "7.4.0",
+            "openshift.io/display-name": "JBoss EAP 7.4.0",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
-            "description": "An example JBoss Enterprise Application Platform application. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/7.3.x/README.adoc",
+            "description": "An example JBoss Enterprise Application Platform application. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap74/README.adoc",
             "template.openshift.io/long-description": "This template defines resources needed to develop a JBoss Enterprise Application Platform based application, including a build configuration, application deployment configuration and secure communication using edge TLS.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-enterprise-application-platform/",
             "template.openshift.io/support-url": "https://access.redhat.com"
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap74-basic-s2i",
-        "xpaas": "7.4"
+        "xpaas": "7.4.0"
     },
     "message": "A new JBoss EAP based application has been created in your project.",
     "parameters": [
@@ -30,16 +30,16 @@
         },
         {
             "displayName": "EAP Image Name",
-            "description": "Name of the EAP image to use, example: jboss-eap73-openshift:7.4",
+            "description": "Name of the EAP image to use, example: jboss-eap74-openjdk11-openshift:latest",
             "name": "EAP_IMAGE_NAME",
-            "value": "jboss-eap74-openshift:7.4",
+            "value": "jboss-eap74-openjdk11-openshift:7.4.0",
             "required": true
         },
         {
             "displayName": "EAP Runtime Image Name",
-            "description": "Name of the EAP image to use, example: jboss-eap73-runtime-openshift:7.4",
+            "description": "Name of the EAP image to use, example: jboss-eap74-openjdk11-runtime-openshift:latest",
             "name": "EAP_RUNTIME_IMAGE_NAME",
-            "value": "jboss-eap74-runtime-openshift:7.4",
+            "value": "jboss-eap74-openjdk11-runtime-openshift:7.4.0",
             "required": true
         },
         {
@@ -53,14 +53,14 @@
             "displayName": "Git Reference",
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
-            "value": "7.4.x-openshift",
+            "value": "7.4.x",
             "required": false
         },
         {
             "displayName": "Context Directory",
             "description": "Path within Git project to build; empty for root project directory.",
             "name": "CONTEXT_DIR",
-            "value": "helloworld",
+            "value": "kitchensink",
             "required": false
         },
         {
@@ -217,7 +217,7 @@
         },
         {
             "kind": "Route",
-            "apiVersion": "v1",
+            "apiVersion": "route.openshift.io/v1",
             "id": "${APPLICATION_NAME}-https",
             "metadata": {
                 "name": "${APPLICATION_NAME}",
@@ -240,7 +240,7 @@
         },
         {
             "kind": "ImageStream",
-            "apiVersion": "v1",
+            "apiVersion": "image.openshift.io/v1",
             "metadata": {
                 "name": "${APPLICATION_NAME}",
                 "labels": {
@@ -250,7 +250,7 @@
         },
         {
             "kind": "ImageStream",
-            "apiVersion": "v1",
+            "apiVersion": "image.openshift.io/v1",
             "metadata": {
                 "name": "${APPLICATION_NAME}-build-artifacts",
                 "labels": {
@@ -260,7 +260,7 @@
         },
         {
             "kind": "BuildConfig",
-            "apiVersion": "v1",
+            "apiVersion": "build.openshift.io/v1",
             "metadata": {
                 "name": "${APPLICATION_NAME}-build-artifacts",
                 "labels": {
@@ -340,8 +340,8 @@
             }
         },
         {
-            "apiVersion": "v1",
             "kind": "BuildConfig",
+            "apiVersion": "build.openshift.io/v1",
             "metadata": {
                 "labels": {
                     "application": "${APPLICATION_NAME}"
@@ -401,7 +401,7 @@
         },
         {
             "kind": "DeploymentConfig",
-            "apiVersion": "v1",
+            "apiVersion": "apps.openshift.io/v1",
             "metadata": {
                 "name": "${APPLICATION_NAME}",
                 "labels": {
@@ -439,7 +439,13 @@
                         "name": "${APPLICATION_NAME}",
                         "labels": {
                             "deploymentConfig": "${APPLICATION_NAME}",
-                            "application": "${APPLICATION_NAME}"
+                            "application": "${APPLICATION_NAME}",
+                            "com.company": "Red_Hat",
+                            "com.redhat.product-name": "Red_Hat_Runtimes",
+                            "com.redhat.product-version": "2021-Q2",
+                            "com.redhat.component-name": "EAP",
+                            "com.redhat.component-version": "7.4",
+                            "com.redhat.component-type": "application"
                         }
                     },
                     "spec": {

@@ -40,19 +40,20 @@ import org.junit.runner.RunWith;
 /**
  * Create Component test for OpenShift Application Explorer
  * 
- * @author jkopriva@redhat.com
+ * @author jkopriva@redhat.com, odockal@redhat.com
  */
 @OpenPerspective(DebugPerspective.class)
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject(name="test-project4")
+@RequiredODOProject(name = "test-project4", cleanup = true)
 public class DebugNodeDevfileComponentODOTest extends AbstractODOTest {
-	private static final String APP_SOURCE = "app.js";
+	
+	private static final String APP_SOURCE = "server.js";
 
 	private static final String ECLIPSE_PROJECT = "nodeproject" + new Random().nextInt();
   
-	private static final int BREAKPOINT_LINE = 34;
+	private static final int BREAKPOINT_LINE = 55;
 	
 	private static final String APPLICATION_NAME = "myapp";
 
@@ -62,9 +63,8 @@ public class DebugNodeDevfileComponentODOTest extends AbstractODOTest {
 	
 	@BeforeClass
 	public static void setupWorkspace() {
-		importLauncherProject(ECLIPSE_PROJECT, "rest-http", "nodejs v14-community");
-		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "node.js", null, false);
-		createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080);
+		importEmptyProject(ECLIPSE_PROJECT);
+		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "node.js", "nodejs-starter", true);
 	}
 	
 	@Test
@@ -80,7 +80,7 @@ public class DebugNodeDevfileComponentODOTest extends AbstractODOTest {
 		view.activate();
 		view.getOpenShiftODOConnection().getProject(projectReq.getProjectName()).getApplication(APPLICATION_NAME).getComponent(ECLIPSE_PROJECT).debug();
     
-		AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "/api/greeting");
+		AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "");
 
 		try {
 			new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE), TimePeriod.LONG);

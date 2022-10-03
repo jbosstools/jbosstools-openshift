@@ -49,7 +49,7 @@ public class NewOpenShift3ApplicationWizard extends AbstractOpenShiftApplication
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.reopen();
 		
-		explorer.getOpenShift3Connection(this.connection).refresh();
+		explorer.getOpenShift3Connection(this.connection).refresh(TimePeriod.getCustom(180));
 		
 		selectExplorerProject(project, explorer);
 	
