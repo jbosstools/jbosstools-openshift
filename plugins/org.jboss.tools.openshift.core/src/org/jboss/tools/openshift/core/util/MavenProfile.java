@@ -13,8 +13,6 @@ package org.jboss.tools.openshift.core.util;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -26,6 +24,8 @@ import org.eclipse.m2e.profiles.core.internal.IProfileManager;
 import org.eclipse.m2e.profiles.core.internal.ProfileData;
 import org.eclipse.m2e.profiles.core.internal.ProfileState;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * A maven profile that can be activated or deactivated.
@@ -33,6 +33,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  * @author Dmitrii Bocharov
  * @author Andre Dietisheim
  */
+@SuppressWarnings("restriction")
 public class MavenProfile {
     
     public static final String OPENSHIFT_MAVEN_PROFILE = "openshift";
@@ -40,7 +41,6 @@ public class MavenProfile {
 	private final String profileId;
 	private final IProject project;
 	
-	@Inject
 	private IProfileManager profileManager;
 
 	/**
@@ -51,6 +51,9 @@ public class MavenProfile {
 	public MavenProfile(String profileId, IProject project) {
 		this.profileId = profileId;
 		this.project = project;
+		
+		BundleContext bundleContext = FrameworkUtil.getBundle(MavenProfile.class).getBundleContext();
+		profileManager = bundleContext.getService(bundleContext.getServiceReference(IProfileManager.class));
 	}
 
 	/**
@@ -71,7 +74,6 @@ public class MavenProfile {
 		return activate(profileId, project, monitor);
 	}
 
-	@SuppressWarnings("restriction")
     protected boolean activate(String profileId, IProject project, IProgressMonitor monitor) throws CoreException {
 		IFile pom = getPom(project);
 	    if (StringUtils.isEmpty(profileId)
@@ -109,7 +111,6 @@ public class MavenProfile {
 	    return deactivate(profileId, project, monitor);
 	}
 	
-	@SuppressWarnings("restriction")
     protected boolean deactivate(String profileId, IProject project, IProgressMonitor monitor) throws CoreException {
         IFile pom = getPom(project);
         if (StringUtils.isEmpty(profileId)
@@ -129,7 +130,6 @@ public class MavenProfile {
         return true;
     }
 
-	@SuppressWarnings("restriction")
     protected IFile getPom(IProject project) throws CoreException {
 		if (project == null) {
 			return null;
@@ -143,25 +143,21 @@ public class MavenProfile {
 	    return pom;
 	}
 	
-	@SuppressWarnings("restriction")
     protected boolean canActivate(String profileId, List<String> activeProfiles, List<ProfileData> profiles) {
 		return !activeProfiles.contains(profileId)
 				&& profileExists(profiles);
 	}
 	
-	@SuppressWarnings("restriction")
     protected boolean canDeactivate(String profileId, List<String> activeProfiles, List<ProfileData> profiles) {
         return activeProfiles.contains(profileId)
                 && profileExists(profiles);
     }
 
-	@SuppressWarnings("restriction")
     protected boolean profileExists(List<ProfileData> profiles) {
 		return profiles.stream()
 			.anyMatch(p -> profileId.equals(p.getId()));
 	}
 	
-	@SuppressWarnings("restriction")
     protected List<String> getActiveProfiles(List<ProfileData> profiles) {
 		return profiles.stream()
                 .filter(p -> ProfileState.Active.equals(p.getActivationState())
