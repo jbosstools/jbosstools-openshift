@@ -76,7 +76,7 @@
 						</artifactItem>
 						<artifactItem>
 						    <groupId>com.squareup.okio</groupId>
-						    <artifactId>okio</artifactId>
+						    <artifactId>okio-jvm</artifactId>
 						    <version>${ok-io.version}</version>
 						</artifactItem>
 						<artifactItem>

@@ -9,7 +9,7 @@ Bundle-Localization: plugin
 Bundle-ClassPath: .,
  lib/openshift-restclient-java-9.0.5.Final.jar,
  lib/okhttp-4.10.0.jar,
- lib/okio-3.0.0.jar,
+ lib/okio-jvm-3.0.0.jar,
  lib/kotlin-stdlib-1.6.20.jar,
  lib/jboss-dmr-1.6.1.Final.jar,
  lib/commons-codec-1.15.jar,

@@ -9,7 +9,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/openshift-restclient-java-9.0.5.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/okhttp-4.10.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/okio-3.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/okio-jvm-3.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/kotlin-stdlib-1.6.20.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-dmr-1.6.1.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.15.jar"/>
