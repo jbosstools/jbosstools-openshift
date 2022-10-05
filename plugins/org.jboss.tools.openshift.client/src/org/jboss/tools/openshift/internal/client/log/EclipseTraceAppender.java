@@ -41,7 +41,7 @@ public final class EclipseTraceAppender extends AbstractAppender {
 
 	private EclipseTraceAppender(String name, Layout<? extends Serializable> layout, Filter filter,
 			boolean ignoreExceptions) {
-		super(name, filter, layout, ignoreExceptions, EMPTY_ARRAY);
+		super(name, filter, layout, ignoreExceptions);
 	}
 
 	@PluginFactory
