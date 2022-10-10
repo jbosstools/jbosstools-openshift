@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
@@ -64,7 +65,7 @@ public class OAuthBrowser extends Composite implements ProgressListener {
     super(parent, style);
     setLayout(new GridLayout(1, false));
     setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-    browser = new Browser(this, SWT.NONE);
+    browser = new Browser(this, Platform.WS_WIN32.equals(Platform.getOS()) ? SWT.EDGE : SWT.NONE);
     browser.setLayoutData(new GridData( GridData.FILL_BOTH));
     browser.addProgressListener(this);
   }
