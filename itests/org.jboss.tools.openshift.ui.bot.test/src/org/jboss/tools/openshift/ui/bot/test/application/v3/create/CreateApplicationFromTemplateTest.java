@@ -85,6 +85,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	private String helloworldProject = "helloworld";
 	private String kitchensinkProject = "kitchensink";
 
+	protected static final String TEST_PROJECT = "osProjectWithResources";
 	protected static final String TESTS_PROJECT = "os4templates";
 	
 	private String genericWebhookURL;
@@ -100,7 +101,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	private CleanOpenShiftConnectionRequirement cleanReq;
 	
 	protected void importTestsProject() {
-		importTestsProject(new File("resources" + File.separator + TESTS_PROJECT).getAbsolutePath());
+		importTestsProject(new File("resources" + File.separator + TEST_PROJECT).getAbsolutePath());
 	}
 	
 	protected String getTemplateURL() {
@@ -108,12 +109,12 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	}
 	
 	protected String getFilesystemTemplatePath() {
-		return new File("resources" + File.separator + TESTS_PROJECT).getAbsolutePath() + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME;
+		return new File("resources" + File.separator + TEST_PROJECT).getAbsolutePath() + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME;
 	}
 	
 	protected String getWorkspaceTemplatePath() {
 		return "${workspace_loc:"
-				+ File.separator + "os4templates" + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME +"}";
+				+ File.separator + TEST_PROJECT + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME +"}";
 	}
 	
 	protected void importTestsProject(String pathToProject) {
@@ -125,12 +126,12 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 		new FinishButton().click();
 
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-		new WaitUntil(new ProjectExists(TESTS_PROJECT), TimePeriod.LONG);
+		new WaitUntil(new ProjectExists(TEST_PROJECT), TimePeriod.LONG);
 	}
 
 	@Before
 	public void setUp() {
-		if (!new ProjectExists(TESTS_PROJECT).test()) {
+		if (!new ProjectExists(TEST_PROJECT).test()) {
 			importTestsProject();
 		}
 		DatastoreOS3.generateProjectName();
@@ -160,12 +161,14 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 		new PushButton(OpenShiftLabel.Button.BROWSE_WORKSPACE).click();
 
 		new DefaultShell(OpenShiftLabel.Shell.SELECT_OPENSHIFT_TEMPLATE);
-		new DefaultTreeItem(TESTS_PROJECT, OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME).select();
+		new DefaultTreeItem(TEST_PROJECT, OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME).select();
 		new OkButton().click();
 
 		new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
-		assertTrue("Template from workspace is not correctly shown in text field containing its path",
-				new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).getText().equals(getWorkspaceTemplatePath()));
+		String workspaceTemplate = new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).getText();
+		assertTrue("Template from workspace is not correctly shown in text field, expected: " + getWorkspaceTemplatePath() +
+				", actual: " + workspaceTemplate,
+				workspaceTemplate.equals(getWorkspaceTemplatePath()));
 
 		new WaitUntil(new ControlIsEnabled(new CancelButton()));
 
@@ -173,7 +176,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 //		assertTrue("Defined resource button should be enabled",
 //				new PushButton(OpenShiftLabel.Button.DEFINED_RESOURCES).isEnabled());
 
-		completeApplicationCreationAndVerify(helloworldProject, 2);
+		completeApplicationCreationAndVerify(kitchensinkProject, 2);
 	}
 
 	@Test

@@ -8,3 +8,4 @@ bin/
 .DS_Store
 .sonarlint/
 rebel.xml
+itests/org.jboss.tools.cdk.ui.bot.test/resources/non-readable

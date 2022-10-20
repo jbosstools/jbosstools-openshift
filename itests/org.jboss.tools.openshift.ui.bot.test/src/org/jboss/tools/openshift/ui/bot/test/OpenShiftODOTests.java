@@ -26,23 +26,23 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * <b>OpenShift Abstract class for Tests suites</b>
+ * <b>OpenShift ODO based tooling Tests suite</b>
  * 
- * @author jkopriva@redhat.com
+ * @author jkopriva@redhat.com, odockal@redhat.com
  */
 
 @RunWith(RedDeerSuite.class)
 @SuiteClasses({
 	LoginODOTest.class, // pass
-	ProjectManagementODOTest.class, // pass 
-	ConnectionODOCommandsTests.class,
-	CreateVertxDevfileComponentWithLocalDevfileODOTest.class, // pass
-	CreateDevfileComponentODOTest.class, // pass 
+	ProjectManagementODOTest.class, //  pass
+	ConnectionODOCommandsTests.class, // pass
+	CreateVertxDevfileComponentWithLocalDevfileODOTest.class, // pass 
+	CreateDevfileComponentODOTest.class, //  pass
 	CreatePythonDevfileComponentWithStarterODOTest.class, // pass
-	DebugNodeDevfileComponentODOTest.class, // pass - ignored
-	DebugVertxDevfileComponentODOTest.class, //   
-	DebugPythonDevfileComponentODOTest.class,
-	CreateServiceODOTest.class, // disable this suite for now, depends on service catalog (which is not supported on newer OpenShift)
+	DebugNodeDevfileComponentODOTest.class, // pass
+	DebugVertxDevfileComponentODOTest.class, // pass  
+	DebugPythonDevfileComponentODOTest.class, // failed
+	CreateServiceODOTest.class, // passed
 	RegistryODOTest.class // pass
 })
 public class OpenShiftODOTests {

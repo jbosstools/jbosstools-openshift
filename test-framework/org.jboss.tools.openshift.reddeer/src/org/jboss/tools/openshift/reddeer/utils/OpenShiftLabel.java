@@ -337,6 +337,8 @@ public class OpenShiftLabel {
 		// OpenShift Application Explorer related
 		public static final String APPLICATION = "Application:";
 		public static final String COMPONENT_TYPE = "Component type:";
+		public static final String TYPE = "Type:";
+		public static final String SERVICE = "Service:";
 		public static final String COMPONENT_VERSION = "Component version:";
 		public static final String ECLIPSE_PROJECT = "Eclipse Project: ";
 		public static final String PUSH_AFTER_CREATE = "Push after create:";
@@ -359,8 +361,8 @@ public class OpenShiftLabel {
 	 */
 	public static class Others {
 		public static final String CONNECT_TOOL_ITEM = "Connection...";
-		public static final String EAP_TEMPLATE = "eap73-basic-s2i (eap, javaee, java, jboss) - openshift";
-		public static final String EAP_TEMPLATE_OLD = "eap71-basic-s2i (eap, javaee, java, jboss) - openshift";
+		public static final String EAP_TEMPLATE = "eap74-basic-s2i (eap, javaee, java, jboss) - openshift";
+		public static final String EAP_TEMPLATE_OLD = "eap73-basic-s2i (eap, javaee, java, jboss) - openshift";
 		public static final String EAP_BUILDER_IMAGE = "jboss-eap70-openshift:1.5 (builder, eap, javaee, java, jboss) - openshift";
 		public static final String NODEJS_TEMPLATE = "nodejs-example (quickstart, nodejs) - openshift";
 		public static final String RED_HAT_CENTRAL = "Red Hat Central";

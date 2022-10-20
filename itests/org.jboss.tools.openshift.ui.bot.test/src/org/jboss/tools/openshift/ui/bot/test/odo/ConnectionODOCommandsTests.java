@@ -11,22 +11,27 @@
 package org.jboss.tools.openshift.ui.bot.test.odo;
 
 import org.eclipse.reddeer.common.util.Display;
-import org.eclipse.reddeer.common.util.ResultRunnable;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.browser.InternalBrowserRequirement.UseInternalBrowser;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
-import org.eclipse.swt.graphics.Point;
-import org.jboss.ide.eclipse.as.reddeer.server.requirement.InternalBrowserRequirement.UseInternalBrowser;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOConnectionRequirement.RequiredODOConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftODOProjectRequirement.RequiredODOProject;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftApplicationExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOConnection;
 import org.jboss.tools.openshift.reddeer.widget.terminal.TerminalContainsText;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -38,10 +43,17 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @UseInternalBrowser
+@RequiredODOProject(name = "test-project-operator", cleanup = true)
 public class ConnectionODOCommandsTests {
 
 	private OpenShiftODOConnection connection;
 
+	@After
+	public void cleanUp() {
+		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
+		new WaitWhile(new JobIsRunning(new WithTextMatcher("Refresh cluster")), TimePeriod.DEFAULT, false);
+	}
+	
 	@Before
 	public void setUp() {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
@@ -61,11 +73,15 @@ public class ConnectionODOCommandsTests {
 		new WaitUntil(new TerminalContainsText("Odo Devfile Components"), TimePeriod.LONG);
 	}
 
+	/**
+	 * This test case is not working as Opening a console for OS explorer app. connection
+	 * opens up a site with self-signed certificate which is evaluated as invalid, giving an user
+	 * option to accept it, using native message box, which cannot be handled by reddeer.
+	 */
+	@Ignore
 	@Test
 	public void testOpenConsole() {
-		connection.openConsole(); // prepare requirement for using internal browser
-
-		closeSSLDialog("");
+		connection.openConsole(); // prepare requirement for using internal browse
 		closeSSLDialog("");
 		new WaitUntil(new BrowserContainsText("oauth"));
 	}

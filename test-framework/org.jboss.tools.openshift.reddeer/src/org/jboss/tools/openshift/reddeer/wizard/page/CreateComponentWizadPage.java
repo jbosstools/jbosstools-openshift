@@ -67,9 +67,17 @@ public class CreateComponentWizadPage extends WizardPage {
 			DefaultList list = new DefaultList(new WithLabelMatcher(OpenShiftLabel.TextLabels.COMPONENT_TYPE));
 			String filter = "";
 			if (devfile) {
-				filter = Arrays.asList(list.getListItems()).stream().filter(item -> item.toLowerCase().contains(componentType)).findFirst().get();				
+				filter = Arrays.asList(list.getListItems())
+						.stream()
+						.filter(item -> item.toLowerCase().contains(componentType))
+						.findFirst()
+						.orElseThrow(() -> new IllegalArgumentException("No Devfile record contains " + componentType));				
 			} else {
-				filter = Arrays.asList(list.getListItems()).stream().filter(item -> item.toLowerCase().contains(componentType)).findFirst().get();
+				filter = Arrays.asList(list.getListItems())
+						.stream()
+						.filter(item -> item.toLowerCase().contains(componentType))
+						.findFirst()
+						.orElseThrow(() -> new IllegalArgumentException("No Devfile record contains " + componentType));
 			}
 			list.select(filter);
 		}

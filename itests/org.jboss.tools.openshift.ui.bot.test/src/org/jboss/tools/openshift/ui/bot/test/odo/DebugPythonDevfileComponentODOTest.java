@@ -39,6 +39,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 /**
  * Create Component test for OpenShift Application Explorer
  * 
@@ -48,29 +49,27 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject(name="test-project9")
+@RequiredODOProject(name = "test-project6", cleanup = true)
 public class DebugPythonDevfileComponentODOTest extends AbstractODOTest {
-	
-	/**
-	 * 
-	 */
+
 	private static final String APP_SOURCE = "app.py";
-	
+
 	private static final String ECLIPSE_PROJECT = "pythonproject" + new Random().nextInt();
+
+	private static final int BREAKPOINT_LINE = 8;
 	
-	private static final int BREAKPOINT_LINE = 7;
-	
+	private static final String APPLICATION_NAME = "myapp";
 
 	@InjectRequirement
 	private static OpenShiftODOProjectRequirement projectReq;
-	
-	
+
 	@BeforeClass
 	public static void setupWorkspace() {
-	  importEmptyProject(ECLIPSE_PROJECT);
-		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "python", "python-example", true);
+		importEmptyProject(ECLIPSE_PROJECT);
+		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "python", "django-example", true);
+		createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080);
 	}
-	
+
 	@Test
 	public void checkBreakpointReached() throws IOException, InterruptedException, ExecutionException {
 		ProjectExplorer pe = new ProjectExplorer();
@@ -84,12 +83,14 @@ public class DebugPythonDevfileComponentODOTest extends AbstractODOTest {
 		editor.setCursorPosition(BREAKPOINT_LINE, 1);
 		new ShellMenuItem("Run", "Toggle Breakpoint").select();
 		editor.setCursorPosition(1);
-		
+
 		OpenShiftApplicationExplorerView view = new OpenShiftApplicationExplorerView();
 		view.activate();
-		view.getOpenShiftODOConnection().getProject(projectReq.getProjectName()).getApplication("myapp").getComponent(ECLIPSE_PROJECT).debug();
-		
-		AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), "myapp", ECLIPSE_PROJECT, "/");
+		view.getOpenShiftODOConnection().getProject(projectReq.getProjectName()).getApplication(APPLICATION_NAME)
+				.getComponent(ECLIPSE_PROJECT).debug();
+
+		AbstractODOTest.triggerDebugSession(ECLIPSE_PROJECT, projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT,
+				"/");
 
 		try {
 			new WaitUntil(new EditorWithTitleIsActive(APP_SOURCE), TimePeriod.LONG);

@@ -18,8 +18,8 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.eclipse.ui.browser.BrowserEditor;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.browser.InternalBrowserRequirement.UseInternalBrowser;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
-import org.jboss.ide.eclipse.as.reddeer.server.requirement.InternalBrowserRequirement.UseInternalBrowser;
 import org.jboss.tools.openshift.reddeer.condition.AmountOfResourcesExists;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
@@ -76,8 +76,8 @@ public class DeploymentTest extends AbstractTest {
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.SHOW_IN_WEB_BROWSER).select();
 
 		try {
-			new WaitUntil(new BrowserContainsText("Hello World!"), TimePeriod.VERY_LONG);
-			new BrowserEditor("helloworld").close();
+			new WaitUntil(new BrowserContainsText("Welcome"), TimePeriod.VERY_LONG);
+			new BrowserEditor("kitchensink").close();
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("Application was not deployed successfully because it is not shown in web browser properly.\n"
 					+ ex.getMessage());

@@ -66,6 +66,7 @@ public class OpenShiftApplicationExplorerView extends WorkbenchView {
 		} else {
 			open();
 		}
+		activate();
 	}
 	
 	private void handleOdoToolRequiredDialog () {

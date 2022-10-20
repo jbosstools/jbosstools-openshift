@@ -34,13 +34,11 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject(name="test-project2")
+@RequiredODOProject(name = "test-project1", cleanup = true)
 public class CreateVertxDevfileComponentWithLocalDevfileODOTest extends AbstractODOTest {
 	
-
 	@InjectRequirement
 	private static OpenShiftODOProjectRequirement projectReq;
-	
 	
 	@BeforeClass
 	public static void setupWorkspace() throws IOException, CoreException {

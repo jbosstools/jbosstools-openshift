@@ -45,7 +45,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject(name="test-project7")
+@RequiredODOProject(name = "test-project5", cleanup = true)
 public class DebugVertxDevfileComponentODOTest extends AbstractODOTest {
 	
 	private static final String APP_SOURCE = "HttpApplication.java";
@@ -59,10 +59,9 @@ public class DebugVertxDevfileComponentODOTest extends AbstractODOTest {
 	@InjectRequirement
 	private static OpenShiftODOProjectRequirement projectReq;
 	
-	
 	@BeforeClass
 	public static void setupWorkspace() {
-		importLauncherProject(ECLIPSE_PROJECT, "vert.x community");
+		importLauncherProject(ECLIPSE_PROJECT, "rest-http", "vert.x community");
 		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "maven java", null, true);
 		createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080);
 	}

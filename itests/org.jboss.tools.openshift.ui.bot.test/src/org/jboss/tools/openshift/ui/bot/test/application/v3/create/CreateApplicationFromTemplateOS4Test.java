@@ -37,18 +37,18 @@ public class CreateApplicationFromTemplateOS4Test extends CreateApplicationFromT
 	
 	@Override
 	protected void importTestsProject() {
-		importTestsProject(new File("resources" + File.separator + TESTS_PROJECT).getAbsolutePath());
+		importTestsProject(new File("resources" + File.separator + TEST_PROJECT).getAbsolutePath());
 	}
 	
 	@Override
 	protected String getFilesystemTemplatePath() {
-		return new File("resources" + File.separator + TESTS_PROJECT).getAbsolutePath() + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME;
+		return new File("resources" + File.separator + TEST_PROJECT).getAbsolutePath() + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME;
 	}
 	
 	@Override
 	protected String getWorkspaceTemplatePath() {
 		return "${workspace_loc:"
-				+ File.separator + TESTS_PROJECT + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME +"}";
+				+ File.separator + TEST_PROJECT + File.separator + OpenShiftResources.EAP_TEMPLATE_RESOURCES_FILENAME +"}";
 	}
 	
 }

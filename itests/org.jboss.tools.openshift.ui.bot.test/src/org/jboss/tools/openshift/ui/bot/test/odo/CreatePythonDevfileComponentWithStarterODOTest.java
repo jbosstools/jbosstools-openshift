@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject(name="test-project8")
+@RequiredODOProject(name = "test-project3", cleanup = true)
 public class CreatePythonDevfileComponentWithStarterODOTest extends AbstractODOTest {
 	
 
@@ -43,7 +43,7 @@ public class CreatePythonDevfileComponentWithStarterODOTest extends AbstractODOT
 	
 	@Test
 	public void testCreateComponent() {
-		createComponent(projectReq.getProjectName(), "python", "python-example", true);
+		createComponent(projectReq.getProjectName(), "flask", "flask-example", true);
 	}
 
 }

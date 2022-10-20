@@ -23,15 +23,15 @@ public class OpenShiftResources {
 	/**
 	 * the template that creates a basic eap service
 	 */
-	public static final String EAP_TEMPLATE = "eap73-basic-s2i";
+	public static final String EAP_TEMPLATE = "eap74-basic-s2i";
 	public static final String EAP_SERVICE = "eap-app";
 	public static final String EAP_SERVICE_PING = "eap-app-ping";
 	public static final String EAP_APP_REPLICATION_CONTROLLER = "eap-app-1";
 	public static final String EAP_APP_GIT_NAME = "jboss-eap-quickstarts";
-	public static final String EAP_TEMPLATE_RESOURCES_PATH = "resources/eap73-basic-s2i-helloworld.json";
-	public static final String EAP_TEMPLATE_RESOURCES_FILENAME = "eap73-basic-s2i-helloworld.json";
-	public static final String EAP_TEMPLATE_RESOURCES_PATH_OS4 = "resources/os4templates/eap73-basic-s2i-helloworld.json";
-	public static final String EAP_TEMPLATE_RESOURCES_FILENAME_OS4 = "eap73-basic-s2i-helloworld.json";
+	public static final String EAP_TEMPLATE_RESOURCES_PATH = "resources/os4templates/eap73-basic-s2i-helloworld.json";
+	public static final String EAP_TEMPLATE_RESOURCES_FILENAME = "eap74-basic-s2i-helloworld.json";
+	public static final String EAP_TEMPLATE_RESOURCES_PATH_OS4 = "resources/os4templates/eap74-basic-s2i-helloworld.json";
+	public static final String EAP_TEMPLATE_RESOURCES_FILENAME_OS4 = "eap74-basic-s2i-helloworld.json";
 	
 	public static final String EAP_CD_TEMPLATE = "resources/eap-cd-basic-s2i-helloworld.json";
 

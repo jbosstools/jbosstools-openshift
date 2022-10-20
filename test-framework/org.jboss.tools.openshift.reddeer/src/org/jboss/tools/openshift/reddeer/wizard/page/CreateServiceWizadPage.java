@@ -36,13 +36,21 @@ public class CreateServiceWizadPage  extends WizardPage {
 	public String getServiceName() {
 		return new LabeledText(OpenShiftLabel.TextLabels.NAME).getText();	
 	}
+	
+	public void setService(String service) {
+		new LabeledCombo(OpenShiftLabel.TextLabels.SERVICE).setSelection(service);
+	}
+	
+	public String getService() {
+		return new LabeledCombo(OpenShiftLabel.TextLabels.SERVICE).getSelection();		
+	}
 
 	public void setComponentType(String componentType) {
-		new LabeledCombo(OpenShiftLabel.TextLabels.COMPONENT_TYPE).setSelection(componentType);	
+		new LabeledCombo(OpenShiftLabel.TextLabels.TYPE).setSelection(componentType);	
 	}
 	
 	public String getComponentType() {
-		return new LabeledCombo(OpenShiftLabel.TextLabels.COMPONENT_TYPE).getSelection();	
+		return new LabeledCombo(OpenShiftLabel.TextLabels.TYPE).getSelection();	
 	}
 
 	public void setApplication(String applicationName) {

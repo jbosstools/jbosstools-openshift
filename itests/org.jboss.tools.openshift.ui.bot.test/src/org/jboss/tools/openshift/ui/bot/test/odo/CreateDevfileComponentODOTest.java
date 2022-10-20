@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredODOConnection
 @CleanODOConnection
-@RequiredODOProject(name="test-project3")
+@RequiredODOProject(name = "test-project2", cleanup = true)
 public class CreateDevfileComponentODOTest extends AbstractODOTest {
 	
 

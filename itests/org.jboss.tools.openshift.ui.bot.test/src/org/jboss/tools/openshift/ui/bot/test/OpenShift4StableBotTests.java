@@ -58,7 +58,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(RedDeerSuite.class)
 @SuiteClasses({
-		//not yet stable is added in commented line to easily track not stable tests
+		// not yet stable is added in commented line to easily track not stable tests
 	
 		// General
 		OCBinaryLocationTest.class, // pass
@@ -74,47 +74,47 @@ import org.junit.runners.Suite.SuiteClasses;
 
 		// Project
 		ProjectNameValidationTest.class, // pass
-		LinkToCreateNewProjectTest.class, // failed
+		LinkToCreateNewProjectTest.class, // pass
 		CreateNewProjectTest.class, // pass
 		DeleteProjectTest.class, // pass
-		ResourcesTest.class, // pass 
-		//not yet stable ProjectPropertiesTest.class,
+		ResourcesTest.class, //  failed
+		// not yet stable ProjectPropertiesTest.class,
 
 		// Application wizard handling
 		OpenNewApplicationWizardTest.class,  // pass
-// 		not yet stable OpenNewApplicationWizardWithNoProjectTest.class,
-		NewApplicationWizardHandlingTest.class, // pass
-		TemplateParametersTest.class, // pass 
+	 	// not yet stable OpenNewApplicationWizardWithNoProjectTest.class,
+		NewApplicationWizardHandlingTest.class, // pass 
+		TemplateParametersTest.class, // pass  
 		LabelsTest.class, // pass
 		BuilderImageApplicationWizardHandlingTest.class, // pass
 
 		// Application handling
-		//not yet stable DeleteResourceOS4Test.class,
-		//not yet stable InteligentDeleteResourceOS4Test.class,
-		OSExplorerResourceTest.class, // pass 
-		TriggerBuildOS4Test.class, // pass
-		ImportApplicationOS4Test.class, // pass 
-		PortForwardingOS4Test.class,  // pass
-		LogsTest.class, // pass
+		DeleteResourceOS4Test.class, // blocked
+		InteligentDeleteResourceOS4Test.class, // blocked
+		OSExplorerResourceTest.class, //  pass
+		TriggerBuildOS4Test.class, // failed - cannot use properties
+		ImportApplicationOS4Test.class, // pass
+		PortForwardingOS4Test.class,  // failed - cannot use properties
+		LogsTest.class, // failed
 		EditResourcesOS4Test.class, // pass
 		HandleCustomTemplateOS4Test.class, // pass
 		ImportApplicationWizardTest.class, // pass
 		ImportApplicationWizardGitTest.class, // pass	
 	
 		// Creation of a new application
-		CreateApplicationFromTemplateOS4Test.class, // pass 
+		CreateApplicationFromTemplateOS4Test.class, //  pass
 		CreateApplicationOnBuilderImageTest.class, // pass
-		DeploymentOS4Test.class, // pass
+		DeploymentOS4Test.class, // pass	
 
 		// Advanced application testing
 		CreateResourcesOS4Test.class, // pass
-		ScalingOS4Test.class, // pass
+		ScalingOS4Test.class, // failed - blocked
 		EditResourceLimitsOS4Test.class, // pass 
 
 		// Server adapter
 		ServerAdapterWizardHandlingOS4Test.class, // pass
-		//not yet stable CreateServerAdapterTest.class,
-		//not yet stable ServerAdapterFromResourceOS4Test.class,
+//		// not yet stable CreateServerAdapterTest.class,
+		// not yet stable ServerAdapterFromResourceOS4Test.class,
 		PublishChangesOS4Test.class,
 		//not yet stable SpringBootTest.class,
 
