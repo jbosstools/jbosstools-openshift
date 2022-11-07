@@ -11,10 +11,10 @@
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.TableViewer;
@@ -87,7 +87,7 @@ public class DeploymentConfigPage extends EnvironmentVariablePage {
 		Spinner replicas = new Spinner(scalingContainer, SWT.BORDER);
 		replicas.setMinimum(1);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(replicas);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(replicas))
+		ValueBindingBuilder.bind(WidgetProperties.spinnerSelection().observe(replicas))
 				.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_REPLICAS).observe(model)).in(dbc);
 		parent.addControlListener(new ControlAdapter() {
 

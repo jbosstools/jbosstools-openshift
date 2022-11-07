@@ -24,7 +24,7 @@ import org.apache.commons.lang.BooleanUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -47,11 +47,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -314,7 +314,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(warningComposite);
 
 		IObservableValue<IStatus> ocBinaryStatus = 
-				BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model);
+				BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS, IStatus.class).observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.visible().observe(warningComposite))
 				.to(ocBinaryStatus)
 				.converting(new Converter(IStatus.class, Boolean.class) {
@@ -397,7 +397,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 		@SuppressWarnings("unchecked")
 		IObservableValue<RsyncStatus> rsyncStatus = 
-				BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model);
+				BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS, RsyncStatus.class).observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.visible().observe(composite))
 				.to(rsyncStatus)
 				.converting(new Converter(RsyncStatus.class, Boolean.class) {
@@ -493,7 +493,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	private void createProjectControls(Composite parent, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
 		@SuppressWarnings("unchecked")
 		IObservableValue<IProject> eclipseProjectObservable = BeanProperties
-				.value(ServerSettingsWizardPageModel.PROPERTY_DEPLOYPROJECT).observe(model);
+				.value(ServerSettingsWizardPageModel.PROPERTY_DEPLOYPROJECT, IProject.class).observe(model);
 		new SelectProjectComponentBuilder().setTextLabel("Eclipse Project: ")
 				.setEclipseProjectObservable(eclipseProjectObservable)
 				.setSelectionListener(onBrowseProjects(model, parent.getShell())).build(parent, dbc);
@@ -790,7 +790,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				.hint(RESOURCE_TREE_WIDTH, RESOURCE_TREE_HEIGHT).applyTo(resourcesViewer.getControl());
 		resourcesViewer.addDoubleClickListener(onDoubleClickService());
 		IObservableList<ObservableTreeItem> resourceItemsObservable = BeanProperties
-				.list(ServerSettingsWizardPageModel.PROPERTY_RESOURCE_ITEMS).observe(model);
+				.list(ServerSettingsWizardPageModel.PROPERTY_RESOURCE_ITEMS, ObservableTreeItem.class).observe(model);
 		DataBindingUtils.addDisposableListChangeListener(onResourceItemsChanged(resourcesViewer),
 				resourceItemsObservable, resourcesViewer.getTree());
 		selectorText.addModifyListener(onFilterTextModified(resourcesViewer));
@@ -819,7 +819,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		Button useInferredPodPathButton = new Button(container, SWT.CHECK);
 		useInferredPodPathButton.setText("&Use inferred Pod Deployment Path");
 		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).applyTo(useInferredPodPathButton);
-		ISWTObservableValue useInferredPodPathObservable = WidgetProperties.selection()
+		ISWTObservableValue useInferredPodPathObservable = WidgetProperties.buttonSelection()
 				.observe(useInferredPodPathButton);
 		ValueBindingBuilder.bind(useInferredPodPathObservable)
 				.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_INFERRED_POD_PATH).observe(model))
@@ -882,8 +882,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		useImageDevmodeKey.setText("use image provided key");
 		GridDataFactory.fillDefaults().span(4, 1).align(SWT.FILL, SWT.CENTER).applyTo(useImageDevmodeKey);
 		IObservableValue<Boolean> useImageDevmodeKeyObservable = BeanProperties
-				.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEVMODE_KEY).observe(model);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(useImageDevmodeKey))
+				.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEVMODE_KEY, Boolean.class).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.buttonSelection().observe(useImageDevmodeKey))
 				.to(useImageDevmodeKeyObservable).in(dbc);
 		// filler
 		new Label(parent, SWT.NONE);
@@ -916,8 +916,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		useImageDebugPortKeyButton.setText("use image provided key and value");
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER).applyTo(useImageDebugPortKeyButton);
 		IObservableValue<Boolean> useImageDebugPortKey = BeanProperties
-				.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEBUG_PORT_KEY).observe(model);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(useImageDebugPortKeyButton))
+				.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEBUG_PORT_KEY, Boolean.class).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.buttonSelection().observe(useImageDebugPortKeyButton))
 				.to(useImageDebugPortKey).in(dbc);
 		// filler
 		new Label(parent, SWT.NONE);
@@ -944,8 +944,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 		// port text field
 		IObservableValue<Boolean> useImageDebugPortValue = BeanProperties
-				.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEBUG_PORT_VALUE).observe(model);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(useImageDebugPortKeyButton))
+				.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEBUG_PORT_VALUE, Boolean.class).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.buttonSelection().observe(useImageDebugPortKeyButton))
 				.to(useImageDebugPortValue).in(dbc);
 		Label portLabel = new Label(parent, SWT.NONE);
 		portLabel.setText("Port:");
@@ -1027,14 +1027,14 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		// }
 		// });
 
-		IObservableValue<IResource> selectedRouteObservable = ViewerProperties.singleSelection().observe(routesViewer);
+		IObservableValue<IResource> selectedRouteObservable = ViewerProperties.singleSelection(IResource.class).observe(routesViewer);
 		ValueBindingBuilder.bind(selectedRouteObservable)
 				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_ROUTE).observe(model)).in(dbc);
 
-		final IObservableValue<Boolean> isSelectDefaultRouteObservable = WidgetProperties.selection()
+		final IObservableValue<Boolean> isSelectDefaultRouteObservable = WidgetProperties.buttonSelection()
 				.observe(promptRouteButton);
 		final IObservableValue<Boolean> selectDefaultRouteModelObservable = BeanProperties
-				.value(ServerSettingsWizardPageModel.PROPERTY_SELECT_DEFAULT_ROUTE).observe(model);
+				.value(ServerSettingsWizardPageModel.PROPERTY_SELECT_DEFAULT_ROUTE, Boolean.class).observe(model);
 		ValueBindingBuilder.bind(isSelectDefaultRouteObservable).converting(new InvertingBooleanConverter())
 				.to(selectDefaultRouteModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(routesViewer.getControl()))

@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.internal.ui.server;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -59,32 +59,32 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	}
 
 	private void initChangelisteners(IServerWorkingCopy server, ServerEditorSection section) {
-		this.devmodeKeyObservable = BeanProperties.value(PROPERTY_DEVMODE_KEY).observe(this);
+		this.devmodeKeyObservable = BeanProperties.value(PROPERTY_DEVMODE_KEY, String.class).observe(this);
 		devmodeKeyObservable.addValueChangeListener(event -> {
 			if (initializing) {
 				return;
 			}
 			section.execute(new SetStringCommand(server, "SetDevmodeKey", OpenShiftServerUtils.ATTR_DEVMODE_KEY,
-					(String) event.diff.getOldValue(), (String) event.diff.getNewValue()));
+					event.diff.getOldValue(), event.diff.getNewValue()));
 		});
 
-		this.debugPortKeyObservable = BeanProperties.value(PROPERTY_DEBUG_PORT_KEY).observe(this);
+		this.debugPortKeyObservable = BeanProperties.value(PROPERTY_DEBUG_PORT_KEY, String.class).observe(this);
 		debugPortKeyObservable.addValueChangeListener(event -> {
 			if (initializing) {
 				return;
 			}
 			section.execute(new SetStringCommand(server, "SetDebugPortKey", OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY,
-					(String) event.diff.getOldValue(), (String) event.diff.getNewValue()));
+					event.diff.getOldValue(), event.diff.getNewValue()));
 		});
 
-		this.debugPortValueObservable = BeanProperties.value(PROPERTY_DEBUG_PORT_VALUE).observe(this);
+		this.debugPortValueObservable = BeanProperties.value(PROPERTY_DEBUG_PORT_VALUE, String.class).observe(this);
 		debugPortValueObservable.addValueChangeListener(event -> {
 			if (initializing) {
 				return;
 			}
 			section.execute(
 					new SetStringCommand(server, "SetDebugPortValue", OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE,
-							(String) event.diff.getOldValue(), (String) event.diff.getNewValue()));
+							event.diff.getOldValue(), event.diff.getNewValue()));
 		});
 	}
 

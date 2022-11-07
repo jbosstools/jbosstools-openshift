@@ -14,12 +14,12 @@ import java.util.List;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -88,7 +88,7 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(servicePortSpinner);
 		final Binding servicePortBinding = ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(servicePortSpinner))
+				.bind(WidgetProperties.spinnerSelection().observe(servicePortSpinner))
 				.validatingAfterConvert(new ServicePortValidator(model.getPort(), this.ports))
 				.to(BeanProperties.value(PROPERTY_SERVICE_PORT).observe(model)).in(dbc);
 		ControlDecorationSupport.create(servicePortBinding, SWT.LEFT | SWT.TOP, null,
@@ -114,7 +114,7 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 		routePortButton.setText("Used by route");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
 				.applyTo(routePortButton);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(routePortButton))
+		ValueBindingBuilder.bind(WidgetProperties.buttonSelection().observe(routePortButton))
 				.to(BeanProperties.value(ServicePortAdapter.ROUTE_PORT).observe(model)).in(dbc);
 	}
 

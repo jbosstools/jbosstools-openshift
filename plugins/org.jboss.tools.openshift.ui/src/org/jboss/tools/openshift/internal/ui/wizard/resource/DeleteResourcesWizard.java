@@ -17,7 +17,7 @@ import java.util.regex.PatternSyntaxException;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -28,9 +28,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -174,15 +174,15 @@ public class DeleteResourcesWizard extends AbstractOpenShiftWizard<DeleteResourc
 			// resources table
 			Composite tableContainer = new Composite(resourcesContainer, SWT.NONE);
 			IObservableValue<KeyValueFilter> labelFilter = BeanProperties
-					.value(DeleteResourcesWizardModel.PROP_LABEL_FILTER).observe(model);
+					.value(DeleteResourcesWizardModel.PROP_LABEL_FILTER, KeyValueFilter.class).observe(model);
 			TableViewer resourcesViewer = createResourcesTable(labelFilter, tableContainer);
 			GridDataFactory.fillDefaults().span(1, 3).align(SWT.FILL, SWT.CENTER).hint(SWT.DEFAULT, 500)
 					.grab(true, false).applyTo(tableContainer);
 			IObservableList<IParameter> allResourcesObservable = BeanProperties
-					.list(DeleteResourcesWizardModel.PROP_ALL_RESOURCES).observe(model);
+					.list(DeleteResourcesWizardModel.PROP_ALL_RESOURCES, IParameter.class).observe(model);
 			resourcesViewer.setInput(allResourcesObservable);
 			IObservableList<IResource> selectedResources = BeanProperties
-					.list(DeleteResourcesWizardModel.PROP_SELECTED_RESOURCES).observe(model);
+					.list(DeleteResourcesWizardModel.PROP_SELECTED_RESOURCES, IResource.class).observe(model);
 			dbc.bindList(ViewerProperties.multipleSelection().observe(resourcesViewer), selectedResources);
 			dbc.addValidationStatusProvider(new MultiValidator() {
 

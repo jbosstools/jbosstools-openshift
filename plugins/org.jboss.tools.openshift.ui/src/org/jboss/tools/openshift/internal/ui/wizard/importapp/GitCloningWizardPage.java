@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
@@ -106,8 +106,8 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		useDefaultCloneDestinationButton.setToolTipText("Uncheck if you want to use a custom location to clone to");
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.LEFT, SWT.CENTER).applyTo(useDefaultCloneDestinationButton);
 		final IObservableValue<Boolean> useDefaultCloneDestinationObservable = BeanProperties
-				.value(IGitCloningPageModel.PROPERTY_USE_DEFAULT_CLONE_DESTINATION).observe(model);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(useDefaultCloneDestinationButton))
+				.value(IGitCloningPageModel.PROPERTY_USE_DEFAULT_CLONE_DESTINATION, Boolean.class).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.buttonSelection().observe(useDefaultCloneDestinationButton))
 				.to(useDefaultCloneDestinationObservable).in(dbc);
 
 		// clone destination
@@ -119,7 +119,7 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		final IObservableValue<String> cloneDestinationObservable = WidgetProperties.text(SWT.Modify)
 				.observe(cloneDestinationText);
 		final IObservableValue<String> cloneDestinationModelObservable = BeanProperties
-				.value(IGitCloningPageModel.PROPERTY_CLONE_DESTINATION).observe(model);
+				.value(IGitCloningPageModel.PROPERTY_CLONE_DESTINATION, String.class).observe(model);
 		ValueBindingBuilder.bind(cloneDestinationObservable).to(cloneDestinationModelObservable).in(dbc);
 		Button browseCloneDestinationButton = new Button(cloneGroupComposite, SWT.PUSH);
 		browseCloneDestinationButton.setText("Browse...");
@@ -139,11 +139,11 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		reuseRepositoryButton.setSelection(false);
 		reuseRepositoryButton.setText("Do not clone - use existing repository");
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.LEFT, SWT.CENTER).applyTo(reuseRepositoryButton);
-		final IObservableValue<Boolean> reuseGitReposityObservable = WidgetProperties.selection()
+		final IObservableValue<Boolean> reuseGitReposityObservable = WidgetProperties.buttonSelection()
 				.observe(reuseRepositoryButton);
 		ValueBindingBuilder.bind(reuseGitReposityObservable)
 				.to(BeanProperties.value(IGitCloningPageModel.PROPERTY_REUSE_GIT_REPOSITORY).observe(model)).in(dbc);
-		IObservableValue<File> repoPathObservable = BeanProperties.value(IGitCloningPageModel.PROPERTY_REPO_PATH)
+		IObservableValue<File> repoPathObservable = BeanProperties.value(IGitCloningPageModel.PROPERTY_REPO_PATH, File.class)
 				.observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(reuseRepositoryButton))
 				.notUpdating(repoPathObservable).converting(new FileExistsConverter()).in(dbc);
@@ -168,13 +168,13 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(checkoutComposite);
 		Button checkoutBranchCheckbox = new Button(checkoutComposite, SWT.CHECK);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(checkoutBranchCheckbox);
-		ISWTObservableValue checkoutBranchCheckboxObservable = WidgetProperties.selection()
+		ISWTObservableValue checkoutBranchCheckboxObservable = WidgetProperties.buttonSelection()
 				.observe(checkoutBranchCheckbox);
 		ValueBindingBuilder.bind(checkoutBranchCheckboxObservable).validatingAfterConvert(new CheckoutBranchValidator())
 				.to(BeanProperties.value(IGitCloningPageModel.PROPERTY_CHECKOUT_BRANCH_REUSED_REPO).observe(model))
 				.validatingAfterConvert(new CheckoutBranchValidator()).in(dbc);
 		IObservableValue<Boolean> isRepositoryBranchGitRefObservable = BeanProperties
-				.value(IGitCloningPageModel.PROPERTY_IS_REPOSITORY_BRANCH_GIT_REF).observe(model);
+				.value(IGitCloningPageModel.PROPERTY_IS_REPOSITORY_BRANCH_GIT_REF, Boolean.class).observe(model);
 		ComputedValue<Boolean> checkoutBranchEnablement = new ComputedValue<Boolean>() {
 
 			@Override

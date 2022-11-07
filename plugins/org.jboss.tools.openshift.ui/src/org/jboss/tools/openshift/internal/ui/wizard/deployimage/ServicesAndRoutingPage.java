@@ -14,7 +14,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.DomainValidator;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.map.IObservableMap;
 import org.eclipse.core.databinding.observable.set.IObservableSet;
@@ -24,10 +24,10 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ObservableMapLabelProvider;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -110,8 +110,8 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 				"Adding a route to the service will make the image accessible\noutside of the OpenShift cluster on all the available service ports. \nYou can target a specific port by editing the route later.");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(false, false).span(2, 1).applyTo(btnAddRoute);
 		final IObservableValue<Boolean> addRouteModelObservable = BeanProperties
-				.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE).observe(model);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(btnAddRoute)).to(addRouteModelObservable).in(dbc);
+				.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE, Boolean.class).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.buttonSelection().observe(btnAddRoute)).to(addRouteModelObservable).in(dbc);
 
 		Label labelRouteHostname = new Label(routingContainer, SWT.NONE);
 		labelRouteHostname.setText("Hostname:");
@@ -127,9 +127,9 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 				.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTE_HOSTNAME).observe(model)).in(dbc);
 
 		final IObservableList<IServicePort> portsObservable = 
-				BeanProperties.list(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model);
+				BeanProperties.list(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS, IServicePort.class).observe(model);
 		final IObservableValue<IServicePort> routingPortObservable = 
-				BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTING_PORT).observe(model);
+				BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTING_PORT, IServicePort.class).observe(model);
 
 		MultiValidator validator = new MultiValidator() {
 
@@ -195,11 +195,11 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 
 		@SuppressWarnings("unchecked")
 		IObservableList<IServicePort> portsObservable = 
-				BeanProperties.list(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model);
+				BeanProperties.list(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS, IServicePort.class).observe(model);
 		portsViewer.setInput(portsObservable);
 		@SuppressWarnings("unchecked")
 		IObservableValue<IServicePort> selectedServicePortObservable = 
-				BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT).observe(model);
+				BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT, IServicePort.class).observe(model);
 		ValueBindingBuilder
 			.bind(ViewerProperties.singleSelection().observe(portsViewer))
 			.to(selectedServicePortObservable)
