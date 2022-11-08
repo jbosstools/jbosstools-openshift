@@ -13,11 +13,11 @@ import java.util.Map;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -61,7 +61,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 
 	private ComboViewer authTypeViewer;
 	private IObservableValue<Boolean> rememberTokenObservable;
-	private IObservableValue<IDetailView> selectedDetailViewObservable;
+	private IObservableValue<IConnectionEditorDetailView> selectedDetailViewObservable;
 	private IObservableValue<String> authSchemeObservable;
 	private Binding selectedAuthTypeBinding;
 
@@ -99,7 +99,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 
 	private class ConnectionEditorStackedDetailViews extends AbstractStackedDetailViews {
 
-		public ConnectionEditorStackedDetailViews(IObservableValue<IDetailView> detailViewModel, Object context,
+		public ConnectionEditorStackedDetailViews(IObservableValue<? extends IDetailView> detailViewModel, Object context,
 				Composite parent, DataBindingContext dbc) {
 			super(detailViewModel, context, parent, dbc);
 		}

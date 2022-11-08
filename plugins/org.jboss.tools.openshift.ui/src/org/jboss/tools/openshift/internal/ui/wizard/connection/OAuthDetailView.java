@@ -16,7 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.WritableValue;
@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationUpdater;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -98,7 +98,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			Object context, IObservableValue<String> authSchemeObservable) {
 		this.wizard = wizard;
 		this.pageModel = pageModel;
-		this.urlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel);
+		this.urlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST, String.class).observe(pageModel);
 		this.tokenObservable = new WritableValue<String>(null, String.class);
 		this.rememberTokenObservable = new WritableValue<Boolean>(Boolean.FALSE, Boolean.class);
 		this.connectionValidator = ConnectionValidatorFactory.createOAuthAuthenticationValidator(pageModel,
@@ -153,7 +153,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		dbc.addValidationStatusProvider(connectionValidator);
 		bindWidgetsToInternalModel(dbc);
 		this.rememberTokenBinding = ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(rememberTokenCheckbox)).to(rememberTokenObservable).in(dbc);
+				.bind(WidgetProperties.buttonSelection().observe(rememberTokenCheckbox)).to(rememberTokenObservable).in(dbc);
 	}
 
 	@Override

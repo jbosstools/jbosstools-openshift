@@ -11,7 +11,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate;
 import java.util.Iterator;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.map.ObservableMap;
@@ -22,9 +22,9 @@ import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -89,13 +89,13 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		// parameters table
 		Composite tableContainer = new Composite(container, SWT.NONE);
 		IObservableList<IParameter> parametersObservable = BeanProperties
-				.list(ITemplateParametersPageModel.PROPERTY_PARAMETERS).observe(model);
+				.list(ITemplateParametersPageModel.PROPERTY_PARAMETERS, IParameter.class).observe(model);
 		this.viewer = createTable(tableContainer, parametersObservable, dbc);
 		GridDataFactory.fillDefaults().span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300)
 				.applyTo(tableContainer);
 		viewer.setInput(parametersObservable);
 		IObservableValue<IParameter> selectedParameter = BeanProperties
-				.value(ITemplateParametersPageModel.PROPERTY_SELECTED_PARAMETER).observe(model);
+				.value(ITemplateParametersPageModel.PROPERTY_SELECTED_PARAMETER, IParameter.class).observe(model);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer)).to(selectedParameter).in(dbc);
 		viewer.addDoubleClickListener(onDoubleClick());
 

@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -263,7 +263,7 @@ public class ScaleDeploymentHandler extends AbstractHandler {
 			scaleSpinner.setPageIncrement(1);
 			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(scaleSpinner);
 
-			ValueBindingBuilder.bind(WidgetProperties.selection().observe(scaleSpinner))
+			ValueBindingBuilder.bind(WidgetProperties.spinnerSelection().observe(scaleSpinner))
 					.validatingAfterConvert(new IValidator() {
 
 						@Override

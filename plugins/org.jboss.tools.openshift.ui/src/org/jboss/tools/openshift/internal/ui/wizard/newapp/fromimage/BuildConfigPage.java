@@ -12,12 +12,12 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -108,7 +108,7 @@ public class BuildConfigPage extends EnvironmentVariablePage {
 		webHookBtn.setToolTipText(
 				"The source repository must be configured to use the webhook to trigger a build when source is committed.");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(webHookBtn);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(webHookBtn))
+		ValueBindingBuilder.bind(WidgetProperties.buttonSelection().observe(webHookBtn))
 				.to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONFIG_WEB_HOOK).observe(model)).in(dbc);
 
 		//image change
@@ -117,14 +117,14 @@ public class BuildConfigPage extends EnvironmentVariablePage {
 		imageChangeBtn.setToolTipText(
 				"Automatically building a new image when the builder image changes allows your code to always run on the latest updates.");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(imageChangeBtn);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(imageChangeBtn))
+		ValueBindingBuilder.bind(WidgetProperties.buttonSelection().observe(imageChangeBtn))
 				.to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_IMAGE_CHANGE_TRIGGER).observe(model)).in(dbc);
 
 		//build config change
 		Button configChangeBtn = new Button(parent, SWT.CHECK);
 		configChangeBtn.setText("Automatically build a new image when the build configuration changes");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(configChangeBtn);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(configChangeBtn))
+		ValueBindingBuilder.bind(WidgetProperties.buttonSelection().observe(configChangeBtn))
 				.to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONFIG_CHANGE_TRIGGER).observe(model)).in(dbc);
 
 	}

@@ -18,7 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -35,7 +35,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -363,7 +363,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 			Button overrideOC = new Button(advancedComposite, SWT.CHECK);
 			overrideOC.setText("Override 'oc' location: ");
 			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(lblRegistry);
-			IObservableValue<Boolean> overrideOCObservable = WidgetProperties.selection().observe(overrideOC);
+			IObservableValue<Boolean> overrideOCObservable = WidgetProperties.buttonSelection().observe(overrideOC);
 			ValueBindingBuilder.bind(overrideOCObservable)
 					.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_OC_OVERRIDE).observe(model))
 					.in(dbc);

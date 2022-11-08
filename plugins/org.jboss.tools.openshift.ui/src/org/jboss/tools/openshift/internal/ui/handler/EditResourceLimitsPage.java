@@ -11,11 +11,11 @@
 package org.jboss.tools.openshift.internal.ui.handler;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -118,9 +118,9 @@ public class EditResourceLimitsPage extends AbstractOpenShiftWizardPage {
 		});
 
 		IObservableValue<String> valueObservable = WidgetProperties.text(SWT.Modify).observe(text);
-		IObservableValue<String> selectedUnitObservable = ViewerProperties.singleSelection().observe(combo);
+		IObservableValue<String> selectedUnitObservable = ViewerProperties.singleSelection(String.class).observe(combo);
 		IObservableValue<IContainer> master = 
-				BeanProperties.value(EditResourceLimitsPageModel.SELECTED_CONTAINER).observe(model);
+				BeanProperties.value(EditResourceLimitsPageModel.SELECTED_CONTAINER, IContainer.class).observe(model);
 		ValueBindingBuilder.bind(valueObservable)
 			.validatingAfterGet(new NumericValidator("integer", Integer::parseInt))
 			.converting(new AggregatingConverter(selectedUnitObservable, true))

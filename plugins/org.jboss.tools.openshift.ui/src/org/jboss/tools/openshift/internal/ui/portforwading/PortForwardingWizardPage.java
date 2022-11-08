@@ -16,7 +16,7 @@ import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -108,7 +108,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 				.applyTo(findFreesPortButton);
 		final IObservableValue findFreePortsButtonObservable = BeanProperties
 				.value(PortForwardingWizardModel.PROPERTY_USE_FREE_PORTS).observe(wizardModel);
-		final IObservableValue findFreePortsButtonSelection = WidgetProperties.selection().observe(findFreesPortButton);
+		final IObservableValue findFreePortsButtonSelection = WidgetProperties.buttonSelection().observe(findFreesPortButton);
 		dbc.bindValue(findFreePortsButtonSelection, findFreePortsButtonObservable);
 		DataBindingUtils.addDisposableValueChangeListener(new IValueChangeListener() {
 			@Override

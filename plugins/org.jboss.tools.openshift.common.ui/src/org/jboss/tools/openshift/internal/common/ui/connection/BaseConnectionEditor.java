@@ -11,7 +11,7 @@
 package org.jboss.tools.openshift.internal.common.ui.connection;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
@@ -41,7 +41,7 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 	public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 		this.wizardPage = (ConnectionWizardPage) context;
 		this.pageModel = wizardPage.getModel();
-		this.selectedConnection = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION)
+		this.selectedConnection = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION, IConnection.class)
 				.observe(pageModel);
 		this.changeListener = createDetailViewChangedListener(pageModel);
 		this.connectionAuthenticationProvider = createConnectionAuthenticationProvider(pageModel);

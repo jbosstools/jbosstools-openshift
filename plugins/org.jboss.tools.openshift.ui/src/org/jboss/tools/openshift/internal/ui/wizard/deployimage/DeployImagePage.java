@@ -11,11 +11,10 @@
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
@@ -26,9 +25,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -298,7 +297,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				.setInput(BeanProperties.list(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTIONS).observe(model));
 
 		IObservableValue<IDockerConnection> dockerConnectionObservable = BeanProperties
-				.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model);
+				.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION, IDockerConnection.class).observe(model);
 		DockerConnectionStatusProvider validator = new DockerConnectionStatusProvider(dockerConnectionObservable);
 		IObservableValue<?> selectedConnectionObservable = ViewerProperties.singleSelection().observe(connectionViewer);
 		Binding selectedConnectionBinding = ValueBindingBuilder.bind(selectedConnectionObservable)
@@ -359,7 +358,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		final IObservableValue<String> connnectionTextObservable = WidgetProperties.text(SWT.None)
 				.observe(connectionText);
 		final IObservableValue<IDockerConnection> connnectionObservable = BeanProperties
-				.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model);
+				.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION, IDockerConnection.class).observe(model);
 		ValueBindingBuilder.bind(connnectionTextObservable).notUpdatingParticipant().to(connnectionObservable)
 				.converting(new ObjectToStringConverter(IDockerConnection.class) {
 					ConnectionColumLabelProvider labelProvider = new ConnectionColumLabelProvider();
@@ -383,7 +382,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		final IObservableValue<String> connnectionTextObservable = WidgetProperties.text(SWT.None)
 				.observe(connectionText);
 		final IObservableValue<IConnection> connnectionObservable = BeanProperties
-				.value(IDeployImagePageModel.PROPERTY_CONNECTION).observe(model);
+				.value(IDeployImagePageModel.PROPERTY_CONNECTION, IConnection.class).observe(model);
 		ValueBindingBuilder.bind(connnectionTextObservable).notUpdatingParticipant().to(connnectionObservable)
 				.converting(new ObjectToStringConverter(Connection.class) {
 					ConnectionColumLabelProvider labelProvider = new ConnectionColumLabelProvider();
@@ -415,7 +414,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		cmboProject.setComparator(comparator);
 		model.setProjectsComparator(comparator.asProjectComparator());
 
-		IObservableValue<IProject> projectObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_PROJECT)
+		IObservableValue<IProject> projectObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_PROJECT, IProject.class)
 				.observe(model);
 		ProjectStatusProvider validator = new ProjectStatusProvider(projectObservable);
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(cmboProject);
@@ -468,7 +467,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		final IObservableValue<String> imageNameTextObservable = WidgetProperties.text(SWT.Modify).observeDelayed(500,
 				imageNameText);
 		final IObservableValue<String> imageNameObservable = BeanProperties
-				.value(IDeployImagePageModel.PROPERTY_IMAGE_NAME).observe(model);
+				.value(IDeployImagePageModel.PROPERTY_IMAGE_NAME, String.class).observe(model);
 		Binding imageBinding = ValueBindingBuilder.bind(imageNameTextObservable)
 				.converting(new TrimmingStringConverter()).validatingAfterConvert(new DockerImageValidator())
 				.to(imageNameObservable).in(dbc);
@@ -511,7 +510,6 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				.converting(new IsNotNull2BooleanConverter()).in(dbc);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void createPushToRegistrySettings(final Composite parent, final DataBindingContext dbc) {
 		// checkbox
 		final Button pushImageToRegistryButton = new Button(parent, SWT.CHECK);
@@ -519,8 +517,8 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(NUM_COLUMS, 1)
 				.applyTo(pushImageToRegistryButton);
 		final IObservableValue<Boolean> pushImageToRegistryButtonObservable = BeanProperties
-				.value(IDeployImagePageModel.PROPERTY_PUSH_IMAGE_TO_REGISTRY).observe(model);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(pushImageToRegistryButton))
+				.value(IDeployImagePageModel.PROPERTY_PUSH_IMAGE_TO_REGISTRY, Boolean.class).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.buttonSelection().observe(pushImageToRegistryButton))
 				.to(pushImageToRegistryButtonObservable).in(dbc);
 
 		// registry location
@@ -532,7 +530,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(NUM_COLUMS - 1, 1)
 				.applyTo(registryLocationText);
 		final IObservableValue<String> registryLocationObservable = BeanProperties
-				.value(IDeployImagePageModel.PROPERTY_TARGET_REGISTRY_LOCATION).observe(model);
+				.value(IDeployImagePageModel.PROPERTY_TARGET_REGISTRY_LOCATION, String.class).observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(registryLocationText))
 				.to(registryLocationObservable).in(dbc);
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(registryLocationText))
@@ -547,7 +545,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(NUM_COLUMS - 1, 1)
 				.applyTo(registryUsernameText);
 		final IObservableValue<String> registryUsernameObservable = BeanProperties
-				.value(IDeployImagePageModel.PROPERTY_TARGET_REGISTRY_USERNAME).observe(model);
+				.value(IDeployImagePageModel.PROPERTY_TARGET_REGISTRY_USERNAME, String.class).observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(registryUsernameText))
 				.to(registryUsernameObservable).in(dbc);
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(registryUsernameText))
@@ -562,7 +560,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(NUM_COLUMS - 1, 1)
 				.applyTo(registryPasswordText);
 		final IObservableValue<String> registryPasswordObservable = BeanProperties
-				.value(IDeployImagePageModel.PROPERTY_TARGET_REGISTRY_PASSWORD).observe(model);
+				.value(IDeployImagePageModel.PROPERTY_TARGET_REGISTRY_PASSWORD,String.class).observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(registryPasswordText))
 				.to(registryPasswordObservable).in(dbc);
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(registryPasswordText))
@@ -642,7 +640,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 						@Override
 						public IStatus runInUIThread(IProgressMonitor monitor) {
 							NewProjectWizard newProjectWizard = new NewProjectWizard(model.getConnection(),
-									(List<IProject>) model.getProjects());
+									model.getProjects());
 							int result = new OkCancelButtonWizardDialog(getShell(), newProjectWizard).open();
 							// reload projects to reflect changes that happened in
 							// projects wizard
