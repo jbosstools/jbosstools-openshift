@@ -21,6 +21,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
  *
  */
 public interface RemoteStackDebugger {
-	boolean isValid(String stackType, String stackVersion);
-	void startRemoteDebugger(IProject project, String stackType, String stackVersion, int port, Map<String, String> env, IProgressMonitor monitor) throws CoreException;
+	boolean isValid(String stackType);
+	void startRemoteDebugger(IProject project, String stackType, int port, Map<String, String> env, IProgressMonitor monitor) throws CoreException;
 }

@@ -13,20 +13,17 @@ package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
+import org.jboss.tools.openshift.core.odo.ComponentMetadata;
 import org.jboss.tools.openshift.core.odo.ComponentType;
 import org.jboss.tools.openshift.core.odo.DevfileComponentType;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.Starter;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-
-import com.redhat.devtools.alizer.api.DevfileType;
-import com.redhat.devtools.alizer.api.LanguageRecognizer;
-import com.redhat.devtools.alizer.api.RecognizerFactory;
 
 /**
  * @author Red Hat Developers
@@ -39,77 +36,44 @@ public class CreateComponentModel extends ComponentModel {
 	public static final String PROPERTY_SELECTED_COMPONENT_TYPE = "selectedComponentType";
 	public static final String PROPERTY_SELECTED_COMPONENT_STARTERS = "selectedComponentStarters";
 	public static final String PROPERTY_SELECTED_COMPONENT_STARTER = "selectedComponentStarter";
-	public static final String PROPERTY_PUSH_AFTER_CREATE = "pushAfterCreate";
-	
+
+	public static final String PROPERTY_DEVMODE_AFTER_CREATE = "devAfterCreate";
+	public static final String PROPERTY_IMPORT = "importMode";
+
 	public static final String DEVFILE_NAME = "devfile.yaml";
-	
-	private static final LanguageRecognizer recognizer = new RecognizerFactory().createLanguageRecognizer();
-	
 
 	private IProject eclipseProject;
-	
+
 	private boolean eclipseProjectHasDevfile = false;
-	
+
 	private boolean eclipseProjectEmpty = false;
-	
-	private final List<ComponentType> componentTypes;
-	
+
+	private final List<DevfileComponentType> devfileTypes;
+
 	private ComponentType selectedComponentType;
-	
+
 	private List<Starter> selectedComponentStarters;
-	
+
 	private Starter selectedComponentStarter;
-	
-	private boolean pushAfterCreate = true;
-	
-	private static class DevfileTypeAdapter implements DevfileType {
-	  private final DevfileComponentType delegate;
 
-    private DevfileTypeAdapter(DevfileComponentType delegate) {
-	    this.delegate = delegate;
-	  }
+	private boolean devModeAfterCreate = true;
 
-    @Override
-    public String getLanguage() {
-      return delegate.getLanguage();
-    }
+	private boolean importMode;
 
-    @Override
-    public String getName() {
-      return delegate.getName();
-    }
-
-    @Override
-    public String getProjectType() {
-      return delegate.getProjectType();
-    }
-
-    @Override
-    public List<String> getTags() {
-      return delegate.getTags();
-    }
-
-    public ComponentType getDelegate() {
-      return delegate;
-    }
-	}
-	
-	private boolean defaultApplication;
-	
 	/**
 	 * @param odo
 	 */
-	public CreateComponentModel(Odo odo, List<ComponentType> componentTypes, String projectName, String applicationName, IProject project) {
-		super(odo, projectName, applicationName==null?"app":applicationName, null);
-		this.componentTypes = componentTypes;
+	public CreateComponentModel(Odo odo, List<DevfileComponentType> componentTypes, String projectName,
+			IProject project) {
+		super(odo, projectName, null);
+		this.devfileTypes = componentTypes;
 		if (project != null) {
-		  setEclipseProject(project);
-		  setComponentName(project.getName());
+			setEclipseProject(project);
+			setComponentName(project.getName());
 		}
 		if (getSelectedComponentType() == null && !componentTypes.isEmpty()) {
 			setSelectedComponentType(componentTypes.get(0));
 		}
-		defaultApplication = applicationName == null;
 	}
 
 	/**
@@ -128,47 +92,55 @@ public class CreateComponentModel extends ComponentModel {
 		setEclipseProjectEmpty(ProjectUtils.isEmpty(project));
 		setSelectedComponentStarter(null);
 		if (!isEclipseProjectHasDevfile()) {
-		  List<DevfileTypeAdapter> types = componentTypes.stream().filter(t -> t instanceof DevfileComponentType).map(t -> new DevfileTypeAdapter((DevfileComponentType) t)).collect(Collectors.toList());
-		  try {
-        DevfileTypeAdapter type = recognizer.selectDevFileFromTypes(project.getLocation().toOSString(), types);
-        if (type != null) {
-          setSelectedComponentType(type.getDelegate());
-        }
-      } catch (IOException e) {
-        OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
-      }
+			try {
+				List<ComponentMetadata> types = getOdo().analyze(project.getLocation().toOSString());
+				if (!types.isEmpty()) {
+					ComponentMetadata metadata = types.get(0);
+					Optional<DevfileComponentType> type = devfileTypes.stream()
+							.filter(t -> t.getDevfileRegistry().getName().equals(metadata.getRegistry())
+									&& t.getName().equals(metadata.getComponentType()))
+							.findFirst();
+					if (type.isPresent()) {
+						setSelectedComponentType(type.get());
+					}
+				}
+			} catch (IOException e) {
+				OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+			}
 		}
 	}
 
 	/**
-   * @return the eclipseProjectHasDevfile
-   */
-  public boolean isEclipseProjectHasDevfile() {
-    return eclipseProjectHasDevfile;
-  }
+	 * @return the eclipseProjectHasDevfile
+	 */
+	public boolean isEclipseProjectHasDevfile() {
+		return eclipseProjectHasDevfile;
+	}
 
-  /**
-   * @param eclipseProjectHasDevfile the eclipseProjectHasDevfile to set
-   */
-  public void setEclipseProjectHasDevfile(boolean eclipseProjectHasDevfile) {
-    firePropertyChange(PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE, this.eclipseProjectHasDevfile, this.eclipseProjectHasDevfile = eclipseProjectHasDevfile);
-  }
+	/**
+	 * @param eclipseProjectHasDevfile the eclipseProjectHasDevfile to set
+	 */
+	public void setEclipseProjectHasDevfile(boolean eclipseProjectHasDevfile) {
+		firePropertyChange(PROPERTY_ECLIPSE_PROJECT_HAS_DEVFILE, this.eclipseProjectHasDevfile,
+				this.eclipseProjectHasDevfile = eclipseProjectHasDevfile);
+	}
 
-  /**
-   * @return the eclipseProjectEmpty
-   */
-  public boolean isEclipseProjectEmpty() {
-    return eclipseProjectEmpty;
-  }
+	/**
+	 * @return the eclipseProjectEmpty
+	 */
+	public boolean isEclipseProjectEmpty() {
+		return eclipseProjectEmpty;
+	}
 
-  /**
-   * @param eclipseProjectEmpty the eclipseProjectEmpty to set
-   */
-  public void setEclipseProjectEmpty(boolean eclipseProjectEmpty) {
-    firePropertyChange(PROPERTY_ECLIPSE_PROJECT_EMPTY, this.eclipseProjectEmpty, this.eclipseProjectEmpty = eclipseProjectEmpty);
-  }
+	/**
+	 * @param eclipseProjectEmpty the eclipseProjectEmpty to set
+	 */
+	public void setEclipseProjectEmpty(boolean eclipseProjectEmpty) {
+		firePropertyChange(PROPERTY_ECLIPSE_PROJECT_EMPTY, this.eclipseProjectEmpty,
+				this.eclipseProjectEmpty = eclipseProjectEmpty);
+	}
 
-  /**
+	/**
 	 * @return the selectedComponentType
 	 */
 	public ComponentType getSelectedComponentType() {
@@ -179,67 +151,74 @@ public class CreateComponentModel extends ComponentModel {
 	 * @param selectedComponentType the selectedComponentType to set
 	 */
 	public void setSelectedComponentType(ComponentType selectedComponentType) {
-		firePropertyChange(PROPERTY_SELECTED_COMPONENT_TYPE, this.selectedComponentType, this.selectedComponentType = selectedComponentType);
+		firePropertyChange(PROPERTY_SELECTED_COMPONENT_TYPE, this.selectedComponentType,
+				this.selectedComponentType = selectedComponentType);
 		if (selectedComponentType instanceof DevfileComponentType) {
-		  try {
-        setSelectedComponentStarters(getOdo().getComponentTypeInfo(selectedComponentType.getName(), ((DevfileComponentType) selectedComponentType).getDevfileRegistry().getName()).getStarters());
-      } catch (IOException e) {
-        setSelectedComponentStarters(Collections.emptyList());
-      }
-		  setSelectedComponentStarter(null);
+			try {
+				setSelectedComponentStarters(getOdo()
+						.getComponentTypeInfo(selectedComponentType.getName(),
+								((DevfileComponentType) selectedComponentType).getDevfileRegistry().getName())
+						.getStarters());
+			} catch (IOException e) {
+				OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+				setSelectedComponentStarters(Collections.emptyList());
+			}
+			setSelectedComponentStarter(null);
 		}
 	}
 
 	/**
-   * @return the selectedComponentStarters
-   */
-  public List<Starter> getSelectedComponentStarters() {
-    return selectedComponentStarters;
-  }
-
-  /**
-   * @param selectedComponentStarters the selectedComponentStarters to set
-   */
-  public void setSelectedComponentStarters(List<Starter> selectedComponentStarters) {
-    firePropertyChange(PROPERTY_SELECTED_COMPONENT_STARTERS, this.selectedComponentStarters, this.selectedComponentStarters = selectedComponentStarters);
-  }
-
-  /**
-   * @return the selectedComponentStarter
-   */
-  public Starter getSelectedComponentStarter() {
-    return selectedComponentStarter;
-  }
-
-  /**
-   * @param selectedComponentStarter the selectedComponentStarter to set
-   */
-  public void setSelectedComponentStarter(Starter selectedComponentStarter) {
-    firePropertyChange(PROPERTY_SELECTED_COMPONENT_STARTER, this.selectedComponentStarter, this.selectedComponentStarter = selectedComponentStarter);
-  }
-
-  /**
-	 * @return the pushAfterCreate
+	 * @return the selectedComponentStarters
 	 */
-	public boolean isPushAfterCreate() {
-		return pushAfterCreate;
+	public List<Starter> getSelectedComponentStarters() {
+		return selectedComponentStarters;
 	}
 
 	/**
-	 * @param pushAfterCreate the pushAfterCreate to set
+	 * @param selectedComponentStarters the selectedComponentStarters to set
 	 */
-	public void setPushAfterCreate(boolean pushAfterCreate) {
-		firePropertyChange(PROPERTY_PUSH_AFTER_CREATE, this.pushAfterCreate, this.pushAfterCreate = pushAfterCreate);
+	public void setSelectedComponentStarters(List<Starter> selectedComponentStarters) {
+		firePropertyChange(PROPERTY_SELECTED_COMPONENT_STARTERS, this.selectedComponentStarters,
+				this.selectedComponentStarters = selectedComponentStarters);
+	}
+
+	/**
+	 * @return the selectedComponentStarter
+	 */
+	public Starter getSelectedComponentStarter() {
+		return selectedComponentStarter;
+	}
+
+	/**
+	 * @param selectedComponentStarter the selectedComponentStarter to set
+	 */
+	public void setSelectedComponentStarter(Starter selectedComponentStarter) {
+		firePropertyChange(PROPERTY_SELECTED_COMPONENT_STARTER, this.selectedComponentStarter,
+				this.selectedComponentStarter = selectedComponentStarter);
+	}
+
+	public boolean isDevModeAfterCreate() {
+		return devModeAfterCreate;
+	}
+
+	public void setDevModeAfterCreate(boolean devModeAfterCreate) {
+		firePropertyChange(PROPERTY_DEVMODE_AFTER_CREATE, this.devModeAfterCreate,
+				this.devModeAfterCreate = devModeAfterCreate);
 	}
 
 	/**
 	 * @return the componentTypes
 	 */
-	public List<ComponentType> getComponentTypes() {
-		return componentTypes;
+	public List<DevfileComponentType> getComponentTypes() {
+		return devfileTypes;
 	}
 
-	public boolean isDefaultApplication() {
-		return defaultApplication;
+	public boolean isImportMode() {
+		return importMode;
 	}
+
+	public void setImportMode(boolean importMode) {
+		firePropertyChange(PROPERTY_IMPORT, this.importMode, this.importMode = importMode);
+	}
+
 }

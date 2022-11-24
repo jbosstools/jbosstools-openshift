@@ -22,7 +22,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
@@ -30,8 +29,7 @@ import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.ServiceTemplate;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
-import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ProjectElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.NamespaceElement;
 import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateServiceWizard;
 
 /**
@@ -42,39 +40,26 @@ public class CreateServiceHandler extends AbstractHandler {
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		ApplicationElement application = null;
-		ProjectElement project = UIUtils.getFirstElement(selection, ProjectElement.class);
-		if (project == null) {
-			application = UIUtils.getFirstElement(selection, ApplicationElement.class);
-			if (application == null) {
-				return OpenShiftUIActivator.statusFactory().cancelStatus("No project or application selected"); //$NON-NLS-1$
-			}
-			project = application.getParent();
-		}
+		NamespaceElement project = UIUtils.getFirstElement(selection, NamespaceElement.class);
 		try {
 			Odo odo = project.getParent().getOdo();
 			List<ServiceTemplate> templates = odo.getServiceTemplates();
 			if (!templates.isEmpty()) {
-				final IWizard createServiceWizard = new CreateServiceWizard(templates,
-						project.getWrapped(),
-						application == null ? "" : application.getWrapped().getName(), odo);
+				final IWizard createServiceWizard = new CreateServiceWizard(templates, project.getWrapped(), odo);
 				if (WizardUtils.openWizardDialog(createServiceWizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
-				  if (application==null) {
-				    project.refresh();
-				  } else {
-				    application.refresh();
-				  }
+					project.refresh();
 				}
 			} else {
-				MessageDialog.openWarning(HandlerUtil.getActiveShell(event), "Create service", "No operators installed on your cluster, can't create services");
+				MessageDialog.openWarning(HandlerUtil.getActiveShell(event), "Create service",
+						"No operators installed on your cluster, can't create services");
 			}
 			return Status.OK_STATUS;
 
 		} catch (IOException e) {
 			String title = "Unable to create service";
 			String message = e.getMessage();
-			MessageDialog.open(MessageDialog.ERROR,
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), title, message, SWT.NONE);
+			MessageDialog.open(MessageDialog.ERROR, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+					title, message, SWT.NONE);
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 	}

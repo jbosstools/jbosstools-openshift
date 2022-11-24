@@ -49,12 +49,12 @@ public class PythonRemoteStackDebugger implements RemoteStackDebugger, IDebugPro
 	private static final List<String> SUPPORTED = List.of("python", "django");
 
 	@Override
-	public boolean isValid(String stackType, String stackVersion) {
+	public boolean isValid(String stackType) {
 		return SUPPORTED.contains(stackType.toLowerCase());
 	}
 
 	@Override
-	public void startRemoteDebugger(IProject project, String stackType, String stackVersion, int port, Map<String, String> env, IProgressMonitor monitor) throws CoreException {
+	public void startRemoteDebugger(IProject project, String stackType, int port, Map<String, String> env, IProgressMonitor monitor) throws CoreException {
 		try {
 		  waitForDebugger(port);
 			String name = "OpenShift remote (Python) " + project.getName();

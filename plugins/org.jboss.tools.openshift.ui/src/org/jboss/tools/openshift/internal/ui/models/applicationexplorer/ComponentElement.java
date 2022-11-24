@@ -17,10 +17,15 @@ import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
  * @author Red Hat Developers
  *
  */
-public class ComponentElement extends AbstractOpenshiftUIElement<Component, ApplicationElement, ApplicationExplorerUIModel> {
+public class ComponentElement extends AbstractOpenshiftUIElement<Component, NamespaceElement, ApplicationExplorerUIModel> {
 	
-	public ComponentElement(Component component, ApplicationElement parentElement) {
+	public ComponentElement(Component component, NamespaceElement parentElement) {
 		super(parentElement, component);
 	}
 
+	@Override
+	public void refresh() {
+		fireChanged(this);
+	}
+	
 }

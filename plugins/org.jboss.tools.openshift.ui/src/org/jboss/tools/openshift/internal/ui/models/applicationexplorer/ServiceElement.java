@@ -17,9 +17,9 @@ import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
  * @author Red Hat Developers
  *
  */
-public class ServiceElement extends AbstractOpenshiftUIElement<Service, ApplicationElement, ApplicationExplorerUIModel> {
+public class ServiceElement extends AbstractOpenshiftUIElement<Service, NamespaceElement, ApplicationExplorerUIModel> {
 	
-	public ServiceElement(Service service, ApplicationElement parentElement) {
+	public ServiceElement(Service service, NamespaceElement parentElement) {
 		super(parentElement, service);
 	}
 

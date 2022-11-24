@@ -10,46 +10,38 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
-import java.util.List;
-
 public class ComponentDescriptor {
-  private final String path;
-  private final String project;
-  private final String application;
-  private final String name;
-  private final List<Integer> ports;
-  private final ComponentKind kind;
+	private final String managedByVersion;
+	private String path;
+	private final String name;
 
-  ComponentDescriptor(String project, String application, String path, String name, ComponentKind kind, List<Integer> ports) {
-    this.project = project;
-    this.application = application;
-    this.path = path;
-    this.name = name;
-    this.kind = kind;
-    this.ports = ports;
-  }
+	private final String managedBy;
 
-  public String getProject() {
-    return project;
-  }
+	public ComponentDescriptor(String name, String path, String managedBy, String managedByVersion) {
+		this.name = name;
+		this.path = path;
+		this.managedBy = managedBy;
+		this.managedByVersion = managedByVersion;
+	}
 
-  public String getApplication() {
-    return application;
-  }
+	public String getName() {
+		return name;
+	}
 
-  public String getPath() {
-    return path;
-  }
+	public String getPath() {
+		return path;
+	}
 
-  public String getName() {
-    return name;
-  }
+	public void setPath(String path) {
+		this.path = path;
+	}
 
-  public ComponentKind getKind() {
-    return kind;
-  }
+	public String getManagedBy() {
+		return managedBy;
+	}
 
-  public List<Integer> getPorts() {
-    return ports;
-  }
+	public boolean isPreOdo3() {
+		return managedBy != null && "odo".equals(managedBy) && managedByVersion != null && managedByVersion.length() > 1
+				&& managedByVersion.charAt(1) - '0' < 3;
+	}
 }

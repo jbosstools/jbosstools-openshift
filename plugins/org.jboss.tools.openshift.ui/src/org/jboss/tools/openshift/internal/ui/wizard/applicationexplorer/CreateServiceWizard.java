@@ -24,8 +24,8 @@ public class CreateServiceWizard extends Wizard {
 	
 	private CreateServiceWizardPage page;
 	
-	public CreateServiceWizard(List<ServiceTemplate> serviceTemplates, String project, String application, Odo odo) {
-		this.addPage(this.page = new CreateServiceWizardPage(this, new CreateServiceModel(odo, serviceTemplates, project, application)));
+	public CreateServiceWizard(List<ServiceTemplate> serviceTemplates, String project, Odo odo) {
+		this.addPage(this.page = new CreateServiceWizardPage(this, new CreateServiceModel(odo, serviceTemplates, project)));
 		setNeedsProgressMonitor(true);
 		setWindowTitle("Create service");
 	}

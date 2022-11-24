@@ -20,19 +20,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<ComponentType>> {
-  private static final String DEVFILE_NAME_FIELD = "Name";
+  private static final long serialVersionUID = 7595264268359691655L;
 
-  private static final String DEVFILE_ITEMS_FIELD = "items";
-  
-  private static final String DEVFILE_REGISTRY = "Registry";
+private static final String DEVFILE_NAME_FIELD = "name";
 
-  private static final String DEVFILE_DISPLAY_NAME_FIELD = "DisplayName";
+  private static final String DEVFILE_REGISTRY = "registry";
 
-  private static final String DEVFILE_DESCRIPTION_FIELD = "Description";
+  private static final String DEVFILE_DISPLAY_NAME_FIELD = "displayName";
+
+  private static final String DEVFILE_DESCRIPTION_FIELD = "description";
   
-  private static final String DEVFILE_LANGUAGE_FIELD = "Language";
+  private static final String DEVFILE_LANGUAGE_FIELD = "language";
   
-  private static final String DEVFILE_TAGS_FIELD = "Tags";
+  private static final String DEVFILE_TAGS_FIELD = "tags";
 
   public ComponentTypesDeserializer() {
     super(TypeFactory.defaultInstance().constructCollectionType(List.class, ComponentType.class));
@@ -41,7 +41,7 @@ public class ComponentTypesDeserializer extends StdNodeBasedDeserializer<List<Co
   @Override
   public List<ComponentType> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
     List<ComponentType> result = new ArrayList<>();
-    result.addAll(parseDevfileItems(root.get(DEVFILE_ITEMS_FIELD)));
+    result.addAll(parseDevfileItems(root));
     return result;
   }
 

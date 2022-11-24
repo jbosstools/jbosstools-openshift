@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -8,24 +8,24 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
+package org.jboss.tools.openshift.core.odo;
 
-import org.eclipse.jface.wizard.Wizard;
+public interface ComponentMetadata {
+	String getRegistry();
 
-/**
- * @author Red Hat Developers
- *
- */
-public class CreateURLWizard extends Wizard {
-	
-	public CreateURLWizard(CreateURLModel model) {
-		this.addPage(new CreateURLWizardPage(this, model));
-		setNeedsProgressMonitor(true);
-		setWindowTitle("Create url");
-	}
+	String getComponentType();
 
-	@Override
-	public boolean performFinish() {
-		return true;
+	public static ComponentMetadata of(String registry, String componentType) {
+		return new ComponentMetadata() {
+			@Override
+			public String getRegistry() {
+				return registry;
+			}
+
+			@Override
+			public String getComponentType() {
+				return componentType;
+			}
+		};
 	}
 }

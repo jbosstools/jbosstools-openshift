@@ -1,14 +1,11 @@
 {
-    "kind": "List",
-    "apiVersion": "odo.dev/v1alpha1",
-    "metadata": {
-        "creationTimestamp": null
-    },
-    "registries": [
-        {
-            "Name": "DefaultDevfileRegistry",
-            "URL": "https://github.com/odo-devfiles/registry",
-            "Secure": false
-        }
-    ]
+	"preferences": [
+	],
+	"registries": [
+		{
+			"name": "DefaultDevfileRegistry",
+			"url": "https://registry.devfile.io",
+			"secure": true
+		}
+	]
 }

@@ -20,13 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DevfileRegistriesDeserializer extends StdNodeBasedDeserializer<List<DevfileRegistry>> {
-  private static final String NAME_FIELD = "Name";
-  
-  private static final String URL_FIELD = "URL";
-  
-  private static final String SECURE_FIELD = "Secure";
+  private static final long serialVersionUID = -2290623576338522754L;
 
-  private static final String REGISTRIES_FIELD = "registries";
+private static final String NAME_FIELD = "name"; //$NON-NLS-1$
+  
+  private static final String URL_FIELD = "url"; //$NON-NLS-1$
+  
+  private static final String SECURE_FIELD = "secure"; //$NON-NLS-1$
+
+  private static final String REGISTRIES_FIELD = "registries"; //$NON-NLS-1$
 
   public DevfileRegistriesDeserializer() {
     super(TypeFactory.defaultInstance().constructCollectionType(List.class, DevfileRegistry.class));

@@ -33,7 +33,7 @@ public class ComponentDescriptorTest {
   public static void setup() {
     MAPPER = new ObjectMapper();
     SimpleModule module = new SimpleModule();
-    module.addDeserializer(List.class, new ComponentDescriptorsDeserializer());
+    module.addDeserializer(List.class, new ComponentDescriptorsDeserializer("."));
     MAPPER.registerModule(module);
   }
 
@@ -58,8 +58,6 @@ public class ComponentDescriptorTest {
     Assert.assertEquals(1, descriptors.size());
     ComponentDescriptor descriptor = descriptors.get(0);
     Assert.assertNotNull(descriptor);
-    Assert.assertEquals("app", descriptor.getApplication());
-    Assert.assertEquals("demo", descriptor.getProject());
-    Assert.assertEquals("q1-maven", descriptor.getName());
+    Assert.assertEquals("devcomp", descriptor.getName());
   }
 }

@@ -11,34 +11,17 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
+
+import org.jboss.tools.openshift.core.odo.Odo;
 
 /**
  * @author Red Hat Developers
  */
-public class AboutHandler extends AbstractHandler {
+public class AboutHandler extends OdoHandler {
 
 	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		ApplicationExplorerUIModel cluster = UIUtils.getFirstElement(selection, ApplicationExplorerUIModel.class);
-		if (cluster == null) {
-			return OpenShiftUIActivator.statusFactory().cancelStatus("No cluster selected"); //$NON-NLS-1$
-		}
-		try {
-			cluster.getOdo().about();
-		} catch (IOException e) {
-			throw new ExecutionException(e.getLocalizedMessage(), e);
-		}
-		return null;
+	public void actionPerformed(Odo odo) throws IOException {
+		odo.about();
 	}
-
 
 }

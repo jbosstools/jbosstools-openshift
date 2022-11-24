@@ -10,14 +10,16 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
+import org.jboss.tools.openshift.core.odo.ComponentFeature;
+
 /**
  * @author Red Hat Developers
  *
  */
-public class ShowLogHandler extends LogHandler {
+public class DevHandler extends FeatureHandler {
 
-	public ShowLogHandler() {
-		super(false);
+	public DevHandler() {
+		super(ComponentFeature.DEV);
 	}
 
 }

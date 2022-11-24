@@ -19,11 +19,11 @@ import org.jboss.tools.openshift.core.odo.Odo;
 public class CreateDevfileRegistryModel extends OdoModel {
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_URL = "URL";
-	public static final String PROPERTY_SECURE = "secure";
+	public static final String PROPERTY_TOKEN = "token";
 
 	private String name;
 	private String url;
-	private boolean secure;
+	private String token;
 
 	public CreateDevfileRegistryModel(Odo odo) {
 		super(odo);
@@ -44,24 +44,24 @@ public class CreateDevfileRegistryModel extends OdoModel {
 	}
 
 	/**
-   * @return the url
-   */
-  public String getURL() {
-    return url;
-  }
-
-  /**
-   * @param url the url to set
-   */
-  public void setURL(String url) {
-    firePropertyChange(PROPERTY_URL, this.url,  this.url = url);
-  }
-
-  public boolean isSecure() {
-		return secure;
+	 * @return the url
+	 */
+	public String getURL() {
+		return url;
 	}
 
-	public void setSecure(boolean secure) {
-		firePropertyChange(PROPERTY_SECURE, this.secure, this.secure = secure);
+	/**
+	 * @param url the url to set
+	 */
+	public void setURL(String url) {
+		firePropertyChange(PROPERTY_URL, this.url, this.url = url);
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		firePropertyChange(PROPERTY_TOKEN, this.token, this.token = token);
 	}
 }

@@ -11,19 +11,11 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.Status;
+
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.core.odo.Odo;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
-import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceElement;
 
 /**
  * @author Red Hat Developers
@@ -31,45 +23,17 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ServiceE
 public class DescribeHandler extends OdoHandler {
 
 	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		ComponentElement component = UIUtils.getFirstElement(selection, ComponentElement.class);
-		ServiceElement service = null;
-		ApplicationElement application = null;
-		if (component == null) {
-			service = UIUtils.getFirstElement(selection, ServiceElement.class);
-			if (service == null) {
-				application = UIUtils.getFirstElement(selection, ApplicationElement.class);
-				if (application == null) {
-					return OpenShiftUIActivator.statusFactory()
-					        .cancelStatus("No application, component or service selected"); //$NON-NLS-1$
-				}
-			}
-		}
+	public void actionPerformed(Odo odo) throws IOException {
 		try {
-			Odo odo = component!=null?component.getRoot().getOdo():service!=null?service.getRoot().getOdo():application.getRoot().getOdo();
-			final ServiceElement fService = service;
-			final ApplicationElement fApplication = application;
-			executeInJob("Describe", monitor -> execute(odo, component, fService, fApplication));
-			return Status.OK_STATUS;
-		} catch (IOException e) {
-			return OpenShiftUIActivator.statusFactory().errorStatus(e);
-		}
-	}
-
-	private void execute(Odo odo, ComponentElement component, ServiceElement service, ApplicationElement application) {
-		try {
-			if (component != null) {
-				odo.describeComponent(component.getParent().getParent().getWrapped(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
-			} else if (service != null) {
-				String template = odo.getServiceTemplate(service.getParent().getParent().getWrapped(), service.getParent().getWrapped().getName(), service.getWrapped().getName());
-				odo.describeServiceTemplate(template);
-			} else {
-				odo.describeApplication(application.getParent().getWrapped(), application.getWrapped().getName());
+			if (getComponent() != null) {
+				ComponentElement component = getComponent();
+				odo.describeComponent(component.getParent().getWrapped(), component.getWrapped().getPath(),
+						component.getWrapped().getName());
 			}
 		} catch (IOException e) {
 			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(),
-			        "Describe", "Describe error message:" + e.getLocalizedMessage()));
+					"Describe", "Describe error message:" + e.getLocalizedMessage()));
 		}
 	}
+
 }

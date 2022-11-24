@@ -32,7 +32,7 @@ public class OpenInBrowserHandler extends AbstractHandler {
 		if (urlElement == null) {
 			return OpenShiftUIActivator.statusFactory().cancelStatus("No url selected"); //$NON-NLS-1$
 		}
-		String url = urlElement.getWrapped().getProtocol() + "://" + urlElement.getWrapped().getHost();
+		String url = urlElement.getWrapped().getProtocol() + "://" + urlElement.getWrapped().getHost() +  ":" + urlElement.getWrapped().getLocalPort();
 		new BrowserUtility().checkedCreateInternalBrowser(url, url, OpenShiftUIActivator.PLUGIN_ID,
 		        OpenShiftUIActivator.getDefault().getLog());
 		return null;

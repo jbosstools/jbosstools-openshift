@@ -22,7 +22,7 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.Componen
 /**
  * @author Red Hat Developers
  */
-public abstract class ComponentHandler extends OdoHandler {
+public abstract class ComponentHandler extends OdoJobHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {

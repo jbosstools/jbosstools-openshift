@@ -1,47 +1,58 @@
 package org.jboss.tools.openshift.internal.ui.propertytester;
 
 import org.eclipse.core.expressions.PropertyTester;
+import org.jboss.tools.openshift.core.odo.ComponentFeatures;
 import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 
 public class ComponentStatePropertyTester extends PropertyTester {
 
-	private static final String VALUE_PUSHED = "pushed";
-	
-	private static final String VALUE_NOT_PUSHED = "not pushed";
-	
-	private static final String VALUE_NO_CONTEXT = "no context";
-	
+	private static final String VALUE_IS_DEBUG = "isDebug";
+	private static final String VALUE_IS_DEPLOY = "isDeploy";
+	private static final String VALUE_IS_DEV = "isDev";
+
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
-		receiver = getComponentElement(receiver);
-		if (!(receiver instanceof ComponentElement) || !(expectedValue instanceof Boolean) || args == null
-		        || args.length != 1 || !(args[0] instanceof String)) {
+		ComponentElement component = getComponentElement(receiver);
+		if (!(component != null) || !(expectedValue instanceof Boolean) || args == null || args.length != 1
+				|| !(args[0] instanceof String)) {
 			return false;
 		}
-		ComponentElement component = (ComponentElement) receiver;
-		switch (component.getWrapped().getState()) {
-		case PUSHED:
-			return expectedValue.equals(args[0].equals(VALUE_PUSHED));
-		case NOT_PUSHED:
-			return expectedValue.equals(args[0].equals(VALUE_NOT_PUSHED));
-		case NO_CONTEXT:
-			return expectedValue.equals(args[0].equals(VALUE_NO_CONTEXT));
+		String arg = (String) args[0];
+		ComponentFeatures features = component.getWrapped().getLiveFeatures();
+
+		switch (arg) {
+		case VALUE_IS_DEBUG:
+			return expectedValue.equals(Boolean.valueOf(features.isDebug()));
+
+		case VALUE_IS_DEPLOY:
+
+			return expectedValue.equals(Boolean.valueOf(features.isDeploy()));
+		case VALUE_IS_DEV:
+			return expectedValue.equals(Boolean.valueOf(features.isDev()));
+
+		default:
+			break;
 		}
+
 		return false;
 	}
 
 	/**
 	 * @param receiver the receiver
-	 * @return the receiver adapter to ComponentElement or null if not found
+	 * @return the receiver adapted to ComponentElement or null if not found
 	 */
-	private Object getComponentElement(Object receiver) {
-		if (receiver instanceof AbstractOpenshiftUIElement<?, ?, ?>) {
-			while (!(receiver instanceof ComponentElement)) {
-				receiver = ((AbstractOpenshiftUIElement<?, AbstractOpenshiftUIElement<?,?,?>, ?>)receiver).getParent();
+	private ComponentElement getComponentElement(Object receiver) {
+		Object result = receiver;
+		if (result instanceof AbstractOpenshiftUIElement<?, ?, ?>) {
+			while (!(result instanceof ComponentElement) && result instanceof AbstractOpenshiftUIElement<?, ?, ?>) {
+				result = ((AbstractOpenshiftUIElement<?, ?, ?>) result).getParent();
 			}
 		}
-		return receiver;
+		if (result instanceof ComponentElement) {
+			return (ComponentElement) result;
+		}
+		return null;
 	}
 
 }

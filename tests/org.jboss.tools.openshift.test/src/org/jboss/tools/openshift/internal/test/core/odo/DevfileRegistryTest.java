@@ -59,7 +59,7 @@ public class DevfileRegistryTest {
     DevfileRegistry registry = registries.get(0);
     Assert.assertNotNull(registry);
     Assert.assertEquals("DefaultDevfileRegistry", registry.getName());
-    Assert.assertEquals("https://github.com/odo-devfiles/registry", registry.getURL());
-    Assert.assertEquals(false, registry.isSecure());
+    Assert.assertEquals("https://registry.devfile.io", registry.getURL());
+    Assert.assertEquals(true, registry.isSecure());
   }
 }
