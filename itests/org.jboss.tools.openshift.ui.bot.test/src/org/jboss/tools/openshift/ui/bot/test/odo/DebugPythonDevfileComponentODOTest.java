@@ -66,7 +66,7 @@ public class DebugPythonDevfileComponentODOTest extends AbstractODOTest {
 	@BeforeClass
 	public static void setupWorkspace() {
 		importEmptyProject(ECLIPSE_PROJECT);
-		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "python", "django-example", true);
+		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "python", "flask-example", true);
 		createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080);
 	}
 

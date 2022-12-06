@@ -1,15 +1,15 @@
 {
     "kind": "Template",
-    "apiVersion": "v1",
+    "apiVersion": "template.openshift.io/v1",
     "metadata": {
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss",
-            "version": "1.0.0",
-            "openshift.io/display-name": "JBoss EAP 7.4",
+            "version": "7.4.0",
+            "openshift.io/display-name": "JBoss EAP 7.4.0",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
-            "description": "An example Red Hat JBoss EAP 7 application. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap72/README.adoc",
-            "template.openshift.io/long-description": "This template defines resources needed to develop a Red Hat JBoss Enterprise Application Platform 7.2 based application, including a build configuration, application deployment configuration and secure communication using edge TLS.",
+            "description": "An example JBoss Enterprise Application Platform application. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap74/README.adoc",
+            "template.openshift.io/long-description": "This template defines resources needed to develop a JBoss Enterprise Application Platform based application, including a build configuration, application deployment configuration and secure communication using edge TLS.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-enterprise-application-platform/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
@@ -17,15 +17,29 @@
     },
     "labels": {
         "template": "eap74-basic-s2i",
-        "xpaas": "1.0.0"
+        "xpaas": "7.4.0"
     },
-    "message": "A new EAP based application has been created in your project.",
+    "message": "A new JBoss EAP based application has been created in your project.",
     "parameters": [
         {
             "displayName": "Application Name",
             "description": "The name for the application.",
             "name": "APPLICATION_NAME",
             "value": "eap-app",
+            "required": true
+        },
+        {
+            "displayName": "EAP Image Name",
+            "description": "Name of the EAP image to use, example: jboss-eap74-openjdk11-openshift:latest",
+            "name": "EAP_IMAGE_NAME",
+            "value": "jboss-eap74-openjdk11-openshift:7.4.0",
+            "required": true
+        },
+        {
+            "displayName": "EAP Runtime Image Name",
+            "description": "Name of the EAP image to use, example: jboss-eap74-openjdk11-runtime-openshift:latest",
+            "name": "EAP_RUNTIME_IMAGE_NAME",
+            "value": "jboss-eap74-openjdk11-runtime-openshift:7.4.0",
             "required": true
         },
         {
@@ -39,26 +53,39 @@
             "displayName": "Git Reference",
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
-            "value": "openshift",
+            "value": "7.4.x",
             "required": false
         },
         {
             "displayName": "Context Directory",
             "description": "Path within Git project to build; empty for root project directory.",
             "name": "CONTEXT_DIR",
-            "value": "helloworld",
+            "value": "kitchensink",
+            "required": false
+        },
+        {
+            "displayName": "Galleon layers",
+            "description": "Comma separated list of Galleon layers to provision a server.",
+            "name": "GALLEON_PROVISION_LAYERS",
+            "required": false
+        },
+        {
+            "displayName": "Enable ExampleDS datasource",
+            "description": "Enable ExampleDS datasource.",
+            "name": "ENABLE_GENERATE_DEFAULT_DATASOURCE",
+            "value": "false",
             "required": false
         },
         {
             "displayName": "Queues",
-            "description": "Queue names",
+            "description": "Queue names, separated by commas. These queues will be automatically created when the broker starts. Also, they will be made accessible as JNDI resources in EAP. Note that all queues used by the application *must* be specified here in order to be created automatically on the remote AMQ broker.",
             "name": "MQ_QUEUES",
             "value": "",
             "required": false
         },
         {
             "displayName": "Topics",
-            "description": "Topic names",
+            "description": "Topic names, separated by commas. These topics will be automatically created when the broker starts. Also, they will be made accessible as JNDI resources in EAP. Note that all topics used by the application *must* be specified here in order to be created automatically on the remote AMQ broker.",
             "name": "MQ_TOPICS",
             "value": "",
             "required": false
@@ -190,8 +217,8 @@
         },
         {
             "kind": "Route",
-            "apiVersion": "v1",
-            "id": "${APPLICATION_NAME}-http",
+            "apiVersion": "route.openshift.io/v1",
+            "id": "${APPLICATION_NAME}-https",
             "metadata": {
                 "name": "${APPLICATION_NAME}",
                 "labels": {
@@ -204,12 +231,16 @@
             "spec": {
                 "to": {
                     "name": "${APPLICATION_NAME}"
-               }
+                },
+                "tls": {
+                    "insecureEdgeTerminationPolicy": "Redirect",
+                    "termination": "edge"
+                }
             }
         },
         {
             "kind": "ImageStream",
-            "apiVersion": "v1",
+            "apiVersion": "image.openshift.io/v1",
             "metadata": {
                 "name": "${APPLICATION_NAME}",
                 "labels": {
@@ -218,10 +249,20 @@
             }
         },
         {
-            "kind": "BuildConfig",
-            "apiVersion": "v1",
+            "kind": "ImageStream",
+            "apiVersion": "image.openshift.io/v1",
             "metadata": {
-                "name": "${APPLICATION_NAME}",
+                "name": "${APPLICATION_NAME}-build-artifacts",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "BuildConfig",
+            "apiVersion": "build.openshift.io/v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-build-artifacts",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 }
@@ -248,6 +289,14 @@
                                 "value": "${MAVEN_ARGS_APPEND}"
                             },
                             {
+                                "name": "GALLEON_PROVISION_LAYERS",
+                                "value": "${GALLEON_PROVISION_LAYERS}"
+                            },
+                            {
+                                "name": "GALLEON_PROVISION_DEFAULT_FAT_SERVER",
+                                "value": "true"
+                            },
+                            {
                                 "name": "ARTIFACT_DIR",
                                 "value": "${ARTIFACT_DIR}"
                             }
@@ -257,14 +306,14 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap72-openshift:1.0"
+                            "name": "${EAP_IMAGE_NAME}"
                         }
                     }
                 },
                 "output": {
                     "to": {
                         "kind": "ImageStreamTag",
-                        "name": "${APPLICATION_NAME}:latest"
+                        "name": "${APPLICATION_NAME}-build-artifacts:latest"
                     }
                 },
                 "triggers": [
@@ -291,8 +340,68 @@
             }
         },
         {
+            "kind": "BuildConfig",
+            "apiVersion": "build.openshift.io/v1",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}"
+            },
+            "spec": {
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "${APPLICATION_NAME}:latest"
+                    }
+                },
+                "source": {
+                    "dockerfile": "FROM ${EAP_RUNTIME_IMAGE_NAME}\nCOPY /server $JBOSS_HOME\nUSER root\nRUN chown -R jboss:root $JBOSS_HOME && chmod -R ug+rwX $JBOSS_HOME\nUSER jboss\nCMD $JBOSS_HOME/bin/openshift-launch.sh",
+                    "images": [
+                        {
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "${APPLICATION_NAME}-build-artifacts:latest"
+                            },
+                            "paths": [
+                                {
+                                    "sourcePath": "/s2i-output/server/",
+                                    "destinationDir": "."
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "strategy": {
+                    "dockerStrategy": {
+                        "imageOptimizationPolicy": "SkipLayers",
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "name": "${EAP_RUNTIME_IMAGE_NAME}",
+                            "namespace": "${IMAGE_STREAM_NAMESPACE}"
+                        }
+                    },
+                    "type": "Docker"
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChange": {
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "${APPLICATION_NAME}-build-artifacts:latest"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ]
+            }
+        },
+        {
             "kind": "DeploymentConfig",
-            "apiVersion": "v1",
+            "apiVersion": "apps.openshift.io/v1",
             "metadata": {
                 "name": "${APPLICATION_NAME}",
                 "labels": {
@@ -330,7 +439,13 @@
                         "name": "${APPLICATION_NAME}",
                         "labels": {
                             "deploymentConfig": "${APPLICATION_NAME}",
-                            "application": "${APPLICATION_NAME}"
+                            "application": "${APPLICATION_NAME}",
+                            "com.company": "Red_Hat",
+                            "com.redhat.product-name": "Red_Hat_Runtimes",
+                            "com.redhat.product-version": "2021-Q2",
+                            "com.redhat.component-name": "EAP",
+                            "com.redhat.component-version": "7.4",
+                            "com.redhat.component-type": "application"
                         }
                     },
                     "spec": {
@@ -362,7 +477,8 @@
                                             "-c",
                                             "/opt/eap/bin/readinessProbe.sh"
                                         ]
-                                    }
+                                    },
+                                    "initialDelaySeconds": 10
                                 },
                                 "ports": [
                                     {
@@ -413,6 +529,10 @@
                                     {
                                         "name": "AUTO_DEPLOY_EXPLODED",
                                         "value": "${AUTO_DEPLOY_EXPLODED}"
+                                    },
+                                    {
+                                        "name": "ENABLE_GENERATE_DEFAULT_DATASOURCE",
+                                        "value": "${ENABLE_GENERATE_DEFAULT_DATASOURCE}"
                                     }
                                 ]
                             }

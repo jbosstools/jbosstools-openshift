@@ -15,6 +15,7 @@ import java.util.Collection;
 
 import org.eclipse.reddeer.junit.internal.runner.ParameterizedRequirementsRunnerFactory;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKVersion;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized.UseParametersRunnerFactory;
@@ -25,6 +26,7 @@ import org.junit.runners.Parameterized.UseParametersRunnerFactory;
  *
  */
 @UseParametersRunnerFactory(ParameterizedRequirementsRunnerFactory.class)
+@Ignore
 public class CRCDownloadRuntimeTest extends DownloadContainerRuntimeAbstractTest {
 
 	private CDKVersion version;

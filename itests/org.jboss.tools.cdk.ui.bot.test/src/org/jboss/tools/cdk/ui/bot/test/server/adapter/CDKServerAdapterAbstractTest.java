@@ -56,7 +56,6 @@ import org.junit.BeforeClass;
  * @author odockal
  *
  */
-@OpenPerspective(value=JBossPerspective.class)
 public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 
 	protected ServersView2 serversView;

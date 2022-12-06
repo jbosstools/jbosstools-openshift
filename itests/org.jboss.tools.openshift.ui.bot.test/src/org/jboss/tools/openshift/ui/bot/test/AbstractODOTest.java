@@ -29,6 +29,7 @@ import org.eclipse.reddeer.jface.condition.WindowIsAvailable;
 import org.eclipse.reddeer.jface.wizard.WizardDialog;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.DefaultText;
@@ -72,6 +73,11 @@ public abstract class AbstractODOTest {
 		pe.deleteAllProjects();
 		// Cleanup notifications
 		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
+		ShellIsAvailable emptyShell = new ShellIsAvailable("");
+		new WaitUntil(emptyShell, TimePeriod.MEDIUM, false);
+		if (emptyShell.getResult() != null) {
+			new DefaultShell(emptyShell.getResult()).close();
+		}
 		new WaitWhile(new JobIsRunning(new WithTextMatcher("Refresh cluster")), TimePeriod.DEFAULT, false);
 	}
 

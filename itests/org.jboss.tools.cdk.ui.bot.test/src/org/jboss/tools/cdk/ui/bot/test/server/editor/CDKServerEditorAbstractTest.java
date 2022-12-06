@@ -86,8 +86,8 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 		
 		try {
 			setupServerWizardPage(dialog);
-			new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.MEDIUM, false);
-			dialog.finish(TimePeriod.MEDIUM);
+			new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.DEFAULT, false);
+			dialog.finish(TimePeriod.DEFAULT);
 		} catch (RedDeerException coreExc) {
 			new CancelButton().click();
 			throw new CDKServerException("Exception occured in CDK server wizard, wizard was canceled", coreExc);
