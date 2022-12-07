@@ -620,7 +620,7 @@ public class OdoCli implements Odo {
 
 	private ComponentInfo parseComponentInfo(String json, ComponentKind kind) throws IOException {
 		JSonParser parser = new JSonParser(JSON_MAPPER.readTree(json));
-		return parser.parseComponentInfo(kind);
+		return parser.parseDescribeComponentInfo(kind);
 	}
 
 	@Override

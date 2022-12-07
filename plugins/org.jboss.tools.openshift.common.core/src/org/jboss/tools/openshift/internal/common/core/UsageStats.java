@@ -82,36 +82,23 @@ public class UsageStats {
 				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 
 		this.odoCli = createEventType("odo_command", "odo command", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoCreateComponent = createEventType("odo_create_component", "component type",
-				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoCreateService = createEventType("odo_create_service", "service type",
-				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoCreateStorage = createEventType("odo_create_storage", "storage size",
-				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoCreateUrl = createEventType("odo_create_url", "secure/not secure",
-				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoLogin = createEventType("odo_login", "Number of logins",
-				UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
-		this.odoLogout = createEventType("odo_logout", "Number of logouts",
-				UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		this.odoCreateComponent = createEventType("odo_create_component", "component type", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoCreateService = createEventType("odo_create_service", "service type", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoCreateStorage = createEventType("odo_create_storage", "storage size", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoCreateUrl = createEventType("odo_create_url", "secure/not secure", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoLogin = createEventType("odo_login", "Number of logins", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		this.odoLogout = createEventType("odo_logout", "Number of logouts", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
 		this.odoPush = createEventType("odo_push", "Number of push", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
-		this.odoWatch = createEventType("odo_watch", "Number of watch",
-				UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
-		this.odoDebug = createEventType("odo_debug", "Number of debug",
-				UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		this.odoWatch = createEventType("odo_watch", "Number of watch", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		this.odoDebug = createEventType("odo_debug", "Number of debug", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
 		this.odoLink = createEventType("odo_link", "Number of link", UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
 		this.odoKubernetesVersion = createEventType("odo_kubernetes_version", "Kubernetes version", null);
-		this.odoIsOpenshift = createEventType("odo_is_openshift", "Is Cluster Openshift?",
-				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoIsOpenshift = createEventType("odo_is_openshift", "Is Cluster Openshift?", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 		this.odoOpenshiftVersion = createEventType("odo_openshift_version", "Openshift version", null);
-		this.odoDevsandboxLogin = createEventType("odo_devsandbox_login", "Openshift Devsandbox Login",
-				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoDevsandboxTokenRetrieved = createEventType("odo_devsandbox_token_retrieved",
-				"Openshift Devsandbox Token Retrieved", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoDevsandboxRedHatSsoGetToken = createEventType("odo_devsandbox_redhat_sso_get_token",
-				"Openshift Devsandbox Red hat SSO Get Token", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.odoDdevsandboxAPIState = createEventType("odo_devsandbox_api_state", "Openshift Devsandbox API state",
-				null);
+		this.odoDevsandboxLogin = createEventType("odo_devsandbox_login", "Openshift Devsandbox Login", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoDevsandboxTokenRetrieved = createEventType("odo_devsandbox_token_retrieved", "Openshift Devsandbox Token Retrieved", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoDevsandboxRedHatSsoGetToken = createEventType("odo_devsandbox_redhat_sso_get_token", "Openshift Devsandbox Red hat SSO Get Token", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
+		this.odoDdevsandboxAPIState = createEventType("odo_devsandbox_api_state", "Openshift Devsandbox API state", null);
 	}
 
 	private UsageEventType createEventType(String actionName, String labelDescription, String valueDescription) {
@@ -165,8 +152,7 @@ public class UsageStats {
 	}
 
 	public void createURL(boolean secure, boolean success) {
-		UsageReporter.getInstance()
-				.trackEvent(odoCreateUrl.event(secure ? SECURE : UNSECURE, success ? SUCCESS : FAILURE));
+		UsageReporter.getInstance().trackEvent(odoCreateUrl.event(secure ? SECURE : UNSECURE, success ? SUCCESS : FAILURE));
 	}
 
 	public void login() {
@@ -218,18 +204,15 @@ public class UsageStats {
 	}
 
 	public void devsandboxLogin(boolean success) {
-		UsageReporter.getInstance()
-				.trackEvent(odoDevsandboxLogin.event("completed wizard rate", success ? SUCCESS : FAILURE)); //$NON-NLS-1$
+		UsageReporter.getInstance().trackEvent(odoDevsandboxLogin.event("completed wizard rate", success ? SUCCESS : FAILURE)); //$NON-NLS-1$
 	}
 
 	public void devsandboxTokenRetrieved() {
-		UsageReporter.getInstance()
-				.trackEvent(odoDevsandboxTokenRetrieved.event("Devsandbox token retrieved rate", SUCCESS)); //$NON-NLS-1$
+		UsageReporter.getInstance().trackEvent(odoDevsandboxTokenRetrieved.event("Devsandbox token retrieved rate", SUCCESS)); //$NON-NLS-1$
 	}
 
 	public void devsandboxRedHatSsoGetToken(boolean success) {
-		UsageReporter.getInstance().trackEvent(
-				odoDevsandboxRedHatSsoGetToken.event("RedHat SSO get token rate", success ? SUCCESS : FAILURE)); //$NON-NLS-1$
+		UsageReporter.getInstance().trackEvent(odoDevsandboxRedHatSsoGetToken.event("RedHat SSO get token rate", success ? SUCCESS : FAILURE)); //$NON-NLS-1$
 	}
 
 	public void devsandboxAPIState(String state) {

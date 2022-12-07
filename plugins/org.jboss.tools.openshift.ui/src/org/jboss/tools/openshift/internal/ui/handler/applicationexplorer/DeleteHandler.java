@@ -75,7 +75,6 @@ public class DeleteHandler extends OdoJobHandler {
 		try {
 			if (element instanceof NamespaceElement) {
 				odo.deleteProject(((NamespaceElement) element).getWrapped());
-				element.getParent().refresh();
 			} else if (element instanceof ComponentElement) {
 				ComponentElement component = (ComponentElement) element;
 				odo.deleteComponent(component.getParent().getWrapped(), component.getWrapped().getPath(),
@@ -86,11 +85,10 @@ public class DeleteHandler extends OdoJobHandler {
 			} else if (element instanceof ServiceElement) {
 				odo.deleteService(((ServiceElement) element).getParent().getWrapped(),
 						((ServiceElement) element).getWrapped());
-				element.getParent().refresh();
 			} else if (element instanceof DevfileRegistryElement) {
 				odo.deleteDevfileRegistry(((DevfileRegistryElement) element).getWrapped().getName());
-				element.getParent().refresh();
 			}
+			element.getParent().refresh();
 		} catch (IOException e) {
 			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(),
 					"Delete", "Delete error:" + e.getLocalizedMessage()));

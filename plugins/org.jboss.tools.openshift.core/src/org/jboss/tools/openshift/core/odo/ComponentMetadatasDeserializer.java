@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
+import static org.jboss.tools.openshift.core.odo.JSonParser.get;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +41,4 @@ public class ComponentMetadatasDeserializer extends StdNodeBasedDeserializer<Lis
 		return result;
 	}
 
-	private static String get(JsonNode node, String fieldName) {
-		return node.has(fieldName) ? node.get(fieldName).asText() : "";
-	}
 }

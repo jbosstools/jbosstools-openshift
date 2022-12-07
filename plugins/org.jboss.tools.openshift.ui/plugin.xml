@@ -1453,7 +1453,7 @@
                                  <test
                                             args="isDeploy"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
-                                            value="false">
+                                            value="true">
                                       </test>
                         </iterate>
                     </and>
@@ -1480,7 +1480,7 @@
                                 <test
                                             args="isDev"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
-                                            value="false">
+                                            value="true">
                                       </test>
                         </iterate>
                     </and>
@@ -1504,7 +1504,7 @@
                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement">
                                 </adapt>
                                 <test
-                                            args="isDev"
+                                            args="isDevRunning"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
                                             value="true">
                                       </test>
@@ -1531,17 +1531,17 @@
                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement">
                                    <or>
                                       <test
-                                            args="isDeploy"
+                                            args="isDeployRunning"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
                                             value="true">
                                       </test>
                                       <test
-                                            args="isDev"
+                                            args="isDevRunning"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
                                             value="true">
                                       </test>
                                       <test
-                                            args="isDebug"
+                                            args="isDebugRunning"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
                                             value="true">
                                       </test>
@@ -1570,17 +1570,17 @@
                                        type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement" />
                                       <or>
                                       <test
-                                            args="isDeploy"
+                                            args="isDeployRunning"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
                                             value="true">
                                       </test>
                                       <test
-                                            args="isDev"
+                                            args="isDevRunning"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
                                             value="true">
                                       </test>
                                       <test
-                                            args="isDebug"
+                                            args="isDebugRunning"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
                                             value="true">
                                       </test>
@@ -1684,23 +1684,11 @@
                         <iterate>
                                 <adapt
                                        type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement" />
-                                     <or>
-                                      <test
-                                            args="isDeploy"
-                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
-                                            value="true">
-                                      </test>
-                                      <test
-                                            args="isDev"
-                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
-                                            value="true">
-                                      </test>
                                       <test
                                             args="isDebug"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
-                                            value="false">
+                                            value="true">
                                       </test>
-                                    </or>
                         </iterate>
                     </and>
                 </visibleWhen>
@@ -1724,17 +1712,17 @@
                                        type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.URLElement" />
                                       <or>
                                       <test
-                                            args="isDeploy"
+                                            args="isDeployRunning"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
                                             value="true">
                                       </test>
                                       <test
-                                            args="isDev"
+                                            args="isDevRunning"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
                                             value="true">
                                       </test>
                                       <test
-                                            args="isDebug"
+                                            args="isDebugRunning"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
                                             value="true">
                                       </test>
@@ -1959,10 +1947,10 @@
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.CreateComponentHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.new">
         </handler>
-        <handler
+        <!-- <handler
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.CreateServiceHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.service.new">
-        </handler>
+        </handler> -->
         <handler
                  class="org.jboss.tools.openshift.internal.ui.handler.applicationexplorer.ShowLogHandler"
                  commandId="org.jboss.tools.openshift.ui.command.applicationexplorer.component.show">

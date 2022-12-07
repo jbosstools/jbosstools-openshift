@@ -27,9 +27,12 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.jboss.tools.common.ui.notification.LabelNotification;
 import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.utils.ConfigHelper;
@@ -132,8 +135,21 @@ public class ApplicationExplorerUIModel
 
 	private void addContextToSettings(String path, ComponentDescriptor descriptor) {
 		if (!components.containsKey(path)) {
+			if (descriptor.isPreOdo3()) {
+				Shell activeShell = Display.getDefault().getActiveShell();
+				LabelNotification notification = LabelNotification.openNotification(activeShell, "Component migration");
+				try {
+					getOdo().migrateComponent(path, descriptor.getName());
+					LabelNotification.openNotification(notification, activeShell,
+							"The component " + descriptor.getName() + " has been migrated to odo 3.x");
+				} catch (IOException e) {
+					LabelNotification.openNotification(notification, activeShell,
+							"The component " + descriptor.getName() + " couldn't be migrated to odo 3.x");
+					OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+				}
+
+			}
 			components.put(path, descriptor);
-			refresh();
 		}
 	}
 

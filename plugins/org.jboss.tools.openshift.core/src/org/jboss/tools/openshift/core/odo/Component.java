@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -47,6 +47,7 @@ public interface Component {
 			return name;
 		}
 
+		@Override
 		public ComponentFeatures getLiveFeatures() {
 			return state;
 		}

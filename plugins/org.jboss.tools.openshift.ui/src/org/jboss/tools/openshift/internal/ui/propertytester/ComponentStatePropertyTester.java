@@ -10,6 +10,10 @@ public class ComponentStatePropertyTester extends PropertyTester {
 	private static final String VALUE_IS_DEBUG = "isDebug";
 	private static final String VALUE_IS_DEPLOY = "isDeploy";
 	private static final String VALUE_IS_DEV = "isDev";
+	
+	private static final String VALUE_IS_DEBUG_RUNNING = "isDebugRunning";
+	private static final String VALUE_IS_DEPLOY_RUNNING = "isDeployRunning";
+	private static final String VALUE_IS_DEV_RUNNING = "isDevRunning";
 
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
@@ -19,18 +23,23 @@ public class ComponentStatePropertyTester extends PropertyTester {
 			return false;
 		}
 		String arg = (String) args[0];
-		ComponentFeatures features = component.getWrapped().getLiveFeatures();
+		ComponentFeatures features = component.getWrapped().getInfo().getFeatures();
+		ComponentFeatures liveFeatures = component.getWrapped().getLiveFeatures();
 
 		switch (arg) {
 		case VALUE_IS_DEBUG:
 			return expectedValue.equals(Boolean.valueOf(features.isDebug()));
-
 		case VALUE_IS_DEPLOY:
-
 			return expectedValue.equals(Boolean.valueOf(features.isDeploy()));
 		case VALUE_IS_DEV:
 			return expectedValue.equals(Boolean.valueOf(features.isDev()));
-
+			
+		case VALUE_IS_DEBUG_RUNNING:
+			return expectedValue.equals(Boolean.valueOf(liveFeatures.isDebug()));
+		case VALUE_IS_DEPLOY_RUNNING:
+			return expectedValue.equals(Boolean.valueOf(liveFeatures.isDeploy()));
+		case VALUE_IS_DEV_RUNNING:
+			return expectedValue.equals(Boolean.valueOf(liveFeatures.isDev()));
 		default:
 			break;
 		}

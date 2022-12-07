@@ -173,7 +173,7 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 		});
 		componentStartersComboViewer.setInput(
 				BeanProperties.list(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_STARTERS).observe(model));
-		Binding componentStartersBinding = ValueBindingBuilder
+		ValueBindingBuilder
 				.bind(ViewerProperties.singleSelection().observe(componentStartersComboViewer))
 				.to(BeanProperties.value(CreateComponentModel.PROPERTY_SELECTED_COMPONENT_STARTER).observe(model))
 				.in(dbc);
@@ -195,7 +195,7 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 		ValueBindingBuilder.bind(WidgetProperties.image().observe(information)).notUpdatingParticipant()
 				.to(computedObservable).converting(IConverter.create(flag -> (boolean) flag ? INFORMATION_IMAGE : null))
 				.in(dbc);
-
+/*
 		Label startDevAfterCreateLabel = new Label(parent, SWT.NONE);
 		startDevAfterCreateLabel.setText("Start dev mode:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(startDevAfterCreateLabel);
@@ -207,7 +207,7 @@ public class CreateComponentWizardPage extends AbstractOpenShiftWizardPage {
 				.observe(startDevAfterCreateButton);
 		Binding startDevAfterCreateBinding = ValueBindingBuilder.bind(startDevAfterCreateObservable)
 				.to(BeanProperties.value(CreateComponentModel.PROPERTY_DEVMODE_AFTER_CREATE).observe(model)).in(dbc);
-		ControlDecorationSupport.create(startDevAfterCreateBinding, SWT.LEFT | SWT.TOP);
+		ControlDecorationSupport.create(startDevAfterCreateBinding, SWT.LEFT | SWT.TOP); */
 	}
 
 	private void onBrowseProjects(SelectionEvent e) {

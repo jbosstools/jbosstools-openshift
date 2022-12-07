@@ -26,7 +26,7 @@ public class JSonParser {
 	private static final String NAME_FIELD = "name";
 	private static final String SPEC_FIELD = "spec";
 	private static final String PROJECT_TYPE_FIELD = "projectType";
-	private static final String DEVFILE_FIELD = "Devfile";
+	private static final String DEVFILE_FIELD = "devfile";
 	private static final String DEVFILE_DATA_FIELD = "devfileData";
 	private static final String STARTER_PROJECTS_FIELD = "starterProjects";
 	private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
@@ -88,7 +88,7 @@ public class JSonParser {
 			String componentTypeName = root.get(PROJECT_TYPE_FIELD).asText();
 			builder.withComponentTypeName(componentTypeName);
 		}
-		if (root.get(SPEC_FIELD).has(ENV_FIELD)) {
+		if (root.has(SPEC_FIELD) && root.get(SPEC_FIELD).has(ENV_FIELD)) {
 			JsonNode env = root.get(SPEC_FIELD).get(ENV_FIELD);
 			for (JsonNode elt : env) {
 				if (elt.has(NAME_FIELD) && elt.has(VALUE_FIELD)) {
@@ -170,7 +170,7 @@ public class JSonParser {
 		return builder.build();
 	}
 
-	private JsonNode resolveRefs(JsonNode root, JsonNode node) throws IOException {
+	private JsonNode resolveRefs(JsonNode node) throws IOException {
 		for (Iterator<String> it = node.fieldNames(); it.hasNext();) {
 			String name = it.next();
 			JsonNode child = node.get(name);
@@ -178,25 +178,25 @@ public class JSonParser {
 				JsonNode replaced = resolve(root, child.get(DOLLAR_REF_FIELD).asText());
 				((ObjectNode) node).set(name, replaced);
 			} else {
-				resolveRefs(root, child);
+				resolveRefs(child);
 			}
 		}
 		return node;
 	}
 
-	private JsonNode resolve(JsonNode root, String ref) throws IOException {
-		JsonNode node = root;
+	private JsonNode resolve(JsonNode node, String ref) throws IOException {
+		JsonNode result = node;
 		String[] ids = ref.split("/");
 		for (String id : ids) {
 			if (!"#".equals(id)) {
 				if (node.has(id)) {
-					node = node.get(id);
+					result = node.get(id);
 				} else {
 					throw new IOException("Can't resolved reference '" + ref + "' element " + id + " not found");
 				}
 			}
 		}
-		return node;
+		return result;
 	}
 
 	public ObjectNode findSchema(String crd) throws IOException {
@@ -208,9 +208,9 @@ public class JSonParser {
 							&& parameter.has(SCHEMA_FIELD)) {
 						JsonNode schema = parameter.get(SCHEMA_FIELD);
 						if (schema.has(DOLLAR_REF_FIELD)) {
-							return (ObjectNode) resolveRefs(root, resolve(root, schema.get(DOLLAR_REF_FIELD).asText()));
+							return (ObjectNode) resolveRefs(resolve(root, schema.get(DOLLAR_REF_FIELD).asText()));
 						}
-						return (ObjectNode) resolveRefs(root, schema);
+						return (ObjectNode) resolveRefs(schema);
 					}
 				}
 			}

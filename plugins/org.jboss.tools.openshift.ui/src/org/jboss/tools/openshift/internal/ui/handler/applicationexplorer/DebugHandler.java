@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -28,7 +27,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.openshift.core.OpenShiftCoreConstants.DebugStatus;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.ComponentFeature;
@@ -62,14 +60,14 @@ public class DebugHandler extends FeatureHandler {
 				RemoteStackDebugger remoteDebugger = RemoteStackProviderRegistry.getInstance()
 						.findBytype(info.getComponentTypeName());
 				if (remoteDebugger != null) {
-					DebugStatus debugStatus = odo.debugStatus(project, component.getPath(),
-							component.getName());
-					Integer port = debugStatus == DebugStatus.RUNNING ? getLocalPort(odo, project, component).get() : allocateLocalPort();
+					DebugStatus debugStatus = odo.debugStatus(project, component.getPath(), component.getName());
+					Integer port = debugStatus == DebugStatus.RUNNING ? getLocalPort(odo, project, component).get()
+							: allocateLocalPort();
 					if (debugStatus != DebugStatus.RUNNING) {
 						executeInJob("Debug", monitor -> startDebug(odo, project, component, port));
 					}
-					executeInJob("Attach debugger", monitor -> createAndLaunchConfig(odo, project, 
-							component, info, port.intValue(), remoteDebugger, monitor));
+					executeInJob("Attach debugger", monitor -> createAndLaunchConfig(odo, project, component, info,
+							port.intValue(), remoteDebugger, monitor));
 
 				}
 			} else {
@@ -81,26 +79,26 @@ public class DebugHandler extends FeatureHandler {
 	}
 
 	private Optional<Integer> getLocalPort(Odo odo, String namespace, Component component) {
-        Optional<Integer> port = Optional.empty();
-        try {
-            List<URL> urls = odo.listURLs(namespace, component.getPath(), component.getName());
-            String[] ports = urls.stream().
-                    map(URL::getContainerPort).toArray(String[]::new);
-            if (ports.length == 1) {
-                port = Optional.ofNullable(Integer.parseInt(urls.get(0).getLocalPort()));
-            } else if (ports.length > 1) {
-            	
-            	int index = MessageDialog.open(MessageDialog.QUESTION, shell, "Choose debugger port", "The component " +
-                                component.getName() +
-                                " has several ports to connect to,\nchoose the one the debugger will connect to.", SWT.NONE, ports);
-                if (index >=0) {
-                    port = Optional.of(Integer.parseInt(urls.get(index).getLocalPort()));
-                }
-            }
-        } catch (IOException e) {
-        	OpenShiftUIActivator.log(IStatus.WARNING, e.getLocalizedMessage(), e);
-        }
-        return port;
+		Optional<Integer> port = Optional.empty();
+		try {
+			List<URL> urls = odo.listURLs(namespace, component.getPath(), component.getName());
+			String[] ports = urls.stream().map(URL::getContainerPort).toArray(String[]::new);
+			if (ports.length == 1) {
+				port = Optional.ofNullable(Integer.parseInt(urls.get(0).getLocalPort()));
+			} else if (ports.length > 1) {
+
+				int index = MessageDialog.open(MessageDialog.QUESTION, shell, "Choose debugger port",
+						"The component " + component.getName()
+								+ " has several ports to connect to,\nchoose the one the debugger will connect to.",
+						SWT.NONE, ports);
+				if (index >= 0) {
+					port = Optional.of(Integer.parseInt(urls.get(index).getLocalPort()));
+				}
+			}
+		} catch (IOException e) {
+			OpenShiftUIActivator.log(IStatus.WARNING, e.getLocalizedMessage(), e);
+		}
+		return port;
 	}
 
 	/**
@@ -113,15 +111,15 @@ public class DebugHandler extends FeatureHandler {
 	 * @param shell          the shell to use for UI
 	 * @throws CoreException
 	 */
-	private void createAndLaunchConfig(Odo odo, String project, Component component,
-			ComponentInfo info, int port, RemoteStackDebugger remoteDebugger, IProgressMonitor monitor) {
+	private void createAndLaunchConfig(Odo odo, String project, Component component, ComponentInfo info, int port,
+			RemoteStackDebugger remoteDebugger, IProgressMonitor monitor) {
 		try {
 			waitForDebugRunning(odo, project, component, monitor);
 			IPath projectPath = new Path(component.getPath());
 			IContainer ecliseProject = ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(projectPath);
 			if (ecliseProject instanceof IProject) {
-				remoteDebugger.startRemoteDebugger((IProject) ecliseProject, info.getComponentTypeName(),
-						 port, info.getEnv(), monitor);
+				remoteDebugger.startRemoteDebugger((IProject) ecliseProject, info.getComponentTypeName(), port,
+						info.getEnv(), monitor);
 			}
 		} catch (CoreException e) {
 			shell.getDisplay()
@@ -151,8 +149,8 @@ public class DebugHandler extends FeatureHandler {
 		}
 	}
 
-	private void waitForDebugRunning(Odo odo, String project, Component component,
-			IProgressMonitor monitor) throws CoreException {
+	private void waitForDebugRunning(Odo odo, String project, Component component, IProgressMonitor monitor)
+			throws CoreException {
 		long start = System.currentTimeMillis();
 		while (System.currentTimeMillis() - start < 60_000 && !monitor.isCanceled()) {
 			try {

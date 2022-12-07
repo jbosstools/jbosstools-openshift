@@ -27,6 +27,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.notification.LabelNotification;
+import org.jboss.tools.openshift.core.odo.Component;
+import org.jboss.tools.openshift.core.odo.ComponentFeature;
 import org.jboss.tools.openshift.core.odo.DevfileComponentType;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -123,6 +125,18 @@ public class CreateComponentHandler extends OdoJobHandler {
 			LabelNotification.openNotification(notification, shell,
 					"Component " + model.getComponentName() + " created");
 			element.getRoot().addContext(model.getEclipseProject());
+//			if (model.isDevModeAfterCreate()) {
+//				model.getOdo().start(model.getProjectName(), model.getEclipseProject().getLocation().toOSString(), model.getComponentName(), ComponentFeature.DEV, res -> {
+//					Component component = (Component)element.getWrapped();
+//					if (component.getLiveFeatures().is(ComponentFeature.DEV)) {
+//						component.getLiveFeatures().removeFeature(ComponentFeature.DEV);
+//					} else {
+//						component.getLiveFeatures().addFeature(ComponentFeature.DEV);
+//					}
+//					element.refresh();
+//				});
+//			}
+			
 		} catch (IOException e) {
 			shell.getDisplay().asyncExec(() -> {
 				notification.close();
