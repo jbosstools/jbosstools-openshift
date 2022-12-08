@@ -87,10 +87,6 @@ public interface Odo {
 
 	String consoleURL() throws IOException;
 
-	void debug(String project, String context, String component, Integer port) throws IOException;
-
-	DebugStatus debugStatus(String project, String context, String component) throws IOException;
-
 	java.net.URL getMasterUrl();
 
 	List<ComponentDescriptor> discover(String path) throws IOException;

@@ -23,9 +23,4 @@ public class ComponentElement extends AbstractOpenshiftUIElement<Component, Name
 		super(parentElement, component);
 	}
 
-	@Override
-	public void refresh() {
-		fireChanged(this);
-	}
-	
 }

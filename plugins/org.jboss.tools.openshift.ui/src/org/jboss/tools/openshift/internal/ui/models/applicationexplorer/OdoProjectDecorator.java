@@ -283,16 +283,6 @@ public class OdoProjectDecorator implements Odo {
 	}
 
 	@Override
-	public void debug(String project, String context, String component, Integer port) throws IOException {
-		delegate.debug(project, component, context, port);
-	}
-
-	@Override
-	public DebugStatus debugStatus(String project, String context, String component) throws IOException {
-		return delegate.debugStatus(project, context, component);
-	}
-
-	@Override
 	public String consoleURL() throws IOException {
 		return delegate.consoleURL();
 	}

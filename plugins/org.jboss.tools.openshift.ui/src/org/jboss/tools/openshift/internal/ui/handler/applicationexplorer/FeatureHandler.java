@@ -36,7 +36,6 @@ public abstract class FeatureHandler extends OdoJobHandler {
 
 	protected final ComponentFeature feature;
 	
-	protected Shell shell;
 
 	public FeatureHandler(ComponentFeature feature) {
 		this.feature = feature;
@@ -45,25 +44,25 @@ public abstract class FeatureHandler extends OdoJobHandler {
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		shell = UIUtils.getShell();
 		ComponentElement componentElement = UIUtils.getFirstElement(selection, ComponentElement.class);
 		Component component = componentElement.getWrapped();
 		NamespaceElement namespaceElement = componentElement.getParent();
 		try {
-			return process(componentElement.getRoot().getOdo(), namespaceElement.getWrapped(), component, res -> {
+			process(componentElement.getRoot().getOdo(), namespaceElement.getWrapped(), component, res -> {
 				if (component.getLiveFeatures().is(feature)) {
 					component.getLiveFeatures().removeFeature(feature);
 				} else {
 					component.getLiveFeatures().addFeature(feature);
 				}
-				componentElement.refresh();
 			});
+			componentElement.refresh();
+			return Status.OK_STATUS;
 		} catch (IOException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 	}
 
-	protected IStatus process(Odo odo, String project, Component component, Consumer<Boolean> callback)
+	protected void process(Odo odo, String project, Component component, Consumer<Boolean> callback)
 			throws IOException {
 		if (odo.isStarted(project, component.getPath(), component.getName(), feature)) {
 			odo.stop(project, component.getPath(), component.getName(), feature);
@@ -71,7 +70,6 @@ public abstract class FeatureHandler extends OdoJobHandler {
 		} else {
 			odo.start(project, component.getPath(), component.getName(), feature, callback);
 		}
-		return Status.OK_STATUS;
 	}
 
 }

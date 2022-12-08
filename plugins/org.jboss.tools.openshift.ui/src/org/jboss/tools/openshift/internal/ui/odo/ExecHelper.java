@@ -23,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -35,10 +34,8 @@ import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.cdt.utils.pty.PTY;
 import org.eclipse.cdt.utils.spawner.ProcessFactory;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
 import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
-import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService.Done;
 import org.eclipse.tm.terminal.view.core.interfaces.ITerminalServiceOutputStreamMonitorListener;
 import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
 
@@ -277,9 +274,8 @@ public class ExecHelper {
 		return nativeEnv;
 	}
 
-	private static long executeWithTerminalInternal(File workingDirectory, boolean waitForProcessToExit,
-			Map<String, String> envs, ITerminalServiceOutputStreamMonitorListener listener,
-			String... command) throws IOException {
+	private static long executeWithTerminalInternal(File workingDirectory, Map<String, String> envs,
+			ITerminalServiceOutputStreamMonitorListener listener, String... command) throws IOException {
 
 		String[] env = envs == null ? null : EnvironmentUtils.toStrings(appendNativeEnv(envs));
 		Process p = Platform.OS_WIN32.equals(Platform.getOS())
@@ -309,26 +305,18 @@ public class ExecHelper {
 		ITerminalService service = TerminalServiceFactory.getService();
 		service.openConsole(properties, null);
 		return p.pid();
-//		if (Display.getDefault().getThread() == Thread.currentThread()) {
-//			waitForProcessToExit = false;
-//		}
-//		if (waitForProcessToExit) {
-//			try {
-//				p.waitFor();
-//			} catch (InterruptedException e) {
-//				Thread.currentThread().interrupt();
-//				throw new IOException(e);
-//			}
-//		}
 	}
 
-	public static long executeWithTerminal(File workingDirectory, boolean waitForProcessToExit,
-			Map<String, String> envs, ITerminalServiceOutputStreamMonitorListener listener,
-			String... command) throws IOException {
-		return executeWithTerminalInternal(workingDirectory, waitForProcessToExit, envs, listener, command);
+	public static long executeWithTerminal(File workingDirectory, Map<String, String> envs,
+			ITerminalServiceOutputStreamMonitorListener listener, String... command) throws IOException {
+		return executeWithTerminalInternal(workingDirectory, envs, listener, command);
 	}
 
-	public static void executeWithTerminal(Map<String, String> envs, String... command) throws IOException {
-		executeWithTerminal(new File(HOME_FOLDER), true, envs, null, command);
+	public static long executeWithTerminal(Map<String, String> envs, String... command) throws IOException {
+		return executeWithTerminal(new File(HOME_FOLDER), envs, null, command);
+	}
+	
+	public static long executeWithTerminal(File workingDirectory, Map<String, String> envs, String... command) throws IOException {
+		return executeWithTerminal(workingDirectory, envs, null, command);
 	}
 }

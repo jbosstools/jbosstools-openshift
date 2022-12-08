@@ -1477,11 +1477,25 @@
                                 <adapt
                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement">
                                 </adapt>
-                                <test
+                                <and>
+                                  <test
                                             args="isDev"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
                                             value="true">
                                       </test>
+                                      <or>
+                                      <test
+                                            args="isDevRunning"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="false">
+                                      </test>
+                                      <test
+                                            args="isDebugRunning"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="false">
+                                      </test>
+                                      </or>
+                                    </and>
                         </iterate>
                     </and>
                 </visibleWhen>
@@ -1503,11 +1517,18 @@
                                 <adapt
                                       type="org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement">
                                 </adapt>
-                                <test
+                                <or>
+                                  <test
+                                            args="isDebugRunning"
+                                            property="org.jboss.tools.openshift.ui.componentAllowedState"
+                                            value="true">
+                                      </test>
+                                  <test
                                             args="isDevRunning"
                                             property="org.jboss.tools.openshift.ui.componentAllowedState"
                                             value="true">
                                       </test>
+                                    </or>
                         </iterate>
                     </and>
                 </visibleWhen>

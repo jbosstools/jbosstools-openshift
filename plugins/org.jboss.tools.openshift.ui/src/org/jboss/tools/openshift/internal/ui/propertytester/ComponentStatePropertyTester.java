@@ -10,7 +10,7 @@ public class ComponentStatePropertyTester extends PropertyTester {
 	private static final String VALUE_IS_DEBUG = "isDebug";
 	private static final String VALUE_IS_DEPLOY = "isDeploy";
 	private static final String VALUE_IS_DEV = "isDev";
-	
+
 	private static final String VALUE_IS_DEBUG_RUNNING = "isDebugRunning";
 	private static final String VALUE_IS_DEPLOY_RUNNING = "isDeployRunning";
 	private static final String VALUE_IS_DEV_RUNNING = "isDevRunning";
@@ -28,12 +28,18 @@ public class ComponentStatePropertyTester extends PropertyTester {
 
 		switch (arg) {
 		case VALUE_IS_DEBUG:
-			return expectedValue.equals(Boolean.valueOf(features.isDebug()));
+			if (!liveFeatures.isDebug())
+				return expectedValue.equals(Boolean.valueOf(features.isDebug()));
+			break;
 		case VALUE_IS_DEPLOY:
-			return expectedValue.equals(Boolean.valueOf(features.isDeploy()));
+			if (!liveFeatures.isDeploy())
+				return expectedValue.equals(Boolean.valueOf(features.isDeploy()));
+			break;
 		case VALUE_IS_DEV:
-			return expectedValue.equals(Boolean.valueOf(features.isDev()));
-			
+			if (!liveFeatures.isDev())
+				return expectedValue.equals(Boolean.valueOf(features.isDev()));
+			break;
+
 		case VALUE_IS_DEBUG_RUNNING:
 			return expectedValue.equals(Boolean.valueOf(liveFeatures.isDebug()));
 		case VALUE_IS_DEPLOY_RUNNING:

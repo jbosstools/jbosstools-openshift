@@ -48,7 +48,6 @@ import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.tm.terminal.view.core.interfaces.ITerminalServiceOutputStreamMonitorListener;
-import org.jboss.tools.openshift.core.OpenShiftCoreConstants.DebugStatus;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
 import org.jboss.tools.openshift.core.odo.ComponentDescriptorsDeserializer;
@@ -249,10 +248,9 @@ public class OdoCli implements Odo {
 			if (isOpenShift()) {
 				return client.adapt(OpenShiftClient.class).projects().list().getItems().stream()
 						.map(p -> p.getMetadata().getName()).collect(Collectors.toList());
-			} else {
-				return client.namespaces().list().getItems().stream().map(n -> n.getMetadata().getName())
-						.collect(Collectors.toList());
 			}
+			return client.namespaces().list().getItems().stream().map(n -> n.getMetadata().getName())
+					.collect(Collectors.toList());
 		} catch (KubernetesClientException e) {
 			throw new IOException(e);
 		}
@@ -332,7 +330,7 @@ public class OdoCli implements Odo {
 
 			TerminalOutputMonitorListener listener = new TerminalOutputMonitorListener(componentMap, callback, feature);
 
-			long pid = ExecHelper.executeWithTerminal(createWorkingDirectory(context), false, envVars, listener,
+			long pid = ExecHelper.executeWithTerminal(createWorkingDirectory(context), envVars, listener,
 					args.toArray(new String[args.size()]));
 			Optional<ProcessHandle> processHandle = ProcessHandle.of(pid);
 			if (processHandle.isPresent()) {
@@ -383,8 +381,7 @@ public class OdoCli implements Odo {
 	@Override
 	public void describeComponent(String project, String context, String component) throws IOException {
 		try {
-			ExecHelper.executeWithTerminal(createWorkingDirectory(context), false, envVars, null, null, command,
-					"describe", "component");
+			ExecHelper.executeWithTerminal(createWorkingDirectory(context), envVars, command, "describe", "component");
 			UsageStats.getInstance().odoCommand("describe", true);
 		} catch (IOException e) {
 			UsageStats.getInstance().odoCommand("describe", false);
@@ -732,17 +729,15 @@ public class OdoCli implements Odo {
 			if (follow) {
 				args.add("--follow");
 			}
-			ExecHelper.executeWithTerminal(createWorkingDirectory(context), false, envVars, null,
+			long pid = ExecHelper.executeWithTerminal(createWorkingDirectory(context), envVars,
 					args.toArray(new String[args.size()]));
-			/*
-			 * (ConsoleView) null, null, new ProcessAdapter() {
-			 * 
-			 * @Override public void startNotified( ProcessEvent event) {
-			 * handlers.set(index, event.getProcessHandler()); }
-			 * 
-			 * @Override public void processTerminated( ProcessEvent event) {
-			 * handlers.set(index, null); } }, args.toArray(new String[args.size()]));
-			 */
+
+			Optional<ProcessHandle> processHandle = ProcessHandle.of(pid);
+			if (processHandle.isPresent()) {
+				handlers.set(index, processHandle.get());
+				CompletableFuture<ProcessHandle> onProcessExit = processHandle.get().onExit();
+				onProcessExit.thenAccept(p -> handlers.set(index, null));
+			}
 		}
 	}
 
@@ -901,34 +896,6 @@ public class OdoCli implements Odo {
 			UsageStats.getInstance().odoCommand("link", true);
 		} catch (IOException e) {
 			UsageStats.getInstance().odoCommand("link", false);
-			throw e;
-		}
-	}
-
-	@Override
-	public void debug(String project, String context, String component, Integer port) throws IOException {
-		UsageStats.getInstance().debug();
-		try {
-			ExecHelper.executeWithTerminal(createWorkingDirectory(context), false, envVars, null, null, command,
-					"debug", "port-forward", "--local-port", port.toString());
-			UsageStats.getInstance().odoCommand("debug port-forward", true);
-		} catch (IOException e) {
-			UsageStats.getInstance().odoCommand("debug port-forward", false);
-			throw e;
-		}
-	}
-
-	@Override
-	public DebugStatus debugStatus(String project, String context, String component) throws IOException {
-		try {
-			ExecResult result = ExecHelper.execute(command, createWorkingDirectory(context), envVars, "debug", "info",
-					"-o", "json");
-			JSonParser parser = new JSonParser(JSON_MAPPER.readTree(result.getStdOut()));
-			return parser.parseDebugStatus();
-		} catch (IOException e) {
-			if (e.getMessage().contains("debug is not running")) {
-				return DebugStatus.NOT_RUNNING;
-			}
 			throw e;
 		}
 	}
