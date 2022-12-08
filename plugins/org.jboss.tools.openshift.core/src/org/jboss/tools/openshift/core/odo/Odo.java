@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.jboss.tools.openshift.core.OpenShiftCoreConstants.DebugStatus;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public interface Odo {

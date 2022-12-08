@@ -15,10 +15,8 @@ import java.util.function.Consumer;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.ComponentFeature;
