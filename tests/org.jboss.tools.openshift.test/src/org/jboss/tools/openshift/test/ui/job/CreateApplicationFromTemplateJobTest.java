@@ -9,10 +9,10 @@
 package org.jboss.tools.openshift.test.ui.job;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -125,7 +125,7 @@ public class CreateApplicationFromTemplateJobTest {
 
 		assertEquals(IStatus.OK, result.getSeverity());
 		assertEquals(resources, job.getResources());
-		verify(template).updateParameterValues(anyCollectionOf(IParameter.class));
+		verify(template).updateParameterValues(anyCollection());
 		verify(template).addObjectLabel(anyString(), anyString());
 	}
 
