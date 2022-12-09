@@ -30,7 +30,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.Job;
-import org.jboss.tools.openshift.core.OpenShiftCoreConstants.DebugStatus;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
 import org.jboss.tools.openshift.core.odo.ComponentFeature;
@@ -75,8 +74,9 @@ public class OdoProjectDecorator implements Odo {
 	}
 
 	@Override
-	public void stop(String project, String context, String component, ComponentFeature feature) throws IOException {
-		delegate.stop(project, context, component, feature);
+	public void stop(String project, String context, String component, ComponentFeature feature,
+			Consumer<Boolean> callback) throws IOException {
+		delegate.stop(project, context, component, feature, callback);
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.Odo;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
@@ -79,8 +80,10 @@ public abstract class LogHandler extends OdoJobHandler {
 					}
 				});
 			}
+			UsageStats.getInstance().odoCommand(follow ? "follow log" : "show log", true);
 			return Status.OK_STATUS;
 		} catch (IOException e) {
+			UsageStats.getInstance().odoCommand(follow ? "follow log" : "show log", false);
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 	}

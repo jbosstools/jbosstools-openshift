@@ -318,7 +318,7 @@ public class OdoCli implements Odo {
 	public void start(String project, String context, String component, ComponentFeature feature,
 			Consumer<Boolean> callback) throws IOException {
 		if (feature.getPeer() != null) {
-			stop(project, context, component, feature.getPeer());
+			stop(project, context, component, feature.getPeer(), callback);
 		}
 		Map<ComponentFeature, ProcessHandle> componentMap = componentFeatureProcesses.computeIfAbsent(component,
 				name -> new HashMap<>());
@@ -346,7 +346,7 @@ public class OdoCli implements Odo {
 	}
 
 	@Override
-	public void stop(String project, String context, String component, ComponentFeature feature) throws IOException {
+	public void stop(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback) throws IOException {
 		Map<ComponentFeature, ProcessHandle> componentMap = componentFeatureProcesses.computeIfAbsent(component,
 				name -> new HashMap<>());
 		ProcessHandle handler = componentMap.remove(feature);
@@ -359,6 +359,7 @@ public class OdoCli implements Odo {
 				execute(createWorkingDirectory(context), command, envVars,
 						feature.getStopArgs().toArray(new String[feature.getStopArgs().size()]));
 			}
+			handler.onExit().thenAccept(t -> callback.accept(Boolean.TRUE));
 		}
 	}
 
@@ -393,8 +394,7 @@ public class OdoCli implements Odo {
 	public List<ComponentMetadata> analyze(String path) throws IOException {
 		return configureObjectMapper(new ComponentMetadatasDeserializer()).readValue(
 				execute(new File(path), command, envVars, "analyze", "-o", "json"),
-				new TypeReference<List<ComponentMetadata>>() {
-				});
+				new TypeReference<List<ComponentMetadata>>() {});
 	}
 
 	@Override
@@ -515,8 +515,7 @@ public class OdoCli implements Odo {
 		try {
 			List<DevfileComponentType> componentTypes = configureObjectMapper(new ComponentTypesDeserializer())
 					.readValue(execute(command, envVars, "registry", "list", "-o", "json"),
-							new TypeReference<List<DevfileComponentType>>() {
-							});
+							new TypeReference<List<DevfileComponentType>>() {});
 			UsageStats.getInstance().odoCommand("catalog list components", true);
 			return componentTypes;
 		} catch (IOException e) {
@@ -571,8 +570,7 @@ public class OdoCli implements Odo {
 			List<ServiceTemplate> serviceTemplates = configureObjectMapper(
 					new ServiceTemplatesDeserializer(this::findSchema))
 					.readValue(execute(command, envVars, "catalog", "list", "services", "-o", "json"),
-							new TypeReference<List<ServiceTemplate>>() {
-							});
+							new TypeReference<List<ServiceTemplate>>() {});
 			UsageStats.getInstance().odoCommand("catalog list services", true);
 			return serviceTemplates;
 		} catch (IOException e) {

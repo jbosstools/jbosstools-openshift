@@ -21,6 +21,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.ComponentFeature;
 import org.jboss.tools.openshift.core.odo.Odo;
+import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
@@ -52,10 +53,12 @@ public abstract class FeatureHandler extends OdoJobHandler {
 				} else {
 					component.getLiveFeatures().addFeature(feature);
 				}
+				componentElement.refresh();
 			});
-			componentElement.refresh();
+			UsageStats.getInstance().odoCommand(feature.getLabel(), true);
 			return Status.OK_STATUS;
 		} catch (IOException e) {
+			UsageStats.getInstance().odoCommand(feature.getLabel(), false);
 			return OpenShiftUIActivator.statusFactory().errorStatus(e);
 		}
 	}
@@ -63,8 +66,7 @@ public abstract class FeatureHandler extends OdoJobHandler {
 	protected void process(Odo odo, String project, Component component, Consumer<Boolean> callback)
 			throws IOException {
 		if (odo.isStarted(project, component.getPath(), component.getName(), feature)) {
-			odo.stop(project, component.getPath(), component.getName(), feature);
-			callback.accept(Boolean.TRUE);
+			odo.stop(project, component.getPath(), component.getName(), feature, callback);
 		} else {
 			odo.start(project, component.getPath(), component.getName(), feature, callback);
 		}

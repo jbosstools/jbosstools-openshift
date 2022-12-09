@@ -24,7 +24,7 @@ public interface Odo {
 	void start(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback)
 			throws IOException;
 
-	void stop(String project, String context, String component, ComponentFeature feature) throws IOException;
+	void stop(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback) throws IOException;
 
 	boolean isStarted(String project, String context, String component, ComponentFeature feature) throws IOException;
 
