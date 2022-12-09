@@ -35,9 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
@@ -127,13 +125,13 @@ public class OdoCli implements Odo {
 	 * component name value is map index by the feature and value is the process
 	 * handler
 	 */
-	private Map<String, Map<ComponentFeature, ProcessHandle>> componentFeatureProcesses = new HashMap<>();
+	private Map<String, Map<ComponentFeature, Process>> componentFeatureProcesses = new HashMap<>();
 
 	/*
 	 * Map of process launched for log activity. Key is component name value is list
 	 * with 2 process handler index 0 is dev index 1 is deploy
 	 */
-	private Map<String, List<ProcessHandle>> componentLogProcesses = new HashMap<>();
+	private Map<String, List<Process>> componentLogProcesses = new HashMap<>();
 
 	private static String buildHttpProxy(IProxyData data) {
 		StringBuilder builder = new StringBuilder();
@@ -320,9 +318,9 @@ public class OdoCli implements Odo {
 		if (feature.getPeer() != null) {
 			stop(project, context, component, feature.getPeer(), callback);
 		}
-		Map<ComponentFeature, ProcessHandle> componentMap = componentFeatureProcesses.computeIfAbsent(component,
+		Map<ComponentFeature, Process> componentMap = componentFeatureProcesses.computeIfAbsent(component,
 				name -> new HashMap<>());
-		ProcessHandle handler = componentMap.get(feature);
+		Process handler = componentMap.get(feature);
 		if (handler == null) {
 			List<String> args = new ArrayList<>();
 			args.add(command);
@@ -330,26 +328,22 @@ public class OdoCli implements Odo {
 
 			TerminalOutputMonitorListener listener = new TerminalOutputMonitorListener(componentMap, callback, feature);
 
-			long pid = ExecHelper.executeWithTerminal(createWorkingDirectory(context), envVars, listener,
+			Process p = ExecHelper.executeWithTerminal(createWorkingDirectory(context), envVars, listener,
 					args.toArray(new String[args.size()]));
-			Optional<ProcessHandle> processHandle = ProcessHandle.of(pid);
-			if (processHandle.isPresent()) {
-				componentMap.put(feature, processHandle.get());
-				CompletableFuture<ProcessHandle> onProcessExit = processHandle.get().onExit();
-				onProcessExit.thenAccept(p -> componentMap.remove(feature));
-			}
+			componentMap.put(feature, p);
+			p.onExit().thenAccept(p1 -> componentMap.remove(feature));
 		}
 	}
 
-	private void stopHandler(ProcessHandle handler) {
+	private void stopHandler(Process handler) {
 		handler.destroy();
 	}
 
 	@Override
 	public void stop(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback) throws IOException {
-		Map<ComponentFeature, ProcessHandle> componentMap = componentFeatureProcesses.computeIfAbsent(component,
+		Map<ComponentFeature, Process> componentMap = componentFeatureProcesses.computeIfAbsent(component,
 				name -> new HashMap<>());
-		ProcessHandle handler = componentMap.remove(feature);
+		Process handler = componentMap.remove(feature);
 		if (handler != null) {
 			stopHandler(handler);
 			if (!feature.getStopArgs().isEmpty()) {
@@ -366,7 +360,7 @@ public class OdoCli implements Odo {
 	@Override
 	public boolean isStarted(String project, String context, String component, ComponentFeature feature)
 			throws IOException {
-		Map<ComponentFeature, ProcessHandle> componentMap = componentFeatureProcesses.computeIfAbsent(component,
+		Map<ComponentFeature, Process> componentMap = componentFeatureProcesses.computeIfAbsent(component,
 				name -> new HashMap<>());
 		return componentMap.containsKey(feature);
 	}
@@ -711,10 +705,10 @@ public class OdoCli implements Odo {
 	}
 
 	private void doLog(String context, String component, boolean follow, boolean deploy) throws IOException {
-		List<ProcessHandle> handlers = componentLogProcesses.computeIfAbsent(component,
-				name -> Arrays.asList(new ProcessHandle[2]));
+		List<Process> handlers = componentLogProcesses.computeIfAbsent(component,
+				name -> Arrays.asList(new Process[2]));
 		int index = deploy ? 1 : 0;
-		ProcessHandle handler = handlers.get(index);
+		Process handler = handlers.get(index);
 		if (handler == null) {
 			List<String> args = new ArrayList<>();
 			args.add(command);
@@ -727,21 +721,17 @@ public class OdoCli implements Odo {
 			if (follow) {
 				args.add("--follow");
 			}
-			long pid = ExecHelper.executeWithTerminal(createWorkingDirectory(context), envVars,
+			Process p = ExecHelper.executeWithTerminal(createWorkingDirectory(context), envVars,
 					args.toArray(new String[args.size()]));
 
-			Optional<ProcessHandle> processHandle = ProcessHandle.of(pid);
-			if (processHandle.isPresent()) {
-				handlers.set(index, processHandle.get());
-				CompletableFuture<ProcessHandle> onProcessExit = processHandle.get().onExit();
-				onProcessExit.thenAccept(p -> handlers.set(index, null));
-			}
+			handlers.set(index, p);
+			p.onExit().thenAccept(p1 -> handlers.set(index, null));
 		}
 	}
 
 	@Override
 	public boolean isLogRunning(String context, String component, boolean deploy) {
-		return componentLogProcesses.computeIfAbsent(component, name -> Arrays.asList(new ProcessHandle[2]))
+		return componentLogProcesses.computeIfAbsent(component, name -> Arrays.asList(new Process[2]))
 				.get(deploy ? 1 : 0) != null;
 	}
 
@@ -982,13 +972,13 @@ public class OdoCli implements Odo {
 
 		private boolean callBackCalled = false;
 
-		private Map<ComponentFeature, ProcessHandle> componentMap;
+		private Map<ComponentFeature, Process> componentMap;
 
 		private ComponentFeature feature;
 
 		private StringBuffer content = new StringBuffer();
 
-		public TerminalOutputMonitorListener(Map<ComponentFeature, ProcessHandle> componentMap,
+		public TerminalOutputMonitorListener(Map<ComponentFeature, Process> componentMap,
 				Consumer<Boolean> callback, ComponentFeature feature) {
 			this.callback = callback;
 			this.componentMap = componentMap;

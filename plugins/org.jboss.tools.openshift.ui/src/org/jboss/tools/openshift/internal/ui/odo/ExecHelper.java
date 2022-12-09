@@ -274,7 +274,7 @@ public class ExecHelper {
 		return nativeEnv;
 	}
 
-	private static long executeWithTerminalInternal(File workingDirectory, Map<String, String> envs,
+	private static Process executeWithTerminalInternal(File workingDirectory, Map<String, String> envs,
 			ITerminalServiceOutputStreamMonitorListener listener, String... command) throws IOException {
 
 		String[] env = envs == null ? null : EnvironmentUtils.toStrings(appendNativeEnv(envs));
@@ -304,19 +304,19 @@ public class ExecHelper {
 		properties.put(ITerminalsConnectorConstants.PROP_ENCODING, StandardCharsets.UTF_8.name());
 		ITerminalService service = TerminalServiceFactory.getService();
 		service.openConsole(properties, null);
-		return p.pid();
+		return p;
 	}
 
-	public static long executeWithTerminal(File workingDirectory, Map<String, String> envs,
+	public static Process executeWithTerminal(File workingDirectory, Map<String, String> envs,
 			ITerminalServiceOutputStreamMonitorListener listener, String... command) throws IOException {
 		return executeWithTerminalInternal(workingDirectory, envs, listener, command);
 	}
 
-	public static long executeWithTerminal(Map<String, String> envs, String... command) throws IOException {
+	public static Process executeWithTerminal(Map<String, String> envs, String... command) throws IOException {
 		return executeWithTerminal(new File(HOME_FOLDER), envs, null, command);
 	}
 	
-	public static long executeWithTerminal(File workingDirectory, Map<String, String> envs, String... command) throws IOException {
+	public static Process executeWithTerminal(File workingDirectory, Map<String, String> envs, String... command) throws IOException {
 		return executeWithTerminal(workingDirectory, envs, null, command);
 	}
 }
