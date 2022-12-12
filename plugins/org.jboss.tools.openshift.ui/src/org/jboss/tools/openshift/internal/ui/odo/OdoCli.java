@@ -822,10 +822,21 @@ public class OdoCli implements Odo {
 
 	@Override
 	public List<Component> getComponents(String project) throws IOException {
-		return configureObjectMapper(new ComponentDeserializer()).readValue(
+		var components = configureObjectMapper(new ComponentDeserializer()).readValue(
 				execute(command, envVars, "list", "--namespace", project, "-o", "json"),
 				new TypeReference<List<Component>>() {
 				});
+		components.forEach(c -> {
+			try {
+				if (c.getLiveFeatures().isDev() && !isStarted(project, c.getPath(), c.getName(), ComponentFeature.DEV)) {
+					c.getLiveFeatures().removeFeature(ComponentFeature.DEV);
+				}
+				if (!c.getLiveFeatures().isDebug() && isStarted(project, c.getPath(), c.getName(), ComponentFeature.DEBUG)) {
+					c.getLiveFeatures().addFeature(ComponentFeature.DEBUG);
+				}
+			} catch (IOException e) {}
+		});
+		return components;
 	}
 
 	@Override

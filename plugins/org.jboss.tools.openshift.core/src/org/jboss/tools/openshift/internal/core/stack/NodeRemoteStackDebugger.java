@@ -36,7 +36,7 @@ public class NodeRemoteStackDebugger implements RemoteStackDebugger {
 
 	private static final String ID_REMOTE_NODE_APPLICATION = "org.eclipse.wildwebdeveloper.launchConfiguration.nodeDebugAttach";
 	
-	private static final List<String> SUPPORTED = List.of("nodejs", "angular", "nextjs", "nuxtjs", "react", "svelte", "vue", "javascript", "typescript");
+	private static final List<String> SUPPORTED = List.of("nodejs", "node.js", "angular", "nextjs", "nuxtjs", "react", "svelte", "vue", "javascript", "typescript");
 
 
 	@Override

@@ -47,31 +47,32 @@ public abstract class FeatureHandler extends OdoJobHandler {
 		ComponentElement componentElement = UIUtils.getFirstElement(selection, ComponentElement.class);
 		Component component = componentElement.getWrapped();
 		NamespaceElement namespaceElement = componentElement.getParent();
-		executeInJob("Adding/removing " + feature.getLabel(), monitor -> {
+		final ComponentFeature feat = feature.getPeer() != null && component.getInfo().getFeatures().is(feature.getPeer()) ? feature.getPeer() : feature;
+		executeInJob("Adding/removing " + feat.getLabel(), monitor -> {
 			try {
-				process(componentElement.getRoot().getOdo(), namespaceElement.getWrapped(), component, res -> {
-					if (component.getLiveFeatures().is(feature)) {
-						component.getLiveFeatures().removeFeature(feature);
+				process(componentElement.getRoot().getOdo(), namespaceElement.getWrapped(), component, feat, res -> {
+					if (component.getLiveFeatures().is(feat)) {
+						component.getLiveFeatures().removeFeature(feat);
 					} else {
-						component.getLiveFeatures().addFeature(feature);
+						component.getLiveFeatures().addFeature(feat);
 					}
 					componentElement.refresh();
 				});
-				UsageStats.getInstance().odoCommand(feature.getLabel(), true);
+				UsageStats.getInstance().odoCommand(feat.getLabel(), true);
 			} catch (IOException e) {
 				OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
-				UsageStats.getInstance().odoCommand(feature.getLabel(), false);
+				UsageStats.getInstance().odoCommand(feat.getLabel(), false);
 			}
 		});
 		return Status.OK_STATUS;
 	}
 
-	protected void process(Odo odo, String project, Component component, Consumer<Boolean> callback)
+	protected void process(Odo odo, String project, Component component, ComponentFeature feat, Consumer<Boolean> callback)
 			throws IOException {
-		if (odo.isStarted(project, component.getPath(), component.getName(), feature)) {
-			odo.stop(project, component.getPath(), component.getName(), feature, callback);
+		if (odo.isStarted(project, component.getPath(), component.getName(), feat)) {
+			odo.stop(project, component.getPath(), component.getName(), feat, callback);
 		} else {
-			odo.start(project, component.getPath(), component.getName(), feature, callback);
+			odo.start(project, component.getPath(), component.getName(), feat, callback);
 		}
 	}
 

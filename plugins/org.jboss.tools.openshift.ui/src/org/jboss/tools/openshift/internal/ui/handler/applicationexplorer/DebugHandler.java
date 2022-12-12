@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
-
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -24,11 +24,13 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.core.odo.Component;
-import org.jboss.tools.openshift.core.odo.ComponentFeature;
 import org.jboss.tools.openshift.core.odo.ComponentInfo;
 import org.jboss.tools.openshift.core.odo.Odo;
 import org.jboss.tools.openshift.core.odo.URL;
@@ -36,22 +38,24 @@ import org.jboss.tools.openshift.core.stack.RemoteStackDebugger;
 import org.jboss.tools.openshift.core.stack.RemoteStackProviderRegistry;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.NamespaceElement;
 
 /**
  * @author Red Hat Developers
  */
-public class DebugHandler extends FeatureHandler {
+public class DebugHandler extends OdoJobHandler {
 
 	private int index;
-
-	public DebugHandler() {
-		super(ComponentFeature.DEBUG);
-	}
-
+	
 	@Override
-	protected void process(Odo odo, String project, Component component, Consumer<Boolean> callback)
-			throws IOException {
-		super.process(odo, project, component, callback.andThen(b -> executeDebug(odo, project, component)));
+	public Object execute(final ExecutionEvent event) throws ExecutionException {
+		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		ComponentElement componentElement = UIUtils.getFirstElement(selection, ComponentElement.class);
+		Component component = componentElement.getWrapped();
+		NamespaceElement namespaceElement = componentElement.getParent();
+		executeDebug(componentElement.getRoot().getOdo(), namespaceElement.getWrapped(), component);
+		return Status.OK_STATUS;
 	}
 
 	public void executeDebug(Odo odo, String project, Component component) {
