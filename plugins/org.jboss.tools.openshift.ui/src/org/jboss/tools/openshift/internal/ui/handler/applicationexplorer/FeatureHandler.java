@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -58,6 +59,7 @@ public abstract class FeatureHandler extends OdoJobHandler {
 				});
 				UsageStats.getInstance().odoCommand(feature.getLabel(), true);
 			} catch (IOException e) {
+				OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
 				UsageStats.getInstance().odoCommand(feature.getLabel(), false);
 			}
 		});
