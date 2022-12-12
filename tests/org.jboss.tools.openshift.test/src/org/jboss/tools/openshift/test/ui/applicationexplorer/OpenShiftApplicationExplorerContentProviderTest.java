@@ -10,7 +10,6 @@ package org.jboss.tools.openshift.test.ui.applicationexplorer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -92,8 +91,6 @@ public class OpenShiftApplicationExplorerContentProviderTest {
      assertEquals(1, childs.length);
      Object element = childs[0];
      assertTrue(element instanceof NamespaceElement);
-     childs = provider.getChildren(element);
-     assertEquals(1, childs.length);
      childs = provider.getChildren(element);
      assertEquals(1, childs.length);
      element = childs[0];
