@@ -46,21 +46,22 @@ public abstract class FeatureHandler extends OdoJobHandler {
 		ComponentElement componentElement = UIUtils.getFirstElement(selection, ComponentElement.class);
 		Component component = componentElement.getWrapped();
 		NamespaceElement namespaceElement = componentElement.getParent();
-		try {
-			process(componentElement.getRoot().getOdo(), namespaceElement.getWrapped(), component, res -> {
-				if (component.getLiveFeatures().is(feature)) {
-					component.getLiveFeatures().removeFeature(feature);
-				} else {
-					component.getLiveFeatures().addFeature(feature);
-				}
-				componentElement.refresh();
-			});
-			UsageStats.getInstance().odoCommand(feature.getLabel(), true);
-			return Status.OK_STATUS;
-		} catch (IOException e) {
-			UsageStats.getInstance().odoCommand(feature.getLabel(), false);
-			return OpenShiftUIActivator.statusFactory().errorStatus(e);
-		}
+		executeInJob("Adding/removing " + feature.getLabel(), monitor -> {
+			try {
+				process(componentElement.getRoot().getOdo(), namespaceElement.getWrapped(), component, res -> {
+					if (component.getLiveFeatures().is(feature)) {
+						component.getLiveFeatures().removeFeature(feature);
+					} else {
+						component.getLiveFeatures().addFeature(feature);
+					}
+					componentElement.refresh();
+				});
+				UsageStats.getInstance().odoCommand(feature.getLabel(), true);
+			} catch (IOException e) {
+				UsageStats.getInstance().odoCommand(feature.getLabel(), false);
+			}
+		});
+		return Status.OK_STATUS;
 	}
 
 	protected void process(Odo odo, String project, Component component, Consumer<Boolean> callback)
