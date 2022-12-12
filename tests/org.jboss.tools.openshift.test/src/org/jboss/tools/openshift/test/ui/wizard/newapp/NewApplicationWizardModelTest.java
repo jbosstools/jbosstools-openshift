@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
@@ -77,7 +78,7 @@ public class NewApplicationWizardModelTest {
 		model.setResourceFactory(factory);
 
 		this.model = spy(model);
-		doReturn(mock(InputStream.class)).when(this.model).createInputStream(anyString(), any());
+		doReturn(mock(InputStream.class)).when(this.model).createInputStream(anyString(), any(IProgressMonitor.class));
 	}
 
 	/**

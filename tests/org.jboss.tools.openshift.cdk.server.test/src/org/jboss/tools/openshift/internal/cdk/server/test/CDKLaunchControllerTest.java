@@ -10,12 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.cdk.server.test;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
 
 import java.util.Collections;
 import java.util.Map;

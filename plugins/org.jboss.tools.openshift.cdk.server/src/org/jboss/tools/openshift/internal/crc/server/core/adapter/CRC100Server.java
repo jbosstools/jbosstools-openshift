@@ -104,18 +104,18 @@ public class CRC100Server extends ServerDelegate {
 	}
 
 	public static boolean matchesCRC_1_24_OrGreater(IServer server) {
-		return matchesCRC_x_y_OrGreater(server, "1", 24);
+		return matchesCRC_x_y_OrGreater(server, 1, 24);
 	}
 
 	public static boolean matchesCRC_1_21_OrGreater(IServer server) {
-		return matchesCRC_x_y_OrGreater(server, "1", 21);
+		return matchesCRC_x_y_OrGreater(server, 1, 21);
 	}
 	
 	public static boolean matchesCRC_2_0_OrGreater(IServer server) {
-		return matchesCRC_x_y_OrGreater(server, "2", 0);
+		return matchesCRC_x_y_OrGreater(server, 2, 0);
 	}
 
-	public static boolean matchesCRC_x_y_OrGreater(IServer server, String major, int minor) {
+	public static boolean matchesCRC_x_y_OrGreater(IServer server, int major, int minor) {
 		String binLoc = getCRCBinaryLocation(server);
 		MinishiftVersions minishiftVersionProps = MinishiftVersionLoader.getVersionProperties(binLoc);
 		String crcVersion = minishiftVersionProps.getCRCVersion();
@@ -125,14 +125,15 @@ public class CRC100Server extends ServerDelegate {
 	}
 	
 	
-	public static boolean matchesCRCversion_x_y_OrGreater(String version, String major, int minor) {
+	public static boolean matchesCRCversion_x_y_OrGreater(String version, int major, int minor) {
 		String prefix = version;
 		if (version.contains("+")) {
 			prefix = version.substring(0, version.indexOf("+"));
 		}
 		
 		String[] segments = prefix.split("\\.");
-		if (major.equals(segments[0]) && Integer.parseInt(segments[1]) >= minor) {
+		int currentMajor = Integer.parseInt(segments[0]);
+		if (currentMajor > major || (currentMajor == major && Integer.parseInt(segments[1]) >= minor)) {
 			return true;
 		}
 		return false;
