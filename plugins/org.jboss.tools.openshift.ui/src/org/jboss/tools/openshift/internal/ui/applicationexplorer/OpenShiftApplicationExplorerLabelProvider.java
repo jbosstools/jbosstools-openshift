@@ -45,7 +45,7 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 		} else if (element instanceof NamespaceElement) {
 			return style(((NamespaceElement) element).getWrapped(), "", limit);
 		} else if (element instanceof ComponentElement) {
-			return style(((ComponentElement) element).getWrapped().getName(), "", limit);
+			return style(((ComponentElement) element).getWrapped().getName(), ((ComponentElement) element).getWrapped().getLiveFeatures().toString(), limit);
 		} else if (element instanceof URLElement) {
 			String base = ((URLElement) element).getWrapped().getHost()+":"+((URLElement) element).getWrapped().getLocalPort();
 			String qualified = ((URLElement) element).getWrapped().getName()+":"+((URLElement) element).getWrapped().getContainerPort();
