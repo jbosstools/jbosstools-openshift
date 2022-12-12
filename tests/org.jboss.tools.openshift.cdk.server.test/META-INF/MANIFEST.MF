@@ -26,7 +26,7 @@ Require-Bundle: org.jboss.tools.common.core;bundle-version="3.7.0",
  org.jboss.tools.openshift.core;bundle-version="3.3.0",
  org.jboss.tools.runtime.core,
  org.jboss.tools.stacks.core,
- org.mockito;bundle-version="2.23.0"
+ org.mockito.mockito-core;bundle-version="4.8.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.jboss.tools.openshift.cdk.server.test.CDKTestActivator
 Bundle-ActivationPolicy: lazy

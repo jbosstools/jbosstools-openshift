@@ -16,9 +16,8 @@ import static org.jboss.tools.openshift.test.util.ResourceMocks.createResources;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -31,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
@@ -78,7 +78,7 @@ public class NewApplicationWizardModelTest {
 		model.setResourceFactory(factory);
 
 		this.model = spy(model);
-		doReturn(mock(InputStream.class)).when(this.model).createInputStream(anyString(), anyObject());
+		doReturn(mock(InputStream.class)).when(this.model).createInputStream(anyString(), any(IProgressMonitor.class));
 	}
 
 	/**
