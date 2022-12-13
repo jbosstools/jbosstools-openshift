@@ -33,12 +33,12 @@ public class JavaRemoteStackDebugger implements RemoteStackDebugger {
 	private static final List<String> SUPPORTED = List.of("maven", "openliberty", "websphereliberty", "quarkus", "spring", "vertx", "wildfly", "java");
 
 	@Override
-	public boolean isValid(String stackType, String stackVersion) {
+	public boolean isValid(String stackType) {
 		return SUPPORTED.contains(stackType.toLowerCase());
 	}
 
 	@Override
-	public void startRemoteDebugger(IProject project, String stackType, String stackVersion, int port, Map<String, String> env, IProgressMonitor monitor) throws CoreException {
+	public void startRemoteDebugger(IProject project, String stackType, int port, Map<String, String> env, IProgressMonitor monitor) throws CoreException {
 		String name = "OpenShift remote (Java) " + project.getName();
 		ILaunchConfigurationType launchConfigurationType = DebugPlugin.getDefault().getLaunchManager()
 				.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);

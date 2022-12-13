@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -16,16 +16,16 @@ import org.jboss.tools.openshift.core.odo.Odo;
  * @author Red Hat Developers
  *
  */
-public class ComponentModel extends ApplicationModel {
+public class ComponentModel extends ProjectModel {
 	public static final String PROPERTY_COMPONENT_NAME = "componentName";
-	
+
 	private String componentName;
-	
+
 	/**
 	 * @param odo
 	 */
-	public ComponentModel(Odo odo, String projectName, String applicationName, String componentName) {
-		super(odo, projectName, applicationName);
+	public ComponentModel(Odo odo, String projectName, String componentName) {
+		super(odo, projectName);
 		setComponentName(componentName);
 	}
 
@@ -40,10 +40,7 @@ public class ComponentModel extends ApplicationModel {
 	 * @param componentName the componentName to set
 	 */
 	public void setComponentName(String componentName) {
-		firePropertyChange(PROPERTY_COMPONENT_NAME, this.componentName,this.componentName = componentName);
+		firePropertyChange(PROPERTY_COMPONENT_NAME, this.componentName, this.componentName = componentName);
 	}
-	
-	
-
 
 }

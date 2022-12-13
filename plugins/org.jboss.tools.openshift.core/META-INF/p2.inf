@@ -1,0 +1,5 @@
+instructions.configure=\
+org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:-Dorg.eclipse.cdt.core.graceful_exit_time_ms=60000);
+
+instructions.unconfigure=\
+org.eclipse.equinox.p2.touchpoint.eclipse.removeJvmArg(jvmArg:-Dorg.eclipse.cdt.core.graceful_exit_time_ms=60000);

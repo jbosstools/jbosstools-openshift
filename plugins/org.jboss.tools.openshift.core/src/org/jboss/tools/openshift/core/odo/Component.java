@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -10,94 +10,79 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
-import java.util.Objects;
-
 public interface Component {
-  String getName();
+	String getName();
 
-  ComponentState getState();
+	ComponentFeatures getLiveFeatures();
 
-  void setState(ComponentState state);
+	void setLiveFeatures(ComponentFeatures state);
 
-  String getPath();
+	String getPath();
 
-  void setPath(String path);
-  
-  ComponentInfo getInfo();
+	void setPath(String path);
 
-  default boolean hasContext() {
-    return getPath() != null;
-  }
+	default boolean hasContext() {
+		return getPath() != null;
+	}
 
-  class ComponentImpl implements Component {
-    private String name;
-    private ComponentInfo info;
-    private ComponentState state;
-    private String path;
+	ComponentInfo getInfo();
 
-    private ComponentImpl(String name, ComponentInfo info, ComponentState state, String path) {
-      this.name = name;
-      this.info = info;
-      this.state = state;
-      this.path = path;
-    }
+	void setInfo(ComponentInfo componentInfo);
 
-    @Override
-    public String getName() {
-      return name;
-    }
+	class ComponentImpl implements Component {
+		private final String name;
+		private ComponentFeatures state;
+		private String path;
+		private ComponentInfo info;
 
-    @Override
-    public ComponentState getState() {
-      return state;
-    }
+		private ComponentImpl(String name, ComponentFeatures state, String path, ComponentInfo info) {
+			this.name = name;
+			this.state = state;
+			this.path = path;
+			this.info = info;
+		}
 
-    @Override
-    public void setState(ComponentState state) {
-      this.state = state;
-    }
+		@Override
+		public String getName() {
+			return name;
+		}
 
-    @Override
-    public String getPath() {
-      return path;
-    }
+		@Override
+		public ComponentFeatures getLiveFeatures() {
+			return state;
+		}
 
-    @Override
-    public void setPath(String path) {
-      this.path = path;
-    }
+		@Override
+		public void setLiveFeatures(ComponentFeatures state) {
+			this.state = state;
+		}
 
-    public ComponentInfo getInfo() {
-      return info;
-    }
+		@Override
+		public String getPath() {
+			return path;
+		}
 
-    @Override
-    public int hashCode() {
-      return Objects.hash(name);
-    }
+		@Override
+		public void setPath(String path) {
+			this.path = path;
+		}
 
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if (!(obj instanceof ComponentImpl)) {
-        return false;
-      }
-      ComponentImpl other = (ComponentImpl) obj;
-      return Objects.equals(name, other.name);
-    }
-  }
+		@Override
+		public ComponentInfo getInfo() {
+			return info;
+		}
 
-  static Component of(String name, ComponentInfo info) {
-    return of(name, info, ComponentState.NO_CONTEXT);
-  }
+		@Override
+		public void setInfo(ComponentInfo componentInfo) {
+			this.info = componentInfo;
+		}
+	}
 
-  static Component of(String name, ComponentInfo info, ComponentState state) {
-    return of(name, info, state, null);
-  }
+	static Component of(String name, ComponentFeatures state, ComponentInfo info) {
+		return of(name, state, null, info);
+	}
 
-  static Component of(String name, ComponentInfo info, ComponentState state, String path) {
-    return new ComponentImpl(name, info, state, path);
-  }
+	static Component of(String name, ComponentFeatures state, String path, ComponentInfo info) {
+		return new ComponentImpl(name, state, path, info);
+	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -32,7 +32,7 @@ public class OpenInBrowserHandler extends AbstractHandler {
 		if (urlElement == null) {
 			return OpenShiftUIActivator.statusFactory().cancelStatus("No url selected"); //$NON-NLS-1$
 		}
-		String url = urlElement.getWrapped().getProtocol() + "://" + urlElement.getWrapped().getHost();
+		String url = urlElement.getWrapped().getProtocol() + "://" + urlElement.getWrapped().getHost() +  ":" + urlElement.getWrapped().getLocalPort();
 		new BrowserUtility().checkedCreateInternalBrowser(url, url, OpenShiftUIActivator.PLUGIN_ID,
 		        OpenShiftUIActivator.getDefault().getLog());
 		return null;

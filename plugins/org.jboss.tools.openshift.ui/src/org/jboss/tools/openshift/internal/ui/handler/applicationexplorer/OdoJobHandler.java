@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2022 Red Hat, Inc.
+ * Copyright (c) 2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,22 +10,29 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
-import java.io.IOException;
+import java.util.function.Consumer;
 
-import org.jboss.tools.foundation.ui.util.BrowserUtility;
-import org.jboss.tools.openshift.core.odo.Odo;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 /**
  * @author Red Hat Developers
  */
-public class OpenConsoleHandler extends OdoHandler {
+public abstract class OdoJobHandler extends AbstractHandler {
 
-	@Override
-	public void actionPerformed(Odo odo) throws IOException {
-		String url = odo.consoleURL();
-		new BrowserUtility().checkedCreateInternalBrowser(url, url, OpenShiftUIActivator.PLUGIN_ID,
-				OpenShiftUIActivator.getDefault().getLog());
+	protected static void executeInJob(String name, Consumer<IProgressMonitor> action) {
+		Job job = Job.create(name, monitor -> {
+			try {
+				action.accept(monitor);
+				return Status.OK_STATUS;
+			}
+			catch (Exception e) {
+				return OpenShiftUIActivator.statusFactory().errorStatus(e);
+			}
+		});
+		job.schedule();
 	}
-
 }

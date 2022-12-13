@@ -12,7 +12,6 @@
 	
     <properties>
         <commons-validator.version>1.7</commons-validator.version>
-        <alizer.version>0.1.0</alizer.version>
     </properties>
 
     <build>
@@ -40,11 +39,6 @@
                             <groupId>commons-validator</groupId>
                             <artifactId>commons-validator</artifactId>
                             <version>${commons-validator.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>com.redhat.devtools.alizer</groupId>
-                            <artifactId>alizer-api</artifactId>
-                            <version>${alizer.version}</version>
                         </artifactItem>
                     </artifactItems>
                 </configuration>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,7 +22,7 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.Componen
 /**
  * @author Red Hat Developers
  */
-public abstract class ComponentHandler extends OdoHandler {
+public abstract class ComponentHandler extends OdoJobHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {

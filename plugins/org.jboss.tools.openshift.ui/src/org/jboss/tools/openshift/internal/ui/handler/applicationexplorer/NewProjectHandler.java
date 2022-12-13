@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -27,7 +28,7 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.Applicat
 /**
  * @author Red Hat Developers
  */
-public class NewProjectHandler extends OdoHandler {
+public class NewProjectHandler extends OdoJobHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -41,12 +42,12 @@ public class NewProjectHandler extends OdoHandler {
 		return null;
 	}
 
-  private static void openDialog(ApplicationExplorerUIModel cluster, Shell shell) {
-    InputDialog dialog = new InputDialog(shell, "New project", "Project name:", null, null);
+	private static void openDialog(ApplicationExplorerUIModel cluster, Shell shell) {
+		InputDialog dialog = new InputDialog(shell, "New project", "Project name:", null, null);
 		if (dialog.open() == Window.OK) {
 			executeInJob("Create project", monitor -> execute(shell, cluster, dialog.getValue()));
 		}
-  }
+	}
 
 	/**
 	 * @param cluster
@@ -62,17 +63,18 @@ public class NewProjectHandler extends OdoHandler {
 		} catch (IOException e) {
 			shell.getDisplay().asyncExec(() -> {
 				notification.close();
-				MessageDialog.openError(shell, "Create project", "Error creating project " + project);
+				MessageDialog.openError(shell, "Create project",
+						"Error creating project " + project + " : " + e.getLocalizedMessage());
 			});
 		}
 	}
 
-  /**
-   * @param shell
-   * @param root
-   */
-  public static void openDialog(Shell shell, ApplicationExplorerUIModel root) {
-    openDialog(root, shell);
-  }
+	/**
+	 * @param shell
+	 * @param root
+	 */
+	public static void openDialog(Shell shell, ApplicationExplorerUIModel root) {
+		openDialog(root, shell);
+	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -17,9 +17,9 @@ import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
  * @author Red Hat Developers
  *
  */
-public class ServiceElement extends AbstractOpenshiftUIElement<Service, ApplicationElement, ApplicationExplorerUIModel> {
+public class ServiceElement extends AbstractOpenshiftUIElement<Service, NamespaceElement, ApplicationExplorerUIModel> {
 	
-	public ServiceElement(Service service, ApplicationElement parentElement) {
+	public ServiceElement(Service service, NamespaceElement parentElement) {
 		super(parentElement, service);
 	}
 

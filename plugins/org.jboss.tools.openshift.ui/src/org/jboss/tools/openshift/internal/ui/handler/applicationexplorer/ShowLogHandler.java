@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,24 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
-import java.io.IOException;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
-
 /**
- * @author Red Hat Developer
+ * @author Red Hat Developers
+ *
  */
-public class ShowLogHandler extends ComponentHandler {
+public class ShowLogHandler extends LogHandler {
 
-	@Override
-	public Object execute(ComponentElement component, Shell shell) throws ExecutionException {
-		try {
-			component.getRoot().getOdo().log(component.getParent().getParent().getWrapped(), component.getParent().getWrapped().getName(), component.getWrapped().getPath(), component.getWrapped().getName());
-		} catch (IOException e) {
-			return OpenShiftUIActivator.statusFactory().errorStatus(e);
-		}
-		return null;
+	public ShowLogHandler() {
+		super(false);
 	}
+
 }

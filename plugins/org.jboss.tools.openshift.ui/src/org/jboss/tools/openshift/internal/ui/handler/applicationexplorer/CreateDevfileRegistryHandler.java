@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Red Hat, Inc.
+ * Copyright (c) 2021-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -28,32 +29,29 @@ import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.CreateDe
 /**
  * @author Red Hat Developers
  */
-public class CreateDevfileRegistryHandler extends OdoHandler {
+public class CreateDevfileRegistryHandler extends OdoJobHandler {
 
-  @Override
-  public Object execute(ExecutionEvent event) throws ExecutionException {
-    try {
-      ISelection selection = HandlerUtil.getCurrentSelection(event);
-      DevfileRegistriesElement registriesElement = UIUtils.getFirstElement(selection, DevfileRegistriesElement.class);
-      final CreateDevfileRegistryModel model = new CreateDevfileRegistryModel(registriesElement.getRoot().getOdo());
-      final IWizard wizard = new CreateDevfileRegistryWizard(model);
-      if (WizardUtils.openWizardDialog(wizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
-        executeInJob("Create devfile registry", monitor -> execute(model, registriesElement));
-      }
-    } catch (IOException e) {
-      MessageDialog.openError(HandlerUtil.getActiveShell(event), "Create devfile registry", "Can't create devfile registry error message:" + e.getLocalizedMessage());
-    }
-    return null;
-  }
-  
-  private void execute(CreateDevfileRegistryModel model, DevfileRegistriesElement registriesElement) {
-    try {
-      model.getOdo().createDevfileRegistry(model.getName(), model.getURL(),
-          model.isSecure());
-      registriesElement.refresh();
-    } catch (IOException e) {
-      Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(),
-          "Create devfile registry", "Can't create devfile registry error message:" + e.getLocalizedMessage()));
-    }
-  }
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		DevfileRegistriesElement registriesElement = UIUtils.getFirstElement(selection, DevfileRegistriesElement.class);
+		final CreateDevfileRegistryModel model = new CreateDevfileRegistryModel(registriesElement.getRoot().getOdo());
+		final IWizard wizard = new CreateDevfileRegistryWizard(model);
+		if (WizardUtils.openWizardDialog(wizard, HandlerUtil.getActiveShell(event)) == Window.OK) {
+			executeInJob("Create devfile registry", monitor -> execute(model, registriesElement));
+		}
+		return null;
+	}
+
+	private void execute(CreateDevfileRegistryModel model, DevfileRegistriesElement registriesElement) {
+		try {
+			model.getOdo().createDevfileRegistry(model.getName(), model.getURL(), model.getToken());
+			registriesElement.refresh();
+		} catch (IOException e) {
+			Display.getDefault()
+					.asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(),
+							"Create devfile registry",
+							"Can't create devfile registry. \n Error message: " + e.getLocalizedMessage()));
+		}
+	}
 }

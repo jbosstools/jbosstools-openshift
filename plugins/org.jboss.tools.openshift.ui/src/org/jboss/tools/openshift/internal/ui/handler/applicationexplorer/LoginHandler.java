@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.handler.applicationexplorer;
 
 import java.io.IOException;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
@@ -31,7 +32,7 @@ import org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer.LoginWiz
 /**
  * @author Red Hat Developers
  */
-public class LoginHandler extends OdoHandler {
+public class LoginHandler extends OdoJobHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -40,28 +41,26 @@ public class LoginHandler extends OdoHandler {
 		if (cluster == null) {
 			return OpenShiftUIActivator.statusFactory().cancelStatus("No cluster selected"); //$NON-NLS-1$
 		}
-		try {
-			openDialog(HandlerUtil.getActiveShell(event), cluster);
-			return Status.OK_STATUS;
-		} catch (IOException e) {
-			throw new ExecutionException(e.getLocalizedMessage(), e);
-		}
+		openDialog(HandlerUtil.getActiveShell(event), cluster);
+		return Status.OK_STATUS;
 	}
 
-	public static void openDialog(final Shell shell, ApplicationExplorerUIModel cluster) throws IOException {
+	public static void openDialog(final Shell shell, ApplicationExplorerUIModel cluster) {
 		final LoginModel model = new LoginModel(cluster.getOdo().getMasterUrl().toString(), cluster.getOdo());
 		final IWizard loginWizard = new LoginWizard(model);
 		if (WizardUtils.openWizardDialog(loginWizard, shell) == Window.OK) {
 			executeInJob("Login to Cluster", monitor -> execute(model, cluster));
 		}
 	}
-	
+
 	private static void execute(LoginModel model, ApplicationExplorerUIModel cluster) {
 		try {
-			model.getOdo().login(model.getUrl(), model.getUsername(), model.getPassword().toCharArray(), model.getToken());
-			cluster.reload();
+			model.getOdo().login(model.getUrl(), model.getUsername(), model.getPassword().toCharArray(),
+					model.getToken().toCharArray());
+			cluster.refresh();
 		} catch (IOException e) {
-			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(), "Login", "Can't login error message:" + e.getLocalizedMessage()));
+			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(), "Login",
+					"Can't login error message:" + e.getLocalizedMessage()));
 		}
 	}
 }

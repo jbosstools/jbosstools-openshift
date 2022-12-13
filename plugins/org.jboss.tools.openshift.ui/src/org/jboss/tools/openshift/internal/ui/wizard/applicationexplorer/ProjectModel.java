@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -18,9 +18,9 @@ import org.jboss.tools.openshift.core.odo.Odo;
  */
 public class ProjectModel extends OdoModel {
 	public static final String PROPERTY_PROJECT_NAME = "projectName";
-	
+
 	private String projectName;
-	
+
 	/**
 	 * @param odo
 	 */
@@ -40,10 +40,7 @@ public class ProjectModel extends OdoModel {
 	 * @param projectName the projectName to set
 	 */
 	public void setProjectName(String projectName) {
-		firePropertyChange(PROPERTY_PROJECT_NAME, this.projectName,this.projectName = projectName);
+		firePropertyChange(PROPERTY_PROJECT_NAME, this.projectName, this.projectName = projectName);
 	}
-	
-	
-
 
 }

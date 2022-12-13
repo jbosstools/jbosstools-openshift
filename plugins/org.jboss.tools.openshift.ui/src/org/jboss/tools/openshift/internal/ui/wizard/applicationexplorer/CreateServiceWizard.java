@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -24,8 +24,8 @@ public class CreateServiceWizard extends Wizard {
 	
 	private CreateServiceWizardPage page;
 	
-	public CreateServiceWizard(List<ServiceTemplate> serviceTemplates, String project, String application, Odo odo) {
-		this.addPage(this.page = new CreateServiceWizardPage(this, new CreateServiceModel(odo, serviceTemplates, project, application)));
+	public CreateServiceWizard(List<ServiceTemplate> serviceTemplates, String project, Odo odo) {
+		this.addPage(this.page = new CreateServiceWizardPage(this, new CreateServiceModel(odo, serviceTemplates, project)));
 		setNeedsProgressMonitor(true);
 		setWindowTitle("Create service");
 	}

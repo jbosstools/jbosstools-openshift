@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,7 +24,7 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.Applicat
 /**
  * @author Red Hat Developers
  */
-public class RefreshHandler extends OdoHandler {
+public class RefreshHandler extends OdoJobHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -51,7 +51,8 @@ public class RefreshHandler extends OdoHandler {
 		} catch (Exception e) {
 			shell.getDisplay().asyncExec(() -> {
 				notification.close();
-				MessageDialog.openError(shell, "Error during refresh", "Cannot refresh cluster");
+				MessageDialog.openError(shell, "Error during refresh",
+						"Cannot refresh cluster: " + e.getLocalizedMessage());
 			});
 		}
 	}

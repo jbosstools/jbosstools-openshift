@@ -79,7 +79,7 @@ public abstract class AbstractODOTest {
 			String component, String urlSuffix) throws IOException, InterruptedException, ExecutionException {
 		String path = ResourcesPlugin.getWorkspace().getRoot().getProject(eclipseProjectName).getLocation()
 				.toOSString();
-		List<URL> urls = OdoCliFactory.getInstance().getOdo().get().listURLs(project, application, path, component);
+		List<URL> urls = OdoCliFactory.getInstance().getOdo().get().listURLs(project, path, component);
 		java.net.URL url = new java.net.URL("http://" + urls.get(0).getHost() + urlSuffix);
 		new Thread(new Runnable() {
 			public void run() {

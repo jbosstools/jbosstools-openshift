@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.internal.ui.wizard.applicationexplorer;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
@@ -63,21 +62,22 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 
 	private static final String PROPERTIES = "properties";
 	private static final String SPEC = "spec";
-	
+
 	private CreateServiceModel model;
 	private JsonSchemaWidget schemaWidget;
-	
+
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	protected CreateServiceWizardPage(IWizard wizard, CreateServiceModel model) {
-		super("Create service", "Specify a name for your service and choose a template to start from.", "Create service", wizard);
+		super("Create service", "Specify a name for your service and choose a template to start from.",
+				"Create service", wizard);
 		this.model = model;
 	}
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
-		
+
 		Label serviceNameLabel = new Label(parent, SWT.NONE);
 		serviceNameLabel.setText("Name:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(serviceNameLabel);
@@ -88,9 +88,9 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 		ISWTObservableValue<String> serviceNameObservable = WidgetProperties.text(SWT.Modify).observe(serviceNameText);
 		Binding serviceNameBinding = ValueBindingBuilder.bind(serviceNameObservable)
 				.validatingAfterGet(new MandatoryStringValidator("Please specify a name"))
-				.to(BeanProperties.value(CreateServiceModel.PROPERTY_SERVICE_NAME).observe(model))
-				.in(dbc);
-		ControlDecorationSupport.create(serviceNameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+				.to(BeanProperties.value(CreateServiceModel.PROPERTY_SERVICE_NAME).observe(model)).in(dbc);
+		ControlDecorationSupport.create(serviceNameBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater(true));
 
 		Label serviceTemplatesLabel = new Label(parent, SWT.NONE);
 		serviceTemplatesLabel.setText("Service:");
@@ -104,14 +104,13 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 		serviceTemplatesComboViewer.setInput(model.getServiceTemplates());
 		Binding serviceTemplatesBinding = ValueBindingBuilder
 				.bind(ViewerProperties.singleSelection().observe(serviceTemplatesComboViewer))
-				.validatingAfterGet(new IsNotNullValidator(
-						ValidationStatus.cancel("You have to select a template.")))
+				.validatingAfterGet(new IsNotNullValidator(ValidationStatus.cancel("You have to select a template.")))
 				.to(BeanProperties.value(CreateServiceModel.PROPERTY_SELECTED_SERVICE_TEMPLATE, ServiceTemplate.class)
 						.observe(model))
 				.in(dbc);
 		ControlDecorationSupport.create(serviceTemplatesBinding, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater());
-		
+
 		Label serviceCRDsLabel = new Label(parent, SWT.NONE);
 		serviceCRDsLabel.setText("Type:");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(serviceCRDsLabel);
@@ -121,20 +120,21 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 		ComboViewer serviceCRDsComboViewer = new ComboViewer(serviceCRDsCombo);
 		serviceCRDsComboViewer.setContentProvider(new ObservableListContentProvider<>());
 		serviceCRDsComboViewer.setLabelProvider(new ServiceTemplateCRDColumLabelProvider());
-		serviceCRDsComboViewer.setInput(BeanProperties.list(CreateServiceModel.PROPERTY_SELECTED_SERVICE_TEMPLATE_CRDS).observe(model));
+		serviceCRDsComboViewer.setInput(
+				BeanProperties.list(CreateServiceModel.PROPERTY_SELECTED_SERVICE_TEMPLATE_CRDS).observe(model));
 		Binding serviceCRDsBinding = ValueBindingBuilder
 				.bind(ViewerProperties.singleSelection().observe(serviceCRDsComboViewer))
-				.validatingAfterGet(new IsNotNullValidator(
-						ValidationStatus.cancel("You have to select a type.")))
+				.validatingAfterGet(new IsNotNullValidator(ValidationStatus.cancel("You have to select a type.")))
 				.to(BeanProperties.value(CreateServiceModel.PROPERTY_SELECTED_SERVICE_TEMPLATE_CRD, OperatorCRD.class)
 						.observe(model))
 				.in(dbc);
 		ControlDecorationSupport.create(serviceCRDsBinding, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater());
-		
-		ScrolledComposite schemaParentComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+
+		ScrolledComposite schemaParentComposite = new ScrolledComposite(parent,
+				SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(3, 1)
-		.applyTo(schemaParentComposite);
+				.applyTo(schemaParentComposite);
 		schemaParentComposite.setExpandHorizontal(true);
 		schemaParentComposite.setExpandVertical(true);
 		schemaWidget = new JsonSchemaWidget(schemaParentComposite, ERROR, schemaParentComposite);
@@ -144,25 +144,8 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 			initSchemaWidget();
 		});
 		initSchemaWidget();
-		
 
-		Label applicationLabel = new Label(parent, SWT.NONE);
-		applicationLabel.setText("Application:");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(applicationLabel);
-		Text applicationNameText = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
-				.applyTo(applicationNameText);
-
-		ISWTObservableValue<String> applicationNameObservable = WidgetProperties.text(SWT.Modify).observe(applicationNameText);
-		Binding applicationNameBinding = ValueBindingBuilder.bind(applicationNameObservable)
-				.validatingAfterGet(new MandatoryStringValidator("Please specify an application"))
-				.to(BeanProperties.value(CreateServiceModel.PROPERTY_APPLICATION_NAME).observe(model))
-				.in(dbc);
-		ControlDecorationSupport.create(applicationNameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-		if (StringUtils.isNotBlank(model.getApplicationName())) {
-			applicationNameText.setEnabled(false);
-		}
-}
+	}
 
 	private void initSchemaWidget() {
 		Job job = new Job("Loading schema for " + model.getSelectedServiceTemplateCRD().getKind()) {
@@ -202,7 +185,7 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 			OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
 		}
 	}
-	
+
 	/**
 	 * @return
 	 */
@@ -213,8 +196,8 @@ public class CreateServiceWizardPage extends AbstractOpenShiftWizardPage {
 				spec = MAPPER.createObjectNode();
 				schemaWidget.dump(spec);
 			}
-			model.getOdo().createService(model.getProjectName(), model.getApplicationName(), model.getSelectedServiceTemplate(),
-			    model.getSelectedServiceTemplateCRD(), model.getServiceName(), spec, false);
+			model.getOdo().createService(model.getProjectName(), model.getSelectedServiceTemplate(),
+					model.getSelectedServiceTemplateCRD(), model.getServiceName(), spec, false);
 			return true;
 		} catch (IOException e) {
 			setErrorMessage(e.getLocalizedMessage());

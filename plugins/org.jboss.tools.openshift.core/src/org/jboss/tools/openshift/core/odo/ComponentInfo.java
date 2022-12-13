@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -14,124 +14,99 @@ import java.util.HashMap;
 import java.util.Map;
 
 public interface ComponentInfo {
-    ComponentSourceType getSourceType();
-    String getComponentTypeName();
-    String getComponentTypeVersion();
-    String getRepositoryURL();
-    String getRepositoryReference();
-    String getBinaryURL();
-    boolean isMigrated();
-    ComponentKind getComponentKind();
-    Map<String, String> getEnv();
 
-    public class Builder {
-        private ComponentSourceType sourceType;
-        private String componentTypeName;
-        private String componentTypeVersion;
-        private String repositoryURL;
-        private String repositoryReference;
-        private String binaryURL;
-        private boolean migrated;
-        private ComponentKind kind;
-        private Map<String, String> env = new HashMap<>();
+	String getComponentTypeName();
 
-        public Builder withSourceType(ComponentSourceType sourceType) {
-            this.sourceType = sourceType;
-            return this;
-        }
+	String getLanguage();
 
-        public Builder withComponentTypeName(String componentTypeName) {
-            this.componentTypeName= componentTypeName;
-            return this;
-        }
+	boolean isMigrated();
 
-        public Builder withComponentTypeVersion(String componentTypeVersion) {
-            this.componentTypeVersion = componentTypeVersion;
-            return this;
-        }
+	ComponentKind getComponentKind();
 
-        public Builder withRepositoryURL(String repositoryURL) {
-            this.repositoryURL = repositoryURL;
-            return this;
-        }
+	ComponentFeatures getFeatures();
 
-        public Builder withRepositoryReference(String repositoryReference) {
-            this.repositoryReference = repositoryReference;
-            return this;
-        }
+	Map<String, String> getEnv();
 
-        public Builder withBinaryURL(String binaryURL) {
-            this.binaryURL = binaryURL;
-            return this;
-        }
+	class Builder {
+		private String componentTypeName;
+		private boolean migrated;
 
-        public Builder withMigrated(boolean migrated) {
-            this.migrated = migrated;
-            return this;
-        }
-        
-        public Builder withComponentKind(ComponentKind kind) {
-            this.kind = kind;
-            return this;
-        }
-        
-        public Builder withEnv(Map<String, String> env) {
-            this.env = env;
-            return this;
-        }
-        
-        public Builder addEnv(String key, String val) {
-            env.put(key, val);
-            return this;
-        }
+		private ComponentKind kind;
 
-        public ComponentInfo build() {
-            return new ComponentInfo() {
-                @Override
-                public ComponentSourceType getSourceType() {
-                    return sourceType;
-                }
+		private ComponentFeatures features = new ComponentFeatures();
 
-                @Override
-                public String getComponentTypeName() {
-                    return componentTypeName;
-                }
+		private String language;
 
-                @Override
-                public String getComponentTypeVersion() {
-                    return componentTypeVersion;
-                }
+		private Map<String, String> env = new HashMap<>();
 
-                @Override
-                public String getRepositoryURL() {
-                    return repositoryURL;
-                }
+		public Builder withComponentTypeName(String componentTypeName) {
+			this.componentTypeName = componentTypeName;
+			return this;
+		}
 
-                @Override
-                public String getRepositoryReference() {
-                    return repositoryReference;
-                }
+		public Builder withMigrated(boolean migrated) {
+			this.migrated = migrated;
+			return this;
+		}
 
-                @Override
-                public String getBinaryURL() {
-                    return binaryURL;
-                }
+		public Builder withComponentKind(ComponentKind kind) {
+			this.kind = kind;
+			return this;
+		}
 
-                @Override
-                public boolean isMigrated() {
-                    return migrated;
-                }
+		public Builder withFeatures(ComponentFeatures features) {
+			this.features = features;
+			return this;
+		}
 
-                @Override
-                public ComponentKind getComponentKind() {
-                    return kind;
-                }
+		public Builder withLanguage(String language) {
+			this.language = language;
+			return this;
+		}
 
-                @Override
-                public Map<String, String> getEnv() {
-                    return env;
-                }
-            };
-        }
-    }
+		public Builder withEnv(Map<String, String> env) {
+			this.env = env;
+			return this;
+		}
+
+		public Builder addEnv(String key, String val) {
+			env.put(key, val);
+			return this;
+		}
+
+		public ComponentInfo build() {
+			return new ComponentInfo() {
+
+				@Override
+				public String getComponentTypeName() {
+					return componentTypeName;
+				}
+
+				@Override
+				public String getLanguage() {
+					return language;
+				}
+
+				@Override
+				public boolean isMigrated() {
+					return migrated;
+				}
+
+				@Override
+				public ComponentKind getComponentKind() {
+					return kind;
+				}
+
+				@Override
+				public ComponentFeatures getFeatures() {
+					return features;
+				}
+
+				@Override
+				public Map<String, String> getEnv() {
+					return env;
+				}
+			};
+		}
+	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2020 Red Hat, Inc.
+ * Copyright (c) 2019-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -11,76 +11,42 @@
 package org.jboss.tools.openshift.core.odo;
 
 public interface URL {
-  enum State {
-    NOT_PUSHED("Not Pushed"),
-    PUSHED("Pushed"),
-    LOCALLY_DELETED("Locally Deleted");
+	String getName();
 
-    private String label;
+	String getProtocol();
 
-    private State(String label) {
-      this.label = label;
-    }
+	String getHost();
 
-    public static State from(String value) {
-      for(State state : State.values()) {
-        if (state.label.equals(value)) {
-          return state;
-        }
-      }
-      return NOT_PUSHED;
-    }
+	String getLocalPort();
 
-    @Override
-    public String toString() {
-      return label;
-    }
-  }
+	String getContainerPort();
 
-  String getName();
+	static URL of(String name, String host, String localPort, String containerPort) {
+		return new URL() {
+			@Override
+			public String getName() {
+				return name;
+			}
 
-  String getProtocol();
+			@Override
+			public String getHost() {
+				return host;
+			}
 
-  String getHost();
+			@Override
+			public String getProtocol() {
+				return "http";
+			}
 
-  String getPort();
+			@Override
+			public String getLocalPort() {
+				return localPort;
+			}
 
-  State getState();
-
-  boolean isSecure();
-
-  static URL of(String name, String protocol, String host, String port, String state, boolean secure) {
-    return new URL() {
-      @Override
-      public String getName() {
-        return name;
-      }
-
-      @Override
-      public String getHost() {
-        return host;
-      }
-
-      @Override
-      public String getProtocol() {
-        return protocol;
-      }
-
-      @Override
-      public String getPort() {
-        return port;
-      }
-
-      @Override
-      public State getState() {
-        return State.from(state);
-      }
-
-      @Override
-      public boolean isSecure() {
-        return secure;
-      }
-
-    };
-  }
+			@Override
+			public String getContainerPort() {
+				return containerPort;
+			}
+		};
+	}
 }

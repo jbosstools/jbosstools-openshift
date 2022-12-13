@@ -12,14 +12,16 @@ package org.jboss.tools.openshift.internal.common.core;
 
 import org.jboss.tools.usage.event.UsageEventType;
 import org.jboss.tools.usage.event.UsageReporter;
+import org.jboss.tools.usage.internal.preferences.UsageReportPreferences;
 
+@SuppressWarnings("restriction")
 public class UsageStats {
 
 	private static final String OPENSHIFT_COMPONENT = "openshift";
 	private static final int SUCCESS = 1;
 	private static final int FAILURE = 0;
 	private static final String HOSTTYPE_OTHER = "other";
-	
+
 	private static final String SECURE = "secure";
 	private static final String UNSECURE = "not secure";
 
@@ -31,7 +33,7 @@ public class UsageStats {
 	private UsageEventType newConnectionV3;
 	private UsageEventType newApplicationV3;
 	private UsageEventType importApplicationV3;
-	
+
 	private UsageEventType odoCli;
 	private UsageEventType odoCreateComponent;
 	private UsageEventType odoCreateService;
@@ -46,7 +48,7 @@ public class UsageStats {
 	private UsageEventType odoKubernetesVersion;
 	private UsageEventType odoIsOpenshift;
 	private UsageEventType odoOpenshiftVersion;
-	
+
 	private UsageEventType odoDevsandboxLogin;
 	private UsageEventType odoDevsandboxTokenRetrieved;
 	private UsageEventType odoDevsandboxRedHatSsoGetToken;
@@ -78,7 +80,7 @@ public class UsageStats {
 		this.importApplicationV3 = createEventType("import_app_v3", // actionName
 				"host type: redhat/other", // labelDescription
 				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		
+
 		this.odoCli = createEventType("odo_command", "odo command", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 		this.odoCreateComponent = createEventType("odo_create_component", "component type", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 		this.odoCreateService = createEventType("odo_create_service", "service type", UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
@@ -132,11 +134,11 @@ public class UsageStats {
 		UsageReporter.getInstance()
 				.trackEvent(importApplicationV3.event(getHostType(host), success ? SUCCESS : FAILURE));
 	}
-	
+
 	public void odoCommand(String command, boolean success) {
 		UsageReporter.getInstance().trackEvent(odoCli.event(command, success ? SUCCESS : FAILURE));
 	}
-	
+
 	public void createComponent(String componentType, boolean success) {
 		UsageReporter.getInstance().trackEvent(odoCreateComponent.event(componentType, success ? SUCCESS : FAILURE));
 	}
@@ -152,7 +154,7 @@ public class UsageStats {
 	public void createURL(boolean secure, boolean success) {
 		UsageReporter.getInstance().trackEvent(odoCreateUrl.event(secure ? SECURE : UNSECURE, success ? SUCCESS : FAILURE));
 	}
-	
+
 	public void login() {
 		UsageReporter.getInstance().countEvent(odoLogin.event());
 	}
@@ -185,9 +187,8 @@ public class UsageStats {
 		String lowercaseHost = host.toLowerCase();
 		if (lowercaseHost.contains("redhat") || lowercaseHost.endsWith("openshift.com")) {
 			return host;
-		} else {
-			return HOSTTYPE_OTHER;
 		}
+		return HOSTTYPE_OTHER;
 	}
 
 	public void kubernetesVersion(String kubernetesVersion) {
@@ -205,7 +206,7 @@ public class UsageStats {
 	public void devsandboxLogin(boolean success) {
 		UsageReporter.getInstance().trackEvent(odoDevsandboxLogin.event("completed wizard rate", success ? SUCCESS : FAILURE)); //$NON-NLS-1$
 	}
-	
+
 	public void devsandboxTokenRetrieved() {
 		UsageReporter.getInstance().trackEvent(odoDevsandboxTokenRetrieved.event("Devsandbox token retrieved rate", SUCCESS)); //$NON-NLS-1$
 	}
@@ -216,5 +217,9 @@ public class UsageStats {
 
 	public void devsandboxAPIState(String state) {
 		UsageReporter.getInstance().trackEvent(odoDdevsandboxAPIState.event(state));
+	}
+
+	public boolean isTrackingEnabled() {
+		return UsageReportPreferences.isEnabled();
 	}
 }

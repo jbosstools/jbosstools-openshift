@@ -63,11 +63,11 @@ Require-Bundle: org.jboss.tools.openshift.common.ui;bundle-version="[3.0.0,4.0.0
  org.eclipse.cdt.core.native,
  org.jboss.tools.common.oauth.core,
  org.eclipse.core.net,
- org.eclipse.osgi
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+ org.eclipse.osgi,
+ org.jboss.tools.usage
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
-Export-Package: com.redhat.devtools.alizer.api;x-friends:="org.jboss.tools.openshift.test",
- org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
+Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.applicationexplorer;x-friends:="org.jboss.tools.openshift.reddeer,org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.comparators;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.dialog;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
@@ -102,8 +102,7 @@ Export-Package: com.redhat.devtools.alizer.api;x-friends:="org.jboss.tools.opens
  org.jboss.tools.openshift.internal.ui.wizard.project;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.wizard.resource;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer"
 Bundle-ClassPath: lib/commons-validator-1.7.jar,
- .,
- lib/alizer-api-0.1.0.jar
+ .
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.content,
  org.eclipse.core.runtime.jobs,

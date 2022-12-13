@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2020-2022 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -20,7 +20,7 @@ import org.jboss.tools.openshift.core.odo.ServiceTemplate;
  * @author Red Hat Developers
  *
  */
-public class CreateServiceModel extends ApplicationModel {
+public class CreateServiceModel extends ProjectModel {
 	public static final String PROPERTY_SERVICE_NAME = "serviceName";
 	public static final String PROPERTY_SELECTED_SERVICE_TEMPLATE = "selectedServiceTemplate";
 	public static final String PROPERTY_SELECTED_SERVICE_TEMPLATE_CRDS = "selectedServiceTemplateCRDs";
@@ -40,8 +40,8 @@ public class CreateServiceModel extends ApplicationModel {
 	/**
 	 * @param odo
 	 */
-	public CreateServiceModel(Odo odo, List<ServiceTemplate> serviceTemplates, String projectName, String applicationName) {
-		super(odo, projectName, applicationName);
+	public CreateServiceModel(Odo odo, List<ServiceTemplate> serviceTemplates, String projectName) {
+		super(odo, projectName);
 		this.serviceTemplates = serviceTemplates;
 		if (!serviceTemplates.isEmpty()) {
 			setSelectedServiceTemplate(serviceTemplates.get(0));
