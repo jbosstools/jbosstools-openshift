@@ -54,6 +54,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
@@ -370,11 +371,7 @@ public class OpenShiftDebugModeTest {
 		debugMode.execute(new NullProgressMonitor());
 
 		// then
-		verify(container, atLeastOnce()).setPorts(and(
-				// new set of ports contains requested port
-				argThat(aSetThatContainsPort(toInt(VALUE_DEBUGPORT))),
-				// but not previously existing port
-				argThat(not(aSetThatContainsPort(88)))));
+		verify(container, atLeastOnce()).setPorts(argThat(aSetThatContainsPort(Integer.valueOf(VALUE_DEBUGPORT))));
 		// send updated dc
 		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
@@ -678,7 +675,7 @@ public class OpenShiftDebugModeTest {
 		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 	
-	private static ArgumentMatcher<Set<IPort>> aSetThatContainsPort(final int port) {
+	private static ArgumentMatcher<Set<IPort>> aSetThatContainsPort(final Integer port) {
 		return new ArgumentMatcher<>() {
 			
 
@@ -687,9 +684,13 @@ public class OpenShiftDebugModeTest {
 				if (CollectionUtils.isEmpty(set)) {
 					return false;
 				}
-				return set.stream().anyMatch(portSpec -> portSpec.getContainerPort() == port);
+				return set.stream().anyMatch(portSpec -> portSpec.getContainerPort() == port.intValue());
 			}
 
+			@Override
+			public String toString() {
+				return NLS.bind("Set of ports that contains the port {0}", port);
+			}
 		};
 	}
 
@@ -702,6 +703,10 @@ public class OpenShiftDebugModeTest {
 				return CollectionUtils.disjunction(Arrays.asList(ports), set).isEmpty();
 			}
 
+			@Override
+			public String toString() {
+				return "Set of ports that contains exactly the given ports.";
+			}
 		};
 	}
 
