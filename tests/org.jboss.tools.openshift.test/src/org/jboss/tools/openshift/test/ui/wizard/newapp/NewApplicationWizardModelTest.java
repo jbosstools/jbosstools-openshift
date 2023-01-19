@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
@@ -248,7 +249,7 @@ public class NewApplicationWizardModelTest {
 		when(factory.create(any(InputStream.class))).thenReturn(template);
 		model.setUseLocalAppSource(true);
 		model.setLocalAppSourceFileName("http://nowhere.com");
-		model.loadAppSource(null);
+		model.loadAppSource(new NullProgressMonitor());
 		verify(factory).create(any(InputStream.class));
 		assertEquals(TemplateApplicationSource.class, model.getSelectedAppSource().getClass());
 	}

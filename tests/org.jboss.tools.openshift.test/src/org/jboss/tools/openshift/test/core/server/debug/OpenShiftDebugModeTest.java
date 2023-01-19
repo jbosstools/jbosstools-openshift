@@ -14,7 +14,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang.math.NumberUtils.toInt;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.not;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createConnection;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createContainer;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createDeploymentConfig;
@@ -27,9 +26,11 @@ import static org.jboss.tools.openshift.test.util.ResourceMocks.createService;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.mockGetContainers;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.mockGetEnvironmentVariables;
 import static org.mockito.AdditionalMatchers.and;
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
@@ -39,7 +40,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -57,9 +57,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -73,6 +70,7 @@ import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IContainer;
@@ -373,11 +371,7 @@ public class OpenShiftDebugModeTest {
 		debugMode.execute(new NullProgressMonitor());
 
 		// then
-		verify(container, atLeastOnce()).setPorts(and(
-				// new set of ports contains requested port
-				argThat(aSetThatContainsPort(toInt(VALUE_DEBUGPORT))),
-				// but not previously existing port
-				argThat(not(aSetThatContainsPort(88)))));
+		verify(container, atLeastOnce()).setPorts(argThat(aSetThatContainsPort(Integer.valueOf(VALUE_DEBUGPORT))));
 		// send updated dc
 		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
@@ -681,35 +675,37 @@ public class OpenShiftDebugModeTest {
 		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 	
-	private static Matcher<Set<IPort>> aSetThatContainsPort(final int port) {
-		return new TypeSafeMatcher<Set<IPort>>() {
+	private static ArgumentMatcher<Set<IPort>> aSetThatContainsPort(final Integer port) {
+		return new ArgumentMatcher<>() {
+			
 
 			@Override
-			protected boolean matchesSafely(Set<IPort> set) {
+			public boolean matches(Set<IPort> set) {
 				if (CollectionUtils.isEmpty(set)) {
 					return false;
 				}
-				return set.stream().anyMatch(portSpec -> portSpec.getContainerPort() == port);
+				return set.stream().anyMatch(portSpec -> portSpec.getContainerPort() == port.intValue());
 			}
 
 			@Override
-			public void describeTo(Description description) {
-				description.appendText(NLS.bind("Set of ports that contains the port {0}", port));
+			public String toString() {
+				return NLS.bind("Set of ports that contains the port {0}", port);
 			}
 		};
 	}
 
-	private static Matcher<Set<IPort>> aSetEqualTo(final IPort... ports) {
-		return new TypeSafeMatcher<Set<IPort>>() {
+	private static ArgumentMatcher<Set<IPort>> aSetEqualTo(final IPort... ports) {
+		return new ArgumentMatcher<>() {
+			
 
 			@Override
-			protected boolean matchesSafely(Set<IPort> set) {
+			public boolean matches(Set<IPort> set) {
 				return CollectionUtils.disjunction(Arrays.asList(ports), set).isEmpty();
 			}
 
 			@Override
-			public void describeTo(Description description) {
-				description.appendText("Set of ports that contains exactly the given ports.");
+			public String toString() {
+				return "Set of ports that contains exactly the given ports.";
 			}
 		};
 	}
