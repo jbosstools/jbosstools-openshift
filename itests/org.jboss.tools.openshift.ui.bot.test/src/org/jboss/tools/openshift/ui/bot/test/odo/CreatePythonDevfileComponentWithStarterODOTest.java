@@ -43,7 +43,7 @@ public class CreatePythonDevfileComponentWithStarterODOTest extends AbstractODOT
 	
 	@Test
 	public void testCreateComponent() {
-		createComponent(projectReq.getProjectName(), "flask", "flask-example", true);
+		createComponent(projectReq.getProjectName(), "python", "flask-example", true);
 	}
 
 }

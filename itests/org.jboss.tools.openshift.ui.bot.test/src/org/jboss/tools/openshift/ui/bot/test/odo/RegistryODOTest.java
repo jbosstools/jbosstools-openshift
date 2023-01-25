@@ -44,7 +44,7 @@ public class RegistryODOTest {
 
 	@Test
 	public void testGetDefaultDevfileRegistry() {
-		assertNotNull(this.explorer.getOpenShiftODORegistries().getRegistry("DefaultDevfileRegistry"));
+		assertNotNull(this.explorer.getOpenShiftODORegistries().getRegistry("devfile"));
 	}
 
 	@Test
