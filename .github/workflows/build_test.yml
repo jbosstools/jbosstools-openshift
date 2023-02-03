@@ -36,14 +36,16 @@ jobs:
         cache: 'maven'
 
     # Build and compile using Maven
-    - name: Build/Compile and run unit tests
-      uses: GabrielBB/xvfb-action@v1
-      with:
-        run: mvn clean verify -U -fae -B --settings build-ci/maven-settings.xml -DskipITests=true -Dmaven.test.error.ignore=true -Dmaven.test.failure.ignore=true -ntp
+    - name: Run tests (Linux)
+      run: xvfb-run -a mvn clean verify -U -fae -B --settings build-ci/maven-settings.xml -DskipITests=true -Dmaven.test.error.ignore=true -Dmaven.test.failure.ignore=true -ntp
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+    - name: Run tests (Windows/Mac)
+      run: mvn clean verify -U -fae -B --settings build-ci/maven-settings.xml -DskipITests=true -Dmaven.test.error.ignore=true -Dmaven.test.failure.ignore=true -ntp
+      if: ${{ matrix.os != 'ubuntu-latest' }}
 
     # Archive artifacts to be applied in Publish Reports workflow
     - name: Archiving test artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with: 
         name: ${{ matrix.os }}-${{ matrix.java }}-test-reports
         path: |
