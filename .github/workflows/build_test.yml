@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
-        java: ["17, 18, 19"]
+        java: [17, 18, 19]
       fail-fast: false
 
     steps:
