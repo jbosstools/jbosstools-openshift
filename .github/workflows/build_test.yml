@@ -49,6 +49,7 @@ jobs:
     # Archive artifacts to be applied in Publish Reports workflow
     - name: Archiving test artifacts
       uses: actions/upload-artifact@v3
+      if: ${{ matrix.os != 'windows-latest'}} # currently disabled because of https://github.com/actions/upload-artifact/issues/240
       with: 
         name: ${{ matrix.os }}-${{ matrix.java }}-test-reports
         path: |
