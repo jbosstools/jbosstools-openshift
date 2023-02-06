@@ -40,7 +40,7 @@ jobs:
       run: xvfb-run -a mvn clean verify -U -fae -B --settings build-ci/maven-settings.xml -DskipITests=true -Dmaven.test.error.ignore=true -Dmaven.test.failure.ignore=true -ntp
       if: ${{ matrix.os == 'ubuntu-latest' }}
     - name: Build/Compile and run unit tests (Windows/Mac)
-      run: 'mvn -U -fae -B --settings build-ci/maven-settings.xml -DskipITests=true -Dmaven.test.error.ignore=true -Dmaven.test.failure.ignore=true -ntp clean verify'
+      run: "mvn -U -fae -B --settings build-ci/maven-settings.xml -DskipITests=true -Dmaven.test.error.ignore=true -Dmaven.test.failure.ignore=true -ntp clean verify"
       if: ${{ matrix.os != 'ubuntu-latest' }}
 
     # Archive artifacts to be applied in Publish Reports workflow
