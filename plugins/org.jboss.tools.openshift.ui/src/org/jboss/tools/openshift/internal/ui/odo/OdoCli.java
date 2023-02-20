@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
@@ -385,7 +386,7 @@ public class OdoCli implements Odo {
 		}
 		var logHandlers = componentLogProcesses.remove(component);
 		if (logHandlers != null) {
-			logHandlers.forEach(handler -> stopHandler(handler));
+			logHandlers.stream().filter(Objects::nonNull).forEach(handler -> stopHandler(handler));
 		}
 	}
 
