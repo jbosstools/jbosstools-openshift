@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BinaryOperator;
@@ -337,10 +338,12 @@ public class OdoCli implements Odo {
 	}
 
 	private void stopHandler(Process handler) {
-		if (Platform.getOS().equals(Platform.OS_WIN32)) {
-			handler.destroy();
-		} else {
-			ProcessHandle.of(handler.pid()).get().destroy();
+		if (handler != null) {
+			if (Platform.getOS().equals(Platform.OS_WIN32)) {
+				handler.destroy();
+			} else {
+				ProcessHandle.of(handler.pid()).get().destroy();
+			}
 		}
 	}
 
@@ -369,6 +372,22 @@ public class OdoCli implements Odo {
 		Map<ComponentFeature, Process> componentMap = componentFeatureProcesses.computeIfAbsent(component,
 				name -> new HashMap<>());
 		return componentMap.containsKey(feature);
+	}
+	
+	/**
+	 * Stop all running processes for a component
+	 * 
+	 * @param component the component name
+	 */
+	private void cleanupComponent(String component) {
+		var featureHandlers = componentFeatureProcesses.remove(component);
+		if (featureHandlers != null) {
+			featureHandlers.forEach((feat, handler) -> stopHandler(handler));
+		}
+		var logHandlers = componentLogProcesses.remove(component);
+		if (logHandlers != null) {
+			logHandlers.stream().filter(Objects::nonNull).forEach(handler -> stopHandler(handler));
+		}
 	}
 
 	private File createWorkingDirectory(String context) {
@@ -676,6 +695,7 @@ public class OdoCli implements Odo {
 
 	private void undeployComponent(String project, String context, String component, boolean deleteConfig,
 			ComponentKind kind) throws IOException {
+		cleanupComponent(component);
 		try {
 			if (kind != ComponentKind.OTHER) {
 				List<String> args = new ArrayList<>();
