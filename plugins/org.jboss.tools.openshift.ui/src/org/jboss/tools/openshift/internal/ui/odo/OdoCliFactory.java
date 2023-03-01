@@ -43,4 +43,8 @@ public class OdoCliFactory {
 		}
 		return future;
 	}
+
+	public void resetOdo() {
+		future = null;
+	}
 }

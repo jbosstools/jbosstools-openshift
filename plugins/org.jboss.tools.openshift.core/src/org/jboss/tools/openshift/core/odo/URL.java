@@ -11,42 +11,57 @@
 package org.jboss.tools.openshift.core.odo;
 
 public interface URL {
-	String getName();
+	  String getName();
 
-	String getProtocol();
+	  String getProtocol();
 
-	String getHost();
+	  String getHost();
 
-	String getLocalPort();
+	  String getPath();
 
-	String getContainerPort();
+	  String getLocalPort();
 
-	static URL of(String name, String host, String localPort, String containerPort) {
-		return new URL() {
-			@Override
-			public String getName() {
-				return name;
-			}
+	  String getContainerPort();
 
-			@Override
-			public String getHost() {
-				return host;
-			}
+	  static URL of(String name, String host, String localPort, String containerPort, String path) {
+	    return new URL() {
+	      @Override
+	      public String getName() {
+	        return name;
+	      }
 
-			@Override
-			public String getProtocol() {
-				return "http";
-			}
+	      @Override
+	      public String getHost() {
+	        return host;
+	      }
 
-			@Override
-			public String getLocalPort() {
-				return localPort;
-			}
+	      @Override
+	      public String getPath() {
+	        return path;
+	      }
 
-			@Override
-			public String getContainerPort() {
-				return containerPort;
-			}
-		};
+	      @Override
+	      public String getProtocol() {
+	        return "http";
+	      }
+
+	      @Override
+	      public String getLocalPort() {
+	        return localPort;
+	      }
+
+	      @Override
+	      public String getContainerPort() {
+	        return containerPort;
+	      }
+	    };
+	  }
+
+	  static URL of(String name, String host, String localPort, String containerPort) {
+	    return of(name, host, localPort, containerPort, "/");
+	  }
+
+	  default String asURL() {
+	    return "http://" + getHost() + ":" + getLocalPort() + getPath();
+	  }
 	}
-}

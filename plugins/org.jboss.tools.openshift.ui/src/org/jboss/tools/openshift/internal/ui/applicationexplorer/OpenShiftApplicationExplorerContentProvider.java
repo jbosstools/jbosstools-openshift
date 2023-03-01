@@ -12,7 +12,9 @@ package org.jboss.tools.openshift.internal.ui.applicationexplorer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IStatus;
@@ -24,6 +26,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.IElementListener;
 import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.BindingElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.CreateComponentMessageElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.CreateProjectMessageElement;
@@ -74,8 +77,8 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
 	}
 
 	@Override
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.viewer = (StructuredViewer) viewer;
+	public void inputChanged(Viewer aViewer, Object oldInput, Object newInput) {
+		this.viewer = (StructuredViewer) aViewer;
 	}
 
 	@Override
@@ -93,7 +96,9 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
 		} else if (parentElement instanceof NamespaceElement) {
 			return getComponentsAndServices((NamespaceElement) parentElement);
 		} else if (parentElement instanceof ComponentElement) {
-			return getURLs((ComponentElement) parentElement);
+			List<URLElement> urls = getURLs((ComponentElement) parentElement);
+			List<BindingElement> bindings = getBindings((ComponentElement) parentElement);
+			return Stream.of(urls, bindings).filter(item -> !item.isEmpty()).flatMap(Collection::stream).toArray();
 		} else if (parentElement instanceof DevfileRegistriesElement) {
 			return getRegistries();
 		} else if (parentElement instanceof DevfileRegistryElement) {
@@ -112,6 +117,7 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
 				childs.add(new NamespaceElement(ns, parentElement));
 			}
 		} catch (Exception e) {
+			OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
 			childs.add(new LoginMessageElement(parentElement));
 		}
 		if (childs.isEmpty()) {
@@ -166,29 +172,43 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
 		} catch (IOException | KubernetesClientException e) {
 			if (childs.isEmpty()) {
 				OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
-				return new Object[] { "Can't list components" };
+				return new Object[] { "Can't list childs elements" };
 			}
 		}
 		if (childs.isEmpty()) {
-			childs.add(new CreateComponentMessageElement<NamespaceElement>(parentElement));
+			childs.add(new CreateComponentMessageElement<>(parentElement));
 		}
 		return childs.toArray();
 	}
 
-	private Object[] getURLs(ComponentElement parentElement) {
+	private List<URLElement> getURLs(ComponentElement parentElement) {
+		List<URLElement> childs = new ArrayList<>();
 		try {
-			List<Object> childs = new ArrayList<>();
 			NamespaceElement project = parentElement.getParent();
 			ApplicationExplorerUIModel cluster = project.getRoot();
 			cluster.getOdo()
 					.listURLs(project.getWrapped(), parentElement.getWrapped().getPath(),
 							parentElement.getWrapped().getName())
 					.forEach(url -> childs.add(new URLElement(url, parentElement)));
-			return childs.toArray();
 		} catch (IOException e) {
 			OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
-			return new Object[] { "Can't list urls" };
 		}
+		return childs;
+	}
+
+	private List<BindingElement> getBindings(ComponentElement parentElement) {
+		List<BindingElement> results = new ArrayList<>();
+		try {
+			NamespaceElement project = parentElement.getParent();
+			ApplicationExplorerUIModel cluster = project.getRoot();
+			cluster.getOdo()
+					.listBindings(project.getWrapped(), parentElement.getWrapped().getPath(),
+							parentElement.getWrapped().getName())
+					.forEach(binding -> results.add(new BindingElement(binding, parentElement)));
+		} catch (IOException e) {
+			OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+		}
+		return results;
 	}
 
 	@Override
@@ -207,7 +227,7 @@ public class OpenShiftApplicationExplorerContentProvider extends ViewerComparato
 	}
 
 	@Override
-	public int compare(Viewer viewer, Object e1, Object e2) {
+	public int compare(Viewer aViewer, Object e1, Object e2) {
 		return 0;
 	}
 

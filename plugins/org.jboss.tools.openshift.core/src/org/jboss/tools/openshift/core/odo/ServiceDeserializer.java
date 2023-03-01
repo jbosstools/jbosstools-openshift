@@ -10,40 +10,42 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class ServiceDeserializer extends StdNodeBasedDeserializer<List<Service>> {
-  private static final String NAME_FIELD = "name";
+	private static final long serialVersionUID = 3410206923429616866L;
 
-  private static final String METADATA_FIELD = "metadata";
-  private static final String KIND_FIELD = "kind";
-  private static final String APIVERSION_FIELD = "apiVersion";
-  private static final String ITEMS = "items";
-  private static final String MANIFEST = "manifest";
+	private static final String NAME_FIELD = "name";
 
-  public ServiceDeserializer() {
-    super(TypeFactory.defaultInstance().constructCollectionType(List.class, Service.class));
-  }
+	private static final String KIND_FIELD = "kind";
+	private static final String APIVERSION_FIELD = "apiVersion";
+	public static final String BINDABLE_SERVICES_FIELD = "bindableServices";
 
-  @Override
-  public List<Service> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
-    List<Service> result = new ArrayList<>();
-      for (JsonNode service : root.get(ITEMS)) {
-        result.add(getService(service));
-    }
-    return result;
-  }
+	public ServiceDeserializer() {
+		super(TypeFactory.defaultInstance().constructCollectionType(List.class, Service.class));
+	}
 
-  public static Service getService(JsonNode service) {
-    String apiVersion = service.get(MANIFEST).get(APIVERSION_FIELD).asText();
-    String kind = service.get(MANIFEST).get(KIND_FIELD).asText();
-    return Service.of(service.get(MANIFEST).get(METADATA_FIELD).get(NAME_FIELD).asText(), apiVersion, kind);
-  }
+	@Override
+	public List<Service> convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+		List<Service> result = new ArrayList<>();
+		if (root.has(BINDABLE_SERVICES_FIELD)) {
+			for (JsonNode service : root.get(BINDABLE_SERVICES_FIELD)) {
+				result.add(getService(service));
+			}
+		}
+		return result;
+	}
+
+	public static Service getService(JsonNode service) {
+		String apiVersion = service.get(APIVERSION_FIELD).asText();
+		String kind = service.get(KIND_FIELD).asText();
+		return Service.of(service.get(NAME_FIELD).asText(), apiVersion, kind);
+	}
 }

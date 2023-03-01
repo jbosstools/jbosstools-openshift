@@ -28,9 +28,9 @@ import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.Componen
  *
  */
 public abstract class OdoHandler extends AbstractHandler {
-	
+
 	private ISelection selection;
-	
+
 	public abstract void actionPerformed(Odo odo) throws IOException;
 
 	@Override
@@ -43,11 +43,11 @@ public abstract class OdoHandler extends AbstractHandler {
 		}
 		return Status.OK_STATUS;
 	}
-	
+
 	protected ComponentElement getComponent() {
 		return UIUtils.getFirstElement(selection, ComponentElement.class);
 	}
-	
+
 	protected ApplicationExplorerUIModel getCluster() {
 		return UIUtils.getFirstElement(selection, ApplicationExplorerUIModel.class);
 	}
@@ -55,10 +55,10 @@ public abstract class OdoHandler extends AbstractHandler {
 	protected Odo getOdo() throws ExecutionException {
 		if (getCluster() != null) {
 			return getCluster().getOdo();
-		}
-		else if (getComponent() != null) {
+		} else if (getComponent() != null) {
 			return getComponent().getRoot().getOdo();
 		}
 		throw new ExecutionException("No component nor cluster selected");
 	}
+
 }

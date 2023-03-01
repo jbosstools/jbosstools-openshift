@@ -1,0 +1,223 @@
+{
+	"devfilePath": "C:\\Users\\Jeff\\IdeaProjects\\empty\\devfile.yaml",
+	"devfileData": {
+		"devfile": {
+			"schemaVersion": "2.2.0",
+			"metadata": {
+				"name": "empty",
+				"version": "2.1.1",
+				"displayName": "Node.js Runtime",
+				"description": "Stack with Node.js 16",
+				"tags": [
+					"Node.js",
+					"Express",
+					"ubi8"
+				],
+				"icon": "https://nodejs.org/static/images/logos/nodejs-new-pantone-black.svg",
+				"projectType": "Node.js",
+				"language": "JavaScript"
+			},
+			"variables": {
+				"CONTAINER_IMAGE": "quay.io/jeffmaury/nodejs-odo-example",
+				"CONTAINER_PORT": "3000",
+				"DOMAIN_NAME": "nodejs.example.com",
+				"RESOURCE_NAME": "my-nodejs-app"
+			},
+			"components": [
+				{
+					"name": "runtime",
+					"container": {
+						"image": "registry.access.redhat.com/ubi8/nodejs-16:latest",
+						"env": [
+							{
+								"name": "DEBUG_PORT",
+								"value": "5858"
+							}
+						],
+						"memoryLimit": "1024Mi",
+						"args": [
+							"tail",
+							"-f",
+							"/dev/null"
+						],
+						"mountSources": true,
+						"dedicatedPod": false,
+						"endpoints": [
+							{
+								"name": "http-node",
+								"targetPort": 3000,
+								"secure": false
+							},
+							{
+								"name": "debug",
+								"targetPort": 5858,
+								"exposure": "none",
+								"secure": false
+							}
+						]
+					}
+				},
+				{
+					"name": "outerloop-build",
+					"image": {
+						"imageName": "quay.io/jeffmaury/nodejs-odo-example",
+						"dockerfile": {
+							"uri": "./Dockerfile",
+							"buildContext": "${PROJECT_SOURCE}",
+							"rootRequired": false
+						},
+						"autoBuild": false
+					}
+				},
+				{
+					"name": "outerloop-deployment",
+					"kubernetes": {
+						"inlined": "kind: Deployment\napiVersion: apps/v1\nmetadata:\n  name: my-nodejs-app\nspec:\n  replicas: 1\n  selector:\n    matchLabels:\n      app: my-nodejs-app\n  template:\n    metadata:\n      labels:\n        app: my-nodejs-app\n    spec:\n      containers:\n        - name: my-nodejs-app\n          image: quay.io/jeffmaury/nodejs-odo-example\n          ports:\n            - name: http\n              containerPort: 3000\n              protocol: TCP\n          resources:\n            limits:\n              memory: \"1024Mi\"\n              cpu: \"500m\"\n",
+						"deployByDefault": false
+					}
+				},
+				{
+					"name": "outerloop-service",
+					"kubernetes": {
+						"inlined": "apiVersion: v1\nkind: Service\nmetadata:\n  name: my-nodejs-app\nspec:\n  ports:\n  - name: \"3000\"\n    port: 3000\n    protocol: TCP\n    targetPort: 3000\n  selector:\n    app: my-nodejs-app\n  type: ClusterIP\n",
+						"deployByDefault": false
+					}
+				},
+				{
+					"name": "outerloop-url",
+					"kubernetes": {
+						"inlined": "apiVersion: route.openshift.io/v1\nkind: Route\nmetadata:\n  name: my-nodejs-app\nspec:\n  path: /\n  to:\n    kind: Service\n    name: my-nodejs-app\n  port:\n    targetPort: 3000\n",
+						"deployByDefault": false
+					}
+				}
+			],
+			"starterProjects": [
+				{
+					"name": "nodejs-starter",
+					"git": {
+						"remotes": {
+							"origin": "https://github.com/odo-devfiles/nodejs-ex.git"
+						}
+					}
+				}
+			],
+			"commands": [
+				{
+					"id": "install",
+					"exec": {
+						"group": {
+							"kind": "build",
+							"isDefault": true
+						},
+						"commandLine": "npm install",
+						"component": "runtime",
+						"workingDir": "${PROJECT_SOURCE}",
+						"hotReloadCapable": false
+					}
+				},
+				{
+					"id": "run",
+					"exec": {
+						"group": {
+							"kind": "run",
+							"isDefault": true
+						},
+						"commandLine": "npm start",
+						"component": "runtime",
+						"workingDir": "${PROJECT_SOURCE}",
+						"hotReloadCapable": false
+					}
+				},
+				{
+					"id": "debug",
+					"exec": {
+						"group": {
+							"kind": "debug",
+							"isDefault": true
+						},
+						"commandLine": "npm run debug",
+						"component": "runtime",
+						"workingDir": "${PROJECT_SOURCE}",
+						"hotReloadCapable": false
+					}
+				},
+				{
+					"id": "test",
+					"exec": {
+						"group": {
+							"kind": "test",
+							"isDefault": true
+						},
+						"commandLine": "npm test",
+						"component": "runtime",
+						"workingDir": "${PROJECT_SOURCE}",
+						"hotReloadCapable": false
+					}
+				},
+				{
+					"id": "deploy",
+					"composite": {
+						"group": {
+							"kind": "deploy",
+							"isDefault": true
+						},
+						"commands": [
+							"build-image",
+							"k8s-deployment",
+							"k8s-service",
+							"k8s-url"
+						],
+						"parallel": false
+					}
+				},
+				{
+					"id": "build-image",
+					"apply": {
+						"component": "outerloop-build"
+					}
+				},
+				{
+					"id": "k8s-deployment",
+					"apply": {
+						"component": "outerloop-deployment"
+					}
+				},
+				{
+					"id": "k8s-service",
+					"apply": {
+						"component": "outerloop-service"
+					}
+				},
+				{
+					"id": "k8s-url",
+					"apply": {
+						"component": "outerloop-url"
+					}
+				}
+			]
+		},
+		"supportedOdoFeatures": {
+			"dev": true,
+			"deploy": true,
+			"debug": true
+		}
+	},
+	"runningIn": {
+		"deploy": true,
+		"dev": false
+	},
+	"routes": [
+		{
+			"name": "my-nodejs-app",
+			"rules": [
+				{
+					"host": "my-nodejs-app-jmaury-dev.apps.sandbox.x8i5.p1.openshiftapps.com",
+					"paths": [
+						"/"
+					]
+				}
+			]
+		}
+	],
+	"managedBy": "odo"
+}

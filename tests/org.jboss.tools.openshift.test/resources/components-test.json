@@ -1,0 +1,11 @@
+{
+	"componentInDevfile": "nodejs1",
+	"components": [
+		{
+			"name": "nodejs1",
+			"managedBy": "",
+			"runningIn": [],
+			"projectType": "nodejs"
+		}
+	]
+}

@@ -30,6 +30,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.Job;
+import org.jboss.tools.openshift.core.odo.Binding;
 import org.jboss.tools.openshift.core.odo.Component;
 import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
 import org.jboss.tools.openshift.core.odo.ComponentFeature;
@@ -278,8 +279,18 @@ public class OdoProjectDecorator implements Odo {
 	}
 
 	@Override
-	public void link(String project, String context, String component, String target) throws IOException {
-		delegate.link(project, context, component, target);
+	public Binding link(String project, String context, String component, String target) throws IOException {
+		return delegate.link(project, context, component, target);
+	}
+
+	@Override
+	public List<Binding> listBindings(String project, String context, String component) throws IOException {
+		return delegate.listBindings(project, context, component);
+	}
+
+	@Override
+	public void deleteBinding(String project, String context, String component, String binding) throws IOException {
+		delegate.deleteBinding(project, context, component, binding);
 	}
 
 	@Override

@@ -1,0 +1,11 @@
+{
+  "bindableServices": [
+    {
+      "name": "my-cluster",
+      "namespace": "jeff",
+      "kind": "PerconaServerMongoDB",
+      "apiVersion": "psmdb.percona.com/v1",
+      "service": "my-cluster/PerconaServerMongoDB.psmdb.percona.com/v1"
+    }
+  ]
+}

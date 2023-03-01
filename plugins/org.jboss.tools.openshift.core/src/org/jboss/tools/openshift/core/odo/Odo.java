@@ -24,7 +24,8 @@ public interface Odo {
 	void start(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback)
 			throws IOException;
 
-	void stop(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback) throws IOException;
+	void stop(String project, String context, String component, ComponentFeature feature, Consumer<Boolean> callback)
+			throws IOException;
 
 	boolean isStarted(String project, String context, String component, ComponentFeature feature) throws IOException;
 
@@ -81,7 +82,11 @@ public interface Odo {
 
 	void about() throws IOException;
 
-	void link(String project, String context, String component, String target) throws IOException;
+	Binding link(String project, String context, String component, String target) throws IOException;
+
+	List<Binding> listBindings(String project, String context, String component) throws IOException;
+
+	void deleteBinding(String project, String context, String component, String binding) throws IOException;
 
 	String consoleURL() throws IOException;
 

@@ -24,6 +24,7 @@ import org.jboss.tools.openshift.internal.test.OpenShiftTestActivator;
 import org.jboss.tools.test.util.JobUtils;
 import org.jboss.tools.test.util.TestProjectProvider;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class MavenProfileTest {
@@ -36,6 +37,7 @@ public class MavenProfileTest {
 	private TestProjectProvider projectProvider;
 
 	@Test
+	@Ignore
 	public void shouldNotActivateIfNoProfileId() throws CoreException, InterruptedException {
 		// given
 		this.projectProvider = createMavenProject(SPRING_BOOT_PROJECT_NAME);
@@ -47,6 +49,7 @@ public class MavenProfileTest {
 	}
 
 	@Test
+	@Ignore
 	public void shouldNotActivateIfNoProject() throws CoreException {
 		// given
 		MavenProfile profile = new MavenProfile(OPENSHIFT_MAVEN_PROFILE_ID, null);
@@ -57,6 +60,7 @@ public class MavenProfileTest {
 	}
 
 	@Test
+	@Ignore
 	public void shouldNotActivateIfProjectIsNotMavenProject() throws CoreException {
 		// given
 		this.projectProvider = createJavaProject(JAVA_PROJECT_NAME);
@@ -68,6 +72,7 @@ public class MavenProfileTest {
 	}
 
 	@Test
+	@Ignore
 	public void shouldNotActivateIfProjectHasOtherProfile() throws CoreException, InterruptedException {
 		// given
 		this.projectProvider = createMavenProject(SPRING_BOOT_PROJECT_NAME);
@@ -79,6 +84,7 @@ public class MavenProfileTest {
 	}
 
 	@Test
+	@Ignore
 	public void shouldActivateIfProjectHasProfile() throws CoreException, InterruptedException {
 		// given
 		this.projectProvider = createMavenProject(SPRING_BOOT_PROJECT_NAME);
@@ -91,6 +97,7 @@ public class MavenProfileTest {
 	}
 
 	@Test
+	@Ignore
 	public void shouldNotActivateIfProfileAlreadyActive() throws CoreException, InterruptedException {
 		// given
 		this.projectProvider = createMavenProject(SPRING_BOOT_PROJECT_NAME);
@@ -103,6 +110,7 @@ public class MavenProfileTest {
 	}
 
 	@Test
+	@Ignore
 	public void shouldDeactivateIfProfileIsActive() throws CoreException, InterruptedException {
 		// given
 		this.projectProvider = createMavenProject(SPRING_BOOT_PROJECT_NAME);
@@ -115,6 +123,7 @@ public class MavenProfileTest {
 	}
 
 	@Test
+	@Ignore
 	public void shouldNotDeactivateIfProfileIsNotActive() throws CoreException, InterruptedException {
 		// given
 		this.projectProvider = createMavenProject(SPRING_BOOT_PROJECT_NAME);

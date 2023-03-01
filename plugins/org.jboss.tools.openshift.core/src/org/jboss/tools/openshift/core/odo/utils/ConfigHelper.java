@@ -10,65 +10,38 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.odo.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.fabric8.kubernetes.api.model.Config;
-import io.fabric8.kubernetes.api.model.ConfigBuilder;
-import io.fabric8.kubernetes.api.model.NamedContext;
-import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
-
 import java.io.File;
 import java.io.IOException;
 
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
+
+import io.fabric8.kubernetes.api.model.Config;
+import io.fabric8.kubernetes.api.model.ConfigBuilder;
+import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
+
 public class ConfigHelper {
-	private ConfigHelper() {}
-	
-    private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+	private ConfigHelper() {
+	}
 
-    public static String getKubeConfigPath() {
-        return System.getProperty("user.home") + "/.kube/config";
-    }
+	public static String getKubeConfigPath() {
+		return System.getProperty("user.home") + "/.kube/config";
+	}
 
-    public static void saveKubeConfig(Config config) throws IOException {
-        mapper.writeValue(new File(getKubeConfigPath()), config);
-    }
+	public static Config safeLoadKubeConfig() {
+		try {
+			return loadKubeConfig();
+		} catch (IOException e) {
+			OpenShiftCoreActivator.logError(e.getLocalizedMessage(), e);
+			return null;
+		}
+	}
 
-    public static Config safeLoadKubeConfig() {
-        try {
-            return loadKubeConfig();
-        } catch (IOException e) {
-            return null;
-        }
-    }
+	public static Config loadKubeConfig() throws IOException {
+		File f = new File(getKubeConfigPath());
+		if (f.exists()) {
+			return KubeConfigUtils.parseConfig(f);
+		}
+		return new ConfigBuilder().build();
+	}
 
-    public static Config loadKubeConfig() throws IOException {
-        File f = new File(getKubeConfigPath());
-        if (f.exists()) {
-            return KubeConfigUtils.parseConfig(f);
-        } else {
-            return new ConfigBuilder().build();
-        }
-    }
-
-    public static boolean isKubeConfigParsable() {
-        return isKubeConfigParsable(new File(getKubeConfigPath()));
-    }
-
-    public static boolean isKubeConfigParsable(File kubeConfig) {
-        try {
-            mapper.readValue(kubeConfig, Config.class);
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    public static NamedContext getCurrentContext() {
-        try {
-            Config config = loadKubeConfig();
-            return KubeConfigUtils.getCurrentContext(config);
-        } catch (IOException e) {
-            return null;
-        }
-    }
 }
