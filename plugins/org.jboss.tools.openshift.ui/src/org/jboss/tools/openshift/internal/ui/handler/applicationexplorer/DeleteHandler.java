@@ -24,6 +24,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.AbstractOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.BindingElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.NamespaceElement;
@@ -67,6 +68,8 @@ public class DeleteHandler extends OdoJobHandler {
 			return String.join(" ", "url", ((URLElement) element).getWrapped().getName());
 		} else if (element instanceof DevfileRegistryElement) {
 			return String.join(" ", "devfile registry", ((DevfileRegistryElement) element).getWrapped().getName());
+		} else if (element instanceof BindingElement) {
+			return String.join(" ", "binding", ((BindingElement) element).getWrapped().getName());
 		}
 		return "";
 	}
@@ -87,6 +90,11 @@ public class DeleteHandler extends OdoJobHandler {
 						((ServiceElement) element).getWrapped());
 			} else if (element instanceof DevfileRegistryElement) {
 				odo.deleteDevfileRegistry(((DevfileRegistryElement) element).getWrapped().getName());
+			} else if (element instanceof BindingElement) {
+				odo.deleteBinding(((BindingElement) element).getParent().getParent().getWrapped(),
+						((BindingElement) element).getParent().getWrapped().getPath(),
+						((BindingElement) element).getParent().getWrapped().getName(),
+						((BindingElement) element).getWrapped().getName());
 			}
 			element.getParent().refresh();
 		} catch (IOException e) {

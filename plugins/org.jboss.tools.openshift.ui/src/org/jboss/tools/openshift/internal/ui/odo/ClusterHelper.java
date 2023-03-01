@@ -10,34 +10,55 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.odo;
 
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.VersionInfo;
 import io.fabric8.openshift.client.OpenShiftClient;
 
 public class ClusterHelper {
-	private static String assemble(String major, String minor) {
-		return major + '.' + minor;
+	public static ClusterInfo getClusterInfo(KubernetesClient client) {
+		if (client instanceof OpenShiftClient) {
+			return new ClusterInfo(getKubernetesVersion((OpenShiftClient) client), true,
+					getOpenShiftVersion((OpenShiftClient) client));
+
+		} else if (client.adapt(OpenShiftClient.class) != null && client.adapt(OpenShiftClient.class).isSupported()) {
+			return new ClusterInfo(getKubernetesVersion(client), true, getOpenShiftVersion(client));
+		} else {
+			return new ClusterInfo(getKubernetesVersion(client), false, "");
+
+		}
 	}
 
-	public static ClusterInfo getClusterInfo(KubernetesClient client) throws KubernetesClientException {
-		if (client instanceof OpenShiftClient || client.isAdaptable(OpenShiftClient.class)) {
-			VersionInfo oClientVersionInfo;
-			VersionInfo kClientVersionInfo;
-			if (client instanceof OpenShiftClient) {
-				oClientVersionInfo = ((OpenShiftClient) client).getVersion();
-				kClientVersionInfo = new DefaultKubernetesClient(client.getConfiguration()).getVersion();
-			} else {
-				oClientVersionInfo = client.adapt(OpenShiftClient.class).getVersion();
-				kClientVersionInfo = client.getVersion();
-			}
-			return new ClusterInfo(kClientVersionInfo != null ? kClientVersionInfo.getGitVersion() : "", true,
-					oClientVersionInfo != null && oClientVersionInfo.getMajor() != null
-							? assemble(oClientVersionInfo.getMajor(), oClientVersionInfo.getMinor())
-							: "");
+	private static String getKubernetesVersion(OpenShiftClient client) {
+		try {
+			KubernetesClient kclient = new KubernetesClientBuilder().withConfig(client.getConfiguration()).build();
+			return getKubernetesVersion(kclient);
+		} catch (KubernetesClientException e) {
+			return null;
 		}
-		VersionInfo kClientVersionInfo = client.getVersion();
-		return new ClusterInfo(kClientVersionInfo != null ? kClientVersionInfo.getGitVersion() : "", false, "");
+	}
+
+	private static String getKubernetesVersion(KubernetesClient client) {
+		VersionInfo version = client.getKubernetesVersion();
+		return version != null ? version.getGitVersion() : "";
+	}
+
+	private static String getOpenShiftVersion(KubernetesClient client) {
+		try {
+			OpenShiftClient oclient = client.adapt(OpenShiftClient.class);
+			return getOpenShiftVersion(oclient);
+		} catch (KubernetesClientException e) {
+			return null;
+		}
+	}
+
+	private static String getOpenShiftVersion(OpenShiftClient client) {
+		VersionInfo version = client.getVersion();
+		return version != null && version.getMajor() != null ? getVersion(version.getMajor(), version.getMinor()) : "";
+	}
+
+	private static String getVersion(String major, String minor) {
+		return major + '.' + minor;
 	}
 }

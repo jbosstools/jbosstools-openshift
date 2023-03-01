@@ -26,10 +26,12 @@ public class JSonParser {
 	private static final String NAME_FIELD = "name";
 	private static final String SPEC_FIELD = "spec";
 	private static final String PROJECT_TYPE_FIELD = "projectType";
+	private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
 	private static final String DEVFILE_FIELD = "devfile";
+
 	private static final String DEVFILE_DATA_FIELD = "devfileData";
 	private static final String STARTER_PROJECTS_FIELD = "starterProjects";
-	private static final String DEBUG_PROCESS_ID_FIELD = "debugProcessID";
+
 	private static final String PATHS_FIELD = "paths";
 	private static final String POST_FIELD = "post";
 	private static final String PARAMETERS_FIELD = "parameters";
@@ -44,6 +46,10 @@ public class JSonParser {
 	private static final String RUNNING_IN_FIELD = "runningIn";
 	private static final String CONTAINER_NAME_FIELD = "containerName";
 	private static final String LANGUAGE_FIELD = "language";
+	private static final String INGRESSES_FIELD = "ingresses";
+	private static final String ROUTES_FIELD = "routes";
+	private static final String HOST_FIELD = "host";
+	private static final String RULES_FIELD = "rules";
 
 	private static final String ENV_FIELD = "env";
 	private static final String VALUE_FIELD = "value";
@@ -63,6 +69,12 @@ public class JSonParser {
 		if (root.has(DEV_FORWARDED_PORTS_FIELD)) {
 			result.addAll(parseURLItems(root.get(DEV_FORWARDED_PORTS_FIELD)));
 		}
+		if (root.has(INGRESSES_FIELD)) {
+			result.addAll(parseIngresses(root.get(INGRESSES_FIELD)));
+		}
+		if (root.has(ROUTES_FIELD)) {
+			result.addAll(parseIngresses(root.get(ROUTES_FIELD)));
+		}
 		return result;
 	}
 
@@ -77,6 +89,27 @@ public class JSonParser {
 				String containerPort = item.has(CONTAINER_PORT_FIELD) ? item.get(CONTAINER_PORT_FIELD).asText()
 						: "8080";
 				result.add(URL.of(name, host, localPort, containerPort));
+			}
+		});
+		return result;
+	}
+
+	private List<URL> parseIngresses(JsonNode ingresses) {
+		List<URL> result = new ArrayList<>();
+		ingresses.forEach(item -> {
+			// odo incorrectly reports urls created with the web ui without names
+			if (item.has(NAME_FIELD)) {
+				String name = item.get(NAME_FIELD).asText();
+				if (item.has(RULES_FIELD)) {
+					item.get(RULES_FIELD).forEach(rule -> {
+						String host = rule.has(HOST_FIELD) ? rule.get(HOST_FIELD).asText() : "localhost";
+						if (rule.has(JSonParser.PATHS_FIELD)) {
+							rule.get(PATHS_FIELD).forEach(path -> {
+								result.add(URL.of(name, host, "80", "80", path.asText()));
+							});
+						}
+					});
+				}
 			}
 		});
 		return result;
@@ -189,8 +222,8 @@ public class JSonParser {
 		String[] ids = ref.split("/");
 		for (String id : ids) {
 			if (!"#".equals(id)) {
-				if (node.has(id)) {
-					result = node.get(id);
+				if (result.has(id)) {
+					result = result.get(id);
 				} else {
 					throw new IOException("Can't resolved reference '" + ref + "' element " + id + " not found");
 				}

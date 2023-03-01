@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion> 
+	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.jboss.tools.openshift</groupId>
 		<artifactId>plugins</artifactId>
 		<version>3.22.0-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.openshift.plugins</groupId>
-	<artifactId>org.jboss.tools.openshift.client</artifactId> 
+	<artifactId>org.jboss.tools.openshift.client</artifactId>
 	<packaging>eclipse-plugin</packaging>
-
 	<properties>
 		<enforcer.skip>true</enforcer.skip>
 		<!-- 
@@ -19,21 +18,20 @@
 		-->
 		<openshift-restclient-java.version>9.0.5.Final</openshift-restclient-java.version>
 		<ok-http.version>4.10.0</ok-http.version>
-		<ok-io.version>3.0.0</ok-io.version>
-		<kotlin-stdlib.version>1.6.20</kotlin-stdlib.version>
+		<ok-io.version>3.3.0</ok-io.version>
+		<kotlin-stdlib.version>1.8.10</kotlin-stdlib.version>
 		<jboss-dmr.version>1.6.1.Final</jboss-dmr.version>
-		<commons-compress.version>1.21</commons-compress.version>
+		<commons-compress.version>1.22</commons-compress.version>
 		<log4j.version>2.19.0</log4j.version>
-		<slf4j.version>2.0.1</slf4j.version>
+		<slf4j.version>2.0.6</slf4j.version>
 		<commons-codec.version>1.15</commons-codec.version>
-		<commons-lang.version>2.6</commons-lang.version>
 		<commons-io.version>2.11.0</commons-io.version>
-		<openshift-client.version>4.11.2</openshift-client.version>
-		<jackson.version>2.12.1</jackson.version>
-		<snakeyaml.version>1.32</snakeyaml.version>
+		<openshift-client.version>6.4.1</openshift-client.version>
+		<jackson.version>2.14.1</jackson.version>
+		<snakeyaml.version>1.33</snakeyaml.version>
 		<retrofit.version>2.9.0</retrofit.version>
+		<zjsonpatch.version>0.3.0</zjsonpatch.version>
 	</properties>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -70,21 +68,26 @@
 							<version>${openshift-restclient-java.version}</version>
 						</artifactItem>
 						<artifactItem>
-						  <groupId>com.squareup.okhttp3</groupId>
-						  <artifactId>okhttp</artifactId>
-						  <version>${ok-http.version}</version>
+							<groupId>com.squareup.okhttp3</groupId>
+							<artifactId>okhttp</artifactId>
+							<version>${ok-http.version}</version>
 						</artifactItem>
 						<artifactItem>
-						    <groupId>com.squareup.okio</groupId>
-						    <artifactId>okio-jvm</artifactId>
-						    <version>${ok-io.version}</version>
+							<groupId>com.squareup.okhttp3</groupId>
+							<artifactId>logging-interceptor</artifactId>
+							<version>${ok-http.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>com.squareup.okio</groupId>
+							<artifactId>okio-jvm</artifactId>
+							<version>${ok-io.version}</version>
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.jetbrains.kotlin</groupId>
 							<artifactId>kotlin-stdlib</artifactId>
 							<version>${kotlin-stdlib.version}</version>
 						</artifactItem>
-  						<artifactItem>
+						<artifactItem>
 							<groupId>org.jboss</groupId>
 							<artifactId>jboss-dmr</artifactId>
 							<version>${jboss-dmr.version}</version>
@@ -115,87 +118,277 @@
 							<version>${commons-compress.version}</version>
 						</artifactItem>
 						<artifactItem>
-						    <groupId>commons-codec</groupId>
-						    <artifactId>commons-codec</artifactId>
-						    <version>${commons-codec.version}</version>
-						</artifactItem>
-						<artifactItem>
-						    <groupId>commons-lang</groupId>
-						    <artifactId>commons-lang</artifactId>
-						    <version>${commons-lang.version}</version>
+							<groupId>commons-codec</groupId>
+							<artifactId>commons-codec</artifactId>
+							<version>${commons-codec.version}</version>
 						</artifactItem>
 						<artifactItem>
 							<groupId>commons-io</groupId>
 							<artifactId>commons-io</artifactId>
 							<version>${commons-io.version}</version>
 						</artifactItem>
-                        <artifactItem>
-                            <groupId>io.fabric8</groupId>
-                            <artifactId>openshift-client</artifactId>
-                            <version>${openshift-client.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>io.fabric8</groupId>
-                            <artifactId>openshift-model</artifactId>
-                            <version>${openshift-client.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>io.fabric8</groupId>
-                            <artifactId>kubernetes-client</artifactId>
-                            <version>${openshift-client.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>io.fabric8</groupId>
-                            <artifactId>kubernetes-model-core</artifactId>
-                            <version>${openshift-client.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>io.fabric8</groupId>
-                            <artifactId>kubernetes-model-apps</artifactId>
-                            <version>${openshift-client.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>com.fasterxml.jackson.dataformat</groupId>
-                            <artifactId>jackson-dataformat-yaml</artifactId>
-                            <version>${jackson.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>com.fasterxml.jackson.datatype</groupId>
-                            <artifactId>jackson-datatype-jsr310</artifactId>
-                            <version>${jackson.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>org.yaml</groupId>
-                            <artifactId>snakeyaml</artifactId>
-                            <version>${snakeyaml.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                          <groupId>com.squareup.okhttp3</groupId>
-                          <artifactId>logging-interceptor</artifactId>
-                          <version>${ok-http.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                          <groupId>com.squareup.retrofit2</groupId>
-                          <artifactId>retrofit</artifactId>
-                          <version>${retrofit.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                          <groupId>com.squareup.retrofit2</groupId>
-                          <artifactId>retrofit</artifactId>
-                          <version>${retrofit.version}</version>
-                          <classifier>sources</classifier>
-                        </artifactItem>
-                        <artifactItem>
-                          <groupId>com.squareup.retrofit2</groupId>
-                          <artifactId>converter-jackson</artifactId>
-                          <version>${retrofit.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                          <groupId>com.squareup.retrofit2</groupId>
-                          <artifactId>converter-jackson</artifactId>
-                          <version>${retrofit.version}</version>
-                          <classifier>sources</classifier>
-                        </artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-client</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-client-api</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-clusterautoscaling</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-config</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-console</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-hive</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-installer</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-machine</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-machineconfig</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-miscellaneous</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-monitoring</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-operator</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-storageversionmigrator</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-tuned</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-whereabouts</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-client</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-client-api</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-httpclient-okhttp</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-common</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-core</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-apps</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-rbac</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-admissionregistration</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-apiextensions</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-autoscaling</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-batch</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-certificates</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-coordination</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-discovery</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-events</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-extensions</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-flowcontrol</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-gatewayapi</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-metrics</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>openshift-model-operatorhub</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-networking</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-node</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-policy</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-scheduling</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>kubernetes-model-storageclass</artifactId>
+							<version>${openshift-client.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>io.fabric8</groupId>
+							<artifactId>zjsonpatch</artifactId>
+							<version>${zjsonpatch.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>com.fasterxml.jackson.core</groupId>
+							<artifactId>jackson-databind</artifactId>
+							<version>${jackson.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>com.fasterxml.jackson.core</groupId>
+							<artifactId>jackson-core</artifactId>
+							<version>${jackson.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>com.fasterxml.jackson.core</groupId>
+							<artifactId>jackson-annotations</artifactId>
+							<version>${jackson.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>com.fasterxml.jackson.dataformat</groupId>
+							<artifactId>jackson-dataformat-yaml</artifactId>
+							<version>${jackson.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>com.fasterxml.jackson.datatype</groupId>
+							<artifactId>jackson-datatype-jsr310</artifactId>
+							<version>${jackson.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.yaml</groupId>
+							<artifactId>snakeyaml</artifactId>
+							<version>${snakeyaml.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>com.squareup.retrofit2</groupId>
+							<artifactId>retrofit</artifactId>
+							<version>${retrofit.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>com.squareup.retrofit2</groupId>
+							<artifactId>retrofit</artifactId>
+							<version>${retrofit.version}</version>
+							<classifier>sources</classifier>
+						</artifactItem>
+						<artifactItem>
+							<groupId>com.squareup.retrofit2</groupId>
+							<artifactId>converter-jackson</artifactId>
+							<version>${retrofit.version}</version>
+						</artifactItem>
+						<artifactItem>
+							<groupId>com.squareup.retrofit2</groupId>
+							<artifactId>converter-jackson</artifactId>
+							<version>${retrofit.version}</version>
+							<classifier>sources</classifier>
+						</artifactItem>
 					</artifactItems>
 				</configuration>
 			</plugin>
@@ -256,14 +449,14 @@
 			<version>${openshift-restclient-java.version}</version>
 		</dependency>
 		<dependency>
-		  <groupId>com.squareup.okhttp3</groupId>
-		  <artifactId>okhttp</artifactId>
-		  <version>${ok-http.version}</version>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>${ok-http.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.squareup.okio</groupId>
-		    <artifactId>okio</artifactId>
-		    <version>${ok-io.version}</version>
+			<groupId>com.squareup.okio</groupId>
+			<artifactId>okio</artifactId>
+			<version>${ok-io.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss</groupId>
@@ -290,15 +483,10 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>${commons-codec.version}</version>
-        </dependency>
 		<dependency>
-		    <groupId>commons-lang</groupId>
-		    <artifactId>commons-lang</artifactId>
-		    <version>${commons-lang.version}</version>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>${commons-codec.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -306,7 +494,6 @@
 			<version>${commons-io.version}</version>
 		</dependency>
 	</dependencies>
-
 	<profiles>
 		<profile>
 			<id>hudson</id>
