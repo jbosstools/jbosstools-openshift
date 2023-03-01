@@ -245,7 +245,7 @@ public class OdoCli implements Odo {
 	}
 
 	@Override
-	public void migrateComponent(String context, String name) throws IOException {
+	public void migrateComponent(String context, String name) {
 		client.apps().deployments().withLabel(KubernetesLabels.COMPONENT_NAME_LABEL, name).delete();
 	}
 
@@ -302,7 +302,7 @@ public class OdoCli implements Odo {
 			throws IOException {
 		ExecResult result = ExecHelper.execute(command, workingDirectory, envs, args);
 		try (BufferedReader reader = new BufferedReader(new StringReader(result.getStdOut()))) {
-			BinaryOperator<String> reducer = new BinaryOperator<String>() {
+			BinaryOperator<String> reducer = new BinaryOperator<>() {
 				private boolean notificationFound = false;
 
 				@Override
@@ -373,24 +373,23 @@ public class OdoCli implements Odo {
 	}
 
 	@Override
-	public boolean isStarted(String project, String context, String component, ComponentFeature feature)
-			throws IOException {
+	public boolean isStarted(String project, String context, String component, ComponentFeature feature) {
 		Map<ComponentFeature, Process> componentMap = componentFeatureProcesses.computeIfAbsent(component,
 				name -> new HashMap<>());
 		return componentMap.containsKey(feature);
 	}
-	
+
 	/**
 	 * Stop all running processes for a component
 	 * 
 	 * @param component the component name
 	 */
 	private void cleanupComponent(String component) {
-		var featureHandlers = componentFeatureProcesses.remove(component);
+		Map<ComponentFeature, Process> featureHandlers = componentFeatureProcesses.remove(component);
 		if (featureHandlers != null) {
 			featureHandlers.forEach((feat, handler) -> stopHandler(handler));
 		}
-		var logHandlers = componentLogProcesses.remove(component);
+		List<Process> logHandlers = componentLogProcesses.remove(component);
 		if (logHandlers != null) {
 			logHandlers.stream().filter(Objects::nonNull).forEach(handler -> stopHandler(handler));
 		}
@@ -475,8 +474,7 @@ public class OdoCli implements Odo {
 		}
 	}
 
-	private CustomResourceDefinitionContext toCustomResourceDefinitionContext(
-			org.jboss.tools.openshift.core.odo.Service service) {
+	private CustomResourceDefinitionContext toCustomResourceDefinitionContext(Service service) {
 		String version = service.getApiVersion().substring(service.getApiVersion().indexOf('/') + 1);
 		String group = service.getApiVersion().substring(0, service.getApiVersion().indexOf('/'));
 		return new CustomResourceDefinitionContext.Builder().withName(service.getKind().toLowerCase() + "s." + group)
@@ -518,7 +516,7 @@ public class OdoCli implements Odo {
 	}
 
 	@Override
-	public void deleteService(String project, org.jboss.tools.openshift.core.odo.Service service) throws IOException {
+	public void deleteService(String project, Service service) {
 		try {
 			CustomResourceDefinitionContext context = toCustomResourceDefinitionContext(service);
 			client.genericKubernetesResources(context).inNamespace(project).withName(service.getName()).delete();
@@ -584,6 +582,7 @@ public class OdoCli implements Odo {
 				return swagger.findSchema("/apis/" + crd);
 			}
 		} catch (IOException e) {
+			OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
 		}
 		return null;
 	}
@@ -609,7 +608,7 @@ public class OdoCli implements Odo {
 	}
 
 	@Override
-	public List<ServiceTemplate> getServiceTemplates() throws IOException {
+	public List<ServiceTemplate> getServiceTemplates() {
 		try {
 			List<GenericKubernetesResource> bindableKinds = getBindableKinds();
 			// if cluster (either openshift or Kubernetes) supports operators
@@ -865,21 +864,17 @@ public class OdoCli implements Odo {
 
 	@Override
 	public List<Component> getComponents(String project) throws IOException {
-		var components = configureObjectMapper(new ComponentDeserializer()).readValue(
+		List<Component> components = configureObjectMapper(new ComponentDeserializer()).readValue(
 				execute(command, envVars, "list", "--namespace", project, "-o", "json"),
 				new TypeReference<List<Component>>() {
 				});
 		components.forEach(c -> {
-			try {
-				if (c.getLiveFeatures().isDev()
-						&& !isStarted(project, c.getPath(), c.getName(), ComponentFeature.DEV)) {
-					c.getLiveFeatures().removeFeature(ComponentFeature.DEV);
-				}
-				if (!c.getLiveFeatures().isDebug()
-						&& isStarted(project, c.getPath(), c.getName(), ComponentFeature.DEBUG)) {
-					c.getLiveFeatures().addFeature(ComponentFeature.DEBUG);
-				}
-			} catch (IOException e) {
+			if (c.getLiveFeatures().isDev() && !isStarted(project, c.getPath(), c.getName(), ComponentFeature.DEV)) {
+				c.getLiveFeatures().removeFeature(ComponentFeature.DEV);
+			}
+			if (!c.getLiveFeatures().isDebug()
+					&& isStarted(project, c.getPath(), c.getName(), ComponentFeature.DEBUG)) {
+				c.getLiveFeatures().addFeature(ComponentFeature.DEBUG);
 			}
 		});
 		return components;
@@ -937,7 +932,7 @@ public class OdoCli implements Odo {
 	}
 
 	private String generateBindingName(List<Binding> bindings) {
-		var counter = 0;
+		int counter = 0;
 		int finalCounter = counter;
 		while (bindings.stream().anyMatch(binding -> binding.getName().equals("b" + finalCounter))) {
 			counter++;
