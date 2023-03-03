@@ -64,7 +64,7 @@ public class DebugNodeDevfileComponentODOTest extends AbstractODOTest {
 	@BeforeClass
 	public static void setupWorkspace() {
 		importEmptyProject(ECLIPSE_PROJECT);
-		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "node.js", "nodejs-starter", true);
+//		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "node.js", "nodejs-starter", true);
 	}
 	
 	@Test

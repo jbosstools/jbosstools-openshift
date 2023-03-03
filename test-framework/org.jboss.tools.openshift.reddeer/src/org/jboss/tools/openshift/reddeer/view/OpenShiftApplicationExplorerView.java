@@ -49,7 +49,7 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODODevfileRegis
  *
  */
 public class OpenShiftApplicationExplorerView extends WorkbenchView {
-
+	
 	public OpenShiftApplicationExplorerView() {
 		super("JBoss Tools", "OpenShift Application Explorer");
 	}

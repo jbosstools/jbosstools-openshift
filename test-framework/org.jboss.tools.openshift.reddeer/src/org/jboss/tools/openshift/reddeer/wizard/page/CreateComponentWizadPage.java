@@ -55,30 +55,18 @@ public class CreateComponentWizadPage extends WizardPage {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void selectComponentType(String componentType, boolean devfile) {
+	public void selectComponentType(String componentType) {
 		try {
 			DefaultTree tree = new DefaultTree(new WithLabelMatcher(OpenShiftLabel.TextLabels.COMPONENT_TYPE));
-			if (devfile) {
-				tree.selectItems(tree.getItem(new TreeItemRegexMatcher(".*" + componentType + ".*")));
-			} else {
-				tree.selectItems(tree.getItem(OpenShiftLabel.TextLabels.S2I_NODE, componentType));
-			}
+			tree.selectItems(tree.getItem(new TreeItemRegexMatcher(".*" + componentType + ".*")));
 		} catch (CoreLayerException exc) {
 			DefaultList list = new DefaultList(new WithLabelMatcher(OpenShiftLabel.TextLabels.COMPONENT_TYPE));
 			String filter = "";
-			if (devfile) {
-				filter = Arrays.asList(list.getListItems())
-						.stream()
-						.filter(item -> item.toLowerCase().contains(componentType))
-						.findFirst()
-						.orElseThrow(() -> new IllegalArgumentException("No Devfile record contains " + componentType));				
-			} else {
-				filter = Arrays.asList(list.getListItems())
-						.stream()
-						.filter(item -> item.toLowerCase().contains(componentType))
-						.findFirst()
-						.orElseThrow(() -> new IllegalArgumentException("No Devfile record contains " + componentType));
-			}
+			filter = Arrays.asList(list.getListItems())
+					.stream()
+					.filter(item -> item.contains(componentType))
+					.findFirst()
+					.orElseThrow(() -> new IllegalArgumentException("No Devfile record contains " + componentType));				
 			list.select(filter);
 		}
 	}

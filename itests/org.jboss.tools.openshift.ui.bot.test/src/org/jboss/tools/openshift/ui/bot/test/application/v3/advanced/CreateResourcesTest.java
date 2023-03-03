@@ -19,7 +19,6 @@ import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
-import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;

@@ -12,13 +12,8 @@ package org.jboss.tools.openshift.ui.bot.test;
 
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.openshift.ui.bot.test.odo.ConnectionODOCommandsTests;
-import org.jboss.tools.openshift.ui.bot.test.odo.CreateDevfileComponentODOTest;
-import org.jboss.tools.openshift.ui.bot.test.odo.CreatePythonDevfileComponentWithStarterODOTest;
-import org.jboss.tools.openshift.ui.bot.test.odo.CreateServiceODOTest;
-import org.jboss.tools.openshift.ui.bot.test.odo.CreateVertxDevfileComponentWithLocalDevfileODOTest;
-import org.jboss.tools.openshift.ui.bot.test.odo.DebugNodeDevfileComponentODOTest;
-import org.jboss.tools.openshift.ui.bot.test.odo.DebugPythonDevfileComponentODOTest;
-import org.jboss.tools.openshift.ui.bot.test.odo.DebugVertxDevfileComponentODOTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.CreateComponentFromDevfileRegistryTest;
+import org.jboss.tools.openshift.ui.bot.test.odo.CreateComponentTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.LoginODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.ProjectManagementODOTest;
 import org.jboss.tools.openshift.ui.bot.test.odo.RegistryODOTest;
@@ -33,17 +28,19 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(RedDeerSuite.class)
 @SuiteClasses({
-	LoginODOTest.class, // pass
-	ProjectManagementODOTest.class, //  pass
-	ConnectionODOCommandsTests.class, // pass
-	CreateVertxDevfileComponentWithLocalDevfileODOTest.class, // pass 
-	CreateDevfileComponentODOTest.class, //  pass
-	CreatePythonDevfileComponentWithStarterODOTest.class, // pass
-	DebugNodeDevfileComponentODOTest.class, // pass
-	DebugVertxDevfileComponentODOTest.class, // pass  
-	DebugPythonDevfileComponentODOTest.class, // failed
-	CreateServiceODOTest.class, // passed
-	RegistryODOTest.class // pass
+	LoginODOTest.class,
+	ProjectManagementODOTest.class,
+	ConnectionODOCommandsTests.class,
+	CreateComponentFromDevfileRegistryTest.class,
+	CreateComponentTest.class,
+	RegistryODOTest.class,
+	// ToDo: create component from local project without a devfile 
+//	CreateComponentFromLocalProjectTest.class, 
+	// ToDo: these require refactoring
+//	CreateAndDebugQuarkusComponentODOTest.class,
+//	CreateAndDebugNodeJSComponentODOTest.class,
+//	CreateAndDebugSpringComponentODOTest.class,
+//	CreateServiceODOTest.class, // requires to be analyzed
 })
 public class OpenShiftODOTests {
 

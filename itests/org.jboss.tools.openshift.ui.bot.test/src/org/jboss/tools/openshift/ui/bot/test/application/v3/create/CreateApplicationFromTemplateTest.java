@@ -105,7 +105,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	}
 	
 	protected String getTemplateURL() {
-		return "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/os4templates/eap73-basic-s2i-helloworld.json";
+		return "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/os4templates/eap74-basic-s2i-helloworld.json";
 	}
 	
 	protected String getFilesystemTemplatePath() {
