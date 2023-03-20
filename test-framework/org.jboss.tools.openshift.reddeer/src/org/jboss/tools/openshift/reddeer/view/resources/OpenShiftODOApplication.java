@@ -25,7 +25,7 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 /**
  * 
- * OpenShift Application Explorer Project implemented with RedDeer.
+ * OpenShift Application Explorer Component/Application implemented with RedDeer.
  * 
  * @author jkopriva@redhat.com
  *
@@ -52,7 +52,7 @@ public class OpenShiftODOApplication extends AbstractOpenShiftApplicationExplore
 		select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.DELETE_OS_PROJECT).select();
 		
-		new DefaultShell(OpenShiftLabel.Shell.DELETE_APPLICATION + " " + getName());
+		new DefaultShell(OpenShiftLabel.Shell.DELETE_COMPONENT + " " + getName());
 		new OkButton().click();
 		
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.DELETE_OS_PROJECT), TimePeriod.LONG);

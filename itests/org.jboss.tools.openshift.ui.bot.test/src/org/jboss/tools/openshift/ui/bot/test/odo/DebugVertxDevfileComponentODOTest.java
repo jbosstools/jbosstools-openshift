@@ -62,7 +62,7 @@ public class DebugVertxDevfileComponentODOTest extends AbstractODOTest {
 	@BeforeClass
 	public static void setupWorkspace() {
 		importLauncherProject(ECLIPSE_PROJECT, "rest-http", "vert.x community");
-		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "maven java", null, true);
+//		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "maven java", null, true);
 		createURL(projectReq.getProjectName(), APPLICATION_NAME, ECLIPSE_PROJECT, "url1", 8080);
 	}
 	

@@ -19,9 +19,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
-import org.eclipse.reddeer.core.exception.CoreLayerException;
-import org.eclipse.reddeer.core.handler.ShellHandler;
-import org.eclipse.reddeer.core.lookup.ShellLookup;
 import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
@@ -32,11 +29,9 @@ import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
-import org.eclipse.reddeer.swt.impl.text.DefaultText;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
-import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.launcher.reddeer.wizards.NewLauncherProjectWizard;
 import org.jboss.tools.common.launcher.reddeer.wizards.NewLauncherProjectWizardPage;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
@@ -49,17 +44,16 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOComponent;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODODevfile;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODODevfileRegistry;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftODOProject;
-import org.jboss.tools.openshift.reddeer.widget.terminal.TerminalHasNoChange;
 import org.jboss.tools.openshift.reddeer.wizard.CreateComponentWizard;
 import org.jboss.tools.openshift.reddeer.wizard.page.CreateComponentWizadPage;
 import org.junit.After;
-import org.junit.Assert;
 
 /**
  * Abstract class for ODO Tests
  * 
  * @author jkopriva@redhat.com, odockal@redhat.com
  */
+@SuppressWarnings("restriction")
 @OpenPerspective(JBossPerspective.class)
 public abstract class AbstractODOTest {
 
@@ -132,46 +126,37 @@ public abstract class AbstractODOTest {
 
 	}
 
-	protected static void createComponent(String projectName, String componentType, String starter, boolean devfile) {
-		createComponent(eclipseProject, projectName, componentType, starter, devfile);
+	protected static void createComponent(String projectName, String componentType, String starter) {
+		createComponent(eclipseProject, projectName, componentType, starter, eclipseProject);
 	}
 
 	public static void createComponent(String eclipseProjectName, String projectName, String componentType,
-			String starter, boolean devfile) {
+			String starter, String componentName) {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();
 		OpenShiftODOProject project = explorer.getOpenShiftODOConnection().getProject(projectName);
 		project.openCreateComponentWizard();
 		CreateComponentWizard componentWizard = new CreateComponentWizard();
 		CreateComponentWizadPage componentWizardPage = new CreateComponentWizadPage(componentWizard);
-		componentWizardPage.setComponentName(eclipseProjectName);
+		componentWizardPage.setComponentName(componentName);
 		componentWizardPage.setEclipseProject(eclipseProjectName);
 		if (componentType != null) {
-			componentWizardPage.selectComponentType(componentType, devfile);
+			componentWizardPage.selectComponentType(componentType);
 		}
 		if (starter != null) {
 			componentWizardPage.selectStarter(starter);
 		}
-		if (!devfile) {
-			try {
-				componentWizardPage.selectComponentVersion("latest");
-			} catch (CoreLayerException exc) {
-				// nothing
-			}
-		}
-		componentWizardPage.setApplication("myapp");
-		componentWizard.finish(TimePeriod.getCustom(600L)); // Maven builds may take more than 5mn
+		componentWizard.finish(TimePeriod.LONG);
 
-		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
-		new WaitWhile(new TerminalHasNoChange(), TimePeriod.VERY_LONG);
+		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
 
 	protected static void createComponentFromRegistry(String registryName, String componentType, String starter) {
-		createComponentFromRegistry(eclipseProject, registryName, componentType, starter);
+		createComponentFromRegistry(eclipseProject, registryName, componentType, starter, eclipseProject);
 	}
 
 	public static void createComponentFromRegistry(String eclipseProjectName, String registryName, String componentType,
-			String starter) {
+			String starter, String componentName) {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
 		explorer.open();
 		OpenShiftODODevfileRegistry registry = explorer.getOpenShiftODORegistries().getRegistry(registryName);
@@ -179,18 +164,17 @@ public abstract class AbstractODOTest {
 		devfile.openCreateComponentWizard();
 		CreateComponentWizard componentWizard = new CreateComponentWizard();
 		CreateComponentWizadPage componentWizardPage = new CreateComponentWizadPage(componentWizard);
-		componentWizardPage.setComponentName(eclipseProjectName);
+		componentWizardPage.setComponentName(componentName);
 		componentWizardPage.setEclipseProject(eclipseProjectName);
 		if (starter != null) {
 			componentWizardPage.selectStarter(starter);
 		}
-		componentWizardPage.setApplication("myapp");
-		componentWizard.finish(TimePeriod.getCustom(600L)); // Maven builds may take more than 5mn
+		componentWizard.finish(TimePeriod.LONG);
 
-		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
-		new WaitWhile(new TerminalHasNoChange(), TimePeriod.VERY_LONG);
+		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
 
+	@Deprecated
 	public static void createURL(String projectName, String applicationName, String componentName, String urlName,
 			int port) {
 		OpenShiftApplicationExplorerView explorer = new OpenShiftApplicationExplorerView();
