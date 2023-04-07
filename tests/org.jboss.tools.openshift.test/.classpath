@@ -6,12 +6,11 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" output="bin/classes" path="src">
+	<classpathentry kind="src" path="src/">
 		<attributes>
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" output="bin/resources" path="resources"/>
-	<classpathentry kind="lib" path="lib/mockserver-netty-no-dependencies-5.15.0.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry exported="true" kind="lib" path="lib/mockserver-netty-no-dependencies-5.15.0.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
