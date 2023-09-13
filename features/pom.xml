@@ -18,7 +18,6 @@
 		<module>org.jboss.tools.openshift.egit.integration.test.feature</module>
 		<module>org.jboss.tools.openshift.cdk.feature</module>
 		<module>org.jboss.tools.openshift.cdk.test.feature</module>
-        <module>org.jboss.tools.openshift.integration.tests.feature</module>
 		<module>org.jboss.tools.openshift.js.feature</module>
 	</modules>
 	<build>
