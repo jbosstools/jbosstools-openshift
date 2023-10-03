@@ -17,7 +17,7 @@
 			https://repository.jboss.org/nexus/service/local/repositories/releases/content/com/openshift/openshift-restclient-java/8.1.1.Final/openshift-restclient-java-8.1.1.Final.jar
 		-->
 		<openshift-restclient-java.version>9.0.5.Final</openshift-restclient-java.version>
-		<ok-http.version>4.10.0</ok-http.version>
+		<ok-http.version>4.11.0</ok-http.version>
 		<ok-io.version>3.3.0</ok-io.version>
 		<kotlin-stdlib.version>1.8.10</kotlin-stdlib.version>
 		<jboss-dmr.version>1.6.1.Final</jboss-dmr.version>
@@ -432,7 +432,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<execute runOnConfiguration="true"></execute>
+										<execute runOnConfiguration="true"/>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
