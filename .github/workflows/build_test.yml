@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
-        java: [ 17, 18 ]
+        java: [ 17, 18, 19, 20, 21 ]
       fail-fast: false
 
     steps:
@@ -34,6 +34,12 @@ jobs:
         java-version: ${{ matrix.java }}
         distribution: 'temurin'
         cache: 'maven'
+    
+    # Install Maven 3.9
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@07fbbe97d97ef44336b7382563d66743297e442f #v4.5
+      with:
+        maven-version: 3.9.4
 
     # Build and compile using Maven
     - name: Build/Compile and run unit tests (Linux)
