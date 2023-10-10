@@ -15,11 +15,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
+import static org.eclipse.core.runtime.Platform.OS_WIN32;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.core.runtime.Platform;
+import org.jboss.tools.common.util.DownloadHelper;
 import org.jboss.tools.openshift.internal.test.OpenShiftTestActivator;
 import org.jboss.tools.openshift.internal.ui.utils.DownloadHelper;
 import org.junit.AfterClass;
@@ -49,7 +53,8 @@ public class OdoDownloadHelperTest {
 		assertNotNull(url);
 		String cmd = helper.downloadIfRequired("odo", url);
 		assertNotNull(cmd);
+		String fullProgramExe = OS_WIN32.equals(Platform.getOS())? "odo.exe":"odo";
 		assertEquals(ODO_CACHE_DIR + File.separatorChar + "cache" + File.separatorChar + "1.0.2" + File.separatorChar
-				+ "odo", cmd);
+				+ fullProgramExe, cmd);
 	}
 }
