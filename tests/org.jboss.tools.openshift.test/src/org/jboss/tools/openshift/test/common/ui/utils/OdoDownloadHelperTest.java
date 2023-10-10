@@ -25,6 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.common.util.DownloadHelper;
 import org.jboss.tools.openshift.internal.test.OpenShiftTestActivator;
+import org.jboss.tools.openshift.internal.ui.utils.DownloadHelper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

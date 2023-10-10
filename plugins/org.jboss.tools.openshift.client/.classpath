@@ -9,27 +9,66 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/openshift-restclient-java-9.0.5.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/okhttp-4.10.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/okio-jvm-3.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/kotlin-stdlib-1.6.20.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/logging-interceptor-4.10.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/okio-jvm-3.3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kotlin-stdlib-1.8.10.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-dmr-1.6.1.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.15.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-compress-1.21.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-compress-1.22.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-io-2.11.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-lang-2.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/log4j-api-2.19.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/log4j-core-2.19.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/log4j-slf4j-impl-2.19.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-2.0.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jackson-dataformat-yaml-2.12.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jackson-datatype-jsr310-2.12.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/snakeyaml-1.32.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/logging-interceptor-4.10.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/kubernetes-client-4.11.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-core-4.11.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-apps-4.11.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/openshift-client-4.11.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/openshift-model-4.11.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-2.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-dataformat-yaml-2.14.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-datatype-jsr310-2.14.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-core-2.14.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-annotations-2.14.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-databind-2.14.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/snakeyaml-1.33.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-client-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-client-api-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-httpclient-okhttp-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-core-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-apps-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-common-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-rbac-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-admissionregistration-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-client-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-client-api-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-operatorhub-6.4.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/converter-jackson-2.9.0.jar" sourcepath="lib/converter-jackson-2.9.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/retrofit-2.9.0.jar" sourcepath="lib/retrofit-2.9.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-apiextensions-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-autoscaling-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-batch-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-certificates-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-coordination-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-discovery-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-events-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-extensions-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-flowcontrol-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-gatewayapi-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-metrics-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-networking-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-node-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-policy-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-scheduling-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/kubernetes-model-storageclass-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/zjsonpatch-0.3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-clusterautoscaling-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-config-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-console-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-hive-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-installer-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-machine-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-machineconfig-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-miscellaneous-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-monitoring-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-operator-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-storageversionmigrator-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-tuned-6.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openshift-model-whereabouts-6.4.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

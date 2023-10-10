@@ -10,56 +10,72 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.test.core.odo;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
 
+import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.core.odo.DevfileRegistriesDeserializer;
 import org.jboss.tools.openshift.core.odo.DevfileRegistry;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class DevfileRegistryTest {
-  private static final URL url = DevfileRegistryTest.class.getResource("/devfile-registry-test.json");
+	private static URL srcUrl;
 
-  private static ObjectMapper MAPPER;
+	private static ObjectMapper MAPPER;
 
-  @BeforeClass
-  public static void setup() {
-    MAPPER = new ObjectMapper();
-    SimpleModule module = new SimpleModule();
-    module.addDeserializer(List.class, new DevfileRegistriesDeserializer());
-    MAPPER.registerModule(module);
-  }
+	private static boolean inEclipse;
 
-  @Test
-  public void verifyThatDevfileRegistriesCanLoad() throws IOException {
-    List<DevfileRegistry> registries = MAPPER.readValue(url, new TypeReference<List<DevfileRegistry>>() {});
-    Assert.assertNotNull(registries);
-  }
+	@BeforeClass
+	public static void setup() {
+		MAPPER = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(List.class, new DevfileRegistriesDeserializer());
+		MAPPER.registerModule(module);
+		inEclipse = PlatformUI.isWorkbenchRunning();
+		srcUrl = getURL("/devfile-registry-test.json");
+	}
 
-  @Test
-  public void verifyThatDevfileRegsitriesReturnsDevfileRegistry() throws IOException {
-    List<DevfileRegistry> registries = MAPPER.readValue(url, new TypeReference<List<DevfileRegistry>>() {});
-    Assert.assertNotNull(registries);
-    Assert.assertEquals(1, registries.size());
-    Assert.assertNotNull(registries.get(0));
-  }
+	private static URL getURL(String urlString) {
+		URL url = DevfileRegistryTest.class.getResource(urlString);
+		if (url == null && inEclipse) {
+			return DevfileRegistryTest.class.getResource("/resources" + urlString);
+		}
+		return url;
+	}
 
-  @Test
-  public void verifyThatDevfileRegsitriesReturnsDevfileRegistryProperties() throws IOException {
-    List<DevfileRegistry> registries = MAPPER.readValue(url, new TypeReference<List<DevfileRegistry>>() {});
-    Assert.assertNotNull(registries);
-    Assert.assertEquals(1, registries.size());
-    DevfileRegistry registry = registries.get(0);
-    Assert.assertNotNull(registry);
-    Assert.assertEquals("DefaultDevfileRegistry", registry.getName());
-    Assert.assertEquals("https://registry.devfile.io", registry.getURL());
-    Assert.assertEquals(true, registry.isSecure());
-  }
+	@Test
+	public void verifyThatDevfileRegistriesCanLoad() throws IOException {
+		List<DevfileRegistry> registries = MAPPER.readValue(srcUrl, new TypeReference<List<DevfileRegistry>>() {
+		});
+		Assert.assertNotNull(registries);
+	}
+
+	@Test
+	public void verifyThatDevfileRegsitriesReturnsDevfileRegistry() throws IOException {
+		List<DevfileRegistry> registries = MAPPER.readValue(srcUrl, new TypeReference<List<DevfileRegistry>>() {
+		});
+		Assert.assertNotNull(registries);
+		Assert.assertEquals(1, registries.size());
+		Assert.assertNotNull(registries.get(0));
+	}
+
+	@Test
+	public void verifyThatDevfileRegsitriesReturnsDevfileRegistryProperties() throws IOException {
+		List<DevfileRegistry> registries = MAPPER.readValue(srcUrl, new TypeReference<List<DevfileRegistry>>() {
+		});
+		Assert.assertNotNull(registries);
+		Assert.assertEquals(1, registries.size());
+		DevfileRegistry registry = registries.get(0);
+		Assert.assertNotNull(registry);
+		Assert.assertEquals("DefaultDevfileRegistry", registry.getName());
+		Assert.assertEquals("https://registry.devfile.io", registry.getURL());
+		Assert.assertEquals(true, registry.isSecure());
+	}
 }

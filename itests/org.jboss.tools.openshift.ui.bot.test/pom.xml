@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.jboss.tools.openshift</groupId>
 		<artifactId>itests</artifactId>
-		<version>3.22.0-SNAPSHOT</version>
+		<version>3.24.0-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.openshift.tests</groupId>
 	<artifactId>org.jboss.tools.openshift.ui.bot.test</artifactId>
@@ -16,7 +16,7 @@
 		<systemProperties>
 			-Dtest.configurations.dir=${configurations.dir} -Dopenshift.server=${openshift.server} -Dopenshift.username=${openshift.username} -Dopenshift.password=${openshift.password} -Dopenshift.token=${openshift.token} -Dopenshift.authmethod=${openshift.authmethod} -Dsecurestorage.password=${securestorage.password} -Dusage_reporting_enabled=false -Duse.cdk=${use.cdk} -Doc.linux.latest=${oc.linux.latest} -Doc.windows.latest=${oc.windows.latest} -Doc.mac.latest=${oc.mac.latest} -Doc.linux.1.1.64=${oc.linux.1.1.64} -Doc.windows.1.1.64=${oc.windows.1.1.64} -Doc.mac.1.1.64=${oc.mac.1.1.64}
 		</systemProperties>
-		<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift3StableBotTests</test.class>
+		<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift4SmokeTests</test.class>
 		<surefire.timeout>9600</surefire.timeout>
 		<openshift.server></openshift.server>
 		<openshift.username></openshift.username>
@@ -75,33 +75,9 @@
 	</build>
 	<profiles>
 		<profile>
-			<id>smoke</id>
-			<properties>
-				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift3SmokeBotTests</test.class>
-			</properties>
-		</profile>
-		<profile>
-			<id>full</id>
-			<properties>
-				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift3BotTests</test.class>
-			</properties>
-		</profile>
-		<profile>
-			<id>eap-cd</id>
-			<properties>
-				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift3EAPCDTests</test.class>
-			</properties>
-		</profile>
-		<profile>
 			<id>openshift4</id>
 			<properties>
-				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift4StableBotTests</test.class>
-			</properties>
-		</profile>
-		<profile>
-			<id>openshift-interop</id>
-			<properties>
-				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShiftInteropTests</test.class>
+				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift4SmokeTests</test.class>
 			</properties>
 		</profile>
 		<profile>

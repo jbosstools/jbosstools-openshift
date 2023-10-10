@@ -15,10 +15,12 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
+import org.jboss.tools.openshift.core.odo.Binding;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ApplicationExplorerUIModel;
+import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.BindingElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.ComponentElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistriesElement;
 import org.jboss.tools.openshift.internal.ui.models.applicationexplorer.DevfileRegistryComponentTypeElement;
@@ -45,14 +47,23 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 		} else if (element instanceof NamespaceElement) {
 			return style(((NamespaceElement) element).getWrapped(), "", limit);
 		} else if (element instanceof ComponentElement) {
-			return style(((ComponentElement) element).getWrapped().getName(), ((ComponentElement) element).getWrapped().getLiveFeatures().toString(), limit);
+			return style(((ComponentElement) element).getWrapped().getName(),
+					((ComponentElement) element).getWrapped().getLiveFeatures().toString(), limit);
 		} else if (element instanceof URLElement) {
-			String base = ((URLElement) element).getWrapped().getHost()+":"+((URLElement) element).getWrapped().getLocalPort();
-			String qualified = ((URLElement) element).getWrapped().getName()+":"+((URLElement) element).getWrapped().getContainerPort();
-			return style(base ,qualified, limit);
+			String base = ((URLElement) element).getWrapped().getHost() + ":"
+					+ ((URLElement) element).getWrapped().getLocalPort();
+			String qualified = ((URLElement) element).getWrapped().getName() + ":"
+					+ ((URLElement) element).getWrapped().getContainerPort();
+			return style(base, qualified, limit);
 		} else if (element instanceof ServiceElement) {
 			return style(((ServiceElement) element).getWrapped().getName(),
 					((ServiceElement) element).getWrapped().getKind(), limit);
+		} else if (element instanceof BindingElement) {
+			Binding binding = ((BindingElement) element).getWrapped();
+			String base = ((BindingElement) element).getWrapped().getName();
+			String qualified = "Bound to "
+					+ binding.getService().getName();
+			return style(base, qualified, limit);
 		} else if (element instanceof MessageElement) {
 			return getStyledText((MessageElement<?>) element);
 		} else if (element instanceof DevfileRegistriesElement) {
@@ -93,6 +104,8 @@ public class OpenShiftApplicationExplorerLabelProvider extends BaseExplorerLabel
 			return OpenShiftImages.COMPONENT_IMG;
 		} else if (element instanceof ServiceElement) {
 			return OpenShiftImages.SERVICE_IMG;
+		} else if (element instanceof BindingElement) {
+			return OpenShiftImages.BINDING_IMG;
 		} else if (element instanceof URLElement) {
 			return OpenShiftImages.URL_IMG;
 		} else if (element instanceof DevfileRegistriesElement || element instanceof DevfileRegistryElement) {

@@ -44,12 +44,12 @@ public class RegistryODOTest {
 
 	@Test
 	public void testGetDefaultDevfileRegistry() {
-		assertNotNull(this.explorer.getOpenShiftODORegistries().getRegistry("devfile"));
+		assertEquals("DefaultDevfileRegistry", this.explorer.getOpenShiftODORegistries().getRegistry("DefaultDevfileRegistry").getName());
 	}
 
 	@Test
 	public void testAddRemoveRegistry() {
-		this.explorer.getOpenShiftODORegistries().createNewRegistry("test", "https://registry.devfile.io");
+		this.explorer.getOpenShiftODORegistries().createNewRegistry("test", "https://stage.registry.devfile.io");
 		assertEquals(2, this.explorer.getOpenShiftODORegistries().getAllRegistries().size());
 		this.explorer.getOpenShiftODORegistries().getRegistry("test").delete();
 		assertEquals(1, this.explorer.getOpenShiftODORegistries().getAllRegistries().size());

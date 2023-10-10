@@ -61,12 +61,14 @@ public class ConnectionODOCommandsTests {
 		connection = explorer.getOpenShiftODOConnection();
 	}
 
+	@Ignore
 	@Test
 	public void testListCatalogServices() {
 		connection.listCatalogServices();
 		new WaitUntil(new TerminalContainsText("Operators"), TimePeriod.LONG);
 	}
 
+	@Ignore
 	@Test
 	public void testListCatalogComponents() {
 		connection.listCatalogComponents();

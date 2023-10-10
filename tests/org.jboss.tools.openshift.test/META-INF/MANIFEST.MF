@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.test
-Bundle-Version: 3.22.0.qualifier
+Bundle-Version: 3.24.0.qualifier
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
 Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
@@ -44,41 +44,16 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.eclipse.m2e.core;bundle-version="2.0.0",
  org.eclipse.m2e.jdt;bundle-version="2.0.0",
  org.jboss.tools.common;bundle-version="3.11.0",
- com.fasterxml.jackson.core.jackson-core,
- com.fasterxml.jackson.core.jackson-databind,
  org.eclipse.text,
  org.eclipse.ui.editors,
  org.eclipse.ui.tests.harness,
  org.mockito.mockito-core;bundle-version="4.8.0",
- assertj-core;bundle-version="3.22.0"
+ assertj-core;bundle-version="3.24.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Activator: org.jboss.tools.openshift.internal.test.OpenShiftTestActivator
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
- lib/mockserver-client-java-5.11.2.jar,
- lib/mockserver-netty-5.11.2.jar,
- lib/mockserver-core-5.11.2.jar,
- lib/netty-transport-4.1.72.Final.jar,
- lib/netty-common-4.1.72.Final.jar,
- lib/disruptor-3.4.4.jar,
- lib/swagger-models-2.1.12.jar,
- lib/netty-codec-http-4.1.72.Final.jar,
- lib/java-uuid-generator-4.0.1.jar,
- lib/netty-buffer-4.1.72.Final.jar,
- lib/netty-resolver-4.1.72.Final.jar,
- lib/netty-codec-4.1.72.Final.jar,
- lib/netty-codec-socks-4.1.72.Final.jar,
- lib/netty-handler-4.1.72.Final.jar,
- lib/jackson-coreutils-1.8.jar,
- lib/json-schema-validator-2.2.6.jar,
- lib/json-schema-core-1.2.5.jar,
- lib/btf-1.2.jar,
- lib/msg-simple-1.1.jar,
- lib/joda-time-2.10.13.jar,
- lib/libphonenumber-8.12.40.jar,
- lib/uri-template-0.9.jar,
- lib/org.apache.servicemix.bundles.rhino-1.7.13_1.jar,
- lib/commons-lang3-3.12.0.jar
+ lib/mockserver-netty-no-dependencies-5.15.0.jar
 Import-Package: com.fasterxml.jackson.annotation;version="2.12.1",
  com.google.common.base;version="21.0.0",
  com.google.common.cache;version="21.0.0",

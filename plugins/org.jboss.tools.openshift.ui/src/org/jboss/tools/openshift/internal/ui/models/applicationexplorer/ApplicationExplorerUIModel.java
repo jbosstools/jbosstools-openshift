@@ -74,7 +74,7 @@ public class ApplicationExplorerUIModel
 
 	private final Map<String, ComponentDescriptor> components = new ConcurrentHashMap<>();
 
-	private Odo odo;
+	private OdoProjectDecorator odoDecorator;
 
 	private Job watcherJob;
 
@@ -100,26 +100,24 @@ public class ApplicationExplorerUIModel
 	}
 
 	private CompletableFuture<Odo> initializeOdo() {
-		return getFactory().getOdo().whenComplete((odo, err) -> {
-			this.odo = odo;
+		return getFactory().getOdo().whenComplete((odo_, err) -> {
+			this.odoDecorator = new OdoProjectDecorator(odo_, this);
 			loadProjects();
+			fireChanged(this);
 		});
 	}
 
 	@Override
 	public void refresh() {
-		initializeOdo().thenAccept(odo -> {
-			getWrapped().odo = odo;
-			ApplicationExplorerUIModel.this.odo = null;
-			fireChanged(this);
-		});
+		OdoCliFactory.getInstance().resetOdo();
+		initializeOdo();
 	}
 
 	public Odo getOdo() {
-		if (odo == null && getWrapped().getOdo() != null) {
-			odo = new OdoProjectDecorator(getWrapped().getOdo(), this);
+		if (odoDecorator == null && getWrapped().getOdo() != null) {
+			odoDecorator = new OdoProjectDecorator(getWrapped().getOdo(), this);
 		}
-		return odo;
+		return odoDecorator;
 	}
 
 	protected Config loadConfig() {
@@ -154,9 +152,9 @@ public class ApplicationExplorerUIModel
 	}
 
 	public void addContext(IProject project) {
-		if (odo != null) {
+		if (getOdo() != null) {
 			try {
-				List<ComponentDescriptor> descriptors = odo.discover(project.getLocation().toOSString());
+				List<ComponentDescriptor> descriptors = getOdo().discover(project.getLocation().toOSString());
 				descriptors.forEach(descriptor -> addContextToSettings(descriptor.getPath(), descriptor));
 			} catch (IOException e) {
 				OpenShiftUIActivator.statusFactory().errorStatus(e);
@@ -188,7 +186,6 @@ public class ApplicationExplorerUIModel
 		} else {
 			Job.createSystem("Load model", monitor -> {
 				internalLoadProjects();
-				refresh();
 				return Status.OK_STATUS;
 			}).schedule();
 		}
@@ -199,11 +196,11 @@ public class ApplicationExplorerUIModel
 	}
 
 	@Override
-	public void onUpdate(ConfigWatcher source, Config config) {
-		if (hasContextChanged(config, this.config)) {
+	public void onUpdate(ConfigWatcher source, Config newConfig) {
+		if (hasContextChanged(newConfig, this.config)) {
 			refresh();
 		}
-		this.config = config;
+		this.config = newConfig;
 	}
 
 	private boolean hasContextChanged(Config newConfig, Config currentConfig) {
@@ -248,7 +245,7 @@ public class ApplicationExplorerUIModel
 	}
 
 	@Override
-	public boolean visit(IResourceDelta delta) throws CoreException {
+	public boolean visit(IResourceDelta delta) {
 		IResource resource = delta.getResource();
 		if (resource == null) {
 			return false;

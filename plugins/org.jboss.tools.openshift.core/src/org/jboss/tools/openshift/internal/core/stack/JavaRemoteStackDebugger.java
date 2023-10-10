@@ -30,7 +30,7 @@ import org.jboss.tools.openshift.core.stack.RemoteStackDebugger;
  *
  */
 public class JavaRemoteStackDebugger implements RemoteStackDebugger {
-	private static final List<String> SUPPORTED = List.of("maven", "openliberty", "websphereliberty", "quarkus", "spring", "vertx", "wildfly", "java");
+	private static final List<String> SUPPORTED = List.of("maven", "openliberty", "websphereliberty", "quarkus", "spring", "vertx", "wildfly", "java", "vert.x");
 
 	@Override
 	public boolean isValid(String stackType) {

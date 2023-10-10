@@ -5,28 +5,14 @@
 	<parent>
 		<groupId>org.jboss.tools.openshift</groupId>
 		<artifactId>tests</artifactId>
-		<version>3.22.0-SNAPSHOT</version>
+		<version>3.24.0-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.openshift.tests</groupId>
 	<artifactId>org.jboss.tools.openshift.test</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
 
 	<properties>
-		<mockserver.version>5.11.2</mockserver.version>
-		<netty.version>4.1.72.Final</netty.version>
-		<disruptor.version>3.4.4</disruptor.version>
-		<swagger.version>2.1.12</swagger.version>
-		<jackson.version>4.0.1</jackson.version>
-		<jackson-coreutils.version>1.8</jackson-coreutils.version>
-		<jsonschema-validator.version>2.2.6</jsonschema-validator.version>
-		<jsonschema-core.version>1.2.5</jsonschema-core.version>
-		<btf.version>1.2</btf.version>
-		<msg-simple.version>1.1</msg-simple.version>
-		<uri-template.version>0.9</uri-template.version>
-		<joda-time.version>2.10.13</joda-time.version>
-		<libphonenumber.version>8.12.40</libphonenumber.version>
-		<rhino.version>1.7.13_1</rhino.version>
-		<commons-lang3.version>3.12.0</commons-lang3.version>
+		<mockserver.version>5.15.0</mockserver.version>
 	</properties>
 	<build>
 		<resources>
@@ -57,123 +43,8 @@
 					<artifactItems>
 						<artifactItem>
 							<groupId>org.mock-server</groupId>
-							<artifactId>mockserver-client-java</artifactId>
+							<artifactId>mockserver-netty-no-dependencies</artifactId>
 							<version>${mockserver.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>org.mock-server</groupId>
-							<artifactId>mockserver-netty</artifactId>
-							<version>${mockserver.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>org.mock-server</groupId>
-							<artifactId>mockserver-core</artifactId>
-							<version>${mockserver.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>io.netty</groupId>
-							<artifactId>netty-transport</artifactId>
-							<version>${netty.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>io.netty</groupId>
-							<artifactId>netty-common</artifactId>
-							<version>${netty.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>io.netty</groupId>
-							<artifactId>netty-codec</artifactId>
-							<version>${netty.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>io.netty</groupId>
-							<artifactId>netty-codec-http</artifactId>
-							<version>${netty.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>io.netty</groupId>
-							<artifactId>netty-codec-socks</artifactId>
-							<version>${netty.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>io.netty</groupId>
-							<artifactId>netty-buffer</artifactId>
-							<version>${netty.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>io.netty</groupId>
-							<artifactId>netty-resolver</artifactId>
-							<version>${netty.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>io.netty</groupId>
-							<artifactId>netty-handler</artifactId>
-							<version>${netty.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>com.lmax</groupId>
-							<artifactId>disruptor</artifactId>
-							<version>${disruptor.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>io.swagger.core.v3</groupId>
-							<artifactId>swagger-models</artifactId>
-							<version>${swagger.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>com.fasterxml.uuid</groupId>
-							<artifactId>java-uuid-generator</artifactId>
-							<version>${jackson.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>com.github.fge</groupId>
-							<artifactId>jackson-coreutils</artifactId>
-							<version>${jackson-coreutils.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>com.github.fge</groupId>
-							<artifactId>json-schema-validator</artifactId>
-							<version>${jsonschema-validator.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>com.github.fge</groupId>
-							<artifactId>json-schema-core</artifactId>
-							<version>${jsonschema-core.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>com.github.fge</groupId>
-							<artifactId>btf</artifactId>
-							<version>${btf.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>com.github.fge</groupId>
-							<artifactId>msg-simple</artifactId>
-							<version>${msg-simple.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>com.github.fge</groupId>
-							<artifactId>uri-template</artifactId>
-							<version>${uri-template.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>joda-time</groupId>
-							<artifactId>joda-time</artifactId>
-							<version>${joda-time.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>com.googlecode.libphonenumber</groupId>
-							<artifactId>libphonenumber</artifactId>
-							<version>${libphonenumber.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>org.apache.servicemix.bundles</groupId>
-							<artifactId>org.apache.servicemix.bundles.rhino</artifactId>
-							<version>${rhino.version}</version>
-						</artifactItem>
-						<artifactItem>
-							<groupId>org.apache.commons</groupId>
-							<artifactId>commons-lang3</artifactId>
-							<version>${commons-lang3.version}</version>
 						</artifactItem>
 					</artifactItems>
 				</configuration>

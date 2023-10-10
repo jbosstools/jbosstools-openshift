@@ -12,8 +12,8 @@ package org.jboss.tools.openshift.internal.ui.odo;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.jboss.tools.common.util.DownloadHelper;
 import org.jboss.tools.openshift.core.odo.Odo;
+import org.jboss.tools.openshift.internal.ui.utils.DownloadHelper;
 
 /**
  * @author Red Hat Developers
@@ -42,5 +42,9 @@ public class OdoCliFactory {
 					.thenApply(command -> new OdoCli(command));
 		}
 		return future;
+	}
+
+	public void resetOdo() {
+		future = null;
 	}
 }

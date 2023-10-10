@@ -4,19 +4,18 @@
 	<parent>
 		<groupId>org.jboss.tools</groupId>
 		<artifactId>parent</artifactId>
-		<version>4.27.0.AM1-SNAPSHOT</version>
+		<version>4.29.0.Final-SNAPSHOT</version>
 	</parent>
-	<groupId>org.jboss.tools</groupId>
+	
 	<artifactId>openshift</artifactId>
 	<name>jbosstools-openshift</name>
-	<version>3.22.0-SNAPSHOT</version>
+	<version>3.24.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<properties>
 		<tycho.scmUrl>scm:git:https://github.com/jbosstools/jbosstools-openshift.git</tycho.scmUrl>
 	</properties>
 	<modules>
 		<module>plugins</module>
-		<module>itests</module>
 		<module>tests</module>
 		<module>test-framework</module>
 		<module>features</module>

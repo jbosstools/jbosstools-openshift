@@ -1,35 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src">
+	<classpathentry kind="src" path="src/">
 		<attributes>
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/mockserver-client-java-5.11.2.jar"/>
-	<classpathentry kind="lib" path="lib/mockserver-core-5.11.2.jar"/>
-	<classpathentry kind="lib" path="lib/netty-transport-4.1.72.Final.jar"/>
-	<classpathentry kind="lib" path="lib/netty-common-4.1.72.Final.jar"/>
-	<classpathentry kind="lib" path="lib/disruptor-3.4.4.jar"/>
-	<classpathentry kind="lib" path="lib/swagger-models-2.1.12.jar"/>
-	<classpathentry kind="lib" path="lib/netty-codec-http-4.1.72.Final.jar"/>
-	<classpathentry kind="lib" path="lib/java-uuid-generator-4.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/netty-buffer-4.1.72.Final.jar"/>
-	<classpathentry kind="lib" path="lib/mockserver-netty-5.11.2.jar"/>
-	<classpathentry kind="lib" path="lib/netty-resolver-4.1.72.Final.jar"/>
-	<classpathentry kind="lib" path="lib/netty-codec-4.1.72.Final.jar"/>
-	<classpathentry kind="lib" path="lib/netty-codec-socks-4.1.72.Final.jar"/>
-	<classpathentry kind="lib" path="lib/netty-handler-4.1.72.Final.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-coreutils-1.8.jar"/>
-	<classpathentry kind="lib" path="lib/json-schema-validator-2.2.6.jar"/>
-	<classpathentry kind="lib" path="lib/msg-simple-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/btf-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/json-schema-core-1.2.5.jar"/>
-	<classpathentry kind="lib" path="lib/joda-time-2.10.13.jar"/>
-	<classpathentry kind="lib" path="lib/libphonenumber-8.12.40.jar"/>
-	<classpathentry kind="lib" path="lib/uri-template-0.9.jar"/>
-	<classpathentry kind="lib" path="lib/org.apache.servicemix.bundles.rhino-1.7.13_1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang3-3.12.0.jar"/>
-	<classpathentry kind="output" path="target/classes"/>
+	<classpathentry exported="true" kind="lib" path="lib/mockserver-netty-no-dependencies-5.15.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

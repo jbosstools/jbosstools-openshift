@@ -24,16 +24,11 @@ public class DescribeHandler extends OdoHandler {
 
 	@Override
 	public void actionPerformed(Odo odo) throws IOException {
-		try {
 			if (getComponent() != null) {
 				ComponentElement component = getComponent();
 				odo.describeComponent(component.getParent().getWrapped(), component.getWrapped().getPath(),
 						component.getWrapped().getName());
 			}
-		} catch (IOException e) {
-			Display.getDefault().asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(),
-					"Describe", "Describe error message:" + e.getLocalizedMessage()));
-		}
 	}
 
 }

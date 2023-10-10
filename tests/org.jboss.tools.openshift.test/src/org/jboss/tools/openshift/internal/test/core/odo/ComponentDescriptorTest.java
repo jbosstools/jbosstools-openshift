@@ -10,54 +10,73 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.test.core.odo;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
 
+import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.openshift.core.odo.ComponentDescriptor;
 import org.jboss.tools.openshift.core.odo.ComponentDescriptorsDeserializer;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class ComponentDescriptorTest {
-  private static final URL url = ComponentDescriptorTest.class.getResource("/component-descriptor-test.json");
+	private static URL srcUrl;
 
-  private static ObjectMapper MAPPER;
+	private static ObjectMapper MAPPER;
 
-  @BeforeClass
-  public static void setup() {
-    MAPPER = new ObjectMapper();
-    SimpleModule module = new SimpleModule();
-    module.addDeserializer(List.class, new ComponentDescriptorsDeserializer("."));
-    MAPPER.registerModule(module);
-  }
+	private static boolean inEclipse;
 
-  @Test
-  public void verifyThatComponentDescriptorsCanLoad() throws IOException {
-    List<ComponentDescriptor> descriptors = MAPPER.readValue(url, new TypeReference<List<ComponentDescriptor>>() {});
-    Assert.assertNotNull(descriptors);
-  }
+	@BeforeClass
+	public static void setup() {
+		MAPPER = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(List.class, new ComponentDescriptorsDeserializer("."));
+		MAPPER.registerModule(module);
+		inEclipse = PlatformUI.isWorkbenchRunning();
+		srcUrl = getURL("/component-descriptor-test.json");
+	}
 
-  @Test
-  public void verifyThatComponentDescriptorsReturnsComponentDescriptor() throws IOException {
-    List<ComponentDescriptor> descriptors = MAPPER.readValue(url, new TypeReference<List<ComponentDescriptor>>() {});
-    Assert.assertNotNull(descriptors);
-    Assert.assertEquals(1, descriptors.size());
-    Assert.assertNotNull(descriptors.get(0));
-  }
+	private static URL getURL(String urlString) {
+		URL url = ComponentDescriptorTest.class.getResource(urlString);
+		if (url == null && inEclipse) {
+			return ComponentDescriptorTest.class.getResource("/resources" + urlString);
+		}
+		return url;
+	}
 
-  @Test
-  public void verifyThatComponentDescriptorsReturnsComponentDescriptorProperties() throws IOException {
-    List<ComponentDescriptor> descriptors = MAPPER.readValue(url, new TypeReference<List<ComponentDescriptor>>() {});
-    Assert.assertNotNull(descriptors);
-    Assert.assertEquals(1, descriptors.size());
-    ComponentDescriptor descriptor = descriptors.get(0);
-    Assert.assertNotNull(descriptor);
-    Assert.assertEquals("devcomp", descriptor.getName());
-  }
+	@Test
+	public void verifyThatComponentDescriptorsCanLoad() throws IOException {
+		List<ComponentDescriptor> descriptors = MAPPER.readValue(srcUrl,
+				new TypeReference<List<ComponentDescriptor>>() {
+				});
+		Assert.assertNotNull(descriptors);
+	}
+
+	@Test
+	public void verifyThatComponentDescriptorsReturnsComponentDescriptor() throws IOException {
+		List<ComponentDescriptor> descriptors = MAPPER.readValue(srcUrl,
+				new TypeReference<List<ComponentDescriptor>>() {
+				});
+		Assert.assertNotNull(descriptors);
+		Assert.assertEquals(1, descriptors.size());
+		Assert.assertNotNull(descriptors.get(0));
+	}
+
+	@Test
+	public void verifyThatComponentDescriptorsReturnsComponentDescriptorProperties() throws IOException {
+		List<ComponentDescriptor> descriptors = MAPPER.readValue(srcUrl,
+				new TypeReference<List<ComponentDescriptor>>() {
+				});
+		Assert.assertNotNull(descriptors);
+		Assert.assertEquals(1, descriptors.size());
+		ComponentDescriptor descriptor = descriptors.get(0);
+		Assert.assertNotNull(descriptor);
+		Assert.assertEquals("devcomp", descriptor.getName());
+	}
 }

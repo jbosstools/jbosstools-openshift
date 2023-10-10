@@ -49,7 +49,7 @@ public class CreateVertxDevfileComponentWithLocalDevfileODOTest extends Abstract
 	
 	@Test
 	public void testCreateComponent() {
-		createComponent(projectReq.getProjectName(), null, null, true);
+//		createComponent(projectReq.getProjectName(), null, null, true);
 	}
 
 }

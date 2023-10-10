@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.client.log;
 
-import static org.apache.logging.log4j.core.config.Property.EMPTY_ARRAY;
 
 import java.io.Serializable;
 import java.util.concurrent.locks.Lock;

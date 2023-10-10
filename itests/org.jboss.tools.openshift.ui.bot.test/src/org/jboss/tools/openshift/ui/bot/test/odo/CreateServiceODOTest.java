@@ -49,8 +49,8 @@ import org.junit.runner.RunWith;
 public class CreateServiceODOTest extends AbstractODOTest {
 	
 	private static final String ECLIPSE_PROJECT = "myservice"; 
-	
-	private static final String APPLICATION_NAME = "myapp";
+	private static final String COMPONENT_TYPE = "Quarkus Java"; 
+	private static final String STARTER = "community"; 
 	
 	@InjectRequirement
 	private static OpenShiftODOProjectRequirement projectReq;
@@ -59,7 +59,7 @@ public class CreateServiceODOTest extends AbstractODOTest {
 	@BeforeClass
 	public static void setupWorkspace() {
 		importEmptyProject(ECLIPSE_PROJECT);
-		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), "node.js", "nodejs-starter", true);
+		createComponent(ECLIPSE_PROJECT, projectReq.getProjectName(), COMPONENT_TYPE, STARTER, ECLIPSE_PROJECT);
 	}
 	
 	@Test
@@ -77,16 +77,17 @@ public class CreateServiceODOTest extends AbstractODOTest {
 		}
 		CreateServiceWizard serviceWizard = new CreateServiceWizard();
 		CreateServiceWizadPage serviceWizardPage = new CreateServiceWizadPage(serviceWizard);
-		serviceWizardPage.setServiceName("myapp");
+//		serviceWizardPage.setServiceName("myapp");
 		serviceWizardPage.setService("MongoDB Operator");
 		serviceWizardPage.setComponentType("MongoDB");
 		serviceWizardPage.setApplication("myapp");
 		serviceWizard.finish(TimePeriod.LONG);
 		
-		OpenShiftODOApplication application = project.getApplication(APPLICATION_NAME);
+		OpenShiftODOApplication application = project.getApplication(ECLIPSE_PROJECT);
 		application.expand();
 		List<TreeItem> items = application.getTreeItem().getItems();
 		new WaitWhile(new TerminalHasNoChange(), TimePeriod.VERY_LONG);
+		// verification missing
 	}
 
 }
