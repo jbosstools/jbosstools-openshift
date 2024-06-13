@@ -2,7 +2,7 @@
 <feature
       id="org.jboss.tools.openshift.cdk.feature"
       label="%featureName"
-      version="3.24.100.qualifier"
+      version="3.24.200.qualifier"
       provider-name="%providerName"
       plugin="org.jboss.tools.openshift.cdk.server"
       license-feature="org.jboss.tools.foundation.license.feature"
