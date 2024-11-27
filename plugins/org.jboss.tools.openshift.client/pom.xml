@@ -18,7 +18,7 @@
 		-->
 		<openshift-restclient-java.version>9.0.5.Final</openshift-restclient-java.version>
 		<ok-http.version>4.10.0</ok-http.version>
-		<ok-io.version>3.3.0</ok-io.version>
+		<ok-io.version>3.4.0</ok-io.version>
 		<kotlin-stdlib.version>1.8.10</kotlin-stdlib.version>
 		<jboss-dmr.version>1.6.1.Final</jboss-dmr.version>
 		<commons-compress.version>1.22</commons-compress.version>
